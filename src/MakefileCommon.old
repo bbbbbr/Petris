@@ -1,0 +1,125 @@
+# Only set GBDK_HOME if it has no env value
+ifeq ($(GBDK_HOME),)
+	GBDK_HOME := $(ZGB_PATH_UNIX)/../env/gbdk
+endif
+PATH := $(ZGB_PATH_UNIX)/../env/make-3.81-bin/bin;$(ZGB_PATH_UNIX)/../env/SDCC/bin;$(ZGB_PATH_UNIX)/../env/msys/bin;$(PATH)
+
+#--- Default build will be release. Can be overidden passing BUILD_TYPE = debug as a parameter
+# ex: Release, Debug, ReleaseColor, DebugColor
+BUILD_TYPE = ReleaseColor
+CGB = yes
+
+ifneq (,$(findstring Release,$(BUILD_TYPE)))
+	BUILD_DEFS += -DNDEBUG
+else
+	PROJECT_NAME := $(PROJECT_NAME)_Debug
+endif
+
+OBJDIR = ../$(BUILD_TYPE)
+OBJDIR_RES = ../$(BUILD_TYPE)/res
+BINDIR = ../bin
+
+LCC = $(GBDK_HOME)/bin/lcc
+SDCC = sdcc
+SDASGB = sdasgb
+ifeq ($(MOD2GBT),)
+	MOD2GBT = $(ZGB_PATH_UNIX)/../env/mod2gbt
+endif
+ifeq ($(BGB),)
+	BGB = $(ZGB_PATH_UNIX)/../env/bgb/bgb
+endif
+
+ifneq ($(strip $(N_BANKS)),)
+	LFLAGS_NBANKS = -Wl-yt1 -Wl-yo$(N_BANKS)
+endif
+
+CFLAGS = -mgbz80 --no-std-crt0  --use-stdout -Dnonbanked=  -I $(GBDK_HOME)/include -I $(GBDK_HOME)/include/asm $(BUILD_DEFS) -I../include
+#-Wa-l -Wl-m -Wl-j
+# --fsigned-char : doesn't seem to be supported currently
+
+EXTENSION = gb
+ifneq (,$(findstring Color,$(BUILD_TYPE)))
+	LFLAGS_NBANKS += -Wl-yp0x143=0xC0
+	CFLAGS += -DCGB
+	EXTENSION = gbc
+endif
+
+LFLAGS = $(LFLAGS_NBANKS)
+
+current_dir = $(shell pwd)
+
+ASMS        = $(foreach dir,.,$(notdir $(wildcard $(dir)/*.s)))
+CLASSES     = $(foreach dir,.,$(notdir $(wildcard $(dir)/*.c)))
+RESOURCES   = $(foreach dir,../res,$(notdir $(wildcard $(dir)/*.c)))
+MUSICS      = $(foreach dir,../res/music,$(notdir $(wildcard $(dir)/*.mod)))
+OBJS = $(RESOURCES:%.c=$(OBJDIR_RES)/%.o) $(MUSICS:%.mod=$(OBJDIR_RES)/%.mod.o) $(ASMS:%.s=$(OBJDIR)/%.o) $(CLASSES:%.c=$(OBJDIR)/%.o)
+
+#dependencies -------------------------------------------------------------------------------------------
+ifneq ($(MAKECMDGOALS),clean)
+-include $(CLASSES:%.c=$(OBJDIR)/%.d)
+endif
+
+$(OBJDIR)/%.d: %.c
+	@set -e; mkdir -p $(OBJDIR);rm -f $@; \
+	$(SDCC) -MM $(CFLAGS) $< > $@.$$$$; \
+ 	sed 's,\($*\)\.rel[ :]*,$(OBJDIR)/$*.o $@ : ,g' < $@.$$$$ > $@; \
+	rm -f $@.$$$$
+#---------------------------------------------------------------------------------------------------------
+
+$(BINDIR):
+	@echo Creating folder $(BINDIR)
+	@mkdir $(BINDIR)
+
+$(OBJDIR):
+	@echo Creating folder $(OBJDIR)
+	@mkdir $(OBJDIR)
+
+$(OBJDIR_RES):
+	@echo Creating folder $(OBJDIR_RES)
+	@mkdir $(OBJDIR_RES)
+
+$(OBJDIR)/%.o: %.s
+	@echo compiling $<
+	@$(SDASGB) -plosgff -I"libc" $(filter --constseg CODE_%, $(subst .b,--constseg CODE_,$(suffix $(<:%.s=%)))) -c -o $@ $<
+
+$(OBJDIR)/%.o: %.c
+	@echo compiling $<
+	@$(SDCC) $(CFLAGS) $(filter --constseg CODE_%, $(subst .b,--constseg CODE_,$(suffix $(<:%.c=%)))) -c -o $@ $<
+
+
+$(OBJDIR_RES)/%.o: ../res/%.c
+	@echo compiling resource: $<
+	@if grep -q "unsigned char" $<; then \
+		sed -i "s/unsigned char/const unsigned  char/g" $<; \
+	fi
+	@$(SDCC) $(CFLAGS) $(filter --constseg CODE_%, $(subst .b,--constseg CODE_,$(suffix $(<:%.c=%)))) -c -o $@ $<
+
+$(OBJDIR_RES)/%.mod.o: ../res/music/%.mod
+	@echo compiling music: $<
+	$(MOD2GBT) $< $(basename $(basename $(notdir $<)))_mod -c $(subst .b,,$(suffix $(<:%.mod=%))) > /dev/null
+	@mv output.c $(OBJDIR)/music_tmp.c
+	@$(SDCC) $(CFLAGS) -c -o $@ $(OBJDIR)/music_tmp.c
+
+$(BINDIR)/$(PROJECT_NAME).$(EXTENSION): $(OBJDIR) $(OBJDIR_RES) $(BINDIR) $(OBJS) $(COMMON_OBJS)
+	@echo Linking
+	$(LCC) $(LFLAGS) -o $(OBJDIR)/$(PROJECT_NAME).$(EXTENSION) $(OBJS) $(COMMON_OBJS)
+	mv $(OBJDIR)/$(PROJECT_NAME).$(EXTENSION) $(BINDIR)/$(PROJECT_NAME).$(EXTENSION)
+
+build_lib: $(OBJDIR) $(OBJS)
+
+build_gb: $(BINDIR)/$(PROJECT_NAME).$(EXTENSION)
+
+clean:
+	@echo Cleaning $(PROJECT_NAME)
+	@rm -rf $(BINDIR)
+	@rm  -f $(OBJDIR)/*.*
+	@rm  -f $(OBJDIR)/res/*.*
+	@rm -rf .map
+	@rm -rf .lst
+
+run: all
+	$(info $$BGB is [${BGB}])
+	@if test -f $(BINDIR)/$(PROJECT_NAME).$(EXTENSION); then \
+		echo Running $(BINDIR)/$(PROJECT_NAME).$(EXTENSION); \
+		$(BGB) $(BINDIR)/$(PROJECT_NAME).$(EXTENSION); \
+	fi
