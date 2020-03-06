@@ -85,6 +85,23 @@ void init_background (void) {
 
 void video_setflip(UINT8 bg_attrib) {
 
+    // int x,y;
+    // UINT8 video_buff;
+
+    // VBK_REG = 1; // Select BG tile attribute map
+
+    //     for (x=0; x < 20; x++) {
+    //         for (y=0; y < 18; y++) {
+
+    //             get_bkg_tiles(x, y, 1, 1, &video_buff);
+    //             video_buff ^= bg_attrib;
+    //             set_bkg_tiles(x, y, 1, 1, &video_buff);
+    //         }
+    //     }
+
+    // VBK_REG = 0; // Re-Select regular BG tile map
+
+
     #define VBUF_SIZE 18 * 20
     int x;
     UINT8 video_buff[ VBUF_SIZE ];
@@ -100,6 +117,7 @@ void video_setflip(UINT8 bg_attrib) {
         set_bkg_tiles(0, 0, 20, 18, &video_buff[0]);
 
     VBK_REG = 0; // Re-Select regular BG tile map
+
 }
 
 void main(void){
