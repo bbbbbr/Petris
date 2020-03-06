@@ -1,23 +1,29 @@
 #include <gb/gb.h>
 #include <gb/cgb.h> // Include cgb functions
 
+// Assets & Resources
 #include "../res/bg_map.h"
 #include "../res/bg_tiles.h"
+#include "../res/pet_tiles.h"
+
+//
+#include "game_pieces.h"
 
 void init (void);
 void init_background (void);
-
 void init_interrupts(void);
+
 void vbl_update(void);
 
 
 void video_setflip(UINT8);
+void board_fill_random(void);
 
 
 UINT8 vbl_count;
 
-UINT8 keys;
-UINT8 previous_keys;
+UINT8 keys = 0x00;
+UINT8 previous_keys = 0x00;
 #define UPDATE_KEYS() previous_keys = keys; keys = joypad()
 
 #define KEY_PRESSED(K) (keys & (K))
@@ -65,10 +71,18 @@ void init (void) {
     init_background();
 }
 
+#define TILES_BG_START       0
+#define TILES_PET_START     64
+#define TILE_COUNT_BG       16
+#define TILE_COUNT_PETS     32
+#define TILE_COUNT_PETBLANK  2
+#define TILE_COUNT_PETTOTAL  TILE_COUNT_PETS + TILE_COUNT_PETBLANK
+
 void init_background (void) {
 
         set_bkg_palette(0, 8, bgPalette); // UBYTE first_palette, UBYTE nb_palettes, UWORD *rgb_data
-        set_bkg_data(0, 63, bg_tiles);
+        set_bkg_data(TILES_BG_START, TILE_COUNT_BG, bg_tiles);
+        set_bkg_data(TILES_PET_START, TILE_COUNT_PETTOTAL, pet_tiles);
 
         // Load BG tile attribute map
         VBK_REG = 1;
@@ -120,6 +134,53 @@ void video_setflip(UINT8 bg_attrib) {
 
 }
 
+#define BRD_ST_X   8
+#define BRD_ST_Y   0
+#define BRD_WIDTH  10
+#define BRD_HEIGHT 17
+#define BRD_SIZE   BRD_WIDTH * BRD_HEIGHT
+
+#define CGB_BG_ATTRIB_PAL_MASK 0x03
+
+UINT8 board_pieces[BRD_SIZE];
+UINT8 board_attrib[BRD_SIZE];
+
+void board_fill_random(void) {
+
+    UINT8 x,y;
+    UINT8 piece;
+
+    // piece = ((GP_PET_DOG  << GP_PET_UPSHIFT) |
+    //         (GP_SEG_TAIL << GP_SEG_UPSHIFT) |
+    //          GP_ROT_HORZ)
+    //         + TILES_PET_START;;
+
+    for (x=0; x < BRD_WIDTH; x++) {
+        for (y=0; y < BRD_HEIGHT; y++) {
+            // weak random, limit to 32 entries
+            piece = ((UINT8)DIV_REG & 0x1F) + TILES_PET_START;
+            //piece = (x  & 0x1F) + TILES_PET_START;
+
+            // Set pet piece
+            board_pieces[x + (y * BRD_WIDTH)] = piece;
+            // Set palette based on pet type (
+            board_attrib[x + (y * BRD_WIDTH)] = (piece >> GP_PET_UPSHIFT) & CGB_BG_ATTRIB_PAL_MASK;
+        }
+    }
+
+    // Update BG Tilemap from Game Board
+    VBK_REG = 1; // Select BG tile attribute map
+    set_bkg_tiles(BRD_ST_X, BRD_ST_Y,
+                  BRD_WIDTH, BRD_HEIGHT,
+                  &board_attrib[0]);
+
+    VBK_REG = 0; // Re-Select regular BG tile map
+    set_bkg_tiles(BRD_ST_X, BRD_ST_Y,
+                  BRD_WIDTH, BRD_HEIGHT,
+                  &board_pieces[0]);
+
+}
+
 void main(void){
     init();
 
@@ -139,8 +200,11 @@ void main(void){
             video_setflip(BG_FLIP_X);
         }
         else if (KEY_TICKED(J_B)) {
-            video_setflip(BG_FLIP_Y);
+            //video_setflip(BG_FLIP_Y);
+            board_fill_random();
         }
-
+        else if (KEY_TICKED(J_START)) {
+            //board_fill_random();
+        }
     }
 }
