@@ -33,16 +33,29 @@ void main(void){
         SPRITES_8x8;
 
         set_bkg_palette(0, 8, bgPalette); // UBYTE first_palette, UBYTE nb_palettes, UWORD *rgb_data
-
-        VBK_REG = 1;
-        set_bkg_tiles(0, 0, 20, 18, bg_mapPLN1);
-
-        VBK_REG = 0;
-        set_bkg_tiles(0, 0, 20, 18, bg_mapPLN0);
-
         set_bkg_data(0, 63, bg_tiles);
 
-        SHOW_BKG;
+//        // Load BG tile attribute map
+//        VBK_REG = 1;
+//        set_bkg_tiles(0, 0, 20, 18, bg_mapPLN1);
+//
+//        // Load BG tile map
+//        VBK_REG = 0;
+//        set_bkg_tiles(0, 0, 20, 18, bg_mapPLN0);
+//
+//        SHOW_BKG;
+
+        // Load BG tile attribute map
+        VBK_REG = 1;
+        set_win_tiles(0, 0, 20, 18, bg_mapPLN1);
+
+        // Load BG tile map
+        VBK_REG = 0;
+        set_win_tiles(0, 0, 20, 18, bg_mapPLN0);
+
+        WX_REG = 7;
+        WY_REG = 0;
+        SHOW_WIN;
 
         DISPLAY_ON;
     }
