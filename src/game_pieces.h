@@ -1,10 +1,16 @@
 // game_pieces.h
 
+#ifndef GAME_PIECES_H
+#define GAME_PIECES_H
+
+
 
 #define GP_EMPTY_MASK 0xE0 // .5+
 #define GP_ROT_MASK   0x10 // .4
 #define GP_PET_MASK   0x0C // .3-2
 #define GP_SEG_MASK   0x03 // .1-0
+
+#define GP_EMPTY      0x20
 
 #define GP_PET_UPSHIFT  2
 #define GP_PET_DOG      0
@@ -22,6 +28,14 @@
 #define GP_ROT_HORZ     0
 #define GP_ROT_VERT     1
 
+// Piece color palettes
+#define GP_PAL_DOG      0x00
+#define GP_PAL_CAT      0x01
+#define GP_PAL_FISH     0x02
+#define GP_PAL_SNAKE    0x03
+#define GP_PAL_EMPTY    0x04
+
+
 // BG Map Attributes (CGB Mode only)
  // Bit 0-2  Background Palette number  (BGP0-7)
  // Bit 3    Tile VRAM Bank number      (0=Bank 0, 1=Bank 1)
@@ -29,3 +43,5 @@
  // Bit 5    Horizontal Flip            (0=Normal, 1=Mirror horizontally)
  // Bit 6    Vertical Flip              (0=Normal, 1=Mirror vertically)
  // Bit 7    BG-to-OAM Priority         (0=Use OAM priority bit, 1=BG Priority)
+
+#endif // GAME_PIECES_H
