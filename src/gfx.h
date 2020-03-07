@@ -17,7 +17,10 @@
 
 extern const UWORD bgPalette[];
 
-void gfx_init_background (void);
+void gfx_init(void);
+void gfx_init_sprites(void);
+void gfx_init_background(void);
+
 void video_setflip(UINT8);
 
 #endif // GFX_H

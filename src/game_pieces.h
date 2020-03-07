@@ -5,12 +5,14 @@
 
 
 
-#define GP_EMPTY_MASK 0xE0 // .5+
-#define GP_ROT_MASK   0x10 // .4
-#define GP_PET_MASK   0x0C // .3-2
-#define GP_SEG_MASK   0x03 // .1-0
+#define GP_EMPTY_MASK 0xE0U // .5+
+#define GP_ROT_MASK   0x10U // .4
+#define GP_PET_MASK   0x0CU // .3-2
+#define GP_SEG_MASK   0x03U // .1-0
 
-#define GP_EMPTY      0x20
+#define GP_TILE_MASK  0x1FU
+
+#define GP_EMPTY      0x20U
 
 #define GP_PET_UPSHIFT  2
 #define GP_PET_DOG      0
@@ -29,11 +31,11 @@
 #define GP_ROT_VERT     1
 
 // Piece color palettes
-#define GP_PAL_DOG      0x00
-#define GP_PAL_CAT      0x01
-#define GP_PAL_FISH     0x02
-#define GP_PAL_SNAKE    0x03
-#define GP_PAL_EMPTY    0x04
+#define GP_PAL_DOG      0x00U
+#define GP_PAL_CAT      0x01U
+#define GP_PAL_FISH     0x02U
+#define GP_PAL_SNAKE    0x03U
+#define GP_PAL_EMPTY    0x04U
 
 
 // BG Map Attributes (CGB Mode only)

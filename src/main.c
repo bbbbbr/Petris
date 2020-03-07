@@ -1,7 +1,7 @@
 #include <gb/gb.h>
 #include <gb/cgb.h> // Include cgb functions
 
-
+#include "game_player.h"
 #include "game_pieces.h"
 #include "game_board.h"
 #include "input.h"
@@ -30,9 +30,10 @@ void init_interrupts() {
 void init (void) {
     // Switch CGB fast mode
     cpu_fast();
-    SPRITES_8x8;
 
-    gfx_init_background();
+    gfx_init();
+
+    player_init();
 }
 
 
@@ -61,5 +62,22 @@ void main(void){
         else if (KEY_TICKED(J_START)) {
             board_reset();
         }
+        else if (KEY_TICKED(J_SELECT)) {
+            player_update_gfx( ((UINT8)DIV_REG & 0x1F) );
+        }
+
+        else if (KEY_TICKED(J_LEFT)) {
+            player_update_xy( -1, 0);
+        }
+        else if (KEY_TICKED(J_RIGHT)) {
+            player_update_xy( 1, 0);
+        }
+        else if (KEY_TICKED(J_UP)) {
+            player_update_xy( 0, -1);
+        }
+        else if (KEY_TICKED(J_DOWN)) {
+            player_update_xy( 0, 1);
+        }
+
     }
 }

@@ -24,6 +24,19 @@ const UWORD bgPalette[] = {
 };
 
 
+void gfx_init (void) {
+
+    gfx_init_background();
+    gfx_init_sprites();
+}
+
+void gfx_init_sprites (void) {
+
+    SPRITES_8x8;
+    set_sprite_palette(0, 8, bgPalette); // UBYTE first_palette, UBYTE nb_palettes, UWORD *rgb_data
+    set_sprite_data(0, TILE_COUNT_PETTOTAL, pet_tiles);
+}
+
 void gfx_init_background (void) {
 
         set_bkg_palette(0, 8, bgPalette); // UBYTE first_palette, UBYTE nb_palettes, UWORD *rgb_data
