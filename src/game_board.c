@@ -119,3 +119,92 @@ void board_fill_random(void) {
 
   board_redraw_all();
 }
+
+
+/*
+void board_check_completed_pets(void) {
+
+    UINT8 x,y;
+    // Scan board bottom to top
+    for (y=BRD_HEIGHT; y > 0; y--) {
+        for (x=0; x < BRD_WIDTH; x++) {
+
+            // piece = board_pieces[x + (y * BRD_WIDTH)];
+            // board_attrib[x + (y * BRD_WIDTH)] = ((piece & GP_PET_MASK) >> GP_PET_UPSHIFT);
+
+
+            // start_x = x;
+            // start_y = y;
+            // if (piece != GP_EMPTY) {
+            //     &connects = piece_connection_LUT(piece.rotation)
+            //     board_check_connected( x + piece_connection_LUT(piece.rotation).x,
+            //                            y + piece_connection_LUT(piece.rotation).y,
+            //                            piece )
+
+            //     if (piece == body/L-turn)
+            //         board_check_connected( piece_connection_LUT2(piece.rotation) )
+            // }
+
+        }
+    }
+
+}
+
+
+start_x = x;
+start_y = y;
+if (piece != GP_EMPTY) {
+
+    get_adjacent_xy(start_x, start_y,
+                    piece,
+                    &adjacent_x, &adjacent_y);
+    // Walk through connected pieces until
+    // there are no more OR it loops back to start_x/y
+    while ((board_check_connected( adjacent_x, adjacent_y, piece ))
+           && (adjacent_x != startx)
+           && (adjacent_y != starty)) {
+        piece_connected_count++
+        board_clear_piece(x,y);
+        // Get new connected x,y from the just tested piece
+        get_adjacent_xy(adjacent_x, adjacent_y,
+                        piece,
+                        &adjacent_x, &adjacent_y);
+    }
+
+    if (piece == body/L-turn)
+        board_check_connected( piece_connection_LUT2(piece.rotation) )
+}
+
+
+UINT8 board_check_connected(check_x,check_y,piece) {
+    if (check_x or check_y) are outside of board
+        return false
+
+    // Does the adjacent peiece connect?
+    if piece_at(check_x,check_y).type == piece.type
+       AND
+       piece_at(check_x,check_y).is_connected to calling location
+       return true
+}
+
+
+
+piece.pet_type
+piece.type (tail, body, L-turn, head)
+piece.rotation (0, 90, 180, 270)
+piece.connects[2].LEFT/RIGHT/UP/DOWN
+
+start_x, start_y, piece
+
+
+check_mode=test/removepieces
+
+for each piece at x,y
+  does connection #1 point to an adjacent piece
+    where pet_type matches
+          AND it has a connection (#1 or #2) that connects to the x,y
+
+  if this piece is a head or tail
+    increment end_counter + 1
+  else if  this piece is a body or L-turn
+*/
