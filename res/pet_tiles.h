@@ -1,6 +1,6 @@
 /*
 
- .H
+ PET_TILES.H
 
  Include File.
 
@@ -70,8 +70,8 @@
 
 /* Gameboy Color palette 3 */
 #define pet_tilesCGBPal3c0 32767
-#define pet_tilesCGBPal3c1 24382
-#define pet_tilesCGBPal3c2 14943
+#define pet_tilesCGBPal3c1 29406
+#define pet_tilesCGBPal3c2 31198
 #define pet_tilesCGBPal3c3 3171
 
 /* Gameboy Color palette 4 */
@@ -100,4 +100,4 @@
 /* Start of tile array. */
 extern unsigned char pet_tiles[];
 
-/* End of .H */
+/* End of PET_TILES.H */

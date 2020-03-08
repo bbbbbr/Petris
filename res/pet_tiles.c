@@ -1,6 +1,6 @@
 /*
 
- ../PET_TILES.C
+ PET_TILES.C
 
  Tile Source File.
 
@@ -95,4 +95,4 @@ const unsigned  char pet_tiles[] =
   0xFF,0x00,0xFF,0x00,0xFF,0x00,0xFF,0x00
 };
 
-/* End of ../PET_TILES.C */
+/* End of PET_TILES.C */

@@ -54,12 +54,11 @@ void main(void){
         // Handle keyboard input
         UPDATE_KEYS();
 
-        if (KEY_TICKED(J_START)) {
-            game_state = GAME_START;
-        }
-
         switch (game_state) {
             case GAME_INTRO:
+                if (KEY_TICKED(J_START)) {
+                    game_state = GAME_START;
+                }
                 break;
 
             case GAME_READY_TO_START:

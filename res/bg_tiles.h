@@ -70,8 +70,8 @@
 
 /* Gameboy Color palette 3 */
 #define bg_tilesCGBPal3c0 32767
-#define bg_tilesCGBPal3c1 24382
-#define bg_tilesCGBPal3c2 14943
+#define bg_tilesCGBPal3c1 29406
+#define bg_tilesCGBPal3c2 31198
 #define bg_tilesCGBPal3c3 3171
 
 /* Gameboy Color palette 4 */

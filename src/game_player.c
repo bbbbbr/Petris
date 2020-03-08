@@ -23,7 +23,7 @@
 
 // TODO: ??fix these: move to game_play.c???
 #define TICK_COUNT_RESET    0
-#define TICK_COUNT_DEFAULT 15 //60 // 60 frames per second default speed
+#define TICK_COUNT_DEFAULT 60 //60 // 60 frames per second default speed
 UINT8 tick_frame_count;
 
 
@@ -152,6 +152,13 @@ void player_update_gfx() {
         player_attrib = ((player_piece & GP_PET_MASK) >> GP_PET_UPSHIFT) // Palette
                          | GP_ROT_LUT_ATTR[player_rotate];               // Rotation sprite mirror bits
 
+        // TODO: This could be simplified by using a full set of pieces instead of 1/2 set and mirroring them
+        // L Turn pieces require mirror X and Y
+        // when rotation is 180 and 270
+        if (((player_piece & GP_SEG_MASK) ==  GP_SEG_TURN_BITS) &&
+             (player_rotate & GP_ROTATE_SEG_TURN_MIRROR_BITS))
+            player_attrib |= (GP_MIRROR_X | GP_MIRROR_Y);
+
         set_sprite_tile(SPR_PLAYER, (player_piece & GP_TILE_MASK));
         set_sprite_prop(SPR_PLAYER, player_attrib);
 
@@ -199,9 +206,13 @@ void player_handle_input(void) {
 
             // Pause
             if (KEY_TICKED(J_START)) {
-                // while( !KEY_TICKED(J_START) ) {
-                //     UPDATE_KEYS();
-                // }
+                // Wait for the player to Start
+                waitpadup();
+                waitpad(J_START);
+                waitpadup();
+
+                // Now reset the key state to avoid passing a keypress into gameplay
+                UPDATE_KEYS();
                 // TODO: Pause/Resume
             }
 

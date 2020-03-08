@@ -25,6 +25,7 @@
 #define GP_SEG_TORSO    1
 #define GP_SEG_TURN     2
 #define GP_SEG_HEAD     3
+#define GP_SEG_TURN_BITS 0x2U
 
 #define GP_ROT_UPSHIFT  4
 #define GP_ROT_HORZ     0
@@ -46,6 +47,7 @@
 #define GP_ROTATE_DEFUALT  GP_ROTATE_0
 #define GP_ROTATE_MIN      GP_ROTATE_0
 #define GP_ROTATE_MAX      GP_ROTATE_270
+#define GP_ROTATE_SEG_TURN_MIRROR_BITS 0x02U
 
 // BG Map Attributes (CGB Mode only)
 // Bit 0-2  Background Palette number  (BGP0-7)
