@@ -74,7 +74,7 @@ UINT8 board_check_open(UINT8 x, UINT8 y) {
 }
 
 
-void board_set_tile(UINT8 x, UINT8 y, UINT8 piece) {
+void board_set_tile(UINT8 x, UINT8 y, UINT8 piece, UINT8 attrib) {
 
     UINT8 tile_index;
 
@@ -86,7 +86,7 @@ void board_set_tile(UINT8 x, UINT8 y, UINT8 piece) {
     // TODO: Bounds checking for board here
     board_pieces[tile_index] = piece;
     // Set palette based on pet type (CGB Pal bits are 0x07)
-    board_attrib[tile_index] = ((piece & GP_PET_MASK) >> GP_PET_UPSHIFT);
+    board_attrib[tile_index] = attrib;
 
     board_draw_tile(x, y, tile_index);
 }

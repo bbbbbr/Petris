@@ -23,7 +23,7 @@
 
 // TODO: ??fix these: move to game_play.c???
 #define TICK_COUNT_RESET    0
-#define TICK_COUNT_DEFAULT 60 // 60 frames per second default speed
+#define TICK_COUNT_DEFAULT 15 //60 // 60 frames per second default speed
 UINT8 tick_frame_count;
 
 
@@ -31,10 +31,11 @@ UINT8 tick_frame_count;
 
 UINT8 piece_state;
 
-UINT8 player_x;
+ INT8 player_x;
 UINT8 player_y;
-UINT8 player_rotate;
+ INT8 player_rotate; // Uses wraparound, so allow negative nums
 UINT8 player_piece;
+UINT8 player_attrib;
 
 
 // TODO: Sprite rotation (use LUT or DEFINES for rotation/mirroring bits)
@@ -58,13 +59,17 @@ void player_piece_reset(void) {
     player_x      = BRD_NEWPIECE_X;
     player_y      = BRD_NEWPIECE_Y;
 
+    player_attrib = 0; // zero out here, updated below in player_update_gfx()
     player_rotate = GP_ROTATE_DEFUALT;
 
     // TODO: IMPROVE NEW PIECE SELECTION
     // For now, choose single random pet tile
     player_piece = ((UINT8)DIV_REG & 0x1F);
+    // player_piece = ((GP_PET_DOG  << GP_PET_UPSHIFT) |
+    //                 (GP_SEG_TAIL << GP_SEG_UPSHIFT) |
+    //                  GP_ROT_HORZ);// + TILES_PET_START;
 
-    player_update_gfx(player_piece);
+    player_update_gfx();
 
     // TODO FIX or move to function player_piece_show(false)
     // Hide player sprite by moving it offscreen
@@ -80,7 +85,26 @@ void player_piece_reset(void) {
 // TODO: optimize out this function unless it starts doing more
 void player_piece_set_on_board(void) {
 
-    board_set_tile(player_x, player_y, player_piece);
+    board_set_tile(player_x, player_y, player_piece, player_attrib);
+}
+
+
+void player_rotate_apply(UINT8 dir) {
+
+    // TODO: For larger pieces test whether they can turn
+    if (dir == PLAYER_ROT_LEFT)
+        player_rotate--;
+    else if (dir == PLAYER_ROT_RIGHT)
+        player_rotate++;
+
+    // Handle wraparound
+    if (player_rotate < GP_ROTATE_MIN)
+        player_rotate = GP_ROTATE_MAX;
+    else if (player_rotate > GP_ROTATE_MAX)
+        player_rotate = GP_ROTATE_MIN;
+
+    // TODO: only need to update GFX if rotation succeeded
+    player_update_gfx();
 }
 
 
@@ -91,8 +115,8 @@ void player_piece_set_on_board(void) {
 //
 UINT8 player_move(INT8 dir_x, INT8 dir_y) {
 
-    UINT8 tx = (player_x + dir_x);
-    UINT8 ty = (player_y + dir_y);
+    INT8 tx = (player_x + dir_x);
+    INT8 ty = (player_y + dir_y);
 
     if ((tx >= BRD_MIN_X) &&
         (tx <= BRD_MAX_X) &&
@@ -117,13 +141,20 @@ UINT8 player_move(INT8 dir_x, INT8 dir_y) {
 }
 
 
-void player_update_gfx(UINT8 new_piece) {
+void player_update_gfx() {
 
-        set_sprite_tile(SPR_PLAYER, (new_piece & GP_TILE_MASK));
+        // Update player rotation (clear bit and then set)
+        player_piece = ((player_piece & ~GP_ROT_MASK)
+                        | GP_ROT_LUT_TILE[player_rotate]);
 
-        set_sprite_prop(SPR_PLAYER, ((new_piece & GP_PET_MASK) >> GP_PET_UPSHIFT) // Palette
-                          // TODO: Sprite mirror bits
-                           );
+        // Set palette based on pet type (CGB Pal bits are 0x07)
+        // And mirror bits based on rotation setting from LUT
+        player_attrib = ((player_piece & GP_PET_MASK) >> GP_PET_UPSHIFT) // Palette
+                         | GP_ROT_LUT_ATTR[player_rotate];               // Rotation sprite mirror bits
+
+        set_sprite_tile(SPR_PLAYER, (player_piece & GP_TILE_MASK));
+        set_sprite_prop(SPR_PLAYER, player_attrib);
+
 }
 
 
@@ -144,18 +175,29 @@ void player_handle_input(void) {
         case PLAYER_INPLAY:
 
             // TODO: allow key repeat (may need KEY_TICKED() -> STATE=MOVING -> still?KEY_PRESSED() -> COUNTER -> THRESHOLD -> MOVE PIECE -> THRESHOLD_FAST ->  STATE=MOVINGFAST
+            // Left / Right movement
             if (KEY_TICKED(J_LEFT)) {
                 player_move( -1, 0);
             }
             else if (KEY_TICKED(J_RIGHT)) {
                 player_move( 1, 0);
             }
-            else if (KEY_TICKED(J_DOWN)) {
-                player_move( 0, 1);
+
+            if (KEY_TICKED(J_DOWN)) {
+                player_gravity_update(); // Call this to allow the player to LAND a piece earlier than tick time
+                // player_move( 0, 1);
                 // TODO: allow DOWN key repeat while LEFT/RIGHT repeating? need separate var if so
             }
 
+            // Rotation
+            if (KEY_TICKED(J_A)) {
+                player_rotate_apply(PLAYER_ROT_RIGHT);
+            }
+            else if (KEY_TICKED(J_B)) {
+                player_rotate_apply(PLAYER_ROT_LEFT);
+            }
 
+            // Pause
             if (KEY_TICKED(J_START)) {
                 // while( !KEY_TICKED(J_START) ) {
                 //     UPDATE_KEYS();
@@ -163,7 +205,13 @@ void player_handle_input(void) {
                 // TODO: Pause/Resume
             }
 
-            player_gravity_update();
+            // Move the piece down automatically every N ticks
+            tick_frame_count++;
+
+            if (tick_frame_count >= TICK_COUNT_DEFAULT) {
+                tick_frame_count = TICK_COUNT_RESET;
+                player_gravity_update();
+            }
 
             break;
 
@@ -184,26 +232,19 @@ extern UINT8 game_state; // TODO: fix this
 // TODO: move/rename ?? game_gracity_update()?
 void player_gravity_update(void) {
 
-    // Move the piece down automatically every N ticks
-    tick_frame_count++;
+    // Try to move the piece down one tile
+    switch (player_move( 0, 1)) {
+        case MOVE_BLOCKED_GAME_OVER:
+            // Game is over
+            game_state = GAME_ENDED;
+            break;
 
-    if (tick_frame_count >= TICK_COUNT_DEFAULT) {
-        tick_frame_count = TICK_COUNT_RESET;
-
-        // Try to move the piece down one tile
-        switch (player_move( 0, 1)) {
-            case MOVE_BLOCKED_GAME_OVER:
-                // Game is over
-                game_state = GAME_ENDED;
-                break;
-
-            case MOVE_BLOCKED:
-                // Piece landed on board
-                // TODO : ?? player_piece_set_on_board();
-                piece_state = PLAYER_PIECE_LANDED;
-                // piece_state = PLAYER_NEWPIECE;
-                break;
-        }
+        case MOVE_BLOCKED:
+            // Piece landed on board
+            // TODO : ?? player_piece_set_on_board();
+            piece_state = PLAYER_PIECE_LANDED;
+            // piece_state = PLAYER_NEWPIECE;
+            break;
     }
 }
 

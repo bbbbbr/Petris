@@ -34,7 +34,7 @@ void board_draw_tile(UINT8, UINT8, UINT8);
 
 void board_reset(void);
 UINT8 board_check_open(UINT8, UINT8);
-void board_set_tile(UINT8, UINT8, UINT8);
+void board_set_tile(UINT8, UINT8, UINT8, UINT8);
 
 void board_fill_random(void);
 

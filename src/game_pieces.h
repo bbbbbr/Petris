@@ -29,6 +29,8 @@
 #define GP_ROT_UPSHIFT  4
 #define GP_ROT_HORZ     0
 #define GP_ROT_VERT     1
+#define GP_ROT_HORZ_BITS  0x00
+#define GP_ROT_VERT_BITS  0x10
 
 // Piece color palettes
 #define GP_PAL_DOG      0x00U
@@ -45,13 +47,20 @@
 #define GP_ROTATE_MIN      GP_ROTATE_0
 #define GP_ROTATE_MAX      GP_ROTATE_270
 
-
 // BG Map Attributes (CGB Mode only)
- // Bit 0-2  Background Palette number  (BGP0-7)
- // Bit 3    Tile VRAM Bank number      (0=Bank 0, 1=Bank 1)
- // Bit 4    Not used
- // Bit 5    Horizontal Flip            (0=Normal, 1=Mirror horizontally)
- // Bit 6    Vertical Flip              (0=Normal, 1=Mirror vertically)
- // Bit 7    BG-to-OAM Priority         (0=Use OAM priority bit, 1=BG Priority)
+// Bit 0-2  Background Palette number  (BGP0-7)
+// Bit 3    Tile VRAM Bank number      (0=Bank 0, 1=Bank 1)
+// Bit 4    Not used
+// Bit 5    Horizontal Flip            (0=Normal, 1=Mirror horizontally)
+// Bit 6    Vertical Flip              (0=Normal, 1=Mirror vertically)
+// Bit 7    BG-to-OAM Priority         (0=Use OAM priority bit, 1=BG Priority)
+
+#define GP_MIRROR_OFF  0x00U
+#define GP_MIRROR_X    S_FLIPX
+#define GP_MIRROR_Y    S_FLIPY
+
+extern const UINT8 GP_ROT_LUT_TILE[];
+extern const UINT8 GP_ROT_LUT_ATTR[];
+
 
 #endif // GAME_PIECES_H
