@@ -35,7 +35,15 @@
 #define GP_PAL_CAT      0x01U
 #define GP_PAL_FISH     0x02U
 #define GP_PAL_SNAKE    0x03U
-#define GP_PAL_EMPTY    0x04U
+#define GP_PAL_EMPTY    0x03U // 0x04U // TODO FIXME
+
+#define GP_ROTATE_0        0
+#define GP_ROTATE_90       1
+#define GP_ROTATE_180      2
+#define GP_ROTATE_270      3
+#define GP_ROTATE_DEFUALT  GP_ROTATE_0
+#define GP_ROTATE_MIN      GP_ROTATE_0
+#define GP_ROTATE_MAX      GP_ROTATE_270
 
 
 // BG Map Attributes (CGB Mode only)

@@ -13,6 +13,7 @@ void vbl_update(void);
 
 
 UINT8 vbl_count;
+UINT8 game_state;
 
 
 void vbl_update() {
@@ -34,7 +35,10 @@ void init (void) {
     gfx_init();
 
     player_init();
+
+    game_state = GAME_INTRO;
 }
+
 
 
 void main(void){
@@ -47,36 +51,36 @@ void main(void){
             wait_vbl_done();
         vbl_count = 0;
 
+        // Handle keyboard input
         UPDATE_KEYS();
 
-        // if (ANY_KEY_TICKED) {
-        //     video_setflip(keys);
-        // }
-        if (KEY_TICKED(J_A)) {
-            video_setflip(BG_FLIP_X);
-        }
-        else if (KEY_TICKED(J_B)) {
-            //video_setflip(BG_FLIP_Y);
-            board_fill_random();
-        }
-        else if (KEY_TICKED(J_START)) {
-            board_reset();
-        }
-        else if (KEY_TICKED(J_SELECT)) {
-            player_update_gfx( ((UINT8)DIV_REG & 0x1F) );
+        if (KEY_TICKED(J_START)) {
+            game_state = GAME_START;
         }
 
-        else if (KEY_TICKED(J_LEFT)) {
-            player_update_xy( -1, 0);
-        }
-        else if (KEY_TICKED(J_RIGHT)) {
-            player_update_xy( 1, 0);
-        }
-        else if (KEY_TICKED(J_UP)) {
-            player_update_xy( 0, -1);
-        }
-        else if (KEY_TICKED(J_DOWN)) {
-            player_update_xy( 0, 1);
+        switch (game_state) {
+            case GAME_INTRO:
+                break;
+
+            case GAME_READY_TO_START:
+                break;
+
+            case GAME_START:
+                board_reset();
+                player_init();
+                game_state = GAME_PLAYING;
+                break;
+
+            case GAME_PLAYING:
+                player_handle_input();
+                break;
+
+            case GAME_ENDED:
+                game_state = GAME_START;
+                break;
+
+            case GAME_OVER_SCREEN:
+                break;
         }
 
     }
