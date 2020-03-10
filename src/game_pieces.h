@@ -19,6 +19,8 @@
 #define GP_PET_CAT      1
 #define GP_PET_FISH     2
 #define GP_PET_SNAKE    3
+#define GP_PET_NONE     4
+
 
 #define GP_SEG_UPSHIFT  0
 #define GP_SEG_TAIL     0
@@ -63,6 +65,39 @@
 
 extern const UINT8 GP_ROT_LUT_TILE[];
 extern const UINT8 GP_ROT_LUT_ATTR[];
+extern const UINT8 GP_CONNECT_LUT[];
+extern const UINT8 GP_CONNECT_MATCHING_LUT[];
+extern const  INT8 GP_CONNECT_NEXT_X_LUT[];
+extern const  INT8 GP_CONNECT_NEXT_Y_LUT[];
+
+
+#define GP_CONNECT_WRAP_DOWNSHIFT 4
+
+#define GP_CONNECT_MASK      0x0FU
+#define GP_CONNECT_WRAP_MASK 0xF0U
+
+#define GP_CONNECT_RESET  0x00U
+
+// #define GP_CONNECT_NONE   0
+// #define GP_CONNECT_LEFT   1
+// #define GP_CONNECT_RIGHT  2
+// #define GP_CONNECT_UP     3
+// #define GP_CONNECT_DOWN   4
+// #define GP_CONNECT_MIN    GP_CONNECT_LEFT
+// #define GP_CONNECT_MAX    GP_CONNECT_DOWN
+
+// #define GP_CONNECT_NONE_BITS   0x00U
+// #define GP_CONNECT_LEFT_BITS   0x01U
+// #define GP_CONNECT_RIGHT_BITS  0x02U
+// #define GP_CONNECT_UP_BITS     0x04U
+// #define GP_CONNECT_DOWN_BITS   0x08U
+#define GP_CONNECT_NONE_BITS   0x00U
+#define GP_CONNECT_LEFT_BITS   0x01U
+#define GP_CONNECT_UP_BITS     0x02U
+#define GP_CONNECT_RIGHT_BITS  0x04U
+#define GP_CONNECT_DOWN_BITS   0x08U
+#define GP_CONNECT_MIN_BITS    GP_CONNECT_LEFT_BITS
+#define GP_CONNECT_MAX_BITS    GP_CONNECT_DOWN_BITS
 
 
 #endif // GAME_PIECES_H

@@ -23,7 +23,7 @@
 
 // TODO: ??fix these: move to game_play.c???
 #define TICK_COUNT_RESET    0
-#define TICK_COUNT_DEFAULT 60 //60 // 60 frames per second default speed
+#define TICK_COUNT_DEFAULT 10 //60 // 60 frames per second default speed
 UINT8 tick_frame_count;
 
 
@@ -82,10 +82,28 @@ void player_piece_reset(void) {
 
 
 
+// UINT8 player_piece_connect_get(UINT8 piece, UINT8 rotate) {
+UINT8 player_piece_connect_get() {
+
+    UINT8 connect;
+
+    // Get connection info for piece
+    connect = GP_CONNECT_LUT[ (player_piece & GP_SEG_MASK) ];
+    // Handle rotation (rotate bits up, then handle nybble wraparound)
+    connect = connect << player_rotate;
+    connect = (connect | (connect >> GP_CONNECT_WRAP_DOWNSHIFT)) & GP_CONNECT_MASK;
+
+    return (connect);
+}
+
+
 // TODO: optimize out this function unless it starts doing more
 void player_piece_set_on_board(void) {
 
-    board_set_tile(player_x, player_y, player_piece, player_attrib);
+    board_set_tile_xy(player_x, player_y,
+                      player_piece,
+                      player_attrib,
+                      player_piece_connect_get());
 }
 
 
@@ -111,7 +129,7 @@ void player_rotate_apply(UINT8 dir) {
 // Tests if direction is available
 // then updates sprite if it moved
 //
-// Returns TRUE if piece was moved
+// Returns MOVE_OK if piece was moved
 //
 UINT8 player_move(INT8 dir_x, INT8 dir_y) {
 
@@ -121,7 +139,7 @@ UINT8 player_move(INT8 dir_x, INT8 dir_y) {
     if ((tx >= BRD_MIN_X) &&
         (tx <= BRD_MAX_X) &&
         (ty <= BRD_MAX_Y) &&
-         board_check_open(tx, ty)) {
+         board_check_open_xy(tx, ty)) {
 
         player_x = tx;
         player_y = ty;
@@ -161,7 +179,6 @@ void player_update_gfx() {
 
         set_sprite_tile(SPR_PLAYER, (player_piece & GP_TILE_MASK));
         set_sprite_prop(SPR_PLAYER, player_attrib);
-
 }
 
 
