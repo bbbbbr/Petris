@@ -252,6 +252,7 @@ UINT8 board_check_connected_xy(INT8 x, INT8 y, UINT8 piece, UINT8 * p_this_conne
     UINT8 adj_piece, adj_connect;
 
     // Get requested board piece
+    // (Fails if edge board piece and returns false to break out of calling loop)
     if (board_piece_get_xy(x, y, &adj_piece, &adj_connect)) {
 
         // TODO: could check for if (adj_piece != GP_EMPTY), but the connect test below should cover that
@@ -264,7 +265,7 @@ UINT8 board_check_connected_xy(INT8 x, INT8 y, UINT8 piece, UINT8 * p_this_conne
 
                 // Find and return next connect direction on this adjacent piece
                 // by excluding current connection
-                *p_this_connect = adj_connect & ~GP_CONNECT_MATCHING_LUT[(*p_this_connect)];
+                *p_this_connect = adj_connect ^ GP_CONNECT_MATCHING_LUT[(*p_this_connect)];
                 return (TRUE);
             }
         }
@@ -283,7 +284,7 @@ UINT8 board_check_completed_pet_xy(INT8 start_x, INT8 start_y, UINT8 piece, UINT
     UINT8 piece_count, headtail_count;
      INT8 next_x, next_y;
     UINT8 this_connect;
-    UINT8 c;
+    UINT8 source_cur_dir;
 
     if (piece != GP_EMPTY) {
 
@@ -304,16 +305,18 @@ UINT8 board_check_completed_pet_xy(INT8 start_x, INT8 start_y, UINT8 piece, UINT
         }
 
         // Loop through possible connect directions (Left/Right/Up/Down)
-        for (c = GP_CONNECT_MIN_BITS; c <= GP_CONNECT_MAX_BITS; c <<= 1) {
+        for (source_cur_dir = GP_CONNECT_MIN_BITS;
+             source_cur_dir <= GP_CONNECT_MAX_BITS;
+             source_cur_dir <<= 1) {
 
             // If there is a connection in this direction
-            if (c & connect) {
+            if (source_cur_dir & connect) {
 
                 // These need to be reset for each new direction
                 // tested from original piece location
-                next_x = start_x + GP_CONNECT_NEXT_X_LUT[c];
-                next_y = start_y + GP_CONNECT_NEXT_Y_LUT[c];
-                this_connect = connect;
+                next_x = start_x + GP_CONNECT_NEXT_X_LUT[source_cur_dir];
+                next_y = start_y + GP_CONNECT_NEXT_Y_LUT[source_cur_dir];
+                this_connect = source_cur_dir;
 
                 // The original piece gets used in this loop
                 while (board_check_connected_xy(next_x, next_y, piece, &this_connect)) {
@@ -355,23 +358,20 @@ UINT8 board_check_completed_pet_xy(INT8 start_x, INT8 start_y, UINT8 piece, UINT
 
         // Check if a completed pet was found
         if ((headtail_count >= 2) && (piece_count >= 2)) {
-            // TODO: re-call this function to remove pieces
             // TODO: count points/etc
 
             // clear the tiles
-            for (c = 0; c < board_tile_clear_count; c++) {
-                // TODO: OPTIMIZE: modulo is SLOW! convert to storing X/Y?
-                // derive x,y from board index
-                // next_x = (board_tile_clear_cache[c] % BRD_WIDTH);
-                // next_y = (board_tile_clear_cache[c] - next_x) / BRD_WIDTH;
-                board_clear_tile_xy(board_tile_clear_cache_x[c],
-                                    board_tile_clear_cache_y[c]);
+            // for (c = 0; c < board_tile_clear_count; c++) {
+            while (board_tile_clear_count) {
+                board_tile_clear_count--;
+                // TODO: OPTIMIZE: smaller arrays could be used. or pre-calc BG tile location)
+                board_clear_tile_xy(board_tile_clear_cache_x[board_tile_clear_count],
+                                    board_tile_clear_cache_y[board_tile_clear_count]);
             }
             return (TRUE);
         }
 
     } // end: if (piece != GP_EMPTY)
-
     return (FALSE);
 }
 
