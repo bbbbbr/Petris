@@ -51,6 +51,9 @@ endif
 
 LFLAGS = $(LFLAGS_NBANKS)
 
+# enable linker map file output
+LFLAGS += -Wl-m
+
 current_dir = $(shell pwd)
 
 ASMS        = $(foreach dir,$(PATH_PREFIX)src,$(notdir $(wildcard $(dir)/*.s)))
@@ -107,7 +110,7 @@ $(OBJDIR_RES)/%.mod.o: $(PATH_PREFIX)res/music/%.mod
 
 $(BINDIR)/$(PROJECT_NAME).$(EXTENSION): $(OBJDIR) $(OBJDIR_RES) $(BINDIR) $(OBJS) $(COMMON_OBJS)
 	@echo Linking
-	$(LCC) $(LFLAGS) -o $(OBJDIR)/$(PROJECT_NAME).$(EXTENSION) $(OBJS) $(COMMON_OBJS)
+	$(LCC) $(LFLAGS) -v -g -o $(OBJDIR)/$(PROJECT_NAME).$(EXTENSION) $(OBJS) $(COMMON_OBJS)
 	mv $(OBJDIR)/$(PROJECT_NAME).$(EXTENSION) $(BINDIR)/$(PROJECT_NAME).$(EXTENSION)
 
 build_lib: $(OBJDIR) $(OBJS)
