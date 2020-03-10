@@ -23,7 +23,7 @@
 
 // TODO: ??fix these: move to game_play.c???
 #define TICK_COUNT_RESET    0
-#define TICK_COUNT_DEFAULT 10 //60 // 60 frames per second default speed
+#define TICK_COUNT_DEFAULT 20 //60 // 60 frames per second default speed
 UINT8 tick_frame_count;
 
 
@@ -219,6 +219,15 @@ void player_handle_input(void) {
             }
             else if (KEY_TICKED(J_B)) {
                 player_rotate_apply(PLAYER_ROT_LEFT);
+            }
+
+            if (KEY_TICKED(J_SELECT)) {
+                board_debug_show_connect_entire_board();
+
+                waitpadup();
+                waitpad(J_SELECT);
+                waitpadup();
+
             }
 
             // Pause

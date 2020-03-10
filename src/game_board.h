@@ -52,5 +52,6 @@ UINT8 board_piece_get_xy(INT8, INT8, UINT8 * , UINT8 * );
 UINT8 board_check_connected_xy(INT8, INT8, UINT8, UINT8 * );
 UINT8 board_check_completed_pet_xy(INT8, INT8, UINT8, UINT8);
 
+void board_debug_show_connect_entire_board(void);
 
 #endif // GAME_BOARD_H

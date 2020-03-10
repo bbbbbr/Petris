@@ -75,6 +75,29 @@ void board_reset(void) {
 }
 
 
+void board_debug_show_connect_entire_board(void) {
+
+    INT8 x, y;
+    // TODO: OPTIMIZE: convert to single loop counter
+
+    for (x=0; x < BRD_WIDTH; x++) {
+        for (y=0; y < BRD_HEIGHT; y++) {
+            // Set pet piece
+            board_pieces[x + (y * BRD_WIDTH)] = board_connect[x + (y * BRD_WIDTH)] + TILES_PET_START;
+
+            // TODO: USE EMPTY PIECE PALETTE INSTEAD?
+            // Set palette based on pet type
+            board_attrib[x + (y * BRD_WIDTH)] = ((board_pieces[x + (y * BRD_WIDTH)] & GP_PET_MASK) >> GP_PET_UPSHIFT);
+
+            // Reset board connection bits
+            board_connect[x + (y * BRD_WIDTH)] = GP_CONNECT_NONE_BITS;
+        }
+    }
+
+    board_redraw_all();
+}
+
+
 
 // Given X, Y board coordinate, is it open for a piece to move there?
 //
@@ -269,7 +292,6 @@ UINT8 board_check_completed_pet_xy(INT8 start_x, INT8 start_y, UINT8 piece, UINT
         board_tile_clear_cache_y[0] = start_y;
         board_tile_clear_count = 1;
 
-
         // Initialize piece count (include current)
         piece_count = 1;
 
@@ -278,7 +300,7 @@ UINT8 board_check_completed_pet_xy(INT8 start_x, INT8 start_y, UINT8 piece, UINT
         // If current piece is an end (tail or head) then increment the end_count
         if ( ((piece & GP_SEG_MASK) == GP_SEG_TAIL) ||
              ((piece & GP_SEG_MASK) == GP_SEG_HEAD) ) {
-            headtail_count = 1;
+            headtail_count++;
         }
 
         // Loop through possible connect directions (Left/Right/Up/Down)
@@ -301,22 +323,28 @@ UINT8 board_check_completed_pet_xy(INT8 start_x, INT8 start_y, UINT8 piece, UINT
                     board_tile_clear_cache_y[board_tile_clear_count] = next_y;
                     board_tile_clear_count++;
 
+                    // Add current piece to the total
+                    piece_count++;
+
                     if (this_connect) {
 
                         // If the adjacent piece has another open connection then
                         // load the new X and Y location, then try it next (in this loop)
-                        piece_count++;
                         next_x += GP_CONNECT_NEXT_X_LUT[this_connect];
                         next_y += GP_CONNECT_NEXT_Y_LUT[this_connect];
 
                         // Check to see if the pet is a loop with no head/tail (next position == starting position)
                         if ((next_x == start_x) && (next_y == start_y)) {
-                            // If so, the pet has been completed, so exit (without a head or tail)
+
+                            // If so, the pet has been completed
+                            // Now exit loop (without needing a head or tail, or dead-end )
                             headtail_count += 2;
                             break; // exit loop
                         }
                     } else {
-                        // If next_connect is empty, that means it's a head or tail segment and this end is completed
+                        // If next_connect is empty (only 1 connection, to previous tile)
+                        // that means it's a HEAD or TAIL segment
+                        // and this end is completed
                         headtail_count++;
                         break; // exit loop
                     }
@@ -326,7 +354,7 @@ UINT8 board_check_completed_pet_xy(INT8 start_x, INT8 start_y, UINT8 piece, UINT
         } // end: for (c=GP_CONNECT_MIN_BITS;
 
         // Check if a completed pet was found
-        if ((headtail_count >= 2) && (piece_count > 1)) {
+        if ((headtail_count >= 2) && (piece_count >= 2)) {
             // TODO: re-call this function to remove pieces
             // TODO: count points/etc
 
