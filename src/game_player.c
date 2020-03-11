@@ -23,8 +23,16 @@
 
 // TODO: ??fix these: move to game_play.c???
 #define TICK_COUNT_RESET    0
-#define TICK_COUNT_DEFAULT 20 //60 // 60 frames per second default speed
+#define TICK_COUNT_DEFAULT 15 // 60 frames per second default speed
 UINT8 tick_frame_count;
+
+
+#define KEY_REPEAT_START               0
+#define KEY_REPEAT_DOWN_RELOAD         1
+#define KEY_REPEAT_DOWN_THRESHOLD      (KEY_REPEAT_DOWN_RELOAD + 2)
+#define KEY_REPEAT_LEFTRIGHT_RELOAD    8
+#define KEY_REPEAT_LEFTRIGHT_THRESHOLD (KEY_REPEAT_LEFTRIGHT_RELOAD + 4) //6
+UINT8 key_down_repeat_got_release = FALSE;
 
 
 #define SPR_PLAYER 0 // Player is sprite "0"
@@ -183,6 +191,8 @@ void player_update_gfx() {
 
 
 
+// TODO: split out to player_input.c or game_input.c
+
 void player_handle_input(void) {
 
     switch (piece_state) {
@@ -198,20 +208,44 @@ void player_handle_input(void) {
 
         case PLAYER_INPLAY:
 
-            // TODO: allow key repeat (may need KEY_TICKED() -> STATE=MOVING -> still?KEY_PRESSED() -> COUNTER -> THRESHOLD -> MOVE PIECE -> THRESHOLD_FAST ->  STATE=MOVINGFAST
-            // Left / Right movement
-            if (KEY_TICKED(J_LEFT)) {
-                player_move( -1, 0);
+            // TODO: OPTIMIZE: consolidate this into a single left/right test function
+            // TODO: move this out of game_player.c
+            if (KEY_PRESSED(J_LEFT)) {
+                if (key_repeat_count == KEY_REPEAT_START)
+                    player_move( -1, 0);
+                else if (key_repeat_count >= KEY_REPEAT_LEFTRIGHT_THRESHOLD) {
+                    player_move( -1, 0);
+                    RESET_KEY_REPEAT(KEY_REPEAT_LEFTRIGHT_RELOAD);
+                }
             }
-            else if (KEY_TICKED(J_RIGHT)) {
-                player_move( 1, 0);
+            else if (KEY_PRESSED(J_RIGHT)) {
+                if (key_repeat_count == KEY_REPEAT_START)
+                    player_move( 1, 0);
+                else if (key_repeat_count >= KEY_REPEAT_LEFTRIGHT_THRESHOLD) {
+                    player_move( 1, 0);
+                    RESET_KEY_REPEAT(KEY_REPEAT_LEFTRIGHT_RELOAD);
+                }
             }
 
-            if (KEY_TICKED(J_DOWN)) {
-                player_gravity_update(); // Call this to allow the player to LAND a piece earlier than tick time
-                // player_move( 0, 1);
-                // TODO: allow DOWN key repeat while LEFT/RIGHT repeating? need separate var if so
+
+
+            // Requires a key_up event on a new piece
+            // before down repeat can take effect.
+            // That protects against accidental down repeat on a new piece
+            if (KEY_PRESSED(J_DOWN)) {
+                // TODO: optimize this (but can't put it in test above)
+                if (key_down_repeat_got_release) {
+                    if (key_repeat_count == KEY_REPEAT_START)
+                        player_gravity_update(); // Call this to allow the player to LAND a piece earlier than tick time
+                    else if (key_repeat_count >= KEY_REPEAT_DOWN_THRESHOLD) {
+                        player_gravity_update();
+                        RESET_KEY_REPEAT(KEY_REPEAT_DOWN_RELOAD);
+                    }
+                }
+            } else {
+                key_down_repeat_got_release = TRUE; // TODO: optimize so this only gets reset when needed, not every frame
             }
+
 
             // Rotation
             if (KEY_TICKED(J_A)) {
@@ -229,6 +263,7 @@ void player_handle_input(void) {
                 waitpadup();
 
             }
+
 
             // Pause
             if (KEY_TICKED(J_START)) {
@@ -259,6 +294,7 @@ void player_handle_input(void) {
 
         case PLAYER_CHECK_BOARD:
             piece_state = PLAYER_NEWPIECE;
+            key_down_repeat_got_release = FALSE;
             break;
     }
 }

@@ -53,6 +53,7 @@ void main(void){
 
         // Handle keyboard input
         UPDATE_KEYS();
+        UPDATE_KEY_REPEAT((J_LEFT | J_RIGHT | J_DOWN));
 
         switch (game_state) {
             case GAME_INTRO:
