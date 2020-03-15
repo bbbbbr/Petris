@@ -44,11 +44,14 @@ extern UINT8 game_state;
 void  player_init(void);
 void  player_piece_reset(void);
 void  player_piece_set_on_board(void);
+UINT8 player_piece_connect_get();
+
 UINT8 player_move(INT8, INT8);
 void  player_update_gfx();
 void  player_rotate_apply(UINT8 dir);
 
 void  player_handle_input(void);
 void  player_gravity_update(void);
+
 
 #endif // GAME_PLAYER_H

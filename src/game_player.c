@@ -9,6 +9,7 @@
 #include "game_pieces.h"
 #include "game_board.h"
 #include "input.h"
+#include "sound.h"
 
 // struct player_info {
 //     UINT8 x;
@@ -23,7 +24,7 @@
 
 // TODO: ??fix these: move to game_play.c???
 #define TICK_COUNT_RESET    0
-#define TICK_COUNT_DEFAULT 15 // 60 frames per second default speed
+#define TICK_COUNT_DEFAULT 30 // 15 // 60 frames per second default speed
 UINT8 tick_frame_count;
 
 
@@ -117,6 +118,10 @@ void player_piece_set_on_board(void) {
 
 void player_rotate_apply(UINT8 dir) {
 
+    // Rotate sound
+    //PlayFx(CHANNEL_1, 30, 0x74, 0x80, 0x24, 0xC6, 0x86);
+    //PlayFx(CHANNEL_1, 30, 0x24, 0x80, 0x24, 0xA4, 0x86);
+      PlayFx(CHANNEL_1, 30, 0x24, 0x80, 0x14, 0x94, 0x86);
     // TODO: For larger pieces test whether they can turn
     if (dir == PLAYER_ROT_LEFT)
         player_rotate--;
@@ -148,6 +153,13 @@ UINT8 player_move(INT8 dir_x, INT8 dir_y) {
         (tx <= BRD_MAX_X) &&
         (ty <= BRD_MAX_Y) &&
          board_check_open_xy(tx, ty)) {
+
+        // TICK sound
+        // PlayFx(CHANNEL_1, 30, 0x00, 0xC0, 0x31, 0x8F, 0x85);
+        // PlayFx(CHANNEL_1, 30, 0x30, 0x81, 0x33, 0x37, 0x87);
+        // PlayFx(CHANNEL_1, 30, 0x74, 0x80, 0x22, 0xD6, 0x86);
+        // PlayFx(CHANNEL_1, 30, 0x74, 0x80, 0x12, 0xD6, 0x86);
+//        PlayFx(CHANNEL_1, 30, 0x74, 0x80, 0x12, 0xA6, 0x86);
 
         player_x = tx;
         player_y = ty;
@@ -250,10 +262,13 @@ void player_handle_input(void) {
             // Rotation
             if (KEY_TICKED(J_A)) {
                 player_rotate_apply(PLAYER_ROT_RIGHT);
+//                PlayFx(CHANNEL_1, 30, 0x3F, 0x4A, 0x67, 0x46, 0xC7);
             }
             else if (KEY_TICKED(J_B)) {
                 player_rotate_apply(PLAYER_ROT_LEFT);
+//                PlayFx(CHANNEL_2, 30, 0x85, 0xA2, 0xA0, 0x86);
             }
+
 
             if (KEY_TICKED(J_SELECT)) {
                 board_debug_show_connect_entire_board();
@@ -288,6 +303,11 @@ void player_handle_input(void) {
             break;
 
         case PLAYER_PIECE_LANDED:
+
+            // PlayFx(CHANNEL_1, 30, 0x4A, 0xc4, 0x74, 0x19, 0x86);
+            // PlayFx(CHANNEL_1, 30, 0x4A, 0xc4, 0x94, 0x19, 0x86);
+            PlayFx(CHANNEL_1, 30, 0x1B, 0x81, 0x43, 0x73, 0x86);
+
             player_piece_set_on_board();
             piece_state = PLAYER_CHECK_BOARD;
             break;

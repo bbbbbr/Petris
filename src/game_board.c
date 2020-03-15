@@ -7,7 +7,7 @@
 #include "game_board.h"
 #include "game_pieces.h"
 #include "gfx.h"
-
+#include "sound.h"
 
 UINT8 board_pieces[BRD_SIZE];
 UINT8 board_attrib[BRD_SIZE];
@@ -291,7 +291,7 @@ UINT8 board_check_completed_pet_xy(INT8 start_x, INT8 start_y, UINT8 piece, UINT
         // Reset tile clear cache (add one entry, current piece)
         board_tile_clear_cache_x[0] = start_x; // = start_x + (start_y * BRD_WIDTH);
         board_tile_clear_cache_y[0] = start_y;
-        board_tile_clear_count = 1;
+        board_tile_clear_count = 1; // TODO: this could just piggy back on piece_count
 
         // Initialize piece count (include current)
         piece_count = 1;
@@ -367,6 +367,10 @@ UINT8 board_check_completed_pet_xy(INT8 start_x, INT8 start_y, UINT8 piece, UINT
                 // TODO: OPTIMIZE: smaller arrays could be used. or pre-calc BG tile location)
                 board_clear_tile_xy(board_tile_clear_cache_x[board_tile_clear_count],
                                     board_tile_clear_cache_y[board_tile_clear_count]);
+
+                // PlayFx(CHANNEL_1, 30, 0x76, 0xC3, 0x53, 0x37, 0x87);
+                // TODO: increment with point count increment
+                PlayFx(CHANNEL_1, 30, 0x76, 0xC3, 0x53, 0x50, 0x87);
             }
             return (TRUE);
         }

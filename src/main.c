@@ -6,10 +6,12 @@
 #include "game_board.h"
 #include "input.h"
 #include "gfx.h"
+#include "sound.h"
 
 void init (void);
 void init_interrupts(void);
 void vbl_update(void);
+void init_sound(void);
 
 
 UINT8 vbl_count;
@@ -20,6 +22,12 @@ void vbl_update() {
     vbl_count ++;
 }
 
+
+void init_sound(void) {
+    NR52_REG = 0x80; // Enables sound, always set this first
+    NR51_REG = 0xFF; // Enables all channels (left and right)
+    NR50_REG = 0x77; // Max volume
+}
 
 void init_interrupts() {
     disable_interrupts();
@@ -34,11 +42,12 @@ void init (void) {
 
     gfx_init();
 
+    init_sound();
+
     player_init();
 
     game_state = GAME_INTRO;
 }
-
 
 
 void main(void){
