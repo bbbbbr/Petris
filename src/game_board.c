@@ -365,6 +365,7 @@ UINT8 board_check_completed_pet_xy(INT8 start_x, INT8 start_y, UINT8 piece, UINT
             while (board_tile_clear_count) {
                 board_tile_clear_count--;
                 // TODO: OPTIMIZE: smaller arrays could be used. or pre-calc BG tile location)
+// TODO: OPTION: PET-PILE MODE (don't clear tiles, level is up and totaled when screen is filled
                 board_clear_tile_xy(board_tile_clear_cache_x[board_tile_clear_count],
                                     board_tile_clear_cache_y[board_tile_clear_count]);
 

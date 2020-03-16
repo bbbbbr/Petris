@@ -24,7 +24,7 @@
 
 // TODO: ??fix these: move to game_play.c???
 #define TICK_COUNT_RESET    0
-#define TICK_COUNT_DEFAULT 30 // 15 // 60 frames per second default speed
+#define TICK_COUNT_DEFAULT 12 //30 // 15 // 60 frames per second default speed
 UINT8 tick_frame_count;
 
 
