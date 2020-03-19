@@ -11,6 +11,7 @@
 #include "../res/bg_map.h"
 #include "../res/bg_tiles.h"
 #include "../res/pet_tiles.h"
+#include "../res/font_numeric_tiles.h"
 
 const UWORD bgPalette[] = {
     bg_tilesCGBPal0c0, bg_tilesCGBPal0c1, bg_tilesCGBPal0c2, bg_tilesCGBPal0c3, // Pet 0
@@ -40,8 +41,10 @@ void gfx_init_sprites (void) {
 void gfx_init_background (void) {
 
         set_bkg_palette(0, 8, bgPalette); // UBYTE first_palette, UBYTE nb_palettes, UWORD *rgb_data
-        set_bkg_data(TILES_BG_START, TILE_COUNT_BG, bg_tiles);
-        set_bkg_data(TILES_PET_START, TILE_COUNT_PETTOTAL, pet_tiles);
+
+        set_bkg_data(TILES_BG_START,        TILE_COUNT_BG,        bg_tiles);
+        set_bkg_data(TILES_FONT_NUMS_START, TILE_COUNT_FONT_NUMS, font_numeric_tiles);
+        set_bkg_data(TILES_PET_START,       TILE_COUNT_PETTOTAL,   pet_tiles);
 
         // Load BG tile attribute map
         VBK_REG = 1;

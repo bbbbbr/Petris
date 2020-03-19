@@ -10,6 +10,7 @@
 #include "game_board.h"
 #include "input.h"
 #include "sound.h"
+#include "player_info.h"
 
 // struct player_info {
 //     UINT8 x;
@@ -24,8 +25,9 @@
 
 // TODO: ??fix these: move to game_play.c???
 #define TICK_COUNT_RESET    0
-#define TICK_COUNT_DEFAULT 12 //30 // 15 // 60 frames per second default speed
+#define TICK_COUNT_DEFAULT 30 // 12 //30 // 15 // 60 frames per second default speed
 UINT8 tick_frame_count;
+UINT8 tick_frame_speed = TICK_COUNT_DEFAULT;
 
 
 #define KEY_REPEAT_START               0
@@ -59,6 +61,9 @@ void player_init(void) {
     piece_state = PLAYER_START;
 
     tick_frame_count = TICK_COUNT_RESET;
+
+    score_reset();
+    level_reset();
 }
 
 
@@ -295,7 +300,7 @@ void player_handle_input(void) {
             // Move the piece down automatically every N ticks
             tick_frame_count++;
 
-            if (tick_frame_count >= TICK_COUNT_DEFAULT) {
+            if (tick_frame_count >= tick_frame_speed) {
                 tick_frame_count = TICK_COUNT_RESET;
                 player_gravity_update();
             }

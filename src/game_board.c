@@ -8,6 +8,7 @@
 #include "game_pieces.h"
 #include "gfx.h"
 #include "sound.h"
+#include "player_info.h"
 
 UINT8 board_pieces[BRD_SIZE];
 UINT8 board_attrib[BRD_SIZE];
@@ -275,6 +276,25 @@ UINT8 board_check_connected_xy(INT8 x, INT8 y, UINT8 piece, UINT8 * p_this_conne
 }
 
 
+void board_handle_pet_completed() {
+
+    // TODO: count points/etc, check level completed
+    score_update((UINT16)board_tile_clear_count);
+
+    while (board_tile_clear_count) {
+        board_tile_clear_count--;
+                // TODO: OPTIMIZE: smaller arrays could be used. or pre-calc BG tile location)
+                // TODO: OPTION: PET-PILE MODE (don't clear tiles, level is up and totaled when screen is filled
+                board_clear_tile_xy(board_tile_clear_cache_x[board_tile_clear_count],
+                                    board_tile_clear_cache_y[board_tile_clear_count]);
+
+                // PlayFx(CHANNEL_1, 30, 0x76, 0xC3, 0x53, 0x37, 0x87);
+                // TODO: increment with point count increment
+                PlayFx(CHANNEL_1, 30, 0x76, 0xC3, 0x53, 0x50, 0x87);
+    }
+}
+
+
 // NOTE: no bounds checking, assumes incoming X,Y are valid board positions
 //
 // TODO: add mode (CHECK vs REMOVE TILES)
@@ -358,21 +378,8 @@ UINT8 board_check_completed_pet_xy(INT8 start_x, INT8 start_y, UINT8 piece, UINT
 
         // Check if a completed pet was found
         if ((headtail_count >= 2) && (piece_count >= 2)) {
-            // TODO: count points/etc
 
-            // clear the tiles
-            // for (c = 0; c < board_tile_clear_count; c++) {
-            while (board_tile_clear_count) {
-                board_tile_clear_count--;
-                // TODO: OPTIMIZE: smaller arrays could be used. or pre-calc BG tile location)
-// TODO: OPTION: PET-PILE MODE (don't clear tiles, level is up and totaled when screen is filled
-                board_clear_tile_xy(board_tile_clear_cache_x[board_tile_clear_count],
-                                    board_tile_clear_cache_y[board_tile_clear_count]);
-
-                // PlayFx(CHANNEL_1, 30, 0x76, 0xC3, 0x53, 0x37, 0x87);
-                // TODO: increment with point count increment
-                PlayFx(CHANNEL_1, 30, 0x76, 0xC3, 0x53, 0x50, 0x87);
-            }
+            board_handle_pet_completed();
             return (TRUE);
         }
 
