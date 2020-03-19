@@ -1,10 +1,10 @@
 # Makefile derived from Zal0/ZGB
 
-# Only set GBDK_HOME if it has no env value
-ifeq ($(GBDK_HOME),)
-	GBDK_HOME := $(ZGB_PATH_UNIX)/../env/gbdk
-endif
-PATH := $(ZGB_PATH_UNIX)/../env/make-3.81-bin/bin;$(ZGB_PATH_UNIX)/../env/SDCC/bin;$(ZGB_PATH_UNIX)/../env/msys/bin;$(PATH)
+# # Only set GBDK_HOME if it has no env value
+# ifeq ($(GBDK_HOME),)
+# 	GBDK_HOME := $(ZGB_PATH_UNIX)/../env/gbdk
+# endif
+# PATH := $(ZGB_PATH_UNIX)/../env/make-3.81-bin/bin;$(ZGB_PATH_UNIX)/../env/SDCC/bin;$(ZGB_PATH_UNIX)/../env/msys/bin;$(PATH)
 
 #--- Default build will be release. Can be overidden passing BUILD_TYPE = debug as a parameter
 # ex: Release, Debug, ReleaseColor, DebugColor
@@ -38,7 +38,9 @@ ifneq ($(strip $(N_BANKS)),)
 	LFLAGS_NBANKS = -Wl-yt1 -Wl-yo$(N_BANKS)
 endif
 
+# These are SDCC flags (LCC is not used)
 CFLAGS = -mgbz80 --no-std-crt0  --use-stdout -Dnonbanked=  -I $(GBDK_HOME)/include -I $(GBDK_HOME)/include/asm $(BUILD_DEFS) -I$(PATH_PREFIX)include
+# --print-search-dirs --verbose
 #-Wa-l -Wl-m -Wl-j
 # --fsigned-char : doesn't seem to be supported currently
 
@@ -61,6 +63,7 @@ CLASSES     = $(foreach dir,$(PATH_PREFIX)src,$(notdir $(wildcard $(dir)/*.c)))
 RESOURCES   = $(foreach dir,$(PATH_PREFIX)res,$(notdir $(wildcard $(dir)/*.c)))
 MUSICS      = $(foreach dir,$(PATH_PREFIX)res/music,$(notdir $(wildcard $(dir)/*.mod)))
 OBJS = $(RESOURCES:%.c=$(OBJDIR_RES)/%.o) $(MUSICS:%.mod=$(OBJDIR_RES)/%.mod.o) $(ASMS:%.s=$(OBJDIR)/%.o) $(CLASSES:%.c=$(OBJDIR)/%.o)
+
 
 #dependencies -------------------------------------------------------------------------------------------
 ifneq ($(MAKECMDGOALS),clean)
@@ -86,7 +89,7 @@ $(OBJDIR_RES):
 	@echo Creating folder: $(OBJDIR_RES)
 	@mkdir $(OBJDIR_RES)
 
-$(OBJDIR)/%.o: %.s
+$(OBJDIR)/%.o: $(PATH_PREFIX)src/%.s
 	@echo compiling $<
 	@$(SDASGB) -plosgff -I"libc" $(filter --constseg CODE_%, $(subst .b,--constseg CODE_,$(suffix $(<:%.s=%)))) -c -o $@ $<
 
