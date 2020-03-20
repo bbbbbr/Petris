@@ -14,8 +14,8 @@
 #include "gfx_print.h"
 
 
-#define PRINT_MAX_DIGITS  4
-#define PRINT_MAX_NUM     9999 // ((10 ^ PRINT_MAX_DIGITS) - 1)
+#define PRINT_MAX_DIGITS  5
+#define PRINT_MAX_NUM     99999 // ((10 ^ PRINT_MAX_DIGITS) - 1)
 UINT8 digits[PRINT_MAX_DIGITS];
 
 UINT8 print_x  = 0;

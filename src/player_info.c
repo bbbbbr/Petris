@@ -14,16 +14,16 @@ UINT16 player_numpets;
 UINT16 player_level;
 
 #define DISPLAY_LEVEL_X 2
-#define DISPLAY_LEVEL_Y 2
+#define DISPLAY_LEVEL_Y 3
 
 #define DISPLAY_SCORE_X 2
-#define DISPLAY_SCORE_Y 5
+#define DISPLAY_SCORE_Y 6
 
 #define DISPLAY_NUMPETS_X 2
-#define DISPLAY_NUMPETS_Y 8
+#define DISPLAY_NUMPETS_Y 9
 
 #define DISPLAY_NUMTILES_X 2
-#define DISPLAY_NUMTILES_Y 11
+#define DISPLAY_NUMTILES_Y 12
 
 
 #define SCORE_SCALE_FACTOR 2 //10
@@ -32,6 +32,7 @@ UINT16 player_level;
 #define PLY_NUMTILES_RESET 0
 #define PLY_NUMPETS_RESET  0
 
+#define PLY_TILES_TILL_NEXT_LEVEL  10
 
 extern UINT8 tick_frame_speed;
 
@@ -43,7 +44,9 @@ void score_update(UINT16 num_tiles) {
         player_numpets++;
     player_numtiles += num_tiles;
 
-    if (player_numtiles >= 10) {
+    // TODO move to level_check_update()
+    // TODO: this is just a hack for now, large pets could skip a level (player_level = (player_level / PLY_TILES_TILL_NEXT_LEVEL))
+    if (player_numtiles >= (PLY_TILES_TILL_NEXT_LEVEL * (player_level + 1))) {
         level_increment();
     }
 
@@ -91,10 +94,10 @@ void score_reset(void) {
 void level_reset(void) {
 
     // TODO: move to level_init()
-    PRINT(DISPLAY_LEVEL_X - 1,    DISPLAY_LEVEL_Y - 1,    "LEVEL:", 0);
-    PRINT(DISPLAY_SCORE_X - 1,    DISPLAY_SCORE_Y - 1,    "SCORE:", 0);
-    PRINT(DISPLAY_NUMTILES_X - 1, DISPLAY_NUMTILES_Y - 1, "TILES:", 0);
-    PRINT(DISPLAY_NUMPETS_X - 1,  DISPLAY_NUMPETS_Y - 1,  "PETS:", 0);
+    PRINT(DISPLAY_LEVEL_X,    DISPLAY_LEVEL_Y - 1,    "LEVEL", 0);
+    PRINT(DISPLAY_SCORE_X,    DISPLAY_SCORE_Y - 1,    "SCORE", 0);
+    PRINT(DISPLAY_NUMTILES_X, DISPLAY_NUMTILES_Y - 1, "TILES", 0);
+    PRINT(DISPLAY_NUMPETS_X,  DISPLAY_NUMPETS_Y - 1,  "PETS", 0);
 
     player_numpets  = PLY_NUMPETS_RESET;
     player_numtiles = PLY_NUMTILES_RESET;
