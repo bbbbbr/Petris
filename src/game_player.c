@@ -4,13 +4,15 @@
 #include <gb/cgb.h> // Include cgb functions
 #include <rand.h>
 
-#include "game_player.h"
-
-#include "game_pieces.h"
-#include "game_board.h"
 #include "input.h"
 #include "sound.h"
+
 #include "player_info.h"
+#include "game_pieces.h"
+#include "game_board.h"
+
+#include "game_player.h"
+
 
 // struct player_info {
 //     UINT8 x;

@@ -4,6 +4,8 @@
 #include "game_player.h"
 #include "game_pieces.h"
 #include "game_board.h"
+#include "intro_screen.h"
+
 #include "input.h"
 #include "gfx.h"
 #include "sound.h"
@@ -40,7 +42,7 @@ void init (void) {
     // Switch CGB fast mode
     cpu_fast();
 
-    gfx_init();
+//    gfx_init();
 
     init_sound();
 
@@ -66,12 +68,16 @@ void main(void){
 
         switch (game_state) {
             case GAME_INTRO:
-                if (KEY_TICKED(J_START)) {
-                    game_state = GAME_START;
-                }
+                intro_screen_handle();
+                // Done with intro screen, now start game
+                if (KEY_TICKED(J_START))
+                    game_state = GAME_READY_TO_START;
                 break;
 
             case GAME_READY_TO_START:
+                gfx_init();
+                // TODO: give the player time to get ready
+                game_state = GAME_START;
                 break;
 
             case GAME_START:

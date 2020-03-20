@@ -39,6 +39,7 @@ void gfx_init_sprites (void) {
     set_sprite_data(0, TILE_COUNT_PETTOTAL, pet_tiles);
 }
 
+// TODO: rename to board_init_background(); move to board_gfx.c
 void gfx_init_background (void) {
 
         set_bkg_palette(0, 8, bgPalette); // UBYTE first_palette, UBYTE nb_palettes, UWORD *rgb_data
