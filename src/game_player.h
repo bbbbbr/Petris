@@ -30,7 +30,9 @@ typedef enum {
 
 
 typedef enum {
-    GAME_INTRO = 0,
+    GAME_INTRO_INIT = 0,
+    GAME_INTRO,
+    GAME_BOARD_INIT,
     GAME_READY_TO_START,
     GAME_START,
     GAME_PLAYING,

@@ -15,9 +15,13 @@
 #include "../res/font_tiles.h"
 
 
+#define SPR_PLAYER 0 // Player is sprite "0" // TODO: fix/centralize this
+
 extern const UWORD bgPalette[];
 
-void intro_screen_gfx_init_background (void) {
+void intro_screen_init(void) {
+
+        move_sprite(SPR_PLAYER, 0,0); // Hide main sprite
 
         set_bkg_palette(0, 8, bgPalette); // UBYTE first_palette, UBYTE nb_palettes, UWORD *rgb_data
 
@@ -39,28 +43,23 @@ void intro_screen_gfx_init_background (void) {
 
 }
 
+UINT8 counter; // TODO: share main -> frame_counter
 
 void intro_screen_handle(void) {
 
-    UINT8 counter = 0;
-
-    intro_screen_gfx_init_background();
+// TODO: clean this up
 
     // Wait for the player to press start
-    waitpadup();
-    while (! KEY_TICKED(J_START)) {
-        UPDATE_KEYS();
-        delay(20);
+    counter++;
 
-        // 8 bit rollover is expected, don't check upper bound
-        counter++;
-        if (counter == 1) {
-            PRINT(5,12, "PRESS START", 0);
-        }
-        else if (counter == 128) {
-            PRINT(5,12, "           ", 0);
-        }
+    if (counter == 1) {
+        PRINT(5,12, "PRESS START", 0);
     }
-
-    waitpadup();
+    else if (counter == 96) {
+        PRINT(5,12, "           ", 0);
+    }
+    else if (counter == 128) {
+        PRINT(5,12, "           ", 0);
+        counter = 0;
+    }
 }

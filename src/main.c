@@ -8,6 +8,7 @@
 
 #include "input.h"
 #include "gfx.h"
+#include "gfx_print.h"
 #include "sound.h"
 
 void init (void);
@@ -17,6 +18,7 @@ void init_sound(void);
 
 
 UINT8 vbl_count;
+// UINT8 frame_count; // TODO
 UINT8 game_state;
 
 
@@ -48,7 +50,9 @@ void init (void) {
 
     player_init();
 
-    game_state = GAME_INTRO;
+    game_state = GAME_INTRO_INIT;
+
+    //frame_count = 0;
 }
 
 
@@ -61,12 +65,20 @@ void main(void){
         if(!vbl_count)
             wait_vbl_done();
         vbl_count = 0;
+        //frame_count++; // TODO: share this with game_player
 
         // Handle keyboard input
         UPDATE_KEYS();
         UPDATE_KEY_REPEAT((J_LEFT | J_RIGHT | J_DOWN));
 
         switch (game_state) {
+
+            case GAME_INTRO_INIT:
+                intro_screen_init();
+                game_state = GAME_INTRO;
+                break;
+
+
             case GAME_INTRO:
                 intro_screen_handle();
                 // Done with intro screen, now start game
@@ -74,27 +86,38 @@ void main(void){
                     game_state = GAME_READY_TO_START;
                 break;
 
+
             case GAME_READY_TO_START:
                 gfx_init();
                 // TODO: give the player time to get ready
                 game_state = GAME_START;
                 break;
 
-            case GAME_START:
+
+            case GAME_START: // TODO: move to GAME_BOARD_INIT
                 board_reset();
                 player_init();
                 game_state = GAME_PLAYING;
                 break;
 
+
             case GAME_PLAYING:
                 player_handle_input();
                 break;
 
+
             case GAME_ENDED:
-                game_state = GAME_START;
+                PRINT(BRD_ST_X + 1,
+                      BRD_ST_Y + 5,
+                      "GAME OVER",0);
+                game_state = GAME_OVER_SCREEN;
                 break;
 
+
             case GAME_OVER_SCREEN:
+                // TODO: game over screen
+                if (KEY_TICKED(J_START))
+                    game_state = GAME_INTRO_INIT;
                 break;
         }
 

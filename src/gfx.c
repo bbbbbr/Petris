@@ -62,7 +62,8 @@ void gfx_init_background (void) {
         DISPLAY_ON;
 }
 
-void video_setflip(UINT8 bg_attrib) {
+
+void video_setflip(UINT8 bg_attrib) { // TODO: DEBUG: DELETE ME
 
     // int x,y;
     // UINT8 video_buff;
