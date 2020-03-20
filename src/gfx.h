@@ -10,14 +10,20 @@
 #define TILES_BG_START          0
 #define TILE_COUNT_BG          16
 
-#define TILES_FONT_NUMS_START  (TILES_BG_START + TILE_COUNT_BG)
-#define TILE_COUNT_FONT_NUMS   11 //Tiles in order: 0123456789<blank>
-#define TILE_FONT_NUMS_BLANK   (TILES_FONT_NUMS_START + 10) // blank tile is after first 10 digit tiles
-
 #define TILES_PET_START        64 // This requires ^2 alignment
 #define TILE_COUNT_PETS        32
 #define TILE_COUNT_PETBLANK     2
 #define TILE_COUNT_PETTOTAL    (TILE_COUNT_PETS + TILE_COUNT_PETBLANK)
+
+// Font gets loaded at the end of tile RAM
+#define TILE_COUNT_FONT     45 //Tiles in order: <blank>ABC...XYZ0123456789!'()-.:?
+#define TILES_FONT_START    (255 - TILE_COUNT_FONT) // (TILES_BG_START + TILE_COUNT_BG)
+    #define TILE_ID_FONT_BLANK  TILES_FONT_START // blank tile
+    #define TILES_FONT_CHARS_START  (TILES_FONT_START  + 1)
+    // Numeric tiles are a subset of main font
+    // So these are just for convenience
+    #define TILES_FONT_NUMS_START  (TILES_FONT_START  + 27)
+    #define TILE_COUNT_FONT_NUMS   11 //Tiles in order: 0123456789<blank>
 
 
 extern const UWORD bgPalette[];

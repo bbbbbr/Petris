@@ -14,10 +14,17 @@ UINT16 player_numpets;
 UINT16 player_level;
 
 #define DISPLAY_LEVEL_X 2
-#define DISPLAY_LEVEL_y 2
+#define DISPLAY_LEVEL_Y 2
 
 #define DISPLAY_SCORE_X 2
-#define DISPLAY_SCORE_y 4
+#define DISPLAY_SCORE_Y 5
+
+#define DISPLAY_NUMPETS_X 2
+#define DISPLAY_NUMPETS_Y 8
+
+#define DISPLAY_NUMTILES_X 2
+#define DISPLAY_NUMTILES_Y 11
+
 
 #define SCORE_SCALE_FACTOR 2 //10
 #define SCORE_RESET        0
@@ -43,13 +50,13 @@ void score_update(UINT16 num_tiles) {
     player_score += num_tiles * num_tiles * SCORE_SCALE_FACTOR * player_level; // TODO: support x 10 scoring? Need to use a 24 bit Num
 
     // Display the score
-    print_num_u16(DISPLAY_SCORE_X, DISPLAY_SCORE_y, player_score);
+    print_num_u16(DISPLAY_SCORE_X, DISPLAY_SCORE_Y, player_score);
 
     // Display number of pet segments completed
-    print_num_u16(DISPLAY_SCORE_X, DISPLAY_SCORE_y + 2, player_numtiles);
+    print_num_u16(DISPLAY_NUMTILES_X, DISPLAY_NUMTILES_Y, player_numtiles);
 
     // Display number of pets completed
-    print_num_u16(DISPLAY_SCORE_X, DISPLAY_SCORE_y + 4, player_numpets);
+    print_num_u16(DISPLAY_NUMPETS_X, DISPLAY_NUMPETS_Y, player_numpets);
 }
 
 
@@ -66,13 +73,13 @@ void level_increment(void) {
     if (tick_frame_speed)
         tick_frame_speed--;     // TODO : Use a proper accessor/setter
 
-    print_num_u16(DISPLAY_LEVEL_X, DISPLAY_LEVEL_y, player_level);
+    print_num_u16(DISPLAY_LEVEL_X, DISPLAY_LEVEL_Y, player_level);
 }
 
 
 void level_show(void) {
 
-    print_num_u16(DISPLAY_LEVEL_X, DISPLAY_LEVEL_y, player_level);
+    print_num_u16(DISPLAY_LEVEL_X, DISPLAY_LEVEL_Y, player_level);
 }
 
 
@@ -82,6 +89,13 @@ void score_reset(void) {
 }
 
 void level_reset(void) {
+
+    // TODO: move to level_init()
+    PRINT(DISPLAY_LEVEL_X - 1,    DISPLAY_LEVEL_Y - 1,    "LEVEL:", 0);
+    PRINT(DISPLAY_SCORE_X - 1,    DISPLAY_SCORE_Y - 1,    "SCORE:", 0);
+    PRINT(DISPLAY_NUMTILES_X - 1, DISPLAY_NUMTILES_Y - 1, "TILES:", 0);
+    PRINT(DISPLAY_NUMPETS_X - 1,  DISPLAY_NUMPETS_Y - 1,  "PETS:", 0);
+
     player_numpets  = PLY_NUMPETS_RESET;
     player_numtiles = PLY_NUMTILES_RESET;
     player_level    = PLY_LEVEL_RESET;

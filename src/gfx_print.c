@@ -18,6 +18,11 @@
 #define PRINT_MAX_NUM     9999 // ((10 ^ PRINT_MAX_DIGITS) - 1)
 UINT8 digits[PRINT_MAX_DIGITS];
 
+UINT8 print_x  = 0;
+UINT8 print_y  = 0;
+UINT8 print_target = PRINT_BKG;
+
+
 // Render a font digit
 void print_num_u16(UINT8 x, UINT8 y, UINT16 num) {
 
@@ -42,7 +47,7 @@ void print_num_u16(UINT8 x, UINT8 y, UINT16 num) {
         // Fill remaining spaces with empty tiles
         while (index > 0) {
             index--;
-            digits[index] = TILE_FONT_NUMS_BLANK;
+            digits[index] = TILE_ID_FONT_BLANK;
         }
 
         // Draw the digits on the background
@@ -58,5 +63,64 @@ void print_num_u16(UINT8 x, UINT8 y, UINT16 num) {
         set_bkg_tiles(x, y,
                       (PRINT_MAX_DIGITS - index), 1, // 1 tile high
                       &digits[index]); // Start at first digit and go to end of array
+    }
+}
+
+
+// Copied from ZGB Print
+// Removed some code, removed some characters
+void print_text(const char* txt, unsigned char delay_time){
+    UINT8 idx = 0;
+    unsigned char c;
+    unsigned char start_x;
+
+    start_x = print_x; // Save start X for newline return
+
+    while(*txt) {
+        // Handle speedup-escape from delay printing
+        // if (joypad()) // TODO: remove or re-enable (delay printing escape)
+        //     delay_time = 0;
+
+        if(*txt == ' ') {
+            c = TILE_ID_FONT_BLANK;
+        } else if(*txt >= 'A' && *txt <= 'Z'){
+            c = TILES_FONT_CHARS_START + *txt - 'A';
+        } else if(*txt >= 'a' && *txt <= 'z') {
+            c = TILES_FONT_CHARS_START + *txt - 'a';
+        } /* else if(*txt >= '0' && *txt <= '9') {
+            c = font_idx + 27 + *txt - '0';
+        } */ else {
+            switch(*txt) {
+                case  '!': c = TILES_FONT_CHARS_START + 37; break;
+                case '\'': c = TILES_FONT_CHARS_START + 38; break;
+                case  '(': c = TILES_FONT_CHARS_START + 39; break;
+                case  ')': c = TILES_FONT_CHARS_START + 40; break;
+                case  '-': c = TILES_FONT_CHARS_START + 41; break;
+                case  '.': c = TILES_FONT_START + 42; break;
+                case  ':': c = TILES_FONT_START + 43; break;
+                case  '?': c = TILES_FONT_START + 44; break;
+                case '\n':
+                    // Do a carriage return, no printing and skip to top of loop
+                    print_x = start_x;
+                    print_y++;
+                    txt++;
+                    if (delay_time)
+                        delay(delay_time);
+                    continue;
+            }
+        }
+
+        if(print_target == PRINT_BKG)
+            set_bkg_tiles(0x1F & (print_x), 0x1F & (print_y), 1, 1, &c);
+        else
+            set_win_tiles(print_x, print_y, 1, 1, &c);
+
+        print_x++;
+        txt++;
+        // TODO: Optional - re-enable delay printing
+        // if (delay_time)
+        //     delay(delay_time);
+            // OPTIONAL: enable or remove sounds while printing text
+            // PlayFx(CHANNEL_1, 0,  0x20, 0x81, 0x43, 0x59, 0x86);
     }
 }
