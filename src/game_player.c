@@ -79,6 +79,7 @@ void player_piece_reset(void) {
     player_rotate = GP_ROTATE_DEFUALT;
 
     // TODO: IMPROVE NEW PIECE SELECTION
+    // TODO: move to player_piece_get_new()
     // For now, choose single random pet tile
     player_piece = ((UINT8)DIV_REG & 0x1F);
     // player_piece = ((GP_PET_DOG  << GP_PET_UPSHIFT) |

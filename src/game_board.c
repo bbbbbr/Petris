@@ -278,20 +278,24 @@ UINT8 board_check_connected_xy(INT8 x, INT8 y, UINT8 piece, UINT8 * p_this_conne
 
 void board_handle_pet_completed() {
 
-    // TODO: count points/etc, check level completed
+    // TODO: Update score *after* tiles are cleared (it looks weird before)
     score_update((UINT16)board_tile_clear_count);
 
     while (board_tile_clear_count) {
         board_tile_clear_count--;
-                // TODO: OPTIMIZE: smaller arrays could be used. or pre-calc BG tile location)
-                // TODO: OPTION: PET-PILE MODE (don't clear tiles, level is up and totaled when screen is filled
-                board_clear_tile_xy(board_tile_clear_cache_x[board_tile_clear_count],
-                                    board_tile_clear_cache_y[board_tile_clear_count]);
+        // TODO: OPTIMIZE: smaller arrays could be used. or pre-calc BG tile location)
+        // TODO: OPTION: PET-PILE MODE (don't clear tiles, level is up and totaled when screen is filled
 
-                // PlayFx(CHANNEL_1, 30, 0x76, 0xC3, 0x53, 0x37, 0x87);
-                // TODO: increment with point count increment
-                PlayFx(CHANNEL_1, 30, 0x76, 0xC3, 0x53, 0x50, 0x87);
-                delay(300);
+        // TODO: special sound (or increase sound) over N tiles
+        PlayFx(CHANNEL_1, 30, 0x76, 0xC3, 0x53, 0x50, 0x87);
+
+        board_clear_tile_xy(board_tile_clear_cache_x[board_tile_clear_count],
+                            board_tile_clear_cache_y[board_tile_clear_count]);
+
+        delay(300);
+
+        // TODO: increment score as the pieces clear?
+        // TODO: animate the peices clearing (can use sprite)
     }
 }
 
@@ -329,6 +333,10 @@ UINT8 board_check_completed_pet_xy(INT8 start_x, INT8 start_y, UINT8 piece, UINT
         for (source_cur_dir = GP_CONNECT_MIN_BITS;
              source_cur_dir <= GP_CONNECT_MAX_BITS;
              source_cur_dir <<= 1) {
+
+            // Stop searching if a pet has been completed
+            if (headtail_count >= 2)
+                break;
 
             // If there is a connection in this direction
             if (source_cur_dir & connect) {
