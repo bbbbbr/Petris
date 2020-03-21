@@ -291,6 +291,7 @@ void board_handle_pet_completed() {
                 // PlayFx(CHANNEL_1, 30, 0x76, 0xC3, 0x53, 0x37, 0x87);
                 // TODO: increment with point count increment
                 PlayFx(CHANNEL_1, 30, 0x76, 0xC3, 0x53, 0x50, 0x87);
+                delay(300);
     }
 }
 
