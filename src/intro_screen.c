@@ -55,10 +55,10 @@ void intro_screen_handle(void) {
     if (counter == 1) {
         PRINT(5,12, "PRESS START", 0);
     }
-    else if (counter == 96) {
+    else if (counter == 100) {
         PRINT(5,12, "           ", 0);
     }
-    else if (counter == 128) {
+    else if (counter == 200) {
         PRINT(5,12, "           ", 0);
         counter = 0;
     }
