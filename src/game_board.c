@@ -278,25 +278,33 @@ UINT8 board_check_connected_xy(INT8 x, INT8 y, UINT8 piece, UINT8 * p_this_conne
 
 void board_handle_pet_completed() {
 
-    // TODO: Update score *after* tiles are cleared (it looks weird before)
+    UINT8 c = 0;
+
     score_update((UINT16)board_tile_clear_count);
 
-    while (board_tile_clear_count) {
-        board_tile_clear_count--;
+    while (c < board_tile_clear_count) {
         // TODO: OPTIMIZE: smaller arrays could be used. or pre-calc BG tile location)
         // TODO: OPTION: PET-PILE MODE (don't clear tiles, level is up and totaled when screen is filled
 
-        // TODO: special sound (or increase sound) over N tiles
-        PlayFx(CHANNEL_1, 30, 0x76, 0xC3, 0x53, 0x50, 0x87);
+        // Play special sound (per tile) when more than N tiles have been cleared for a pet
+        // TODO: or just play a single special sound when crossing the threshold instead?
+        if (c >= BRD_TILE_COUNT_BONUS_SOUND_THRESHOLD)
+            PlayFx(CHANNEL_1, 30, 0x76, 0xC3, 0x53, 0x80, 0x87); // Bonus sound
+        else
+            PlayFx(CHANNEL_1, 30, 0x76, 0xC3, 0x53, 0x40, 0x87); // Normal sound
 
-        board_clear_tile_xy(board_tile_clear_cache_x[board_tile_clear_count],
-                            board_tile_clear_cache_y[board_tile_clear_count]);
+
+        board_clear_tile_xy(board_tile_clear_cache_x[c],
+                            board_tile_clear_cache_y[c]);
 
         delay(300);
+        c++;
 
         // TODO: increment score as the pieces clear?
-        // TODO: animate the peices clearing (can use sprite)
+        // TODO: animate the peices clearing (with sprite?)
     }
+
+    board_tile_clear_count = 0;
 }
 
 
