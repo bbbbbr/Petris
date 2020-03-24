@@ -4,6 +4,8 @@
 #include <gb/cgb.h> // Include cgb functions
 #include <stdlib.h>
 
+#include "common.h"
+
 #include "game_board.h"
 #include "game_pieces.h"
 #include "gfx.h"
@@ -330,8 +332,11 @@ void board_handle_pet_completed() {
 
         board_clear_tile_xy(board_tile_clear_cache_x[c],
                             board_tile_clear_cache_y[c]);
-
-        delay(300);
+        #ifdef CPU_FAST_ENABLED
+            delay(300);
+        #else
+            delay(150);
+        #endif
         c++;
 
         // TODO: increment score as the pieces clear?

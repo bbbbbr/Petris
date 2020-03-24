@@ -1,6 +1,8 @@
 #include <gb/gb.h>
 #include <gb/cgb.h> // Include cgb functions
 
+#include "common.h"
+
 #include "game_player.h"
 #include "game_pieces.h"
 #include "game_board.h"
@@ -42,8 +44,10 @@ void init_interrupts() {
 
 void init (void) {
     // TODO: POWER: is this speed needed? if not, make it more power efficient
-    // Switch CGB to fast speed mode
-    cpu_fast();
+    #ifdef CPU_FAST_ENABLED
+        // Switch CGB to fast speed mode
+        cpu_fast();
+    #endif
 
 //    gfx_init();
 
