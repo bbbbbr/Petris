@@ -39,6 +39,7 @@
 #define BRD_TILE_COUNT_BONUS_SOUND_THRESHOLD 4
 
 
+void board_hide_all(void);
 void board_redraw_all(void);
 void board_draw_tile_xy(INT8, INT8, UINT8);
 

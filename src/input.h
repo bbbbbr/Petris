@@ -10,7 +10,7 @@
 
 #define KEY_PRESSED(K) (keys & (K))
 #define KEY_TICKED(K)   ((keys & (K)) && !(previous_keys & (K)))
-#define KEY_RELEASED(K) ((previous_keys & (K)) && !(keys & (K)))
+#define KEY_RELEASED(K) (!(keys & (K)) && (previous_keys & (K)))
 
 #define ANY_KEY_PRESSED (keys)
 

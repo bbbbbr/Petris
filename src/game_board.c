@@ -20,15 +20,49 @@ UINT8 board_tile_clear_count;
 
 // UINT8 board_connect_cache[BRD_CON_SIZE]; // TODO: this could be Bitpacked
 
+// 10 tiles wide for clearing the game board one row at a time
+// This MUST match game board width
+const UINT8 board_blank_row[] = {GP_EMPTY + TILES_PET_START,
+                                 GP_EMPTY + TILES_PET_START,
+                                 GP_EMPTY + TILES_PET_START,
+                                 GP_EMPTY + TILES_PET_START,
+                                 GP_EMPTY + TILES_PET_START,
+                                 GP_EMPTY + TILES_PET_START,
+                                 GP_EMPTY + TILES_PET_START,
+                                 GP_EMPTY + TILES_PET_START,
+                                 GP_EMPTY + TILES_PET_START,
+                                 GP_EMPTY + TILES_PET_START};
 
-void board_redraw_all(void) {
+// Clears the game board
+//
+// * Called during PAUSE
+void board_hide_all(void) {
+
+    UINT8 y;
+
     // Update BG Tilemap from Game Board
+    VBK_REG = 0; // Select regular BG tile map
+
+    // TODO: this could be more efficient
+    // Only sets tile IDs, leaves attrib map in place
+    for (y = BRD_ST_Y; y < (BRD_ST_Y + BRD_HEIGHT); y++) {
+        set_bkg_tiles(BRD_ST_X, y,
+                      sizeof(board_blank_row), 1,
+                      &board_blank_row[0]);
+
+    }
+}
+
+
+// Redraws the game board from the game board arrays
+void board_redraw_all(void) {
+    // Update BG Attrib Map from Game Board
     VBK_REG = 1; // Select BG tile attribute map
     set_bkg_tiles(BRD_ST_X, BRD_ST_Y,
                   BRD_WIDTH, BRD_HEIGHT,
                   &board_attrib[0]);
 
-    // Update BG Attrib Map from Game Board
+    // Update BG Tilemap from Game Board
     VBK_REG = 0; // Re-Select regular BG tile map
     set_bkg_tiles(BRD_ST_X, BRD_ST_Y,
                   BRD_WIDTH, BRD_HEIGHT,

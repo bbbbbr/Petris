@@ -6,6 +6,7 @@
 
 #include "input.h"
 #include "sound.h"
+#include "gfx_print.h"
 
 #include "player_info.h"
 #include "game_pieces.h"
@@ -69,32 +70,40 @@ void player_init(void) {
 }
 
 
+void player_piece_show(UINT8 do_show) {
+
+    if (do_show) {
+        PLAYER_PIECE_UPDATE_SPRITE_XY;
+    } else {
+        // Hide sprite
+        move_sprite(SPR_PLAYER, 0,0);
+    }
+}
+
 void player_piece_reset(void) {
     // Locate new piece at default position
     // Top of board, in the middle, no rotation
     player_x      = BRD_NEWPIECE_X;
     player_y      = BRD_NEWPIECE_Y;
 
-    player_attrib = 0; // zero out here, updated below in player_update_gfx()
+    player_attrib = 0; // zero out here, updated below in player_piece_update_gfx()
     player_rotate = GP_ROTATE_DEFUALT;
 
     // TODO: IMPROVE NEW PIECE SELECTION
-    // TODO: move to player_piece_get_new()
+    // TODO: move to player_piece_get_next()
     // For now, choose single random pet tile
     player_piece = ((UINT8)DIV_REG & 0x1F);
     // player_piece = ((GP_PET_DOG  << GP_PET_UPSHIFT) |
     //                 (GP_SEG_TAIL << GP_SEG_UPSHIFT) |
     //                  GP_ROT_HORZ);// + TILES_PET_START;
 
-    player_update_gfx();
+    player_piece_update_gfx();
 
-    // TODO FIX or move to function player_piece_show(false)
+    // TODO: FIX (?? does it need fixing?) or use function player_piece_show(false)
     // Hide player sprite by moving it offscreen
-    // move_sprite(SPR_PLAYER, 0, 0);
+    // ?? move_sprite(SPR_PLAYER, 0, 0);
 
-    move_sprite(SPR_PLAYER,
-                (player_x * BRD_UNIT_SIZE) + BRD_PIECE_X_OFFSET,
-                (player_y * BRD_UNIT_SIZE) + BRD_PIECE_Y_OFFSET);
+    PLAYER_PIECE_UPDATE_SPRITE_XY;
 }
 
 
@@ -143,7 +152,7 @@ void player_rotate_apply(UINT8 dir) {
         player_rotate = GP_ROTATE_MIN;
 
     // TODO: only need to update GFX if rotation succeeded
-    player_update_gfx();
+    player_piece_update_gfx();
 }
 
 
@@ -162,7 +171,7 @@ UINT8 player_move(INT8 dir_x, INT8 dir_y) {
         (ty <= BRD_MAX_Y) &&
          board_check_open_xy(tx, ty)) {
 
-        // TICK sound
+        // TODO: TICK sound??
         // PlayFx(CHANNEL_1, 30, 0x00, 0xC0, 0x31, 0x8F, 0x85);
         // PlayFx(CHANNEL_1, 30, 0x30, 0x81, 0x33, 0x37, 0x87);
         // PlayFx(CHANNEL_1, 30, 0x74, 0x80, 0x22, 0xD6, 0x86);
@@ -172,9 +181,8 @@ UINT8 player_move(INT8 dir_x, INT8 dir_y) {
         player_x = tx;
         player_y = ty;
         // TODO: ?? optimize out sprite coordinate offset compensation
-        move_sprite(SPR_PLAYER,
-                    (player_x * BRD_UNIT_SIZE) + BRD_PIECE_X_OFFSET,
-                    (player_y * BRD_UNIT_SIZE) + BRD_PIECE_Y_OFFSET);
+
+        PLAYER_PIECE_UPDATE_SPRITE_XY;;
 
         return (MOVE_OK);
     }
@@ -187,7 +195,7 @@ UINT8 player_move(INT8 dir_x, INT8 dir_y) {
 }
 
 
-void player_update_gfx() {
+void player_piece_update_gfx() {
 
         // Update player rotation (clear bit and then set)
         player_piece = ((player_piece & ~GP_ROT_MASK)
@@ -210,8 +218,36 @@ void player_update_gfx() {
 }
 
 
+void player_handle_pause(void) {
 
-// TODO: split out to player_input.c or game_input.c
+    // Hide the game board and player piece
+    board_hide_all();
+    player_piece_show(FALSE);
+
+    PRINT(BRD_ST_X + 2,
+          BRD_ST_Y + 5,
+          "PAUSED",0);
+
+
+    // TODO: This could probably be done better
+    // Need a delay for joypad to start returning updated values
+    while (joypad() & J_START); // Wait until Start is released
+
+    delay(100);
+    while (!(joypad() & J_START)); // Wait for start
+
+    delay(100);
+    while (joypad() & J_START); // Wait until Start is released
+
+    UPDATE_KEYS(); // refresh key state to make sure it's in sync
+
+    // Redraw the board and player piece
+    board_redraw_all();
+    player_piece_show(TRUE);
+}
+
+
+// TODO: split into two functions: player_update() and player_handle_input() -> maybe move input to player_input.c
 
 void player_handle_input(void) {
 
@@ -227,6 +263,8 @@ void player_handle_input(void) {
             break;
 
         case PLAYER_INPLAY:
+
+            // TODO: player_handle_input() -> maybe move input to player_input.c
 
             // TODO: OPTIMIZE: consolidate this into a single left/right test function
             // TODO: move this out of game_player.c
@@ -290,16 +328,11 @@ void player_handle_input(void) {
 
             // Pause
             if (KEY_TICKED(J_START)) {
-                // Wait for the player to Start
-                waitpadup();
-                waitpad(J_START);
-                waitpadup();
 
-                // Now reset the key state to avoid passing a keypress into gameplay
-                UPDATE_KEYS();
-                // TODO: Pause/Resume
+                player_handle_pause();
             }
 
+            // TODO: This should be moved out of handle input
             // Move the piece down automatically every N ticks
             tick_frame_count++;
 
@@ -349,19 +382,6 @@ void player_gravity_update(void) {
             break;
     }
 }
-
-
-//void player_visible(UINT8 do_show, INT8 X, INT8 Y) {
-    // Show hide on/offscreen
-    // move_sprite(SPR_PLAYER,
-    //     stars_x[c],
-    //     stars_y[c]);
-//}
-
-
-// #define S_FLIPX      0x20U
-// #define S_FLIPY      0x40U
-// #define S_CGB_PALETTE    0x03U
 
 
 

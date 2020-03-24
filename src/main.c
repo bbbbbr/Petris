@@ -41,7 +41,8 @@ void init_interrupts() {
 }
 
 void init (void) {
-    // Switch CGB fast mode
+    // TODO: POWER: is this speed needed? if not, make it more power efficient
+    // Switch CGB to fast speed mode
     cpu_fast();
 
 //    gfx_init();
@@ -107,6 +108,7 @@ void main(void){
 
 
             case GAME_ENDED:
+                // TODO: move this into a function
                 PRINT(BRD_ST_X + 1,
                       BRD_ST_Y + 5,
                       "GAME OVER",0);
