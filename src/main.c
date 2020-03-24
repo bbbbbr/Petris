@@ -6,6 +6,7 @@
 #include "game_player.h"
 #include "game_pieces.h"
 #include "game_board.h"
+#include "game_board_gfx.h"
 #include "intro_screen.h"
 
 #include "input.h"
@@ -49,8 +50,6 @@ void init (void) {
         cpu_fast();
     #endif
 
-//    gfx_init();
-
     init_sound();
 
     player_init();
@@ -93,7 +92,7 @@ void main(void){
 
 
             case GAME_READY_TO_START:
-                gfx_init();
+                board_gfx_init();
                 // TODO: give the player time to get ready
                 game_state = GAME_START;
                 break;

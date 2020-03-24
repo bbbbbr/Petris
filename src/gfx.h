@@ -29,14 +29,7 @@
     #define TILES_FONT_NUMS_START  (TILES_FONT_START  + 27)
     #define TILE_COUNT_FONT_NUMS   11 //Tiles in order: 0123456789<blank>
 
-
 extern const UWORD bgPalette[];
-
-void gfx_init(void);
-void gfx_init_sprites(void);
-void gfx_init_background(void);
-
-void video_setflip(UINT8);
 
 #endif // GFX_H
 
