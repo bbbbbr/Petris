@@ -1,7 +1,7 @@
-// game_pieces.h
+// game_piece_data.h
 
-#ifndef GAME_PIECES_H
-#define GAME_PIECES_H
+#ifndef GAME_PIECE_DATA_H
+#define GAME_PIECE_DATA_H
 
 
 
@@ -13,6 +13,8 @@
 #define GP_TILE_MASK  0x1FU
 
 #define GP_EMPTY      0x20U
+#define GP_SPEC_BOMB  0x21U
+#define GP_SPEC_LITEN 0x22U
 
 #define GP_PET_UPSHIFT  2
 #define GP_PET_DOG      0
@@ -40,13 +42,14 @@
 #define GP_PAL_CAT      0x01U
 #define GP_PAL_FISH     0x02U
 #define GP_PAL_SNAKE    0x03U
-#define GP_PAL_EMPTY    0x03U // 0x04U // TODO FIXME
+#define GP_PAL_EMPTY    0x01U // Use first pet palette
+#define GP_PAL_SPECIAL  0x01U // Use first pet palette
 
 #define GP_ROTATE_0        0
 #define GP_ROTATE_90       1
 #define GP_ROTATE_180      2
 #define GP_ROTATE_270      3
-#define GP_ROTATE_DEFUALT  GP_ROTATE_0
+#define GP_ROTATE_DEFAULT  GP_ROTATE_0
 #define GP_ROTATE_MIN      GP_ROTATE_0
 #define GP_ROTATE_MAX      GP_ROTATE_270
 #define GP_ROTATE_SEG_TURN_MIRROR_BITS 0x02U
@@ -100,4 +103,4 @@ extern const  INT8 GP_CONNECT_NEXT_Y_LUT[];
 #define GP_CONNECT_MAX_BITS    GP_CONNECT_DOWN_BITS
 
 
-#endif // GAME_PIECES_H
+#endif // GAME_PIECE_DATA_H

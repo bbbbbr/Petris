@@ -3,10 +3,9 @@
 
 #include "common.h"
 
-#include "game_player.h"
-#include "game_pieces.h"
-#include "game_board.h"
-#include "game_board_gfx.h"
+// #include "game_board.h"
+// #include "game_board_gfx.h"
+#include "gameplay.h"
 #include "intro_screen.h"
 #include "options_screen.h"
 
@@ -52,7 +51,7 @@ void init (void) {
 
     init_sound();
 
-    player_init();
+    DISPLAY_ON;
 
     game_state = GAME_INTRO_INIT;
 
@@ -87,7 +86,8 @@ void main(void){
                 intro_screen_handle();
                 // Done with intro screen, now start game
                 if (KEY_TICKED(J_START))
-                    game_state = GAME_OPTIONS_INIT;
+                    game_state = GAME_READY_TO_START;
+                    // game_state = GAME_OPTIONS_INIT; // TODO : enable options
                 break;
 
 
@@ -103,37 +103,38 @@ void main(void){
 
 
             case GAME_READY_TO_START:
-                board_gfx_init();
-                // TODO: give the player time to get ready
-                game_state = GAME_START;
-                break;
+                // board_gfx_init(); // moved to gameplay_init
+                //     game_state = GAME_START; // TODO: remove this state
+                //     break;
+                // case GAME_START: // TODO: move to GAME_BOARD_INIT
+                gameplay_init();
 
-
-            case GAME_START: // TODO: move to GAME_BOARD_INIT
-                board_reset();
-                player_init();
+                // TODO: give the player time to get ready (maybe flash "READY")
+                delay(500);
                 game_state = GAME_PLAYING;
                 break;
 
 
             case GAME_PLAYING:
-                player_handle_input();
+                gameplay_update();
                 break;
 
 
             case GAME_ENDED:
-                // TODO: move this into a function
-                PRINT(BRD_ST_X + 1,
-                      BRD_ST_Y + 5,
-                      "GAME OVER",0);
+                // TODO: add some animation / sounds for game ended
+                // gameplay_handle_game_ended();
                 game_state = GAME_OVER_SCREEN;
                 break;
 
 
             case GAME_OVER_SCREEN:
-                // TODO: game over screen
-                if (KEY_TICKED(J_START))
+
+                gameplay_handle_gameover_screen();
+
+                if (KEY_TICKED(J_START)) {
+                    gameplay_exit_cleanup();
                     game_state = GAME_INTRO_INIT;
+                }
                 break;
         }
 

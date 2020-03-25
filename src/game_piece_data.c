@@ -1,9 +1,9 @@
-// game_pieces.c
+// game_piece_data.c
 
 #include <gb/gb.h>
 #include <gb/cgb.h> // Include cgb functions
 
-#include "game_pieces.h"
+#include "game_piece_data.h"
 
 
 // This gets applied to BG Tile/Sprite INDEX:0x10
@@ -20,6 +20,7 @@ const UINT8 GP_ROT_LUT_ATTR[4] =
                  GP_MIRROR_X,
                  GP_MIRROR_Y };
 
+// TODO: clean up unused LUTS
 /*
 // Game board piece connection bitmask lookup
 const UINT8 GP_CONNECT_LUT[4] =

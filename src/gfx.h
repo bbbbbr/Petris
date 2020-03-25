@@ -34,8 +34,9 @@
 
 #define TILES_PET_START        64 // This requires ^2 alignment
 #define TILE_COUNT_PETS        32
-#define TILE_COUNT_PETBLANK     2
-#define TILE_COUNT_PETTOTAL    (TILE_COUNT_PETS + TILE_COUNT_PETBLANK)
+#define TILE_COUNT_PETBLANK     1
+#define TILE_COUNT_PETSPECIAL   2
+#define TILE_COUNT_PETTOTAL    (TILE_COUNT_PETS + TILE_COUNT_PETBLANK + TILE_COUNT_PETSPECIAL)
 
 // Font gets loaded at the end of tile RAM
 #define TILE_COUNT_FONT     45 //Tiles in order: <blank>ABC...XYZ0123456789!'()-.:?

@@ -11,12 +11,14 @@
 #include "input.h"
 #include "common.h"
 
-#include "game_pieces.h"
+#include "game_piece_data.h"
 
 #include "../res/pet_tiles.h"
 #include "../res/font_tiles.h"
 
-#define SPR_PLAYER 0 // Player is sprite "0" // TODO: fix/centralize this
+
+#define SPR_OPTIONS_CURSOR 0 // Cursor is sprite "0"
+
 
 // TODO: these are hardwired for convenience right now
 #define PET_DOG_HEAD             3
@@ -52,14 +54,20 @@ INT8 options_menu_index = 0;
 
 void options_screen_cursor_update(INT8 dir) {
 
+    // Play a sound when moving the cursor
+    if (dir != 0)
+        PlayFx(CHANNEL_1, 30, 0x24, 0x80, 0x14, 0x94, 0x86);
+
+    // Update menu selection
     options_menu_index += dir;
 
     if (options_menu_index < OPTION_MENU_MIN)
         options_menu_index = OPTION_MENU_MAX;
+
     else if (options_menu_index > OPTION_MENU_MAX)
         options_menu_index = OPTION_MENU_MIN;
 
-    move_sprite(SPR_PLAYER,
+    move_sprite(SPR_OPTIONS_CURSOR,
                 OPTION_CURSOR_X,
                 (option_menu_y[options_menu_index] + 2) * 8);
 }
@@ -123,11 +131,21 @@ void options_screen_draw(void) {
 void options_screen_sprites_init(void) {
 
     SPRITES_8x8;
+
     set_sprite_palette(0, 8, bgPalette); // UBYTE first_palette, UBYTE nb_palettes, UWORD *rgb_data
     set_sprite_data(0, TILE_COUNT_PETTOTAL, pet_tiles);
 
-    set_sprite_tile(SPR_PLAYER, PET_DOG_HEAD);
-    set_sprite_prop(SPR_PLAYER, BG_FLIP_X); // TODO: should prob set palette here
+    set_sprite_tile(SPR_OPTIONS_CURSOR, PET_DOG_HEAD);
+    set_sprite_prop(SPR_OPTIONS_CURSOR, BG_FLIP_X); // TODO: should prob set palette here
+
+    SHOW_SPRITES;
+}
+
+
+void options_screen_exit_cleanup(void) {
+
+    HIDE_SPRITES;
+
 }
 
 
@@ -149,8 +167,6 @@ void options_screen_init(void) {
 
     SHOW_BKG;
 
-    DISPLAY_ON;
-
     options_menu_index = OPTION_MENU_STARTGAME;
 
     options_screen_sprites_init();
@@ -158,20 +174,27 @@ void options_screen_init(void) {
 
     options_screen_draw();
     options_screen_setting_draw();
+
 }
+
 
 
 void options_screen_handle(void) {
 
-    if (KEY_TICKED(J_UP))
+    if (KEY_TICKED(J_UP)) {
+
         options_screen_cursor_update(-1);
-    else if (KEY_TICKED(J_DOWN))
+
+    } else if (KEY_TICKED(J_DOWN)) {
+
         options_screen_cursor_update(1);
-    else if (KEY_TICKED(J_START | J_A | J_B)) {
+
+    } else if (KEY_TICKED(J_START | J_A | J_B)) {
 
         if (options_menu_index == OPTION_MENU_STARTGAME)
-            game_state = GAME_READY_TO_START;
 
+            options_screen_exit_cleanup();
+            game_state = GAME_READY_TO_START;
     }
 
 }

@@ -5,6 +5,7 @@
 
 void options_screen_settings(void);
 void options_screen_draw(void);
+void options_screen_exit_cleanup(void);
 void options_screen_init(void);
 void options_screen_handle(void);
 

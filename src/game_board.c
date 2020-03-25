@@ -7,7 +7,7 @@
 #include "common.h"
 
 #include "game_board.h"
-#include "game_pieces.h"
+#include "game_piece_data.h"
 #include "gfx.h"
 #include "sound.h"
 #include "player_info.h"

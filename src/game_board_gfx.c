@@ -3,7 +3,8 @@
 #include <gb/gb.h>
 #include <gb/cgb.h> // Include cgb functions
 
-#include "game_pieces.h"
+#include "game_piece.h"
+#include "game_piece_data.h"
 #include "game_board.h"
 #include "game_board_gfx.h"
 #include "gfx.h"
@@ -18,6 +19,7 @@ void board_gfx_init(void) {
 
     board_gfx_init_background();
     board_gfx_init_sprites();
+
 }
 
 
@@ -48,6 +50,4 @@ void board_gfx_init_background(void) {
         set_bkg_tiles(0, 0, 20, 18, bg_mapPLN0);
 
         SHOW_BKG;
-
-        DISPLAY_ON;
 }

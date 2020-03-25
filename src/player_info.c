@@ -13,26 +13,6 @@ UINT16 player_numtiles;
 UINT16 player_numpets;
 UINT16 player_level;
 
-#define DISPLAY_LEVEL_X 2
-#define DISPLAY_LEVEL_Y 3
-
-#define DISPLAY_SCORE_X 2
-#define DISPLAY_SCORE_Y 6
-
-#define DISPLAY_NUMPETS_X 2
-#define DISPLAY_NUMPETS_Y 9
-
-#define DISPLAY_NUMTILES_X 2
-#define DISPLAY_NUMTILES_Y 12
-
-
-#define SCORE_SCALE_FACTOR 2 //10
-#define SCORE_RESET        0
-#define PLY_LEVEL_RESET    1
-#define PLY_NUMTILES_RESET 0
-#define PLY_NUMPETS_RESET  0
-
-#define PLY_TILES_TILL_NEXT_LEVEL  10
 
 extern UINT8 tick_frame_speed;
 
@@ -45,8 +25,8 @@ void score_update(UINT16 num_tiles) {
     player_numtiles += num_tiles;
 
     // TODO move to level_check_update()
-    // TODO: this is just a hack for now, large pets could skip a level (player_level = (player_level / PLY_TILES_TILL_NEXT_LEVEL))
-    if (player_numtiles >= (PLY_TILES_TILL_NEXT_LEVEL * (player_level + 1))) {
+    // TODO: this is just a hack for now, large pets could skip a level (player_level = (player_level / PLAYER_TILES_TILL_NEXT_LEVEL))
+    if (player_numtiles >= (PLAYER_TILES_TILL_NEXT_LEVEL * (player_level + 1))) {
         level_increment();
     }
 
@@ -67,8 +47,8 @@ void level_increment(void) {
 
     player_level++;
     // TODO: reset or NOT reset number of pets/tiles completed per level? May depend on play mode
-    // player_numpets  = PLY_NUMPETS_RESET;
-    // player_numtiles = PLY_NUMTILES_RESET;
+    // player_numpets  = PLAYER_NUMPETS_RESET;
+    // player_numtiles = PLAYER_NUMTILES_RESET;
 
     // TODO: level_handle_next()
     // TODO: level_speed_get()
@@ -93,14 +73,17 @@ void score_reset(void) {
 
 void level_reset(void) {
 
-    // TODO: move to level_init()
+    // TODO: move to level_init() ?
+    PRINT(DISPLAY_NEXT_PIECE_TEXT_X,    DISPLAY_NEXT_PIECE_TEXT_Y - 1,    "NEXT:", 0);
+
+    PRINT(DISPLAY_LEVEL_X,    DISPLAY_LEVEL_Y - 1,    "LEVEL", 0);
     PRINT(DISPLAY_LEVEL_X,    DISPLAY_LEVEL_Y - 1,    "LEVEL", 0);
     PRINT(DISPLAY_SCORE_X,    DISPLAY_SCORE_Y - 1,    "SCORE", 0);
     PRINT(DISPLAY_NUMTILES_X, DISPLAY_NUMTILES_Y - 1, "TILES", 0);
     PRINT(DISPLAY_NUMPETS_X,  DISPLAY_NUMPETS_Y - 1,  "PETS", 0);
 
-    player_numpets  = PLY_NUMPETS_RESET;
-    player_numtiles = PLY_NUMTILES_RESET;
-    player_level    = PLY_LEVEL_RESET;
+    player_numpets  = PLAYER_NUMPETS_RESET;
+    player_numtiles = PLAYER_NUMTILES_RESET;
+    player_level    = PLAYER_LEVEL_RESET;
     level_show();   // TODO: move this out of here?
 }

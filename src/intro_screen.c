@@ -36,12 +36,11 @@ void intro_screen_init(void) {
     set_bkg_tiles(0, 0, 20, 18, intro_screen_mapPLN0);
 
     SHOW_BKG;
-
-    DISPLAY_ON;
-
 }
 
 UINT8 counter; // TODO: share main -> frame_counter
+
+
 
 void intro_screen_handle(void) {
 
