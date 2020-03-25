@@ -4,6 +4,7 @@
 #include <gb/cgb.h> // Include cgb functions
 #include <rand.h>
 
+#include "common.h"
 #include "input.h"
 #include "sound.h"
 #include "gfx_print.h"
@@ -13,7 +14,6 @@
 #include "game_board.h"
 
 #include "game_player.h"
-
 
 // struct player_info {
 //     UINT8 x;
@@ -361,8 +361,6 @@ void player_handle_input(void) {
     }
 }
 
-
-extern UINT8 game_state; // TODO: fix this
 
 // TODO: move/rename ?? game_gracity_update()?
 void player_gravity_update(void) {

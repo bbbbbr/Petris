@@ -3,11 +3,10 @@
 #include <gb/gb.h>
 #include <gb/cgb.h> // Include cgb functions
 
-#include "gfx.h"
-
 #include "game_pieces.h"
 #include "game_board.h"
 #include "game_board_gfx.h"
+#include "gfx.h"
 
 #include "../res/bg_map.h"
 #include "../res/bg_tiles.h"

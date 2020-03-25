@@ -20,10 +20,9 @@ UINT8 board_tile_clear_cache_x[BRD_SIZE];
 UINT8 board_tile_clear_cache_y[BRD_SIZE];
 UINT8 board_tile_clear_count;
 
-// UINT8 board_connect_cache[BRD_CON_SIZE]; // TODO: this could be Bitpacked
-
 // 10 tiles wide for clearing the game board one row at a time
 // This MUST match game board width
+// TODO: move this to game_board_gfx.h
 const UINT8 board_blank_row[] = {GP_EMPTY + TILES_PET_START,
                                  GP_EMPTY + TILES_PET_START,
                                  GP_EMPTY + TILES_PET_START,
@@ -144,51 +143,6 @@ UINT8 board_check_open_xy(INT8 x, INT8 y) {
     return (board_pieces[x + (y * BRD_WIDTH)] == (GP_EMPTY + TILES_PET_START));
 }
 
-/*
-UINT8 board_piece_get(UINT8 x, UINT8 y, UINT8 * p_piece, UINT8 * p_rotate) {
-
-    if ((x >= BRD_MIN_X) &&
-        (x <= BRD_MAX_X) &&
-        (y >= BRD_MIN_Y) &&
-        (y <= BRD_MAX_Y))
-        *p_piece = board_pieces[x + (y * BRD_WIDTH)];
-
-        *p_rotate = ((*p_piece) & GP_ROT_MASK) >> GP_ROT_UPSHIFT;
-        if (board_attrib[x + (y * BRD_WIDTH)] & (GP_MIRROR_X | GP_MIRROR_X)) // TODO: ROTATION HACK: yuck!
-            *p_rotate += GP_ROTATE_180; // Extract remaining rotation if needed
-
-        *p_rotate = board_attrib[x + (y * BRD_WIDTH)];
-        return (true);
-    else
-        return (GP_EMPTY); // TODO Not well implemented-  should really return distinct error
-}
-
-
-void board_connect_update_xy(UINT8 x, UINT8 y, UINT8 piece, UINT8 connect) {
-
-    UINT8 t_piece, t_rotate;
-// Left  ( 0  deg)
-
-    // Reset connection
-    board_connect[x + (y * BRD_CON_WIDTH)] = BRD_CONNECT_NO;
-
-    // Make sure pieces match
-    if ( board_piece_get(x - 1, y, &t_piece, &t_rotate) ) {
-        if  ((t_piece & GP_PET_MASK) == (piece  & GP_PET_MASK)) {
-
-            if (GP_CONNECT_LUT[connect] &
-                GP_CONNECT_MATCHING_LUT[board_connect_get(t_piece, t_rotate)]) {
-
-                board_connect[x + (y * BRD_CON_WIDTH)] = BRD_CONNECT_YES;
-            }
-        }
-    }
-
-    // Up    ( 90 deg)
-    // Right (180 deg)
-    // Down  (270 deg)
-}
-*/
 
 void board_clear_tile_xy(INT8 x, INT8 y) {
 

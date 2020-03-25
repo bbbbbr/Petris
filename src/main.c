@@ -8,6 +8,7 @@
 #include "game_board.h"
 #include "game_board_gfx.h"
 #include "intro_screen.h"
+#include "options_screen.h"
 
 #include "input.h"
 #include "gfx.h"
@@ -22,7 +23,6 @@ void init_sound(void);
 
 UINT8 vbl_count;
 // UINT8 frame_count; // TODO
-UINT8 game_state;
 
 
 void vbl_update() {
@@ -87,7 +87,18 @@ void main(void){
                 intro_screen_handle();
                 // Done with intro screen, now start game
                 if (KEY_TICKED(J_START))
-                    game_state = GAME_READY_TO_START;
+                    game_state = GAME_OPTIONS_INIT;
+                break;
+
+
+            case GAME_OPTIONS_INIT:
+                options_screen_init();
+                game_state = GAME_OPTIONS;
+                break;
+
+
+            case GAME_OPTIONS:
+                options_screen_handle();
                 break;
 
 

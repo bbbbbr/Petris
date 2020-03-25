@@ -17,6 +17,7 @@
 #define PRINT_MAX_DIGITS  5
 #define PRINT_MAX_NUM     99999 // ((10 ^ PRINT_MAX_DIGITS) - 1)
 UINT8 digits[PRINT_MAX_DIGITS];
+const UINT8 print_tile_cleared_attribs = 0x00;
 
 UINT8 print_x  = 0;
 UINT8 print_y  = 0;
@@ -110,8 +111,14 @@ void print_text(const char* txt, unsigned char delay_time){
             }
         }
 
-        if(print_target == PRINT_BKG)
+        if(print_target == PRINT_BKG) {
+
+            VBK_REG = 1; // Select BG tile attribute map
+            set_bkg_tiles(0x1F & (print_x), 0x1F & (print_y), 1, 1, &print_tile_cleared_attribs);
+
+            VBK_REG = 0; // Select BG tile map
             set_bkg_tiles(0x1F & (print_x), 0x1F & (print_y), 1, 1, &c);
+        }
         else
             set_win_tiles(print_x, print_y, 1, 1, &c);
 

@@ -3,9 +3,27 @@
 #ifndef GFX_H
 #define GFX_H
 
+#define BG_PAL_0    0x00
+#define BG_PAL_1    0x01
+#define BG_PAL_2    0x02
+#define BG_PAL_3    0x03
+#define BG_PAL_4    0x04
+#define BG_PAL_5    0x05
+#define BG_PAL_6    0x06
+#define BG_PAL_7    0x07
+
 #define BG_PRIORITY 0x80
 #define BG_FLIP_Y   0x40
 #define BG_FLIP_X   0x20
+
+#define SCREEN_WIDTH  20
+#define SCREEN_HEIGHT 18
+
+#define SCREEN_MIN_X 0
+#define SCREEN_MIN_Y 0
+#define SCREEN_MAX_X 19
+#define SCREEN_MAX_Y 17
+
 
 #define TILES_BG_START          0
 #define TILE_COUNT_BG          16
