@@ -36,6 +36,9 @@
 #define BRD_CONNECT_NO  0
 #define BRD_CONNECT_YES 1
 
+#define BRD_CHECK_FLAGS_NONE            0x00
+#define BRD_CHECK_FLAGS_IGNORE_PET_TYPE 0x01
+
 #define BRD_TILE_COUNT_BONUS_SOUND_THRESHOLD 4
 
 
@@ -52,9 +55,10 @@ void board_set_tile_xy(INT8, INT8, UINT8, UINT8, UINT8);
 void board_fill_random(void);
 
 UINT8 board_piece_get_xy(INT8, INT8, UINT8 * , UINT8 * );
-UINT8 board_check_connected_xy(INT8, INT8, UINT8, UINT8 * );
-UINT8 board_check_completed_pet_xy(INT8, INT8, UINT8, UINT8);
+UINT8 board_check_connected_xy(INT8, INT8, UINT8, UINT8 *, UINT8);
+UINT8 board_check_completed_pet_xy(INT8, INT8, UINT8, UINT8, UINT8);
 
+void board_handle_pet_completed(UINT8 flags);
 void board_debug_show_connect_entire_board(void);
 
 #endif // GAME_BOARD_H

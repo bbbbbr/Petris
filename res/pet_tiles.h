@@ -93,10 +93,10 @@
 #define pet_tilesCGBPal6c3 0
 
 /* Gameboy Color palette 7 */
-#define pet_tilesCGBPal7c0 6076
-#define pet_tilesCGBPal7c1 8935
-#define pet_tilesCGBPal7c2 6596
-#define pet_tilesCGBPal7c3 224
+#define pet_tilesCGBPal7c0 15166
+#define pet_tilesCGBPal7c1 32623
+#define pet_tilesCGBPal7c2 16367
+#define pet_tilesCGBPal7c3 31198
 /* Start of tile array. */
 extern unsigned char pet_tiles[];
 

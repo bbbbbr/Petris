@@ -16,7 +16,7 @@
 // Extra tiles above pet tiles
 #define GP_EMPTY          0x20U // TODO : Tiles, move empty to be after specials?
 #define GP_SPECIAL_BOMB   0x21U
-#define GP_SPECIAL_LIGHTN 0x22U
+#define GP_SPECIAL_LIGHTENING 0x22U
 
 #define GP_PET_UPSHIFT  2
 #define GP_PET_DOG      0
@@ -90,6 +90,6 @@ extern const  INT8 GP_CONNECT_NEXT_Y_LUT[];
 #define GP_CONNECT_DOWN_BITS   0x08U
 #define GP_CONNECT_MIN_BITS    GP_CONNECT_LEFT_BITS
 #define GP_CONNECT_MAX_BITS    GP_CONNECT_DOWN_BITS
-
+#define GP_CONNECT_ALL_WAYS_BITS (GP_CONNECT_LEFT_BITS | GP_CONNECT_RIGHT_BITS | GP_CONNECT_UP_BITS | GP_CONNECT_DOWN_BITS)
 
 #endif // GAME_PIECE_DATA_H

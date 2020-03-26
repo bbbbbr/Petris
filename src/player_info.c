@@ -23,6 +23,10 @@ extern UINT8 tick_frame_speed;
 
 void new_piece_count_increment(void) {
     player_new_piece_count++;
+
+    if ((player_new_piece_count & PIECE_SPECIAL_THRESHOLD_LIGHTENING) == PIECE_SPECIAL_THRESHOLD_LIGHTENING)
+        game_piece_next_set(GP_SPECIAL_LIGHTENING);
+
 }
 
 

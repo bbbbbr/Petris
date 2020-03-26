@@ -112,6 +112,7 @@ void board_reset(void) {
 }
 
 
+// TODO : remove debugging function
 void board_debug_show_connect_entire_board(void) {
 
     INT8 x, y;
@@ -170,14 +171,26 @@ void board_clear_tile_xy(INT8 x, INT8 y) {
 
 
 
+
+
+
 void board_set_tile_xy(INT8 x, INT8 y, UINT8 piece, UINT8 attrib, UINT8 connect) {
 
     UINT8 tile_index;
 
+    // TODO: move this into a function if it grows board_set_special_xy(INT8 x, INT8 y, UINT8 piece, UINT8 attrib, UINT8 connect)
     if (piece & GP_SPECIAL_MASK) {
 
-        if (piece == GP_SPECIAL_BOMB) {
-            board_handle_special_bomb(x,y);
+        switch (piece) {
+            case GP_SPECIAL_BOMB:
+                board_handle_special_bomb(x,y);
+                break;
+
+            case GP_SPECIAL_LIGHTENING:
+                board_check_completed_pet_xy(x,y, piece,
+                                             GP_CONNECT_ALL_WAYS_BITS,
+                                             BRD_CHECK_FLAGS_IGNORE_PET_TYPE);
+                break;
         }
 
     } else {
@@ -196,7 +209,7 @@ void board_set_tile_xy(INT8 x, INT8 y, UINT8 piece, UINT8 attrib, UINT8 connect)
 
         board_draw_tile_xy(x, y, tile_index);
 
-        board_check_completed_pet_xy(x, y, piece, connect); // TODO: use result
+        board_check_completed_pet_xy(x, y, piece, connect, BRD_CHECK_FLAGS_NONE); // TODO: use result
     }
 }
 
@@ -226,7 +239,7 @@ void board_fill_random(void) {
         }
     }
 
-  board_redraw_all();
+    board_redraw_all();
 }
 
 
@@ -251,7 +264,7 @@ UINT8 board_piece_get_xy(INT8 x, INT8 y, UINT8 * p_piece, UINT8 * p_connect) {
 }
 
 
-UINT8 board_check_connected_xy(INT8 x, INT8 y, UINT8 piece, UINT8 * p_this_connect) {
+UINT8 board_check_connected_xy(INT8 x, INT8 y, UINT8 piece, UINT8 * p_this_connect, UINT8 flags) {
 
     UINT8 adj_piece, adj_connect;
 
@@ -264,7 +277,8 @@ UINT8 board_check_connected_xy(INT8 x, INT8 y, UINT8 piece, UINT8 * p_this_conne
         // Check connection between pieces
         if (GP_CONNECT_MATCHING_LUT[(*p_this_connect)] & adj_connect) {
             // Make sure the pet type matches
-            if ((piece & GP_PET_MASK) == (adj_piece & GP_PET_MASK)) {
+            if ( ((piece & GP_PET_MASK) == (adj_piece & GP_PET_MASK)) ||
+                 (flags & BRD_CHECK_FLAGS_IGNORE_PET_TYPE)) {
                 // Conneection successful
 
                 // Find and return next connect direction on this adjacent piece
@@ -279,11 +293,13 @@ UINT8 board_check_connected_xy(INT8 x, INT8 y, UINT8 piece, UINT8 * p_this_conne
 }
 
 
-void board_handle_pet_completed() {
+void board_handle_pet_completed(UINT8 flags) {
 
     UINT8 c = 0;
 
-    score_update((UINT16)board_tile_clear_count);
+    //  Player gets no credit when special piece is used
+    if (!(flags & BRD_CHECK_FLAGS_IGNORE_PET_TYPE))
+        score_update((UINT16)board_tile_clear_count);
 
     while (c < board_tile_clear_count) {
         // TODO: OPTIMIZE: smaller arrays could be used. or pre-calc BG tile location)
@@ -291,7 +307,10 @@ void board_handle_pet_completed() {
 
         // Play special sound (per tile) when more than N tiles have been cleared for a pet
         // TODO: or just play a single special sound when crossing the threshold instead?
-        if (c >= BRD_TILE_COUNT_BONUS_SOUND_THRESHOLD)
+        // TODO: suppress bonus threshold on special pieces? if (!(flags & BRD_CHECK_FLAGS_IGNORE_PET_TYPE))
+        if (flags & BRD_CHECK_FLAGS_IGNORE_PET_TYPE)
+            PlayFx(CHANNEL_1, 30, 0x1C, 0x81, 0x24, 0x73, 0x86); // Special piece no points sound (bomb) // PlayFx(CHANNEL_1, 30, 0x45, 0xC3, 0x53, 0x00, 0x87);
+        else if (c >= BRD_TILE_COUNT_BONUS_SOUND_THRESHOLD)
             PlayFx(CHANNEL_1, 30, 0x76, 0xC3, 0x53, 0x80, 0x87); // Bonus sound
         else
             PlayFx(CHANNEL_1, 30, 0x76, 0xC3, 0x53, 0x40, 0x87); // Normal sound
@@ -317,9 +336,11 @@ void board_handle_pet_completed() {
 
 // NOTE: no bounds checking, assumes incoming X,Y are valid board positions
 //
-// TODO: add mode (CHECK vs REMOVE TILES)
+// TODO: add mode? (CHECK vs REMOVE TILES)
 //
-UINT8 board_check_completed_pet_xy(INT8 start_x, INT8 start_y, UINT8 piece, UINT8 connect) {
+// NOTE: Assumes that incompatible special pieces (Bomb/etc) are not passed in
+//
+UINT8 board_check_completed_pet_xy(INT8 start_x, INT8 start_y, UINT8 piece, UINT8 connect, UINT8 flags) {
 
     UINT8 piece_count, headtail_count;
      INT8 next_x, next_y;
@@ -352,7 +373,8 @@ UINT8 board_check_completed_pet_xy(INT8 start_x, INT8 start_y, UINT8 piece, UINT
              source_cur_dir <<= 1) {
 
             // Stop searching if a pet has been completed
-            if (headtail_count >= 2)
+            if ( (headtail_count >= 2) &&
+                 !(flags & BRD_CHECK_FLAGS_IGNORE_PET_TYPE))
                 break;
 
             // If there is a connection in this direction
@@ -365,7 +387,7 @@ UINT8 board_check_completed_pet_xy(INT8 start_x, INT8 start_y, UINT8 piece, UINT
                 this_connect = source_cur_dir;
 
                 // The original piece gets used in this loop
-                while (board_check_connected_xy(next_x, next_y, piece, &this_connect)) {
+                while (board_check_connected_xy(next_x, next_y, piece, &this_connect, flags)) {
 
                     // Cache the tile location for clearing later if this pet is completed
                     board_tile_clear_cache_x[board_tile_clear_count] = next_x; // board_tile_clear_cache[board_tile_clear_count] = next_x + (next_y * BRD_WIDTH);
@@ -403,9 +425,10 @@ UINT8 board_check_completed_pet_xy(INT8 start_x, INT8 start_y, UINT8 piece, UINT
         } // end: for (c=GP_CONNECT_MIN_BITS;
 
         // Check if a completed pet was found
-        if ((headtail_count >= 2) && (piece_count >= 2)) {
+        if ( ((headtail_count >= 2) && (piece_count >= 2)) ||
+             (flags & BRD_CHECK_FLAGS_IGNORE_PET_TYPE)) {
 
-            board_handle_pet_completed();
+            board_handle_pet_completed(flags);
             return (TRUE);
         }
 
