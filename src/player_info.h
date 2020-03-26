@@ -30,19 +30,19 @@
 #define PLAYER_LEVEL_RESET    1
 #define PLAYER_NUMTILES_RESET 0
 #define PLAYER_NUMPETS_RESET  0
+#define PLAYER_NEW_PIECE_COUNT_RESET 0
 
 #define PLAYER_TILES_TILL_NEXT_LEVEL  20
 
 
 void score_update(UINT16 num_tiles);
-void level_increment(void);
+void score_reset(void);
 
+void level_increment(void);
+void level_reset(void);
 void level_show(void);
 
-void score_reset(void);
-void level_reset(void);
-
-
+void player_info_newgame_reset(void);
 
 #endif // PLAYER_INFO_H
 

@@ -13,9 +13,10 @@
 #include "game_board_special_pieces.h"
 
 UINT16 player_score;
-UINT16 player_numtiles;
+UINT16 player_numtiles; // UINT24?
 UINT16 player_numpets;
 UINT16 player_level;
+UINT16 player_new_piece_count;
 
 
 extern UINT8 tick_frame_speed;
@@ -81,7 +82,12 @@ void score_reset(void) {
 
 void level_reset(void) {
 
-    // TODO: move to level_init() ?
+    player_numpets  = PLAYER_NUMPETS_RESET;
+    player_numtiles = PLAYER_NUMTILES_RESET;
+    level_show();   // TODO: move this out of here?
+}
+
+void player_info_newgame_reset(void) {
     PRINT(DISPLAY_NEXT_PIECE_TEXT_X,    DISPLAY_NEXT_PIECE_TEXT_Y - 1,    "NEXT:", 0);
 
     PRINT(DISPLAY_LEVEL_X,    DISPLAY_LEVEL_Y - 1,    "LEVEL", 0);
@@ -90,8 +96,8 @@ void level_reset(void) {
     PRINT(DISPLAY_NUMTILES_X, DISPLAY_NUMTILES_Y - 1, "TILES", 0);
     PRINT(DISPLAY_NUMPETS_X,  DISPLAY_NUMPETS_Y - 1,  "PETS", 0);
 
-    player_numpets  = PLAYER_NUMPETS_RESET;
-    player_numtiles = PLAYER_NUMTILES_RESET;
     player_level    = PLAYER_LEVEL_RESET;
-    level_show();   // TODO: move this out of here?
+    player_new_piece_count = PLAYER_NEW_PIECE_COUNT_RESET;
+    score_reset();
+    level_reset();
 }

@@ -82,8 +82,7 @@ void gameplay_init(void) {
     gameplay_piece_drop_requested = FALSE;
     tick_frame_count = PLAYER_SPEED_TICK_COUNT__RESET;
 
-    score_reset();
-    level_reset();
+    player_info_newgame_reset();
 }
 
 
