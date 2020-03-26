@@ -81,19 +81,6 @@ extern const  INT8 GP_CONNECT_NEXT_Y_LUT[];
 
 #define GP_CONNECT_RESET  0x00U
 
-// #define GP_CONNECT_NONE   0
-// #define GP_CONNECT_LEFT   1
-// #define GP_CONNECT_RIGHT  2
-// #define GP_CONNECT_UP     3
-// #define GP_CONNECT_DOWN   4
-// #define GP_CONNECT_MIN    GP_CONNECT_LEFT
-// #define GP_CONNECT_MAX    GP_CONNECT_DOWN
-
-// #define GP_CONNECT_NONE_BITS   0x00U
-// #define GP_CONNECT_LEFT_BITS   0x01U
-// #define GP_CONNECT_RIGHT_BITS  0x02U
-// #define GP_CONNECT_UP_BITS     0x04U
-// #define GP_CONNECT_DOWN_BITS   0x08U
 #define GP_CONNECT_NONE_BITS   0x00U
 #define GP_CONNECT_LEFT_BITS   0x01U
 #define GP_CONNECT_UP_BITS     0x02U
