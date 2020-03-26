@@ -31,7 +31,7 @@
 #define PLAYER_NUMTILES_RESET 0
 #define PLAYER_NUMPETS_RESET  0
 
-#define PLAYER_TILES_TILL_NEXT_LEVEL  2
+#define PLAYER_TILES_TILL_NEXT_LEVEL  20
 
 
 void score_update(UINT16 num_tiles);

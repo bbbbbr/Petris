@@ -8,6 +8,9 @@
 #include "gfx.h"
 #include "gfx_print.h"
 #include "player_info.h"
+#include "game_piece.h"
+#include "game_piece_data.h"
+#include "game_board_special_pieces.h"
 
 UINT16 player_score;
 UINT16 player_numtiles;
@@ -19,6 +22,9 @@ extern UINT8 tick_frame_speed;
 
 
 void score_update(UINT16 num_tiles) {
+
+    if (num_tiles >= PIECE_SPECIAL_THRESHOLD_BOMB)
+        game_piece_next_set(GP_SPECIAL_BOMB);
 
     // Increase number of pets if this is called with sufficient tiles
     if (num_tiles > 1)

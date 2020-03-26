@@ -7,6 +7,7 @@
 #include "common.h"
 
 #include "game_board.h"
+#include "game_board_special_pieces.h"
 #include "game_piece_data.h"
 #include "gfx.h"
 #include "sound.h"
@@ -144,20 +145,27 @@ UINT8 board_check_open_xy(INT8 x, INT8 y) {
 }
 
 
+// TODO: animation?
 void board_clear_tile_xy(INT8 x, INT8 y) {
 
     UINT8 tile_index;
 
-    tile_index = x + (y * BRD_WIDTH);
-
     // TODO: Bounds checking for board here
-    board_pieces[tile_index] = GP_EMPTY + TILES_PET_START;
-    // Set palette based on pet type (CGB Pal bits are 0x07)
-    board_attrib[tile_index] = GP_PAL_EMPTY;
-    // Update connection setting
-    board_connect[tile_index] = GP_CONNECT_NONE_BITS;
+    if ((x >= BRD_MIN_X) &&
+        (x <= BRD_MAX_X) &&
+        (y >= BRD_MIN_Y) &&
+        (y <= BRD_MAX_Y))
+    {
+        tile_index = x + (y * BRD_WIDTH);
 
-    board_draw_tile_xy(x, y, tile_index);
+        board_pieces[tile_index] = GP_EMPTY + TILES_PET_START;
+        // Set palette based on pet type (CGB Pal bits are 0x07)
+        board_attrib[tile_index] = GP_PAL_EMPTY;
+        // Update connection setting
+        board_connect[tile_index] = GP_CONNECT_NONE_BITS;
+
+        board_draw_tile_xy(x, y, tile_index);
+    }
 }
 
 
@@ -166,25 +174,30 @@ void board_set_tile_xy(INT8 x, INT8 y, UINT8 piece, UINT8 attrib, UINT8 connect)
 
     UINT8 tile_index;
 
-    tile_index = x + (y * BRD_WIDTH);
+    if (piece & GP_SPECIAL_MASK) {
 
-    // Add in offset to start of BG tile piece data
-    piece += TILES_PET_START;
+        if (piece == GP_SPECIAL_BOMB) {
+            board_handle_special_bomb(x,y);
+        }
 
-    // TODO: Bounds checking for board here
-    board_pieces[tile_index] = piece;
-    // Set palette based on pet type (CGB Pal bits are 0x07)
-    board_attrib[tile_index] = attrib;
-    // Update connection setting
-    board_connect[tile_index] = connect;
+    } else {
 
-    //    board_connect_update_xy(x, y, piece, connect); // TODO REMOVE
-    board_draw_tile_xy(x, y, tile_index);
+        tile_index = x + (y * BRD_WIDTH);
 
-    board_check_completed_pet_xy(x, y, piece, connect); // TODO: use result
-    // if (board_check_completed_pet_xy(x, y, piece, connect)) {
+        // Add in offset to start of BG tile piece data
+        piece += TILES_PET_START;
 
-    // }
+        // TODO: Bounds checking for board here
+        board_pieces[tile_index] = piece;
+        // Set palette based on pet type (CGB Pal bits are 0x07)
+        board_attrib[tile_index] = attrib;
+        // Update connection setting
+        board_connect[tile_index] = connect;
+
+        board_draw_tile_xy(x, y, tile_index);
+
+        board_check_completed_pet_xy(x, y, piece, connect); // TODO: use result
+    }
 }
 
 
@@ -283,6 +296,7 @@ void board_handle_pet_completed() {
         else
             PlayFx(CHANNEL_1, 30, 0x76, 0xC3, 0x53, 0x40, 0x87); // Normal sound
 
+        // TODO: move the effects into board_clear_tile_xy?
 
         board_clear_tile_xy(board_tile_clear_cache_x[c],
                             board_tile_clear_cache_y[c]);
@@ -312,7 +326,9 @@ UINT8 board_check_completed_pet_xy(INT8 start_x, INT8 start_y, UINT8 piece, UINT
     UINT8 this_connect;
     UINT8 source_cur_dir;
 
-    if (piece != GP_EMPTY) {
+    // if (piece != GP_EMPTY) { // TODO: remove?
+    // Only check connections if it's a pet tile
+//    if (!(piece & GP_EMPTY_MASK)) {  // TODO: can this be removed? (since calling function handles the test... usually)
 
         // Reset tile clear cache (add one entry, current piece)
         board_tile_clear_cache_x[0] = start_x; // = start_x + (start_y * BRD_WIDTH);
@@ -393,7 +409,7 @@ UINT8 board_check_completed_pet_xy(INT8 start_x, INT8 start_y, UINT8 piece, UINT
             return (TRUE);
         }
 
-    } // end: if (piece != GP_EMPTY)
+//    } // end: if (piece != GP_EMPTY)
     return (FALSE);
 }
 

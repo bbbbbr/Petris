@@ -6,15 +6,17 @@
 
 
 #define GP_EMPTY_MASK 0xE0U // .5+
+#define GP_SPECIAL_MASK 0x20U // .5+
 #define GP_ROT_MASK   0x10U // .4
 #define GP_PET_MASK   0x0CU // .3-2
 #define GP_SEG_MASK   0x03U // .1-0
 
-#define GP_TILE_MASK  0x1FU
+#define GP_PET_BITS_MASK  0x1FU
 
-#define GP_EMPTY      0x20U
-#define GP_SPEC_BOMB  0x21U
-#define GP_SPEC_LITEN 0x22U
+// Extra tiles above pet tiles
+#define GP_EMPTY          0x20U // TODO : Tiles, move empty to be after specials?
+#define GP_SPECIAL_BOMB   0x21U
+#define GP_SPECIAL_LIGHTN 0x22U
 
 #define GP_PET_UPSHIFT  2
 #define GP_PET_DOG      0

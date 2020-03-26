@@ -123,6 +123,7 @@ UINT8 player_piece_move(INT8 dir_x, INT8 dir_y) {
     INT8 new_x = (player_x + dir_x);
     INT8 new_y = (player_y + dir_y);
 
+    // TODO: optimize?
     if ((new_x >= BRD_MIN_X) &&
         (new_x <= BRD_MAX_X) &&
         (new_y <= BRD_MAX_Y) &&
@@ -157,6 +158,11 @@ UINT8 player_piece_move(INT8 dir_x, INT8 dir_y) {
 // void player_piece_update_gfx(UINT8 sprite_id, UINT8 t_player_piece, UINT8 t_player_rotate) {
 void player_piece_update_gfx() {
 
+    if (player_piece & GP_SPECIAL_MASK) {
+        // player_piece = player_piece;
+        player_attrib = GP_PAL_DOG; // TODO : Assign a "special" pal?
+
+    } else {
         // Update player rotation (clear rotate bits and then set)
         player_piece = ((player_piece & ~GP_ROT_MASK)
                         | GP_ROT_LUT_TILE[player_rotate]);
@@ -172,7 +178,9 @@ void player_piece_update_gfx() {
         if (((player_piece & GP_SEG_MASK) ==  GP_SEG_TURN_BITS) &&
              (player_rotate & GP_ROTATE_SEG_TURN_MIRROR_BITS))
             player_attrib |= (GP_MIRROR_X | GP_MIRROR_Y);
+    }
 
-        set_sprite_tile(SPR_PLAYER, (player_piece & GP_TILE_MASK));
-        set_sprite_prop(SPR_PLAYER, player_attrib);
+    // set_sprite_tile(SPR_PLAYER, (player_piece & GP_PET_BITS_MASK));
+    set_sprite_tile(SPR_PLAYER, player_piece);
+    set_sprite_prop(SPR_PLAYER, player_attrib);
 }

@@ -8,29 +8,18 @@
 #include "game_piece_data.h"
 
 UINT8 game_piece_next;
-UINT8 game_piece_next_override;
 
 
 
 void game_piece_next_generate(void) {
 
-    // Check to see if there is a special override for the next game piece
-    if (game_piece_next_override != GAME_PIECE_NEXT_OVERRIDE_NONE) {
 
-        game_piece_next = game_piece_next_override;
-
-    } else {
-
-        // TODO: IMPROVE NEW PIECE SELECTION
-        // For now, choose single random pet tile (using div register)
-        game_piece_next = ((UINT8)DIV_REG & 0x1F);
-        // game_piece = ((GP_PET_DOG  << GP_PET_UPSHIFT) |
-        //                 (GP_SEG_TAIL << GP_SEG_UPSHIFT) |
-        //                  GP_ROT_HORZ);// + TILES_PET_START;
-    }
-
-    // Clear override
-    game_piece_next_override = GAME_PIECE_NEXT_OVERRIDE_NONE;
+    // TODO: IMPROVE NEW PIECE SELECTION
+    // For now, choose single random pet tile (using div register)
+    game_piece_next = ((UINT8)DIV_REG & 0x1F);
+    // game_piece = ((GP_PET_DOG  << GP_PET_UPSHIFT) |
+    //                 (GP_SEG_TAIL << GP_SEG_UPSHIFT) |
+    //                  GP_ROT_HORZ);// + TILES_PET_START;
 }
 
 
@@ -42,7 +31,12 @@ UINT8 game_piece_next_get(void) {
 
 
 void game_piece_next_set(UINT8 override_piece) {
-    game_piece_next_override = override_piece;
+
+    // Override the next piece
+    game_piece_next = override_piece;
+
+    // Update the next preview display
+    game_piece_next_show(TRUE);
 }
 
 
@@ -69,9 +63,7 @@ void game_piece_next_show(UINT8 do_show) {
                         ((game_piece_next & GP_PET_MASK) >> GP_PET_UPSHIFT) // Palette
                         | GP_ROT_LUT_ATTR[GP_ROTATE_DEFAULT]);               // Rotation sprite mirror bits
 
-
-
-
+        // Make sure the sprite is visible (this could probs be optimized out with better planning / logic)
         move_sprite(SPR_PLAYER_NEXT,
                     GAME_PIECE_NEXT_PREVIEW_X,
                     GAME_PIECE_NEXT_PREVIEW_Y);
