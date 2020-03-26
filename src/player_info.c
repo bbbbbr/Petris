@@ -4,6 +4,7 @@
 #include <gb/cgb.h> // Include cgb functions
 #include <stdlib.h>
 
+#include "audio_common.h"
 #include "gfx.h"
 #include "gfx_print.h"
 #include "player_info.h"
@@ -45,6 +46,7 @@ void score_update(UINT16 num_tiles) {
 
 void level_increment(void) {
 
+//     PLAY_SOUND_LEVEL_UP; // TODO: this needs a delay after last piece clear sound
     player_level++;
     // TODO: reset or NOT reset number of pets/tiles completed per level? May depend on play mode
     // player_numpets  = PLAYER_NUMPETS_RESET;

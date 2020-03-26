@@ -2,6 +2,7 @@
 #include <gb/cgb.h> // Include cgb functions
 
 #include "common.h"
+#include "audio_common.h"
 
 // #include "game_board.h"
 // #include "game_board_gfx.h"
@@ -12,7 +13,6 @@
 #include "input.h"
 #include "gfx.h"
 #include "gfx_print.h"
-#include "sound.h"
 
 void init (void);
 void init_interrupts(void);
@@ -122,14 +122,14 @@ void main(void){
 
             case GAME_ENDED:
                 // TODO: add some animation / sounds for game ended
-                // gameplay_handle_game_ended();
+                gameplay_handle_gameover_screen();
+                PLAY_SOUND_GAME_OVER;
+
                 game_state = GAME_OVER_SCREEN;
                 break;
 
 
             case GAME_OVER_SCREEN:
-
-                gameplay_handle_gameover_screen();
 
                 if (KEY_TICKED(J_START)) {
                     gameplay_exit_cleanup();
