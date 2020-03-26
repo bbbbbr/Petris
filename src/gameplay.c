@@ -67,11 +67,9 @@ void gameplay_init(void) {
 
     // Hide the player piece and preview sprites initially
     // They will get displayed after PLAYER_NEWPIECE is handled
+    // which then calls player_piece_reload()
     player_piece_update_xy(PLAYER_PIECE_HIDE);
     game_piece_next_show(FALSE);
-
-    // Update the player piece to retrieve it and generate the next
-//    player_piece_reset();
 
 
     SHOW_SPRITES;
@@ -191,7 +189,7 @@ void gameplay_update(void) {
             break;
 
         case PLAYER_NEWPIECE:
-            player_piece_reset();
+            player_piece_reload();
 
             // require down key to be released before it can repeat again
             key_down_repeat_needs_release = TRUE;

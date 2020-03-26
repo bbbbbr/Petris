@@ -44,5 +44,7 @@ void level_show(void);
 
 void player_info_newgame_reset(void);
 
+void new_piece_count_increment(void);
+
 #endif // PLAYER_INFO_H
 

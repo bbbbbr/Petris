@@ -40,7 +40,7 @@ void player_piece_update_xy(UINT8 do_show) {
 
 
 
-void player_piece_reset(void) {
+void player_piece_reload(void) {
     // Locate new piece at default position
     // Top of board, in the middle, no rotation
     player_x      = BRD_NEWPIECE_X;
@@ -53,7 +53,13 @@ void player_piece_reset(void) {
     player_piece = game_piece_next_get();
 
     // Generate the next upcoming piece and display it
+    // TODO: to simplify, move this into game_piece_next_get()?
     game_piece_next_generate();
+
+    // Count the new piece
+    // --> this should be called after game_piece_next_generate()
+    // TODO: move this into game_piece_next_generate?
+    new_piece_count_increment();
 
     // Show a preview of the next piece, if applicable
     game_piece_next_show(TRUE);

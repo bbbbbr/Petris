@@ -13,13 +13,18 @@
 #include "game_board_special_pieces.h"
 
 UINT16 player_score;
-UINT16 player_numtiles; // UINT24?
+UINT16 player_numtiles; // UINT32?
 UINT16 player_numpets;
 UINT16 player_level;
 UINT16 player_new_piece_count;
 
 
 extern UINT8 tick_frame_speed;
+
+void new_piece_count_increment(void) {
+    player_new_piece_count++;
+}
+
 
 
 void score_update(UINT16 num_tiles) {
@@ -51,6 +56,14 @@ void score_update(UINT16 num_tiles) {
 }
 
 
+
+void score_reset(void) {
+    player_score = 0;
+    score_update(0); // TODO: move this out of here?
+}
+
+
+
 void level_increment(void) {
 
 //     PLAY_SOUND_LEVEL_UP; // TODO: this needs a delay after last piece clear sound
@@ -69,16 +82,13 @@ void level_increment(void) {
 }
 
 
+
 void level_show(void) {
 
     print_num_u16(DISPLAY_LEVEL_X, DISPLAY_LEVEL_Y, player_level);
 }
 
 
-void score_reset(void) {
-    player_score = 0;
-    score_update(0); // TODO: move this out of here?
-}
 
 void level_reset(void) {
 
@@ -86,6 +96,7 @@ void level_reset(void) {
     player_numtiles = PLAYER_NUMTILES_RESET;
     level_show();   // TODO: move this out of here?
 }
+
 
 void player_info_newgame_reset(void) {
     PRINT(DISPLAY_NEXT_PIECE_TEXT_X,    DISPLAY_NEXT_PIECE_TEXT_Y - 1,    "NEXT:", 0);
