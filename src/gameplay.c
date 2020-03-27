@@ -20,7 +20,7 @@
 
 
 UINT8 tick_frame_count;
-UINT8 tick_frame_speed = PLAYER_SPEED_TICK_COUNT__DEFAULT; // TODO : rename and move this
+UINT8 tick_frame_speed; // TODO : rename and move this
 
 
 #define KEY_REPEAT_START               0
@@ -74,6 +74,8 @@ void gameplay_init(void) {
 
     SHOW_SPRITES;
 
+    // TODO: move into player_info_init/reset
+    tick_frame_speed = PLAYER_SPEED_TICK_COUNT__DEFAULT;
     piece_state = PLAYER_START;
 
     key_down_repeat_needs_release = FALSE;
