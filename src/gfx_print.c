@@ -16,14 +16,30 @@
 
 #define PRINT_MAX_DIGITS  5
 #define PRINT_MAX_NUM     99999 // ((10 ^ PRINT_MAX_DIGITS) - 1)
+#define PRINT_ATTRIB_PAL_MASK    0x03
+#define PRINT_ATTRIB_PAL_DEFAULT 0x04
 UINT8 digits[PRINT_MAX_DIGITS];
-const UINT8 print_tile_cleared_attribs = 0x00;
+UINT8 digits_attribs[PRINT_MAX_DIGITS] = {PRINT_ATTRIB_PAL_DEFAULT,
+                                          PRINT_ATTRIB_PAL_DEFAULT,
+                                          PRINT_ATTRIB_PAL_DEFAULT,
+                                          PRINT_ATTRIB_PAL_DEFAULT,
+                                          PRINT_ATTRIB_PAL_DEFAULT};
+UINT8 print_tile_cleared_attribs = PRINT_ATTRIB_PAL_DEFAULT;
 
 UINT8 print_x  = 0;
 UINT8 print_y  = 0;
 UINT8 print_target = PRINT_BKG;
 
 
+
+// Set font to use for printing
+void print_font_palette_set(UINT8 pal_num) {
+    print_tile_cleared_attribs = pal_num & PRINT_ATTRIB_PAL_MASK;
+}
+
+
+
+// TODO: accept max_print_digits as param
 // Render a font digit
 void print_num_u16(UINT8 x, UINT8 y, UINT16 num) {
 
@@ -54,10 +70,10 @@ void print_num_u16(UINT8 x, UINT8 y, UINT16 num) {
         // Draw the digits on the background
 
         // Update BG Tilemap from Game Board
-        // VBK_REG = 1; // Select BG tile attribute map
-        // set_bkg_tiles(x, y,
-        //               (PRINT_MAX_DIGITS - index), 1, // 1 tile high
-        //               &digits[index]); // Start at first digit and go to end of array
+        VBK_REG = 1; // Select BG tile attribute map
+        set_bkg_tiles(x, y,
+                       (PRINT_MAX_DIGITS - index), 1, // 1 tile high
+                       &digits_attribs[index]); // Start at first digit and go to end of array
 
         // Update BG Tilemap from Game Board
         VBK_REG = 0; // Re-Select regular BG tile map
@@ -66,6 +82,7 @@ void print_num_u16(UINT8 x, UINT8 y, UINT16 num) {
                       &digits[index]); // Start at first digit and go to end of array
     }
 }
+
 
 
 // Copied from ZGB Print

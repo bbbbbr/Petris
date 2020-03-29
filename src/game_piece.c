@@ -6,6 +6,7 @@
 
 #include "game_piece.h"
 #include "game_piece_data.h"
+#include "player_info.h"
 
 UINT8 game_piece_next;
 

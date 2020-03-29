@@ -24,16 +24,18 @@ UINT8 board_tile_clear_count;
 // 10 tiles wide for clearing the game board one row at a time
 // This MUST match game board width
 // TODO: move this to game_board_gfx.h
-const UINT8 board_blank_row[] = {GP_EMPTY + TILES_PET_START,
-                                 GP_EMPTY + TILES_PET_START,
-                                 GP_EMPTY + TILES_PET_START,
-                                 GP_EMPTY + TILES_PET_START,
-                                 GP_EMPTY + TILES_PET_START,
-                                 GP_EMPTY + TILES_PET_START,
-                                 GP_EMPTY + TILES_PET_START,
-                                 GP_EMPTY + TILES_PET_START,
-                                 GP_EMPTY + TILES_PET_START,
-                                 GP_EMPTY + TILES_PET_START};
+const UINT8 board_blank_row[] = {TILE_ID_BLANK_BG,
+                                 TILE_ID_BLANK_BG,
+                                 TILE_ID_BLANK_BG,
+                                 TILE_ID_BLANK_BG,
+                                 TILE_ID_BLANK_BG,
+                                 TILE_ID_BLANK_BG,
+                                 TILE_ID_BLANK_BG,
+                                 TILE_ID_BLANK_BG,
+                                 TILE_ID_BLANK_BG,
+                                 TILE_ID_BLANK_BG};
+
+const UINT8 board_blank_row_pal[] = {0x04,0x04,0x04,0x04,0x04,0x04,0x04,0x04,0x04,0x04};
 
 // Clears the game board
 //
@@ -41,6 +43,18 @@ const UINT8 board_blank_row[] = {GP_EMPTY + TILES_PET_START,
 void board_hide_all(void) {
 
     UINT8 y;
+    // Update BG Attrons from Game Board
+    VBK_REG = 1; // Select regular BG tile map
+
+    // TODO: this could be more efficient
+    // Only sets tile IDs, leaves attrib map in place
+    for (y = BRD_ST_Y; y < (BRD_ST_Y + BRD_HEIGHT); y++) {
+        set_bkg_tiles(BRD_ST_X, y,
+                      sizeof(board_blank_row_pal), 1,
+                      &board_blank_row_pal[0]);
+
+    }
+
 
     // Update BG Tilemap from Game Board
     VBK_REG = 0; // Select regular BG tile map

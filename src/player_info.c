@@ -52,8 +52,8 @@ void score_update(UINT16 num_tiles) {
     // Display the score
     print_num_u16(DISPLAY_SCORE_X, DISPLAY_SCORE_Y, player_score);
 
-    // Display number of pet segments completed
-    print_num_u16(DISPLAY_NUMTILES_X, DISPLAY_NUMTILES_Y, player_numtiles);
+    // // Display number of pet segments completed
+    // print_num_u16(DISPLAY_NUMTILES_X, DISPLAY_NUMTILES_Y, player_numtiles);
 
     // Display number of pets completed
     print_num_u16(DISPLAY_NUMPETS_X, DISPLAY_NUMPETS_Y, player_numpets);
@@ -106,10 +106,9 @@ void player_info_newgame_reset(void) {
     PRINT(DISPLAY_NEXT_PIECE_TEXT_X,    DISPLAY_NEXT_PIECE_TEXT_Y - 1,    "NEXT:", 0);
 
     PRINT(DISPLAY_LEVEL_X,    DISPLAY_LEVEL_Y - 1,    "LEVEL", 0);
-    PRINT(DISPLAY_LEVEL_X,    DISPLAY_LEVEL_Y - 1,    "LEVEL", 0);
     PRINT(DISPLAY_SCORE_X,    DISPLAY_SCORE_Y - 1,    "SCORE", 0);
-    PRINT(DISPLAY_NUMTILES_X, DISPLAY_NUMTILES_Y - 1, "TILES", 0);
     PRINT(DISPLAY_NUMPETS_X,  DISPLAY_NUMPETS_Y - 1,  "PETS", 0);
+//    PRINT(DISPLAY_NUMTILES_X, DISPLAY_NUMTILES_Y - 1, "TILES", 0);
 
     player_level    = PLAYER_LEVEL_RESET;
     player_new_piece_count = PLAYER_NEW_PIECE_COUNT_RESET;

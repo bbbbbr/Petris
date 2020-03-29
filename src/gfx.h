@@ -25,14 +25,16 @@
 #define SCREEN_MAX_Y 17
 
 
-#define TILES_BG_START          0
-#define TILE_COUNT_BG          16
+//#define TILES_BG_START          0
+//#define TILE_COUNT_BG          16
+
 
 #define TILES_INTRO_START      0
-#define TILE_COUNT_INTRO        53
+#define TILE_COUNT_INTRO       68
+#define TILE_ID_BLANK_BG       3
 
 
-#define TILES_PET_START        64 // This requires ^2 alignment
+#define TILES_PET_START        96 // This requires ^2 alignment
 #define TILE_COUNT_PETS        32
 #define TILE_COUNT_PETBLANK     1
 #define TILE_COUNT_PETSPECIAL   2
@@ -48,7 +50,10 @@
     #define TILES_FONT_NUMS_START  (TILES_FONT_START  + 27)
     #define TILE_COUNT_FONT_NUMS   11 //Tiles in order: 0123456789<blank>
 
-extern const UWORD bgPalette[];
+extern const UWORD board_pets_palette[];
+extern const UWORD intro_screen_palette[];
+
+void print_font_palette_set(UINT8);
 
 #endif // GFX_H
 

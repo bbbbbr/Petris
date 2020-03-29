@@ -1,6 +1,6 @@
 /*
 
- INTRO_SCREEN_MAP.H
+ GAME_BOARD_MAP.H
 
  Map Include File.
 
@@ -18,12 +18,12 @@
 
 */
 
-#define intro_screen_mapWidth 20
-#define intro_screen_mapHeight 18
-#define intro_screen_mapBank 0
+#define game_board_mapWidth 20
+#define game_board_mapHeight 18
+#define game_board_mapBank 0
 
-#define intro_screen_map intro_screen_mapPLN0
-extern const unsigned char intro_screen_mapPLN0[];
-extern const unsigned char intro_screen_mapPLN1[];
+#define game_board_map game_board_mapPLN0
+extern const unsigned char game_board_mapPLN0[];
+extern const unsigned char game_board_mapPLN1[];
 
-/* End of INTRO_SCREEN_MAP.H */
+/* End of GAME_BOARD_MAP.H */

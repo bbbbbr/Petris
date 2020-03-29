@@ -10,7 +10,7 @@
   Compression          : None.
   Counter              : None.
   Tile size            : 8 x 8
-  Tiles                : 0 to 52
+  Tiles                : 0 to 67
 
   Palette colors       : Included.
   SGB Palette          : None.
@@ -75,29 +75,29 @@
 #define intro_screen_tilesCGBPal3c3 3171
 
 /* Gameboy Color palette 4 */
-#define intro_screen_tilesCGBPal4c0 26425
-#define intro_screen_tilesCGBPal4c1 21140
-#define intro_screen_tilesCGBPal4c2 10570
-#define intro_screen_tilesCGBPal4c3 0
+#define intro_screen_tilesCGBPal4c0 30614
+#define intro_screen_tilesCGBPal4c1 30578
+#define intro_screen_tilesCGBPal4c2 29520
+#define intro_screen_tilesCGBPal4c3 25224
 
 /* Gameboy Color palette 5 */
-#define intro_screen_tilesCGBPal5c0 24574
-#define intro_screen_tilesCGBPal5c1 19288
-#define intro_screen_tilesCGBPal5c2 7858
-#define intro_screen_tilesCGBPal5c3 0
+#define intro_screen_tilesCGBPal5c0 16233
+#define intro_screen_tilesCGBPal5c1 15112
+#define intro_screen_tilesCGBPal5c2 12935
+#define intro_screen_tilesCGBPal5c3 11814
 
 /* Gameboy Color palette 6 */
-#define intro_screen_tilesCGBPal6c0 26425
-#define intro_screen_tilesCGBPal6c1 21140
-#define intro_screen_tilesCGBPal6c2 10570
-#define intro_screen_tilesCGBPal6c3 0
+#define intro_screen_tilesCGBPal6c0 11892
+#define intro_screen_tilesCGBPal6c1 10769
+#define intro_screen_tilesCGBPal6c2 11814
+#define intro_screen_tilesCGBPal6c3 8622
 
 /* Gameboy Color palette 7 */
-#define intro_screen_tilesCGBPal7c0 6076
-#define intro_screen_tilesCGBPal7c1 8935
-#define intro_screen_tilesCGBPal7c2 6596
-#define intro_screen_tilesCGBPal7c3 9440
+#define intro_screen_tilesCGBPal7c0 30646
+#define intro_screen_tilesCGBPal7c1 26386
+#define intro_screen_tilesCGBPal7c2 22120
+#define intro_screen_tilesCGBPal7c3 0
 /* Start of tile array. */
-extern unsigned char intro_screen_tiles[];
+extern const unsigned char intro_screen_tiles[];
 
 /* End of INTRO_SCREEN_TILES.H */

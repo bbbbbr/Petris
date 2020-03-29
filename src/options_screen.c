@@ -132,7 +132,7 @@ void options_screen_sprites_init(void) {
 
     SPRITES_8x8;
 
-    set_sprite_palette(0, 8, bgPalette); // UBYTE first_palette, UBYTE nb_palettes, UWORD *rgb_data
+    set_sprite_palette(BG_PAL_0, 4, board_pets_palette); // UBYTE first_palette, UBYTE nb_palettes, UWORD *rgb_data
     set_sprite_data(0, TILE_COUNT_PETTOTAL, pet_tiles);
 
     set_sprite_tile(SPR_OPTIONS_CURSOR, PET_DOG_HEAD);
@@ -151,9 +151,10 @@ void options_screen_exit_cleanup(void) {
 
 void options_screen_init(void) {
 
-    set_bkg_palette(0, 8, bgPalette); // UBYTE first_palette, UBYTE nb_palettes, UWORD *rgb_data
+    // TODO: this all needs updaating for the new gfx
 
-//        set_bkg_data(TILES_OPTIONS_START,     TILE_COUNT_OPTIONS,     options_screen_tiles);
+    set_bkg_palette(BG_PAL_0, 4, board_pets_palette); // UBYTE first_palette, UBYTE nb_palettes, UWORD *rgb_data
+
     set_bkg_data(TILES_FONT_START,      TILE_COUNT_FONT,      font_tiles);
     set_bkg_data(TILES_PET_START,       TILE_COUNT_PETTOTAL,  pet_tiles);
 
