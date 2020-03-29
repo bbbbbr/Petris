@@ -86,8 +86,8 @@ void main(void){
                 intro_screen_handle();
                 // Done with intro screen, now start game
                 if (KEY_TICKED(J_START))
-                    game_state = GAME_READY_TO_START;
-                    // game_state = GAME_OPTIONS_INIT; // TODO : enable options
+                    //game_state = GAME_READY_TO_START;
+                    game_state = GAME_OPTIONS_INIT; // TODO : enable options
                 break;
 
 
