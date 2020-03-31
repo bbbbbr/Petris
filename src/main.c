@@ -111,13 +111,6 @@ void main(void){
                 // case GAME_START: // TODO: move to GAME_BOARD_INIT
                 gameplay_init();
 
-                // PRINT(BRD_ST_X + 2,
-                //       BRD_ST_Y + 5,
-                //       " GET\nREADY!",0);
-
-                // TODO: give the player time to get ready (maybe flash "READY")
-                delay(500);
-                // TODO: clear board after flasing ready
                 game_state = GAME_PLAYING;
                 break;
 

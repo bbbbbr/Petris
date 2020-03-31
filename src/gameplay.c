@@ -67,6 +67,9 @@ void gameplay_init(void) {
     // Mediocre-initialize the random number generator
     initarand(DIV_REG);
 
+    // Flash a get ready message to the player
+    gameplay_handle_get_ready();
+
     board_reset();
 
     // Generate the very first piece
@@ -92,6 +95,29 @@ void gameplay_init(void) {
     player_info_newgame_reset();
 }
 
+
+
+void gameplay_handle_get_ready(void) {
+
+    UINT8 c;
+
+    // Hide the game board and player piece
+    board_hide_all();
+
+    for (c = 0; c < GAMEPLAY_GET_READY_FLASHES; c++) {
+        PRINT(BRD_ST_X + 3,
+              BRD_ST_Y + 5,
+              "    \n      ",0);
+
+        delay(500);
+
+        PRINT(BRD_ST_X + 3,
+              BRD_ST_Y + 5,
+              " GET\nREADY!",0);
+
+        delay(500);
+    }
+}
 
 
 void gameplay_handle_pause(void) {

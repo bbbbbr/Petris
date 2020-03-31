@@ -8,7 +8,7 @@
    Section       :
    Bank          : 0
    Map size      : 20 x 18
-   Tile set      : intro_screen_2bit.gbm.tiles.gbr
+   Tile set      : intro_screen.gbm.tiles.gbr
    Plane count   : 2 planes (16 bits)
    Plane order   : Planes are continues
    Tile offset   : 0

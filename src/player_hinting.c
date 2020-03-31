@@ -141,7 +141,7 @@ void player_hinting_drop_update(void) {
 
     INT8 drop_hint_y;
 
-    drop_hint_y = board_find_lowest_open_in_column(player_x);
+    drop_hint_y = board_find_lowest_open_in_column(player_x, player_y);
 
     // Only update the hint if it's not overlapping with the player
     // otherwise, hide it
@@ -149,6 +149,9 @@ void player_hinting_drop_update(void) {
         move_sprite(SPR_DROP_HINT,
                     (player_x * BRD_UNIT_SIZE)    + BRD_PIECE_X_OFFSET,
                     (drop_hint_y * BRD_UNIT_SIZE) + BRD_PIECE_Y_OFFSET);
+        // Need to re-show the sprite, in case it got hidden when the player
+        // came close to a stack of pieces, but then moved to be over a gap again
+        player_hinting_drop_show(TRUE);
     } else {
         player_hinting_drop_show(FALSE);
     }

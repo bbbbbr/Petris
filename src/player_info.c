@@ -18,8 +18,10 @@ UINT16 player_numpets;
 UINT16 player_level;
 UINT16 player_new_piece_count;
 
-
 extern UINT8 tick_frame_speed;
+
+const UINT8 NEXT_PIECE_BG_TILE = TILE_ID_BOARD_NEXT_PIECE_PREVIEW_BG;
+const UINT8 NEXT_PIECE_BG_PAL  = BG_PAL_BOARD_NEXT_PIECE_PREVIEW;
 
 void new_piece_count_increment(void) {
     player_new_piece_count++;
@@ -109,6 +111,18 @@ void player_info_newgame_reset(void) {
     PRINT(DISPLAY_SCORE_X,    DISPLAY_SCORE_Y - 1,    "SCORE", 0);
     PRINT(DISPLAY_NUMPETS_X,  DISPLAY_NUMPETS_Y - 1,  "PETS", 0);
 //    PRINT(DISPLAY_NUMTILES_X, DISPLAY_NUMTILES_Y - 1, "TILES", 0);
+
+    // Set the preview tile area to a white background
+
+    VBK_REG = 1; // Select BG tile attribute map
+    set_bkg_tiles(GAME_PIECE_NEXT_PREVIEW_BG_X, GAME_PIECE_NEXT_PREVIEW_BG_Y,
+                  1, 1, &NEXT_PIECE_BG_PAL);
+
+    VBK_REG = 0; // Re-Select regular BG tile map
+    set_bkg_tiles(GAME_PIECE_NEXT_PREVIEW_BG_X, GAME_PIECE_NEXT_PREVIEW_BG_Y,
+                  1, 1, &NEXT_PIECE_BG_TILE);
+
+
 
     player_level    = PLAYER_LEVEL_RESET;
     player_new_piece_count = PLAYER_NEW_PIECE_COUNT_RESET;

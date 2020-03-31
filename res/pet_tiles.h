@@ -98,6 +98,6 @@
 #define pet_tilesCGBPal7c2 20083
 #define pet_tilesCGBPal7c3 0
 /* Start of tile array. */
-extern unsigned char pet_tiles[];
+extern const unsigned char pet_tiles[];
 
 /* End of PET_TILES.H */

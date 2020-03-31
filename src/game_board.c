@@ -24,16 +24,16 @@ UINT8 board_tile_clear_count;
 // 10 tiles wide for clearing the game board one row at a time
 // This MUST match game board width
 // TODO: move this to game_board_gfx.h
-const UINT8 board_blank_row[] = {TILE_ID_BLANK_BG,
-                                 TILE_ID_BLANK_BG,
-                                 TILE_ID_BLANK_BG,
-                                 TILE_ID_BLANK_BG,
-                                 TILE_ID_BLANK_BG,
-                                 TILE_ID_BLANK_BG,
-                                 TILE_ID_BLANK_BG,
-                                 TILE_ID_BLANK_BG,
-                                 TILE_ID_BLANK_BG,
-                                 TILE_ID_BLANK_BG};
+const UINT8 board_blank_row[] = {TILE_ID_BOARD_BLANK_BG,
+                                 TILE_ID_BOARD_BLANK_BG,
+                                 TILE_ID_BOARD_BLANK_BG,
+                                 TILE_ID_BOARD_BLANK_BG,
+                                 TILE_ID_BOARD_BLANK_BG,
+                                 TILE_ID_BOARD_BLANK_BG,
+                                 TILE_ID_BOARD_BLANK_BG,
+                                 TILE_ID_BOARD_BLANK_BG,
+                                 TILE_ID_BOARD_BLANK_BG,
+                                 TILE_ID_BOARD_BLANK_BG};
 
 const UINT8 board_blank_row_pal[] = {0x04,0x04,0x04,0x04,0x04,0x04,0x04,0x04,0x04,0x04};
 
@@ -127,20 +127,20 @@ void board_reset(void) {
 
 
 
-// Given X board coordinate, what is the lowest continuously open
-// coordinate from the top of the column.
+// Given x,y board coordinate, what is the lowest continuously open
+// coordinate below the piece?
 //
 // Used for drop-piece hinting
 //
 // TODO: Bounds checking for board here (could then remove from calling function)
-INT8 board_find_lowest_open_in_column(INT8 x) {
+INT8 board_find_lowest_open_in_column(INT8 x, INT8 y_st) {
 
     UINT8 offset; // 8 bits is ok sicne the board array is smaller than 255
     INT8 y;
 
-    // Start at the top of the board / board array
-    y = BRD_MIN_Y;
-    offset = x + (BRD_MIN_Y * BRD_WIDTH); // BRD_MIN_Y is usually zero, maybe the compiler optimizes this out
+    // Start at the Y location of the player piece in board array
+    y = y_st;
+    offset = x + (y_st * BRD_WIDTH);
 
     // Keep checking until either the bottom of the board is reached,
     // or an occupied (non-open) tile is found

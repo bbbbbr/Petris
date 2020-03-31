@@ -11,6 +11,7 @@
 #define BG_PAL_5    0x05
 #define BG_PAL_6    0x06
 #define BG_PAL_7    0x07
+#define BG_PAL_BOARD_NEXT_PIECE_PREVIEW BG_PAL_0
 
 #define BG_PRIORITY 0x80
 #define BG_FLIP_Y   0x40
@@ -31,7 +32,8 @@
 
 #define TILES_INTRO_START      0
 #define TILE_COUNT_INTRO       68
-#define TILE_ID_BLANK_BG       3
+#define TILE_ID_BOARD_BLANK_BG (TILES_INTRO_START + 3)
+#define TILE_ID_BOARD_NEXT_PIECE_PREVIEW_BG  (TILES_INTRO_START + 0)
 
 
 #define TILES_PET_START        96 // This requires ^2 alignment

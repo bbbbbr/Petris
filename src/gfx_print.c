@@ -88,6 +88,7 @@ void print_num_u16(UINT8 x, UINT8 y, UINT16 num) {
 // Copied from ZGB Print
 // Removed some code, removed some characters
 void print_text(const char* txt, unsigned char delay_time){
+
     UINT8 idx = 0;
     unsigned char c;
     unsigned char start_x;
@@ -109,11 +110,11 @@ void print_text(const char* txt, unsigned char delay_time){
             c = font_idx + 27 + *txt - '0';
         } */ else {
             switch(*txt) {
-                case  '!': c = TILES_FONT_CHARS_START + 37; break;
-                case '\'': c = TILES_FONT_CHARS_START + 38; break;
-                case  '(': c = TILES_FONT_CHARS_START + 39; break;
-                case  ')': c = TILES_FONT_CHARS_START + 40; break;
-                case  '-': c = TILES_FONT_CHARS_START + 41; break;
+                case  '!': c = TILES_FONT_START + 37; break;
+                case '\'': c = TILES_FONT_START + 38; break;
+                case  '(': c = TILES_FONT_START + 39; break;
+                case  ')': c = TILES_FONT_START + 40; break;
+                case  '-': c = TILES_FONT_START + 41; break;
                 case  '.': c = TILES_FONT_START + 42; break;
                 case  ':': c = TILES_FONT_START + 43; break;
                 case  '?': c = TILES_FONT_START + 44; break;
