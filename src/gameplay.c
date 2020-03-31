@@ -9,8 +9,11 @@
 #include "sound.h"
 #include "gfx_print.h"
 
-#include "player_info.h"
 #include "player_piece.h"
+#include "player_hinting.h"
+#include "player_info.h"
+#include "player_gfx.h"
+
 #include "game_piece.h"
 #include "game_piece_data.h"
 #include "game_board.h"
@@ -18,6 +21,7 @@
 
 #include "gameplay.h"
 
+extern UINT8 global_frame_count;
 
 UINT8 tick_frame_count;
 UINT8 tick_frame_speed; // TODO : rename and move this
@@ -37,9 +41,9 @@ UINT8 piece_state;
 void gameplay_handle_gameover_screen(void) {
 
     // TODO: add some animation?
-    PRINT(BRD_ST_X + 1,
+    PRINT(BRD_ST_X,
           BRD_ST_Y + 5,
-          "GAME OVER",0);
+          "GAME  OVER",0);
 }
 
 
@@ -47,8 +51,10 @@ void gameplay_handle_gameover_screen(void) {
 void gameplay_exit_cleanup(void) {
 
     HIDE_SPRITES;
+    // TODO: CLEANUP: hide all extra player sprites
     player_piece_update_xy(PLAYER_PIECE_HIDE);
     game_piece_next_show(FALSE);
+    player_hinting_special_show(FALSE);
 }
 
 
@@ -93,6 +99,7 @@ void gameplay_handle_pause(void) {
     board_hide_all();
     player_piece_update_xy(PLAYER_PIECE_HIDE);
     game_piece_next_show(FALSE);
+    player_hinting_special_show(FALSE);
 
     PRINT(BRD_ST_X + 2,
           BRD_ST_Y + 5,
@@ -154,6 +161,7 @@ void gameplay_handle_input(void) {
 
             if (key_repeat_count == KEY_REPEAT_START) {
                 gameplay_piece_drop_requested = TRUE;// Request moving a piece down earlier than tick time
+
             } else if (key_repeat_count >= KEY_REPEAT_DOWN_THRESHOLD) {
                 gameplay_piece_drop_requested = TRUE; // Request moving a piece down earlier than tick time
                 RESET_KEY_REPEAT(KEY_REPEAT_DOWN_RELOAD);
@@ -220,12 +228,15 @@ void gameplay_update(void) {
 void gameplay_gravity_update(void) {
 
     // Move the piece down automatically every N ticks
-    tick_frame_count++;
+    tick_frame_count++; // TODO: possible to merge in with global_frame_count?
 
     if ((tick_frame_count >= tick_frame_speed)
         || (gameplay_piece_drop_requested)) {
 
+        // Reset the counter
         tick_frame_count = PLAYER_SPEED_TICK_COUNT__RESET;
+        // Clear current request to move a piece down earlier than tick time
+        // (will get re-enabled next pass if player continues to hold drop key down)
         gameplay_piece_drop_requested = FALSE;
 
         // Try to move the piece down one tile
@@ -242,4 +253,8 @@ void gameplay_gravity_update(void) {
                 break;
         }
     }
+
+    // Update any flickering hint sprite elements
+    // NOTE: This should happen after player_piece_move()
+    player_hinting_flicker_update(global_frame_count);
 }

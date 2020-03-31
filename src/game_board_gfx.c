@@ -27,6 +27,7 @@ void board_gfx_init_sprites(void) {
 
     SPRITES_8x8;
     set_sprite_palette(BG_PAL_0, 4, board_pets_palette); // UBYTE first_palette, UBYTE nb_palettes, UWORD *rgb_data
+    set_sprite_palette(BG_PAL_4, 1, board_specials_palette); // UBYTE first_palette, UBYTE nb_palettes, UWORD *rgb_data
     set_sprite_data(0, TILE_COUNT_PETTOTAL, pet_tiles);
 }
 

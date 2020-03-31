@@ -10,6 +10,8 @@
 #include "intro_screen.h"
 #include "options_screen.h"
 
+#include "player_hinting.h"
+
 #include "input.h"
 #include "gfx.h"
 #include "gfx_print.h"
@@ -21,7 +23,7 @@ void init_sound(void);
 
 
 UINT8 vbl_count;
-// UINT8 frame_count; // TODO
+UINT8 global_frame_count; // TODO
 
 
 void vbl_update() {
@@ -55,7 +57,7 @@ void init (void) {
 
     game_state = GAME_INTRO_INIT;
 
-    //frame_count = 0;
+    global_frame_count = 0;
 }
 
 
@@ -68,7 +70,7 @@ void main(void){
         if(!vbl_count)
             wait_vbl_done();
         vbl_count = 0;
-        //frame_count++; // TODO: share this with game_player
+        global_frame_count++; // TODO: share this with game_player
 
         // Handle keyboard input
         UPDATE_KEYS();
@@ -109,8 +111,13 @@ void main(void){
                 // case GAME_START: // TODO: move to GAME_BOARD_INIT
                 gameplay_init();
 
+                // PRINT(BRD_ST_X + 2,
+                //       BRD_ST_Y + 5,
+                //       " GET\nREADY!",0);
+
                 // TODO: give the player time to get ready (maybe flash "READY")
                 delay(500);
+                // TODO: clear board after flasing ready
                 game_state = GAME_PLAYING;
                 break;
 

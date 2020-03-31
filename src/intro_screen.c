@@ -9,17 +9,17 @@
 #include "sound.h"
 #include "input.h"
 
+#include "player_gfx.h"
+
 #include "../res/intro_screen_tiles.h"
 #include "../res/intro_screen_map.h"
 #include "../res/pet_tiles.h"
 #include "../res/font_tiles.h"
 
 
-#define SPR_PLAYER 0 // Player is sprite "0" // TODO: fix/centralize this
-
 void intro_screen_init(void) {
 
-    move_sprite(SPR_PLAYER, 0,0); // Hide main sprite
+//    move_sprite(SPR_PLAYER, 0,0); // Hide main sprite // TODO: should be ok to remove this if other screens do proper cleanup on exit
 
     set_bkg_palette(BG_PAL_4, 4, intro_screen_palette); // UBYTE first_palette, UBYTE nb_palettes, UWORD *rgb_data
 

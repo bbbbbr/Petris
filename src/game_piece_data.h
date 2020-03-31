@@ -14,9 +14,13 @@
 #define GP_PET_BITS_MASK  0x1FU
 
 // Extra tiles above pet tiles
-#define GP_EMPTY          0x20U // TODO : Tiles, move empty to be after specials?
-#define GP_SPECIAL_BOMB   0x21U
-#define GP_SPECIAL_LIGHTENING 0x22U
+#define GP_EMPTY               0x20U // TODO : Tiles, move empty to be after specials?
+#define GP_SPECIAL_START       0x21U
+#define GP_SPECIAL_BOMB        0x21U
+#define GP_SPECIAL_LIGHTENING  0x22U
+#define GP_SPECIAL_BOMB_HINT   0x23U
+#define GP_SPECIAL_MERGE_HINT  0x24U
+
 
 #define GP_PET_UPSHIFT  2
 #define GP_PET_DOG      0
@@ -44,8 +48,8 @@
 #define GP_PAL_CAT      0x01U
 #define GP_PAL_FISH     0x02U
 #define GP_PAL_SNAKE    0x03U
-#define GP_PAL_EMPTY    0x01U // Use first pet palette
-#define GP_PAL_SPECIAL  0x01U // Use first pet palette
+#define GP_PAL_EMPTY    0x00U // Use first pet palette
+#define GP_PAL_SPECIAL  0x04U
 
 #define GP_ROTATE_0        0
 #define GP_ROTATE_90       1

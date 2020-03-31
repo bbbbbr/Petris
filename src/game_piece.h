@@ -3,9 +3,6 @@
 #ifndef GAME_PIECE_H
 #define GAME_PIECE_H
 
-
-#define SPR_PLAYER_NEXT      1 // Next piece preview is "1"
-
 #define GAME_PIECE_NEXT_OVERRIDE_NONE 0xFF
 
 void  game_piece_next_generate(void);

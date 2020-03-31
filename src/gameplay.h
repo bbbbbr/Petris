@@ -37,7 +37,6 @@ void gameplay_handle_input(void);
 void gameplay_update(void);
 void gameplay_gravity_update(void);
 
-#define SPR_PLAYER      0 // Player is sprite "0"
 
 
 #endif // GAME_PLAYER_H

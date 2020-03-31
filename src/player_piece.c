@@ -8,20 +8,24 @@
 #include "sound.h"
 #include "gfx_print.h"
 
-#include "player_info.h"
 #include "game_piece.h"
 #include "game_piece_data.h"
 #include "game_board.h"
-#include "gameplay.h"
 
 #include "player_piece.h"
+#include "player_hinting.h"
+#include "player_info.h"
+#include "player_gfx.h"
 
+#include "gameplay.h"
 
  INT8 player_x;
 UINT8 player_y;
  INT8 player_rotate; // Uses wraparound, so allow negative nums
 UINT8 player_piece;
 UINT8 player_attrib;
+
+
 
 
 void player_piece_update_xy(UINT8 do_show) {
@@ -66,6 +70,14 @@ void player_piece_reload(void) {
 
     player_piece_update_gfx();
     player_piece_update_xy(PLAYER_PIECE_SHOW);
+
+    if (player_piece & GP_SPECIAL_MASK) {
+        player_hinting_special_update_gfx();
+        player_hinting_special_show(TRUE);
+    } else
+        player_hinting_special_show(FALSE);
+
+
 }
 
 
@@ -147,6 +159,9 @@ UINT8 player_piece_move(INT8 dir_x, INT8 dir_y) {
 
         player_piece_update_xy(PLAYER_PIECE_SHOW);
 
+        if (player_piece & GP_SPECIAL_MASK)
+            player_hinting_special_move();
+
         return (MOVE_OK);
     }
 
@@ -166,7 +181,7 @@ void player_piece_update_gfx() {
 
     if (player_piece & GP_SPECIAL_MASK) {
         // player_piece = player_piece;
-        player_attrib = GP_PAL_DOG; // TODO : Assign a "special" pal?
+        player_attrib = GP_PAL_SPECIAL; // TODO : Assign a "special" pal?
 
     } else {
         // Update player rotation (clear rotate bits and then set)

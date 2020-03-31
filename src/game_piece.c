@@ -7,6 +7,7 @@
 #include "game_piece.h"
 #include "game_piece_data.h"
 #include "player_info.h"
+#include "player_gfx.h"
 
 UINT8 game_piece_next;
 
@@ -60,9 +61,15 @@ void game_piece_next_show(UINT8 do_show) {
 
         // Set palette based on pet type (CGB Pal bits are 0x07)
         // And mirror bits based on rotation setting from LUT
-        set_sprite_prop(SPR_PLAYER_NEXT,
-                        ((game_piece_next & GP_PET_MASK) >> GP_PET_UPSHIFT) // Palette
-                        | GP_ROT_LUT_ATTR[GP_ROTATE_DEFAULT]);               // Rotation sprite mirror bits
+        if (game_piece_next & GP_SPECIAL_MASK) {
+            // Special sprites have one palette and no rotation/etc
+            set_sprite_prop(SPR_PLAYER_NEXT, GP_PAL_SPECIAL);
+
+        } else {
+            set_sprite_prop(SPR_PLAYER_NEXT,
+                            ((game_piece_next & GP_PET_MASK) >> GP_PET_UPSHIFT) // Palette
+                            | GP_ROT_LUT_ATTR[GP_ROTATE_DEFAULT]);               // Rotation sprite mirror bits
+        }
 
         // Make sure the sprite is visible (this could probs be optimized out with better planning / logic)
         move_sprite(SPR_PLAYER_NEXT,

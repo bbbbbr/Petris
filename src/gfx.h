@@ -37,7 +37,7 @@
 #define TILES_PET_START        96 // This requires ^2 alignment
 #define TILE_COUNT_PETS        32
 #define TILE_COUNT_PETBLANK     1
-#define TILE_COUNT_PETSPECIAL   2
+#define TILE_COUNT_PETSPECIAL   4
 #define TILE_COUNT_PETTOTAL    (TILE_COUNT_PETS + TILE_COUNT_PETBLANK + TILE_COUNT_PETSPECIAL)
 
 // Font gets loaded at the end of tile RAM
@@ -51,6 +51,7 @@
     #define TILE_COUNT_FONT_NUMS   11 //Tiles in order: 0123456789<blank>
 
 extern const UWORD board_pets_palette[];
+extern const UWORD board_specials_palette[];
 extern const UWORD intro_screen_palette[];
 
 void print_font_palette_set(UINT8);

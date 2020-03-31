@@ -16,6 +16,11 @@ const UWORD board_pets_palette[] = {
     pet_tilesCGBPal3c0, pet_tilesCGBPal3c1, pet_tilesCGBPal3c2, pet_tilesCGBPal3c3, // Pet 3
 };
 
+const UWORD board_specials_palette[] = {
+    pet_tilesCGBPal4c0, pet_tilesCGBPal4c1, pet_tilesCGBPal4c2, pet_tilesCGBPal4c3, // Specials
+};
+
+
 
 // Palettes 4..7
 const UWORD intro_screen_palette[] = {

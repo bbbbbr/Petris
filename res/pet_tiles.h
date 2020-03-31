@@ -10,7 +10,7 @@
   Compression          : None.
   Counter              : None.
   Tile size            : 8 x 8
-  Tiles                : 0 to 34
+  Tiles                : 0 to 36
 
   Palette colors       : Included.
   SGB Palette          : None.
@@ -75,10 +75,10 @@
 #define pet_tilesCGBPal3c3 17585
 
 /* Gameboy Color palette 4 */
-#define pet_tilesCGBPal4c0 30614
-#define pet_tilesCGBPal4c1 30578
-#define pet_tilesCGBPal4c2 29520
-#define pet_tilesCGBPal4c3 25224
+#define pet_tilesCGBPal4c0 32765
+#define pet_tilesCGBPal4c1 32696
+#define pet_tilesCGBPal4c2 31670
+#define pet_tilesCGBPal4c3 7399
 
 /* Gameboy Color palette 5 */
 #define pet_tilesCGBPal5c0 16233
@@ -93,11 +93,11 @@
 #define pet_tilesCGBPal6c3 8622
 
 /* Gameboy Color palette 7 */
-#define pet_tilesCGBPal7c0 30646
-#define pet_tilesCGBPal7c1 26386
-#define pet_tilesCGBPal7c2 22120
+#define pet_tilesCGBPal7c0 32765
+#define pet_tilesCGBPal7c1 25368
+#define pet_tilesCGBPal7c2 20083
 #define pet_tilesCGBPal7c3 0
 /* Start of tile array. */
-extern const unsigned char pet_tiles[];
+extern unsigned char pet_tiles[];
 
 /* End of PET_TILES.H */
