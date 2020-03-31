@@ -105,15 +105,15 @@ void gameplay_handle_get_ready(void) {
     board_hide_all();
 
     for (c = 0; c < GAMEPLAY_GET_READY_FLASHES; c++) {
-        PRINT(BRD_ST_X + 3,
+        PRINT(BRD_ST_X + 2,
               BRD_ST_Y + 5,
-              "    \n      ",0);
+              "    \n\n      ",0);
 
         delay(500);
 
-        PRINT(BRD_ST_X + 3,
+        PRINT(BRD_ST_X + 2,
               BRD_ST_Y + 5,
-              " GET\nREADY!",0);
+              " GET\n\nREADY!",0);
 
         delay(500);
     }
