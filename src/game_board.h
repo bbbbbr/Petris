@@ -49,6 +49,7 @@ void board_draw_tile_xy(INT8, INT8, UINT8);
 void board_reset(void);
 void board_clear_tile_xy(INT8, INT8);
 
+INT8 board_find_lowest_open_in_column(INT8);
 UINT8 board_check_open_xy(INT8, INT8);
 void board_set_tile_xy(INT8, INT8, UINT8, UINT8, UINT8);
 

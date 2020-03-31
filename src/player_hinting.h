@@ -12,5 +12,7 @@ void player_hinting_special_show(UINT8);
 void player_hinting_special_update_gfx(void);
 void player_hinting_special_move(void);
 
+void player_hinting_drop_show(UINT8);
+void player_hinting_drop_update(void);
 
 #endif // PLAYER_HINTING_H

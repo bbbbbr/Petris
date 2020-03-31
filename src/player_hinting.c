@@ -20,7 +20,7 @@
 #include "gameplay.h"
 
 extern  INT8 player_x;
-extern UINT8 player_y;
+extern  INT8 player_y;
 extern  INT8 player_rotate; // Uses wraparound, so allow negative nums
 extern UINT8 player_piece;
 extern UINT8 player_attrib;
@@ -38,7 +38,6 @@ UINT8 hint_special_tile;
 
 
 // Apply sprite flicker to special piece hinting and drop hinting if needed
-// TODO: REORGANIZE: move to a different source file
 void player_hinting_flicker_update(UINT8 frame_count) {
 
     if ((frame_count & 0x0F) == 0x00)
@@ -48,12 +47,12 @@ void player_hinting_flicker_update(UINT8 frame_count) {
 }
 
 
-// TODO: REORGANIZE: move to a different source file
+
 void player_hinting_special_show(UINT8 do_show) {
 
     if ((do_show) && (player_piece & GP_SPECIAL_MASK)) {
 
-        // Update sprite to current coordinates
+        // Update sprite to use visible tiles
         set_sprite_tile(SPR_SPECIAL_HINT_1, hint_special_tile);
         set_sprite_tile(SPR_SPECIAL_HINT_2, hint_special_tile);
         set_sprite_tile(SPR_SPECIAL_HINT_3, hint_special_tile);
@@ -65,6 +64,7 @@ void player_hinting_special_show(UINT8 do_show) {
         // move_sprite(SPR_SPECIAL_HINT_2, 0,0);
         // move_sprite(SPR_SPECIAL_HINT_3, 0,0);
         // move_sprite(SPR_SPECIAL_HINT_4, 0,0);
+        //
         // Hide using a clear tile, maybe it's a little faster? // TODO
         set_sprite_tile(SPR_SPECIAL_HINT_1, GP_EMPTY);
         set_sprite_tile(SPR_SPECIAL_HINT_2, GP_EMPTY);
@@ -115,6 +115,42 @@ void player_hinting_special_update_gfx() {
         set_sprite_prop(SPR_SPECIAL_HINT_2, GP_PAL_SPECIAL);
         set_sprite_prop(SPR_SPECIAL_HINT_3, GP_PAL_SPECIAL);
         set_sprite_prop(SPR_SPECIAL_HINT_4, GP_PAL_SPECIAL);
-
-        player_hinting_special_move();
 }
+
+
+
+void player_hinting_drop_show(UINT8 do_show) {
+
+    if (do_show) {
+
+        // Update sprite to use visible tile
+        set_sprite_tile(SPR_DROP_HINT, GP_SPECIAL_DROP_HINT);
+        set_sprite_prop(SPR_DROP_HINT, GP_PAL_DROPHINT);
+
+    } else {
+        // Hide sprite
+        // move_sprite(SPR_DROP_HINT, 0,0);
+        // Hide using a clear tile, maybe it's a little faster? // TODO
+        set_sprite_tile(SPR_DROP_HINT, GP_EMPTY);
+    }
+}
+
+
+
+void player_hinting_drop_update(void) {
+
+    INT8 drop_hint_y;
+
+    drop_hint_y = board_find_lowest_open_in_column(player_x);
+
+    // Only update the hint if it's not overlapping with the player
+    // otherwise, hide it
+    if (player_y != drop_hint_y) {
+        move_sprite(SPR_DROP_HINT,
+                    (player_x * BRD_UNIT_SIZE)    + BRD_PIECE_X_OFFSET,
+                    (drop_hint_y * BRD_UNIT_SIZE) + BRD_PIECE_Y_OFFSET);
+    } else {
+        player_hinting_drop_show(FALSE);
+    }
+}
+

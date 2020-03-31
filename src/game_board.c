@@ -126,27 +126,34 @@ void board_reset(void) {
 }
 
 
-// TODO : remove debugging function
-void board_debug_show_connect_entire_board(void) {
 
-    INT8 x, y;
-    // TODO: OPTIMIZE: convert to single loop counter
+// Given X board coordinate, what is the lowest continuously open
+// coordinate from the top of the column.
+//
+// Used for drop-piece hinting
+//
+// TODO: Bounds checking for board here (could then remove from calling function)
+INT8 board_find_lowest_open_in_column(INT8 x) {
 
-    for (x=0; x < BRD_WIDTH; x++) {
-        for (y=0; y < BRD_HEIGHT; y++) {
-            // Set pet piece
-            board_pieces[x + (y * BRD_WIDTH)] = board_connect[x + (y * BRD_WIDTH)] + TILES_PET_START;
+    UINT8 offset; // 8 bits is ok sicne the board array is smaller than 255
+    INT8 y;
 
-            // TODO: USE EMPTY PIECE PALETTE INSTEAD?
-            // Set palette based on pet type
-            board_attrib[x + (y * BRD_WIDTH)] = ((board_pieces[x + (y * BRD_WIDTH)] & GP_PET_MASK) >> GP_PET_UPSHIFT);
+    // Start at the top of the board / board array
+    y = BRD_MIN_Y;
+    offset = x + (BRD_MIN_Y * BRD_WIDTH); // BRD_MIN_Y is usually zero, maybe the compiler optimizes this out
 
-            // Reset board connection bits
-            board_connect[x + (y * BRD_WIDTH)] = GP_CONNECT_NONE_BITS;
-        }
+    // Keep checking until either the bottom of the board is reached,
+    // or an occupied (non-open) tile is found
+    while ((y <= BRD_MAX_Y) &&
+           (board_pieces[offset] == (GP_EMPTY + TILES_PET_START))) {
+
+        // Move to next row down and then test again
+        y++;
+        offset += BRD_WIDTH;
     }
 
-    board_redraw_all();
+    // Last free coordinate is -1 above the piece the loop stopped on
+    return y - 1;
 }
 
 
@@ -158,6 +165,7 @@ UINT8 board_check_open_xy(INT8 x, INT8 y) {
     // TODO: Bounds checking for board here (could then remove from calling function)
     return (board_pieces[x + (y * BRD_WIDTH)] == (GP_EMPTY + TILES_PET_START));
 }
+
 
 
 // TODO: animation?

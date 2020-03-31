@@ -20,7 +20,7 @@
 #include "gameplay.h"
 
  INT8 player_x;
-UINT8 player_y;
+ INT8 player_y;
  INT8 player_rotate; // Uses wraparound, so allow negative nums
 UINT8 player_piece;
 UINT8 player_attrib;
@@ -73,10 +73,14 @@ void player_piece_reload(void) {
 
     if (player_piece & GP_SPECIAL_MASK) {
         player_hinting_special_update_gfx();
+        player_hinting_special_move(); // TODO: ?? move into player_piece_update_xy() ??
         player_hinting_special_show(TRUE);
     } else
         player_hinting_special_show(FALSE);
 
+    // TODO: if (option_player_hinting_enabled)
+    player_hinting_drop_show(TRUE);
+    player_hinting_drop_update();
 
 }
 
@@ -161,6 +165,8 @@ UINT8 player_piece_move(INT8 dir_x, INT8 dir_y) {
 
         if (player_piece & GP_SPECIAL_MASK)
             player_hinting_special_move();
+
+        player_hinting_drop_update();
 
         return (MOVE_OK);
     }

@@ -55,6 +55,7 @@ void gameplay_exit_cleanup(void) {
     player_piece_update_xy(PLAYER_PIECE_HIDE);
     game_piece_next_show(FALSE);
     player_hinting_special_show(FALSE);
+    player_hinting_drop_show(FALSE);
 }
 
 
@@ -97,9 +98,11 @@ void gameplay_handle_pause(void) {
 
     // Hide the game board and player piece
     board_hide_all();
-    player_piece_update_xy(PLAYER_PIECE_HIDE);
+    // TODO: CONSOLIDATE: these hides are basically a dupe of gameplay_exit_cleanup()
     game_piece_next_show(FALSE);
+    player_piece_update_xy(PLAYER_PIECE_HIDE);
     player_hinting_special_show(FALSE);
+    player_hinting_drop_show(FALSE);
 
     PRINT(BRD_ST_X + 2,
           BRD_ST_Y + 5,
