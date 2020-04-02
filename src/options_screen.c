@@ -45,29 +45,31 @@ enum {
     OPTION_MENU_MAX = OPTION_MENU_STARTGAME
 } option_menu_entries;
 
-const UINT8  option_menu_y[] = {6, 8, 10, 14};
-const char * option_menu_text[] = {"TYPE: ",
-                                   "LEVEL: ",
-                                   "VISUAL HINTS: ",
-                                   "   START GAME "};
 
+// Trailing spaces are to clear out previous option value text
+const char * options_type[]         = {"MARATHON    ", "LEVEL UP   ", "PET CLEANUP", "COLLECT    "}; // Must match : option_game_type_entries
+const char * options_difficulty[]   = {"EASY  ", "NORMAL", "HARD  ", "EXPERT "}; // Must match : option_difficulty_entries
+const char * options_visual_hints[] = {"ON ", "OFF"}; // Must match : option_visual_hints_entries
 
-
-// Trailing spaces are to clear out previous settings text
-const char * options_type[]         = {"MARATHON    ", "LEVEL UP   ", "PET CLEANUP", "COLLECT    "};
-const char * options_difficulty[]   = {"EASY  ", "NORMAL", "HARD  ", "EXPERT "};
-const char * options_visual_hints[] = {"ON ", "OFF"};
 
 typedef struct opt_item {
-    INT8 opt_count;
-    const char * * p_text;
-    INT8 * p_curval;
+
+    UINT8          menu_y;      // Y position of option menu entry
+    const char *   label;       // Option name
+
+    INT8           opt_entries; // Size of option values array
+    const char * * p_text_arr;  // Array of option text strings / values
+    INT8 *         p_curval;    // Pointer to (extern) option variable
+
 } option_item;
 
-option_item options[] = {
-        { (INT8)ARRAY_LEN(options_type),         &options_type[0]        , &option_game_type},
-        { (INT8)ARRAY_LEN(options_difficulty),   &options_difficulty[0]  , &option_game_difficulty},
-        { (INT8)ARRAY_LEN(options_visual_hints), &options_visual_hints[0], &option_game_visual_hints} };
+
+const option_item options[] = {
+        { 6, "TYPE: ",         (INT8)ARRAY_LEN(options_type),         &options_type[0]        , &option_game_type},
+        { 8, "LEVEL: ",        (INT8)ARRAY_LEN(options_difficulty),   &options_difficulty[0]  , &option_game_difficulty},
+        { 10,"VISUAL HINTS: ", (INT8)ARRAY_LEN(options_visual_hints), &options_visual_hints[0], &option_game_visual_hints},
+        { 14,"   START GAME ", (INT8)ARRAY_LEN(options_visual_hints), NULL,                     NULL}
+    };
 
 
 
@@ -95,7 +97,7 @@ void options_screen_cursor_update(INT8 dir) {
 
     move_sprite(SPR_OPTIONS_CURSOR,
                 OPTION_CURSOR_X,
-                (option_menu_y[options_menu_index] + 2) * 8);
+                (options[options_menu_index].menu_y + 2) * 8);
 }
 
 
@@ -117,9 +119,9 @@ void options_screen_setting_update(INT8 dir) {
 
         // Handle wraparound
         if (*(options[options_menu_index].p_curval) < OPTION_SETTING_MIN) {
-            *(options[options_menu_index].p_curval) = options[options_menu_index].opt_count - 1; // zero indexed array
+            *(options[options_menu_index].p_curval) = options[options_menu_index].opt_entries - 1; // zero indexed array
         }
-        else if (*(options[options_menu_index].p_curval) >= options[options_menu_index].opt_count) {
+        else if (*(options[options_menu_index].p_curval) >= options[options_menu_index].opt_entries) {
             *(options[options_menu_index].p_curval) = OPTION_SETTING_MIN;
         }
 
@@ -135,15 +137,15 @@ void options_screen_setting_draw(INT8 option_id) {
     // Print option Title
     // (they have trailing spaces)
     PRINT(OPTION_MENU_X,
-          option_menu_y[option_id],
-          option_menu_text[option_id], 0);
+          options[option_id].menu_y,
+          options[option_id].label, 0);
 
     // Next print the current setting value, using the
     // print cursor at the end of the previous print
     //
     // Don't print current settings for "Start Game" menu entry
     if (option_id != OPTION_MENU_STARTGAME) {
-        print_text(options[option_id].p_text[ *(options[option_id].p_curval) ], 0);
+        print_text(options[option_id].p_text_arr[ *(options[option_id].p_curval) ], 0);
     }
 
 }
@@ -254,8 +256,15 @@ void options_screen_handle(void) {
         options_screen_setting_update(1);
 
     }
+    // Start game
+    else if (KEY_TICKED(J_START)) {
+
+        options_screen_exit_cleanup();
+        game_state = GAME_READY_TO_START;
+
+    }
     // Start game or update value of current setting
-    else if (KEY_TICKED(J_START | J_A)) {
+    else if (KEY_TICKED(J_A)) {
 
         if (options_menu_index == OPTION_MENU_STARTGAME) {
 
