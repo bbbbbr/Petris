@@ -5,6 +5,7 @@
 #include <rand.h>
 
 #include "common.h"
+
 #include "input.h"
 #include "sound.h"
 #include "gfx_print.h"
@@ -109,13 +110,21 @@ void gameplay_handle_get_ready(void) {
               BRD_ST_Y + 5,
               "    \n\n      ",0);
 
-        delay(500);
+        #ifdef CPU_FAST_ENABLED
+            delay(1000);
+        #else
+            delay(500);
+        #endif
 
         PRINT(BRD_ST_X + 2,
               BRD_ST_Y + 5,
               " GET\n\nREADY!",0);
 
-        delay(500);
+        #ifdef CPU_FAST_ENABLED
+            delay(1000);
+        #else
+            delay(500);
+        #endif
     }
 }
 

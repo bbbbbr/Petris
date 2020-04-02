@@ -6,6 +6,8 @@
 // Enable CGB Fast cpu mode
 // #define CPU_FAST_ENABLED
 
+#define ARRAY_LEN(A)  sizeof(A) / sizeof(A[0])
+
 typedef enum {
     GAME_INTRO_INIT = 0,
     GAME_INTRO,

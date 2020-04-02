@@ -13,6 +13,9 @@
 
 #include "game_piece_data.h"
 
+#include "options.h"
+#include "options_screen.h"
+
 #include "../res/intro_screen_tiles.h"
 #include "../res/pet_tiles.h"
 #include "../res/font_tiles.h"
@@ -21,35 +24,58 @@
 #define SPR_OPTIONS_CURSOR 0 // Cursor is sprite "0"
 #define PET_DOG_HEAD       ((GP_PET_DOG << GP_PET_UPSHIFT) | (GP_SEG_HEAD << GP_SEG_UPSHIFT))
 
+#define OPTION_MENU_X 3
+#define OPTION_CURSOR_X (2 * 8)
 
+
+const UINT8 options_screen_attrib_pal = BG_PAL_4;
 const UINT8 options_screen_tiles[] = {TILES_INTRO_START + 0,
                                       TILES_INTRO_START + 1,
                                       TILES_INTRO_START + 2,
                                       TILES_INTRO_START + 3};
-// const UINT8 attirb_none = 0x00;
-const UINT8 options_screen_attrib_pal = BG_PAL_4;
-
-#define OPTION_MENU_X 3
-
-#define OPTION_CURSOR_X (2 * 8)
-
 
 enum {
     OPTION_MENU_MIN = 0,
+
     OPTION_MENU_TYPE = OPTION_MENU_MIN,
     OPTION_MENU_LEVEL,
+    OPTION_MENU_VISUAL_HINTS,
     OPTION_MENU_STARTGAME,
+
     OPTION_MENU_MAX = OPTION_MENU_STARTGAME
-} OPTION_MENU_ENTRIES;
+} option_menu_entries;
 
-const UINT8 option_menu_y[] = {6, 8, 12};
-const char * option_menu_text[] = {"TYPE:   MARATHON",
-                                  "LEVEL:  NORMAL  ",
-                                  "  START GAME    "};
+const UINT8  option_menu_y[] = {6, 8, 10, 14};
+const char * option_menu_text[] = {"TYPE: ",
+                                   "LEVEL: ",
+                                   "VISUAL HINTS: ",
+                                   "   START GAME "};
 
-INT8 options_menu_index = 0;
 
 
+// Trailing spaces are to clear out previous settings text
+const char * options_type[]         = {"MARATHON    ", "LEVEL UP   ", "PET CLEANUP", "COLLECT    "};
+const char * options_difficulty[]   = {"EASY  ", "NORMAL", "HARD  ", "EXPERT "};
+const char * options_visual_hints[] = {"ON ", "OFF"};
+
+typedef struct opt_item {
+    INT8 opt_count;
+    const char * * p_text;
+    INT8 * p_curval;
+} option_item;
+
+option_item options[] = {
+        { (INT8)ARRAY_LEN(options_type),         &options_type[0]        , &option_game_type},
+        { (INT8)ARRAY_LEN(options_difficulty),   &options_difficulty[0]  , &option_game_difficulty},
+        { (INT8)ARRAY_LEN(options_visual_hints), &options_visual_hints[0], &option_game_visual_hints} };
+
+
+
+INT8 options_menu_index = OPTION_MENU_STARTGAME;
+
+
+
+// Update which option is currenrlt selected
 void options_screen_cursor_update(INT8 dir) {
 
     // Play a sound when moving the cursor
@@ -59,11 +85,13 @@ void options_screen_cursor_update(INT8 dir) {
     // Update menu selection
     options_menu_index += dir;
 
-    if (options_menu_index < OPTION_MENU_MIN)
+    // Handle wraparound
+    if (options_menu_index < OPTION_MENU_MIN) {
         options_menu_index = OPTION_MENU_MAX;
-
-    else if (options_menu_index > OPTION_MENU_MAX)
+    }
+    else if (options_menu_index > OPTION_MENU_MAX) {
         options_menu_index = OPTION_MENU_MIN;
+    }
 
     move_sprite(SPR_OPTIONS_CURSOR,
                 OPTION_CURSOR_X,
@@ -71,13 +99,55 @@ void options_screen_cursor_update(INT8 dir) {
 }
 
 
-void options_screen_setting_draw(void) {
 
-    UINT8 c;
-    for (c = OPTION_MENU_MIN; c <= OPTION_MENU_MAX; c++) {
-        PRINT(OPTION_MENU_X,option_menu_y[c],  option_menu_text[c], 0);
+// Update the currently selected option's value
+void options_screen_setting_update(INT8 dir) {
+
+
+    // "Start Game" menu entry has no settings
+    if (options_menu_index != OPTION_MENU_STARTGAME) {
+
+        // Play a sound when moving the cursor
+        if (dir != 0) {
+            PlayFx(CHANNEL_1, 30, 0x24, 0x80, 0x14, 0x94, 0x86);
+        }
+
+        // Update setting
+        *(options[options_menu_index].p_curval) += dir;
+
+        // Handle wraparound
+        if (*(options[options_menu_index].p_curval) < OPTION_SETTING_MIN) {
+            *(options[options_menu_index].p_curval) = options[options_menu_index].opt_count - 1; // zero indexed array
+        }
+        else if (*(options[options_menu_index].p_curval) >= options[options_menu_index].opt_count) {
+            *(options[options_menu_index].p_curval) = OPTION_SETTING_MIN;
+        }
+
+        options_screen_setting_draw(options_menu_index);
     }
 }
+
+
+
+// Print an option's name and current value
+void options_screen_setting_draw(INT8 option_id) {
+
+    // Print option Title
+    // (they have trailing spaces)
+    PRINT(OPTION_MENU_X,
+          option_menu_y[option_id],
+          option_menu_text[option_id], 0);
+
+    // Next print the current setting value, using the
+    // print cursor at the end of the previous print
+    //
+    // Don't print current settings for "Start Game" menu entry
+    if (option_id != OPTION_MENU_STARTGAME) {
+        print_text(options[option_id].p_text[ *(options[option_id].p_curval) ], 0);
+    }
+
+}
+
 
 
 // TODO: OPTIMIZE: rendering this to a global, shared, temp array would be much faster global_bg_scratch_tilemap[], global_bg_scratch_attribmap[]
@@ -111,6 +181,7 @@ void options_screen_draw(void) {
 }
 
 
+
 void options_screen_sprites_init(void) {
 
     SPRITES_8x8;
@@ -125,6 +196,7 @@ void options_screen_sprites_init(void) {
 }
 
 
+
 void options_screen_exit_cleanup(void) {
 
     HIDE_SPRITES;
@@ -132,10 +204,14 @@ void options_screen_exit_cleanup(void) {
 }
 
 
+
 void options_screen_init(void) {
+
+    INT8 c;
 
     set_bkg_palette(BG_PAL_4, 4, intro_screen_palette); // UBYTE first_palette, UBYTE nb_palettes, UWORD *rgb_data
 
+    // TODO: OPTIMIZE: consolidate this? the same tiles are used in all screens so far
     set_bkg_data(TILES_INTRO_START,     TILE_COUNT_INTRO,     intro_screen_tiles);
     set_bkg_data(TILES_FONT_START,      TILE_COUNT_FONT,      font_tiles);
     set_bkg_data(TILES_PET_START,       TILE_COUNT_PETTOTAL,  pet_tiles);
@@ -148,13 +224,17 @@ void options_screen_init(void) {
     options_screen_cursor_update(0);
 
     options_screen_draw();
-    options_screen_setting_draw();
+
+    for (c = OPTION_MENU_MIN; c <= OPTION_MENU_MAX; c++) {
+        options_screen_setting_draw(c);
+    }
 }
 
 
 
 void options_screen_handle(void) {
 
+    // Cursor Updates
     if (KEY_TICKED(J_UP)) {
 
         options_screen_cursor_update(-1);
@@ -163,12 +243,34 @@ void options_screen_handle(void) {
 
         options_screen_cursor_update(1);
 
-    } else if (KEY_TICKED(J_START | J_A | J_B)) {
+    }
+    // Change value of current option
+    else if (KEY_TICKED(J_LEFT)) {
 
-        if (options_menu_index == OPTION_MENU_STARTGAME)
+        options_screen_setting_update(-1);
+
+    } else if (KEY_TICKED(J_RIGHT)) {
+
+        options_screen_setting_update(1);
+
+    }
+    // Start game or update value of current setting
+    else if (KEY_TICKED(J_START | J_A)) {
+
+        if (options_menu_index == OPTION_MENU_STARTGAME) {
 
             options_screen_exit_cleanup();
             game_state = GAME_READY_TO_START;
+        }
+        else {
+            options_screen_setting_update(1);
+        }
+    }
+    // Go back to Intro Screen
+    else if (KEY_TICKED(J_B)) {
+
+        options_screen_exit_cleanup();
+        game_state = GAME_INTRO_INIT;
     }
 
 }
