@@ -222,14 +222,15 @@ void options_screen_init(void) {
 
     options_menu_index = OPTION_MENU_STARTGAME;
 
-    options_screen_sprites_init();
-    options_screen_cursor_update(0);
-
     options_screen_draw();
 
     for (c = OPTION_MENU_MIN; c <= OPTION_MENU_MAX; c++) {
         options_screen_setting_draw(c);
     }
+
+    // Reveal sprite last since other screen setup/drawing is slow
+    options_screen_sprites_init();
+    options_screen_cursor_update(0);
 }
 
 
