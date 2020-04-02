@@ -8,6 +8,8 @@
 #include "sound.h"
 #include "gfx_print.h"
 
+#include "options.h"
+
 #include "game_piece.h"
 #include "game_piece_data.h"
 #include "game_board.h"
@@ -71,17 +73,20 @@ void player_piece_reload(void) {
     player_piece_update_gfx();
     player_piece_update_xy(PLAYER_PIECE_SHOW);
 
-    if (player_piece & GP_SPECIAL_MASK) {
-        player_hinting_special_update_gfx();
-        player_hinting_special_move(); // TODO: ?? move into player_piece_update_xy() ??
-        player_hinting_special_show(TRUE);
-    } else
-        player_hinting_special_show(FALSE);
 
-    // TODO: if (option_player_hinting_enabled)
-    player_hinting_drop_show(TRUE);
-    player_hinting_drop_update();
+    if (option_game_visual_hints == OPTION_VISUAL_HINTS_ON) {
 
+        if (player_piece & GP_SPECIAL_MASK) {
+            player_hinting_special_update_gfx();
+            player_hinting_special_move(); // TODO: ?? move into player_piece_update_xy() ??
+            player_hinting_special_show(TRUE);
+        } else
+            player_hinting_special_show(FALSE);
+
+        // TODO: if (option_player_hinting_enabled)
+        player_hinting_drop_show(TRUE);
+        player_hinting_drop_update();
+    }
 }
 
 
@@ -163,10 +168,13 @@ UINT8 player_piece_move(INT8 dir_x, INT8 dir_y) {
 
         player_piece_update_xy(PLAYER_PIECE_SHOW);
 
-        if (player_piece & GP_SPECIAL_MASK)
-            player_hinting_special_move();
+        if (option_game_visual_hints == OPTION_VISUAL_HINTS_ON) {
 
-        player_hinting_drop_update();
+            if (player_piece & GP_SPECIAL_MASK)
+                player_hinting_special_move();
+
+            player_hinting_drop_update();
+    }
 
         return (MOVE_OK);
     }
