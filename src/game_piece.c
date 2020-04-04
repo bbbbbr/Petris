@@ -4,10 +4,12 @@
 #include <gb/cgb.h> // Include cgb functions
 #include <rand.h>
 
+#include "options.h"
 #include "game_piece.h"
 #include "game_piece_data.h"
 #include "player_info.h"
 #include "player_gfx.h"
+
 
 UINT8 game_piece_next;
 
@@ -45,12 +47,11 @@ void game_piece_next_set(UINT8 override_piece) {
 
 void game_piece_next_show(UINT8 do_show) {
 
-    // if (game_difficulty_get() == GAME_DIFFICULTY_EASY)  // TODO
-
     // TODO: this could get animated to launch the next piece
     //       to the top of the board
 
-    if (do_show) {
+    // TODO: OPTIMIZE: ?? would be less overhead to test option_game_preview_next before calling function?
+    if ((do_show) && (option_game_preview_next == NEXT_PREV_ON)) {
 
         // TODO: consolidate sprite calculation with player_piece_update_gfx() where this is duplicated from?
 

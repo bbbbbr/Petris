@@ -104,7 +104,7 @@ void level_increment(void) {
     // TODO: level_handle_next() ?? Do more things?
 
     // TODO: ?? change this to options_frames_per_drop_update() call -> game_speed_frames_per_drop_set()
-    game_speed_frames_per_drop_set( options_get_frames_per_drop(player_level) );
+    game_speed_frames_per_drop_set( options_frames_per_drop_get(player_level) );
 
     print_num_u16(DISPLAY_LEVEL_X, DISPLAY_LEVEL_Y, player_level);
 }
@@ -150,10 +150,8 @@ void player_info_newgame_reset(void) {
     score_reset();
     level_counters_reset();
 
-    options_player_settings_apply();
-
     // Should be called after level_counters_reset()
-    game_speed_frames_per_drop_set( options_get_frames_per_drop(player_level) );
+    game_speed_frames_per_drop_set( options_frames_per_drop_get(player_level) );
     // TODO: ???? change this to options_frames_per_drop_update() call -> game_speed_frames_per_drop_set()
     // OR, level_update_speed()
     // OR, gameplay_speed_update() <------ ???

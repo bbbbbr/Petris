@@ -3,10 +3,6 @@
 #ifndef OPTIONS_H
 #define OPTIONS_H
 
-extern INT8 option_game_difficulty;
-extern INT8 option_game_visual_hints;
-extern INT8 option_game_type;
-
 #define OPTION_SETTING_MIN 0
 
 // Game Type Level
@@ -41,8 +37,9 @@ enum {
 } option_visual_hints_entries;
 
 
-#define NEXT_PREV_ON  0
 #define NEXT_PREV_OFF  0
+#define NEXT_PREV_ON  1
+#define NEXT_PREV_DEFAULT NEXT_PREV_ON
 
 // These are offsets for where to start in frames_per_drop_LUT
 // The index for them is option_difficulty_entries
@@ -87,7 +84,12 @@ typedef struct settings_rec {
 
 extern const settings_data * p_game_settings;
 
-UINT8 options_get_frames_per_drop(UINT8);
+extern INT8 option_game_difficulty;
+extern INT8 option_game_visual_hints;
+extern INT8 option_game_type;
+extern INT8 option_game_preview_next;
+
+UINT8 options_frames_per_drop_get(UINT8);
 void options_player_settings_apply(void);
 
 #endif // OPTIONS_H

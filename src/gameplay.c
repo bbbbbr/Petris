@@ -73,6 +73,8 @@ void gameplay_init(void) {
 
     board_gfx_init();
 
+    options_player_settings_apply();
+
     // Mediocre-initialize the random number generator
     initarand(DIV_REG);
 
@@ -104,8 +106,6 @@ void gameplay_init(void) {
 
     game_speed_drop_frame_counter = GAME_SPEED_DROP_FRAME_COUNTER_RESET;
 
-    // TODO: ?? better here or in player_info_newgame_reset?
-    // options_player_settings_apply();
     player_info_newgame_reset();
 }
 

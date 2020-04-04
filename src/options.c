@@ -13,9 +13,10 @@
 // TODO: rename "option_game_" -> "game_setting" , rename "options.c/h" -> "game_settings.c/h"
 
 // TODO: For now these aren't in an array/struct to reduce cost of access. Re-evaluate later
-INT8 option_game_type = OPTION_GAME_TYPE_DEFAULT;
-INT8 option_game_difficulty = OPTION_DIFFICULTY_DEFAULT;
+INT8 option_game_type         = OPTION_GAME_TYPE_DEFAULT;
+INT8 option_game_difficulty   = OPTION_DIFFICULTY_DEFAULT;
 INT8 option_game_visual_hints = OPTION_VISUAL_HINTS_DEFAULT;
+INT8 option_game_preview_next = NEXT_PREV_DEFAULT;
 
 // See spreadsheet for more details
 // Speed increase per level bracket roughly doubles
@@ -33,9 +34,14 @@ const settings_data settings_LUT[] = {
 const settings_data * p_game_settings;
 
 
+// TODO: ?? use accessor instead of directly accessing option_game_preview_next?
+//UINT8 options_preview_next_enabled_get(UINT8 level) {
+//     option_game_preview_next      = settings_LUT[ option_game_difficulty ].preview_next_enabled;
+//}
+
 
 // NOTE: level must *not* be zero
-UINT8 options_get_frames_per_drop(UINT8 level) {
+UINT8 options_frames_per_drop_get(UINT8 level) {
 
     UINT8 index;
 
@@ -56,15 +62,5 @@ void options_player_settings_apply(void) {
 
     p_game_settings = &settings_LUT[ option_game_difficulty ];
 
-    // level / 10
-    // speed_LUT_offset = level /   player_settings.LUT_speed_offset
-    // frames_per_drop_LUT[ p_game_settings.LUT_speed_offset ];
-
-
-//     option_game_preview_next      = settings_LUT[ option_game_difficulty ].preview_next_enabled;
-// //     frames_per_drop               = frames_per_drop_LUT[ settings_LUT[ option_game_difficulty ].LUT_speed_offset ];
-//     score_bonus                   = settings_LUT[ option_game_difficulty ].score_bonus;
-
-//     piece_special_threshold_bomb  = settings_LUT[ option_game_difficulty ].spec_bomb_threshold_pettiles;
-//     piece_special_threshold_merge = settings_LUT[ option_game_difficulty ].spec_merge_threshold_pieces;
+    option_game_preview_next = p_game_settings->preview_next_enabled;
 }
