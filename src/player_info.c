@@ -11,22 +11,24 @@
 #include "game_piece.h"
 #include "game_piece_data.h"
 #include "game_board_special_pieces.h"
+#include "gameplay.h"
+#include "options.h"
 
 UINT16 player_score;
 UINT16 player_numtiles; // UINT32?
 UINT16 player_numpets;
 UINT16 player_level;
-UINT16 player_new_piece_count;
-
-extern UINT8 tick_frame_speed;
+UINT16 player_numpieces;
 
 const UINT8 NEXT_PIECE_BG_TILE = TILE_ID_BOARD_NEXT_PIECE_PREVIEW_BG;
 const UINT8 NEXT_PIECE_BG_PAL  = BG_PAL_BOARD_NEXT_PIECE_PREVIEW;
 
-void new_piece_count_increment(void) {
-    player_new_piece_count++;
 
-    if ((player_new_piece_count & PIECE_SPECIAL_THRESHOLD_LIGHTENING) == PIECE_SPECIAL_THRESHOLD_LIGHTENING)
+void new_piece_count_increment(void) {
+    player_numpieces++;
+
+    // Check to see whether a special piece (merge) should be delivered
+    if ((player_numpieces & p_game_settings->spec_merge_threshold_pieces) == p_game_settings->spec_merge_threshold_pieces)
         game_piece_next_set(GP_SPECIAL_LIGHTENING);
 
 }
@@ -35,21 +37,30 @@ void new_piece_count_increment(void) {
 
 void score_update(UINT16 num_tiles) {
 
-    if (num_tiles >= PIECE_SPECIAL_THRESHOLD_BOMB)
+    // Check to see whether a special piece (bomb) should be delivered
+    if (num_tiles >= p_game_settings->spec_bomb_threshold_pettiles)
         game_piece_next_set(GP_SPECIAL_BOMB);
 
     // Increase number of pets if this is called with sufficient tiles
     if (num_tiles > 1)
         player_numpets++;
+
+    // Increment the total title count
+    // TODO: player_numtiles_this_level
     player_numtiles += num_tiles;
 
-    // TODO move to level_check_update()
-    // TODO: this is just a hack for now, large pets could skip a level (player_level = (player_level / PLAYER_TILES_TILL_NEXT_LEVEL))
-    if (player_numtiles >= (PLAYER_TILES_TILL_NEXT_LEVEL * (player_level + 1))) {
-        level_increment();
-    }
+    level_check_update();
 
-    player_score += num_tiles * num_tiles * SCORE_SCALE_FACTOR * player_level; // TODO: support x 10 scoring? Need to use a 24 bit Num
+    // TODO: support x 10 scoring? Need to use a 24 bit Num
+    // Scoring:
+    // * Increases exponentially per number of tiles in the pet
+    // * Multiplied by (player_level / 10)
+    // * Multiplied by game difficulty type factor: score_bonus
+    // * Multiplied by a general scale factor: SCORE_SCALE_FACTOR
+    player_score += (num_tiles * num_tiles)
+                    * (player_level / 10)
+                    * (UINT16)p_game_settings->score_bonus
+                    * SCORE_SCALE_FACTOR;
 
     // Display the score
     print_num_u16(DISPLAY_SCORE_X, DISPLAY_SCORE_Y, player_score);
@@ -70,19 +81,30 @@ void score_reset(void) {
 
 
 
+void level_check_update(void) {
+
+
+    // TODO: finalize on whether levels increment based on pets or pet tile count
+    //if (player_numtiles >= (PLAYER_TILES_PER_LEVEL * (player_level + 1))) {
+    //  OR could do newlevel = (player_numtiles / PLAYER_TILES_PER_LEVEL) = (PLAYER_TILES_PER_LEVEL * (player_level + 1))
+    if (player_numpets >= (PLAYER_PETS_PER_LEVEL * (player_level + 1))) {
+        level_increment();
+    }
+
+}
+
+
+
 void level_increment(void) {
 
-//     PLAY_SOUND_LEVEL_UP; // TODO: this needs a delay after last piece clear sound
+    // TODO:    PLAY_SOUND_LEVEL_UP; // TODO: this needs a delay after last piece clear sound
+    // TODO: ???? reset or NOT reset number of pets/tiles completed per level? May depend on play mode
     player_level++;
-    // TODO: reset or NOT reset number of pets/tiles completed per level? May depend on play mode
-    // player_numpets  = PLAYER_NUMPETS_RESET;
-    // player_numtiles = PLAYER_NUMTILES_RESET;
 
-    // TODO: level_handle_next()
-    // TODO: level_speed_get()
-    // incerase level speed
-    if (tick_frame_speed)
-        tick_frame_speed--;     // TODO : Use a proper accessor/setter
+    // TODO: level_handle_next() ?? Do more things?
+
+    // TODO: ?? change this to options_frames_per_drop_update() call -> game_speed_frames_per_drop_set()
+    game_speed_frames_per_drop_set( options_get_frames_per_drop(player_level) );
 
     print_num_u16(DISPLAY_LEVEL_X, DISPLAY_LEVEL_Y, player_level);
 }
@@ -96,10 +118,13 @@ void level_show(void) {
 
 
 
-void level_reset(void) {
+void level_counters_reset(void) {
 
-    player_numpets  = PLAYER_NUMPETS_RESET;
-    player_numtiles = PLAYER_NUMTILES_RESET;
+    player_level     = PLAYER_LEVEL_RESET;
+    player_numpets   = PLAYER_NUMPETS_RESET;
+    player_numtiles  = PLAYER_NUMTILES_RESET;
+    player_numpieces = PLAYER_NUMPIECES_RESET;
+
     level_show();   // TODO: move this out of here?
 }
 
@@ -122,10 +147,14 @@ void player_info_newgame_reset(void) {
     set_bkg_tiles(GAME_PIECE_NEXT_PREVIEW_BG_X, GAME_PIECE_NEXT_PREVIEW_BG_Y,
                   1, 1, &NEXT_PIECE_BG_TILE);
 
-
-
-    player_level    = PLAYER_LEVEL_RESET;
-    player_new_piece_count = PLAYER_NEW_PIECE_COUNT_RESET;
     score_reset();
-    level_reset();
+    level_counters_reset();
+
+    options_player_settings_apply();
+
+    // Should be called after level_counters_reset()
+    game_speed_frames_per_drop_set( options_get_frames_per_drop(player_level) );
+    // TODO: ???? change this to options_frames_per_drop_update() call -> game_speed_frames_per_drop_set()
+    // OR, level_update_speed()
+    // OR, gameplay_speed_update() <------ ???
 }

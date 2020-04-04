@@ -15,6 +15,7 @@
 #include "player_info.h"
 #include "player_gfx.h"
 
+#include "options.h"
 #include "game_piece.h"
 #include "game_piece_data.h"
 #include "game_board.h"
@@ -24,8 +25,8 @@
 
 extern UINT8 global_frame_count;
 
-UINT8 tick_frame_count;
-UINT8 tick_frame_speed; // TODO : rename and move this
+UINT8 game_speed_drop_frame_counter;
+UINT8 game_speed_frames_per_drop;
 
 
 #define KEY_REPEAT_START               0
@@ -37,6 +38,13 @@ UINT8 key_down_repeat_needs_release;
 UINT8 gameplay_piece_drop_requested;
 
 UINT8 piece_state;
+
+
+
+void game_speed_frames_per_drop_set(UINT8 new_val) {
+    game_speed_frames_per_drop = new_val;
+}
+
 
 
 void gameplay_handle_gameover_screen(void) {
@@ -86,13 +94,18 @@ void gameplay_init(void) {
     SHOW_SPRITES;
 
     // TODO: move into player_info_init/reset
-    tick_frame_speed = PLAYER_SPEED_TICK_COUNT__DEFAULT;
+    // game_speed_frames_per_drop = GAME_SPEED_FRAMES_PER_DROP_RESET;
+
     piece_state = PLAYER_START;
 
     key_down_repeat_needs_release = FALSE;
-    gameplay_piece_drop_requested = FALSE;
-    tick_frame_count = PLAYER_SPEED_TICK_COUNT__RESET;
 
+    gameplay_piece_drop_requested = FALSE;
+
+    game_speed_drop_frame_counter = GAME_SPEED_DROP_FRAME_COUNTER_RESET;
+
+    // TODO: ?? better here or in player_info_newgame_reset?
+    // options_player_settings_apply();
     player_info_newgame_reset();
 }
 
@@ -224,6 +237,21 @@ void gameplay_handle_input(void) {
 
         gameplay_handle_pause();
     }
+
+
+    // TODO: DEBUG
+    if (KEY_PRESSED(J_SELECT)) {
+
+        if (KEY_TICKED(J_A)) {
+            game_speed_frames_per_drop++;
+        }
+        else if (KEY_TICKED(J_B)) {
+            game_speed_frames_per_drop--;
+        }
+
+        print_num_u16(3,0, (UINT16)game_speed_frames_per_drop);
+    }
+
 }
 
 
@@ -266,13 +294,13 @@ void gameplay_update(void) {
 void gameplay_gravity_update(void) {
 
     // Move the piece down automatically every N ticks
-    tick_frame_count++; // TODO: possible to merge in with global_frame_count?
+    game_speed_drop_frame_counter++; // TODO: possible to merge in with global_frame_count?
 
-    if ((tick_frame_count >= tick_frame_speed)
+    if ((game_speed_drop_frame_counter >= game_speed_frames_per_drop)
         || (gameplay_piece_drop_requested)) {
 
         // Reset the counter
-        tick_frame_count = PLAYER_SPEED_TICK_COUNT__RESET;
+        game_speed_drop_frame_counter = GAME_SPEED_DROP_FRAME_COUNTER_RESET;
         // Clear current request to move a piece down earlier than tick time
         // (will get re-enabled next pass if player continues to hold drop key down)
         gameplay_piece_drop_requested = FALSE;
