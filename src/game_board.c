@@ -389,6 +389,11 @@ UINT8 board_check_completed_pet_xy(INT8 start_x, INT8 start_y, UINT8 piece, UINT
             headtail_count++;
         }
 
+
+// TODO: there is a minor bug where a merge piece with a loop connected to it will cycle through both directions of the loop
+// Could clear the bits for where it connects?
+// source_cur_dir ^=
+
         // Loop through possible connect directions (Left/Right/Up/Down)
         for (source_cur_dir = GP_CONNECT_MIN_BITS;
              source_cur_dir <= GP_CONNECT_MAX_BITS;
@@ -411,6 +416,23 @@ UINT8 board_check_completed_pet_xy(INT8 start_x, INT8 start_y, UINT8 piece, UINT
                 // The original piece gets used in this loop
                 while (board_check_connected_xy(next_x, next_y, piece, &this_connect, flags)) {
 
+                    // The loop is entered with :
+                    // * next_x/y -> has not yet been updated, so it...
+                    //               stores current position just tested as connecting to the previous
+                    // * this_connect -> holding the connections bits for the current position
+                    //                 with the direction just tested masked out
+
+                    // Check to see if the pet is a loop with no head/tail (current position == starting position)
+                    // Important: must be tested *before* incrementing piece_count and updating next_x/Y
+                    if ((next_x == start_x) && (next_y == start_y)) {
+
+                        // If so, the pet has been completed
+                        // Now exit loop (without needing a head or tail, or dead-end )
+                        // Signal completion via adding 2 head/tails
+                        headtail_count += 2;
+                        break; // exit loop
+                    }
+
                     // Cache the tile location for clearing later if this pet is completed
                     board_tile_clear_cache_x[board_tile_clear_count] = next_x; // board_tile_clear_cache[board_tile_clear_count] = next_x + (next_y * BRD_WIDTH);
                     board_tile_clear_cache_y[board_tile_clear_count] = next_y;
@@ -426,14 +448,6 @@ UINT8 board_check_completed_pet_xy(INT8 start_x, INT8 start_y, UINT8 piece, UINT
                         next_x += GP_CONNECT_NEXT_X_LUT[this_connect];
                         next_y += GP_CONNECT_NEXT_Y_LUT[this_connect];
 
-                        // Check to see if the pet is a loop with no head/tail (next position == starting position)
-                        if ((next_x == start_x) && (next_y == start_y)) {
-
-                            // If so, the pet has been completed
-                            // Now exit loop (without needing a head or tail, or dead-end )
-                            headtail_count += 2;
-                            break; // exit loop
-                        }
                     } else {
                         // If next_connect is empty (only 1 connection, to previous tile)
                         // that means it's a HEAD or TAIL segment
