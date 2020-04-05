@@ -209,6 +209,9 @@ void board_set_tile_xy(INT8 x, INT8 y, UINT8 piece, UINT8 attrib, UINT8 connect)
                 break;
 
             case GP_SPECIAL_LIGHTENING:
+                // NOTE: Piece is only passed in for testing, not put on the board.
+                //       **DON'T** set pieces on board with more than 2 connection bits
+                //       set (such as the 4-way Merge), it's an unhandled condition.
                 board_check_completed_pet_xy(x,y, piece,
                                              GP_CONNECT_ALL_WAYS_BITS,
                                              BRD_CHECK_FLAGS_IGNORE_PET_TYPE);
@@ -355,23 +358,23 @@ void board_handle_pet_completed(UINT8 flags) {
     board_tile_clear_count = 0;
 }
 
-
 // NOTE: no bounds checking, assumes incoming X,Y are valid board positions
 //
-// TODO: add mode? (CHECK vs REMOVE TILES)
-//
 // NOTE: Assumes that incompatible special pieces (Bomb/etc) are not passed in
+// NOTE: IMPORTANT no piece on board should ever have more than 2 connection bits
+//       set. It's ok to pass those in as params, but never land them on the board.
+//
+// NOTE: Special-MERGE piece is passed in, but *NOT* copied onto the board array beforehand.
+//       Any connection that tests it's board location will find an EMPTY entry (no connects)
 //
 UINT8 board_check_completed_pet_xy(INT8 start_x, INT8 start_y, UINT8 piece, UINT8 connect, UINT8 flags) {
 
     UINT8 piece_count, headtail_count;
-     INT8 next_x, next_y;
+     INT8 check_x, check_y;
     UINT8 this_connect;
+    UINT8 last_connect;
     UINT8 source_cur_dir;
 
-    // if (piece != GP_EMPTY) { // TODO: remove?
-    // Only check connections if it's a pet tile
-//    if (!(piece & GP_EMPTY_MASK)) {  // TODO: can this be removed? (since calling function handles the test... usually)
 
         // Reset tile clear cache (add one entry, current piece)
         board_tile_clear_cache_x[0] = start_x; // = start_x + (start_y * BRD_WIDTH);
@@ -390,10 +393,6 @@ UINT8 board_check_completed_pet_xy(INT8 start_x, INT8 start_y, UINT8 piece, UINT
         }
 
 
-// TODO: there is a minor bug where a merge piece with a loop connected to it will cycle through both directions of the loop
-// Could clear the bits for where it connects?
-// source_cur_dir ^=
-
         // Loop through possible connect directions (Left/Right/Up/Down)
         for (source_cur_dir = GP_CONNECT_MIN_BITS;
              source_cur_dir <= GP_CONNECT_MAX_BITS;
@@ -409,22 +408,29 @@ UINT8 board_check_completed_pet_xy(INT8 start_x, INT8 start_y, UINT8 piece, UINT
 
                 // These need to be reset for each new direction
                 // tested from original piece location
-                next_x = start_x + GP_CONNECT_NEXT_X_LUT[source_cur_dir];
-                next_y = start_y + GP_CONNECT_NEXT_Y_LUT[source_cur_dir];
+                check_x = start_x + GP_CONNECT_NEXT_X_LUT[source_cur_dir];
+                check_y = start_y + GP_CONNECT_NEXT_Y_LUT[source_cur_dir];
                 this_connect = source_cur_dir;
 
+                // Store previous connection bit
+                last_connect = this_connect;
+
                 // The original piece gets used in this loop
-                while (board_check_connected_xy(next_x, next_y, piece, &this_connect, flags)) {
+                while (board_check_connected_xy(check_x, check_y, piece, &this_connect, flags)) {
 
                     // The loop is entered with :
-                    // * next_x/y -> has not yet been updated, so it...
-                    //               stores current position just tested as connecting to the previous
-                    // * this_connect -> holding the connections bits for the current position
-                    //                 with the direction just tested masked out
+                    // * check_x/y -> Not yet been updated (will be below)
+                    //                Has current position just tested as connecting to the previous
+                    //                Will get updated using the direction pointed to by: this_connect
+                    //
+                    // * this_connect -> Gets updated by board_check_connected_xy()
+                    //                   Now has the next-connections bits pointing from the just-tested position
+                    //                   toward the next x/y to check (with it's preceding direction bits masked out)
+
 
                     // Check to see if the pet is a loop with no head/tail (current position == starting position)
-                    // Important: must be tested *before* incrementing piece_count and updating next_x/Y
-                    if ((next_x == start_x) && (next_y == start_y)) {
+                    // Important: must be tested *before* incrementing piece_count and updating check_x/Y
+                    if ((check_x == start_x) && (check_y == start_y)) {
 
                         // If so, the pet has been completed
                         // Now exit loop (without needing a head or tail, or dead-end )
@@ -434,8 +440,8 @@ UINT8 board_check_completed_pet_xy(INT8 start_x, INT8 start_y, UINT8 piece, UINT
                     }
 
                     // Cache the tile location for clearing later if this pet is completed
-                    board_tile_clear_cache_x[board_tile_clear_count] = next_x; // board_tile_clear_cache[board_tile_clear_count] = next_x + (next_y * BRD_WIDTH);
-                    board_tile_clear_cache_y[board_tile_clear_count] = next_y;
+                    board_tile_clear_cache_x[board_tile_clear_count] = check_x; // board_tile_clear_cache[board_tile_clear_count] = check_x + (check_y * BRD_WIDTH);
+                    board_tile_clear_cache_y[board_tile_clear_count] = check_y;
                     board_tile_clear_count++;
 
                     // Add current piece to the total
@@ -445,20 +451,35 @@ UINT8 board_check_completed_pet_xy(INT8 start_x, INT8 start_y, UINT8 piece, UINT
 
                         // If the adjacent piece has another open connection then
                         // load the new X and Y location, then try it next (in this loop)
-                        next_x += GP_CONNECT_NEXT_X_LUT[this_connect];
-                        next_y += GP_CONNECT_NEXT_Y_LUT[this_connect];
+                        check_x += GP_CONNECT_NEXT_X_LUT[this_connect];
+                        check_y += GP_CONNECT_NEXT_Y_LUT[this_connect];
 
                     } else {
-                        // If next_connect is empty (only 1 connection, to previous tile)
+
+                        // If check_connect is empty (only 1 connection, to previous tile)
                         // that means it's a HEAD or TAIL segment
                         // and this end is completed
                         headtail_count++;
                         break; // exit loop
                     }
 
+                    // Store previous connection bit
+                    last_connect = this_connect;
+
                 } // end: while board_check_connected_xy()
+
+                // Prevent special-merge from re-testing already
+                // handled pieces (in case of a loop shape)
+                if ((check_x == start_x) && (check_y == start_y)
+                    && (flags & BRD_CHECK_FLAGS_IGNORE_PET_TYPE)) {
+                    // Clear the (copied) connection for the original piece
+                    // connection that the loop just completed on
+                    connect ^= GP_CONNECT_MATCHING_LUT[(last_connect)];
+                }
+
             } // end: if (c & connect)
         } // end: for (c=GP_CONNECT_MIN_BITS;
+
 
         // Check if a completed pet was found
         if ( ((headtail_count >= 2) && (piece_count >= 2)) ||
