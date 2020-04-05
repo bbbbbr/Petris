@@ -5,6 +5,34 @@
 
 #define OPTION_SETTING_MIN 0
 
+// Speed breakdown by difficulty level
+
+// FpD:   Frames between Drop
+// Inc:   Inc Every N Levels
+// Msec:  Msec between Drop
+// Diff:  Subjective Difficulty
+// % Max: Speed % of max
+// EZ:    Easy
+// NM:    Normal
+// HD:    Hard
+// EX:    Expert
+// BT:    Beast
+
+// FpD Inc Msec    Diff        % Max   EZ  NM  HD  EX  BT
+// 60  1   1000    Slow/Easy   5       1
+// 45  1   750     Med Easy    7       10  1
+// 30  1   500     Med         10      20  10
+// 20  2   333     Med Harder  15      30  20
+// 15  2   250     Hard Easy   20      40  30  1
+// 10  5   167     Hardish     30          40  10
+// 8   5   133     Hard        38              10  1
+// 6   5   100     Hard Hard   50              20  10  1
+// 5   5   83      Hard Hard   60              40  20  10
+// 4   0   67      V HARD      75                  30  20
+// 4   0   67      V HARD      75                  40  30
+// 3   0   50      V-V HARD    100                     40
+// 3   0   50      V-V HARD    100
+
 // Game Type Level
 enum {
     OPTION_GAME_TYPE_MARATHON, // = OPTION_GAME_TYPE_MIN,
