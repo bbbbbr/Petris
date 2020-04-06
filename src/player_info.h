@@ -4,6 +4,10 @@
 #ifndef PLAYER_INFO_H
 #define PLAYER_INFO_H
 
+// TODO: POLISH: revisit launch delay. Increase to 10 Frames?
+#define GAME_SPEED_LAUNCH_DELAY_FRAMES         6 // 1/10 of a second (60/10) in practice its n+1 frames due to the state machine lag
+#define GAME_SPEED_LAUNCH_DELAY_RESET          0
+
 #define GAME_SPEED_DROP_FRAME_COUNTER_RESET    0
 // #define GAME_SPEED_FRAMES_PER_DROP_DEFAULT  6 // 12 //30 // 15 // 60 frames per second default speed
 

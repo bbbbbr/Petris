@@ -8,7 +8,7 @@
 
 
 void  player_piece_update_xy(UINT8);
-UINT8 player_piece_reload(void);
+UINT8 player_piece_try_reload(void);
 void  player_piece_set_on_board(void);
 UINT8 player_piece_connect_get();
 

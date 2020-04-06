@@ -46,7 +46,7 @@ void player_piece_update_xy(UINT8 do_show) {
 
 
 
-UINT8 player_piece_reload(void) {
+UINT8 player_piece_try_reload(void) {
 
     // If the board already has a tile in the default load location then
     // that means game over. Signal failure

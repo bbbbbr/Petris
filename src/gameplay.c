@@ -38,7 +38,7 @@ UINT8 key_down_repeat_needs_release;
 UINT8 gameplay_piece_drop_requested;
 
 UINT8 piece_state;
-
+UINT8 new_piece_launch_delay;
 
 
 void game_speed_frames_per_drop_set(UINT8 new_val) {
@@ -89,7 +89,7 @@ void gameplay_init(void) {
 
     // Hide the player piece and preview sprites initially
     // They will get displayed after PLAYER_NEWPIECE is handled
-    // which then calls player_piece_reload()
+    // which then calls player_piece_try_reload()
     player_piece_update_xy(PLAYER_PIECE_HIDE);
     game_piece_next_show(FALSE);
 
@@ -246,36 +246,49 @@ void gameplay_handle_input(void) {
 void gameplay_update(void) {
 
     switch (piece_state) {
-        case PLAYER_START:
 
-            piece_state = PLAYER_NEWPIECE;
+        case PLAYER_START:
+            piece_state = PLAYER_NEWPIECE_PRELAUNCH;
             break;
 
-        case PLAYER_NEWPIECE:
-            if (player_piece_reload()) {
-                // require down key to be released before it can repeat again
-                key_down_repeat_needs_release = TRUE;
-                piece_state = PLAYER_INPLAY;
+
+        case PLAYER_NEWPIECE_PRELAUNCH:
+            new_piece_launch_delay = GAME_SPEED_LAUNCH_DELAY_FRAMES;
+            piece_state = PLAYER_NEWPIECE_LAUNCH;
+            break;
+
+
+        case PLAYER_NEWPIECE_LAUNCH:
+            if (new_piece_launch_delay) {
+                new_piece_launch_delay--;
             } else {
-                // failed to load the piece -> game over
-                game_state = GAME_ENDED;
+
+                if (player_piece_try_reload()) {
+                    // require down key to be released before it can repeat again
+                    key_down_repeat_needs_release = TRUE;
+                    piece_state = PLAYER_INPLAY;
+                } else {
+                    // failed to load the piece -> game over
+                    game_state = GAME_ENDED;
+                }
             }
             break;
+
 
         case PLAYER_INPLAY:
             gameplay_handle_input();
             gameplay_gravity_update();
             break;
 
-        case PLAYER_PIECE_LANDED:
 
+        case PLAYER_PIECE_LANDED:
             PlayFx(CHANNEL_1, 30, 0x1C, 0x81, 0x24, 0x73, 0x86);
 
             // Sets the piece on the board
             // Then checks for completed pet removal
             player_piece_set_on_board();
 
-            piece_state = PLAYER_NEWPIECE;
+            piece_state = PLAYER_NEWPIECE_PRELAUNCH;
             break;
     }
 }
