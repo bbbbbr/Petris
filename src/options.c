@@ -20,7 +20,8 @@ INT8 option_game_preview_next = NEXT_PREV_DEFAULT;
 
 // See spreadsheet for more details
 // Speed increase per level bracket roughly doubles
-const UINT8 frames_per_drop_LUT[] = {60,45,30,20,15,10,8,6,5,4,4,3,3};
+const UINT8 frames_per_drop_LUT[]          = {60,45,30,20,15,10,8,7,6,5,4,4,3};
+const UINT8 levels_per_fpd_decrement_LUT[] = { 1, 1, 1, 2, 2, 5,5,0,0,0,0,0,0};
 
 // Presets per difficulty level
 const settings_data settings_LUT[] = {
@@ -44,16 +45,41 @@ const settings_data * p_game_settings;
 UINT8 options_frames_per_drop_get(UINT8 level) {
 
     UINT8 index;
+    UINT8 sub_decrement = 0;
 
-    // game level is 1 based, so offset by -1 for array indexing
-    index = (level - 1) + p_game_settings->LUT_speed_offset;
+    // First get level index into frames-per-drop LUT
+    index = (level / FPD_LUT_LEVELS_PER_TIER);
 
-    // Bounds check
+    // Make sure Level doesn't exceed max number of tiers
+    // (increasing speed per level caps out after a certain range)
+    if (index >= FPD_TIERS_MAX) {
+        index = FPD_TIERS_MAX;
+    }
+
+    // Add offset based on difficulty setting
+    index += p_game_settings->LUT_speed_offset;
+
+    // Bounds check level LUT array
     if (index >= ARRAY_LEN(frames_per_drop_LUT)) {
         index = ARRAY_LEN(frames_per_drop_LUT);
     }
-    // frames_per_drop_LUT[ p_game_settings.LUT_speed_offset ];
-    return ( frames_per_drop_LUT[ index ] );
+
+    // Only factor in sub-tier per-level decrement if level isn't maxed out
+    if (level < FPD_LEVEL_MAX) {
+
+        // Bounds check sub-level LUT array
+        if (index < ARRAY_LEN(levels_per_fpd_decrement_LUT)) {
+
+            // TODO: OPTIMIZE: there is probably a more efficient way of doing this
+            // Increase in drop speed between tiers is based on
+            // levels elapsed since tier base divided by a scaling factor
+            sub_decrement = (level % FPD_LUT_LEVELS_PER_TIER) / levels_per_fpd_decrement_LUT[index];
+        }
+    }
+
+    // Return new frames-per-drop,
+    // factoring in per level sub-decrement
+    return (frames_per_drop_LUT[ index ] - sub_decrement);
  }
 
 

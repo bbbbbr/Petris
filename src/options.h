@@ -25,13 +25,13 @@
 // 20  2   333     Med Harder  15      30  20
 // 15  2   250     Hard Easy   20      40  30  1
 // 10  5   167     Hardish     30          40  10
-// 8   5   133     Hard        38              10  1
-// 6   5   100     Hard Hard   50              20  10  1
-// 5   5   83      Hard Hard   60              40  20  10
-// 4   0   67      V HARD      75                  30  20
-// 4   0   67      V HARD      75                  40  30
+// 8   0   133     Hard        38              20  1
+// 7   0   100     Hard Hard   50              30  10
+// 6   0   83      Hard Hard   60              40  20  1
+// 5   0   67      V HARD      75                  30  10
+// 4   0   67      V HARD      75                  40  20
+// 4   0   50      V-V HARD    100                     30
 // 3   0   50      V-V HARD    100                     40
-// 3   0   50      V-V HARD    100
 
 // Game Type Level
 enum {
@@ -76,7 +76,7 @@ enum {
 #define SPD_ST_NORMAL 1
 #define SPD_ST_HARD   4
 #define SPD_ST_EXPERT 6
-#define SPD_ST_BEAST  7
+#define SPD_ST_BEAST  8
 
 #define BONUS_EASY   1
 #define BONUS_NORMAL 1
@@ -102,6 +102,9 @@ enum {
 #define MERGE_THR_EXPERT 0x007F // once every 128
 #define MERGE_THR_BEAST  0x007F // once every 128
 
+#define FPD_LEVEL_MAX            40
+#define FPD_LUT_LEVELS_PER_TIER  10
+#define FPD_TIERS_MAX            (FPD_LEVEL_MAX / FPD_LUT_LEVELS_PER_TIER) // Level 40: FpD LUT tops out at 40 levels per difficulty setting
 
 typedef struct settings_rec {
     UINT8  LUT_speed_offset;
