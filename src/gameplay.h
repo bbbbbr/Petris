@@ -16,8 +16,7 @@ typedef enum {
 
 typedef enum {
     MOVE_OK = 0,
-    MOVE_BLOCKED,
-    MOVE_BLOCKED_GAME_OVER,
+    MOVE_BLOCKED
 } PIECE_MOVE_STATES;
 
 typedef enum {

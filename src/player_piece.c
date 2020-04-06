@@ -46,7 +46,16 @@ void player_piece_update_xy(UINT8 do_show) {
 
 
 
-void player_piece_reload(void) {
+UINT8 player_piece_reload(void) {
+
+    // If the board already has a tile in the default load location then
+    // that means game over. Signal failure
+    if (!board_check_open_xy(BRD_NEWPIECE_X, BRD_NEWPIECE_Y)) {
+
+        return (FALSE);
+    }
+
+
     // Locate new piece at default position
     // Top of board, in the middle, no rotation
     player_x      = BRD_NEWPIECE_X;
@@ -87,6 +96,9 @@ void player_piece_reload(void) {
         player_hinting_drop_show(TRUE);
         player_hinting_drop_update();
     }
+
+    // Signal successful load of a new piece
+    return (TRUE);
 }
 
 
@@ -179,11 +191,7 @@ UINT8 player_piece_move(INT8 dir_x, INT8 dir_y) {
         return (MOVE_OK);
     }
 
-    // If the move failed and the piece
-    if ((player_y == BRD_NEWPIECE_Y) && (dir_y == 1))
-        return (MOVE_BLOCKED_GAME_OVER);
-    else
-        return (MOVE_BLOCKED);
+    return (MOVE_BLOCKED);
 }
 
 

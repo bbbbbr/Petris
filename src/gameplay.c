@@ -265,11 +265,14 @@ void gameplay_update(void) {
             break;
 
         case PLAYER_NEWPIECE:
-            player_piece_reload();
-
-            // require down key to be released before it can repeat again
-            key_down_repeat_needs_release = TRUE;
-            piece_state = PLAYER_INPLAY;
+            if (player_piece_reload()) {
+                // require down key to be released before it can repeat again
+                key_down_repeat_needs_release = TRUE;
+                piece_state = PLAYER_INPLAY;
+            } else {
+                // failed to load the piece -> game over
+                game_state = GAME_ENDED;
+            }
             break;
 
         case PLAYER_INPLAY:
@@ -284,6 +287,7 @@ void gameplay_update(void) {
             // Sets the piece on the board
             // Then checks for completed pet removal
             player_piece_set_on_board();
+
             piece_state = PLAYER_NEWPIECE;
             break;
     }
@@ -301,22 +305,16 @@ void gameplay_gravity_update(void) {
 
         // Reset the counter
         game_speed_drop_frame_counter = GAME_SPEED_DROP_FRAME_COUNTER_RESET;
+
         // Clear current request to move a piece down earlier than tick time
         // (will get re-enabled next pass if player continues to hold drop key down)
         gameplay_piece_drop_requested = FALSE;
 
         // Try to move the piece down one tile
-        switch (player_piece_move( 0, 1)) {
+        if (player_piece_move( 0, 1) == MOVE_BLOCKED) {
 
-            case MOVE_BLOCKED_GAME_OVER:
-                // Game is over
-                game_state = GAME_ENDED;
-                break;
-
-            case MOVE_BLOCKED:
-                // Piece landed on board
-                piece_state = PLAYER_PIECE_LANDED;
-                break;
+            // Piece landed on board
+            piece_state = PLAYER_PIECE_LANDED;
         }
     }
 
