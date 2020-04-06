@@ -238,20 +238,6 @@ void gameplay_handle_input(void) {
         gameplay_handle_pause();
     }
 
-
-    // TODO: DEBUG
-    if (KEY_PRESSED(J_SELECT)) {
-
-        if (KEY_TICKED(J_A)) {
-            game_speed_frames_per_drop++;
-        }
-        else if (KEY_TICKED(J_B)) {
-            game_speed_frames_per_drop--;
-        }
-
-        print_num_u16(3,0, (UINT16)game_speed_frames_per_drop);
-    }
-
 }
 
 
