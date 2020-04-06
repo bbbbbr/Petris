@@ -84,6 +84,7 @@ void gameplay_init(void) {
     board_reset();
 
     // Generate the very first piece
+    game_piece_next_reset();
     game_piece_next_generate();
 
     // Hide the player piece and preview sprites initially

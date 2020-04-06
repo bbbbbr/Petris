@@ -12,18 +12,33 @@
 
 
 UINT8 game_piece_next;
+UINT8 game_piece_next_stash;
 
+
+void  game_piece_next_reset(void) {
+    game_piece_next_stash = GAME_PIECE_STASH_NONE;
+}
 
 
 void game_piece_next_generate(void) {
 
+    // Retrieve stashed next game piece if present
+    if (game_piece_next_stash != GAME_PIECE_STASH_NONE) {
 
-    // TODO: IMPROVE NEW PIECE SELECTION
-    // For now, choose single random pet tile (using div register)
-    game_piece_next = ((UINT8)DIV_REG & 0x1F);
-    // game_piece = ((GP_PET_DOG  << GP_PET_UPSHIFT) |
-    //                 (GP_SEG_TAIL << GP_SEG_UPSHIFT) |
-    //                  GP_ROT_HORZ);// + TILES_PET_START;
+        game_piece_next = game_piece_next_stash;
+        // Clear stashed next game piece
+        game_piece_next_stash = GAME_PIECE_STASH_NONE;
+
+    } else {
+        // Otherwise geenrate a new piece
+
+        // TODO: IMPROVE NEW PIECE SELECTION
+        // For now, choose single random pet tile (using div register)
+        game_piece_next = ((UINT8)DIV_REG & 0x1F);
+        // game_piece = ((GP_PET_DOG  << GP_PET_UPSHIFT) |
+        //                 (GP_SEG_TAIL << GP_SEG_UPSHIFT) |
+        //                  GP_ROT_HORZ);// + TILES_PET_START;
+    }
 }
 
 
@@ -35,6 +50,9 @@ UINT8 game_piece_next_get(void) {
 
 
 void game_piece_next_set(UINT8 override_piece) {
+
+    // Store current next piece
+    game_piece_next_stash = game_piece_next;
 
     // Override the next piece
     game_piece_next = override_piece;
