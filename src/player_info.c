@@ -34,7 +34,6 @@ void new_piece_count_increment(void) {
 }
 
 
-
 void score_update(UINT16 num_tiles) {
 
     // Check to see whether a special piece (bomb) should be delivered
@@ -58,7 +57,7 @@ void score_update(UINT16 num_tiles) {
     // * Multiplied by game difficulty type factor: score_bonus
     // * Multiplied by a general scale factor: SCORE_SCALE_FACTOR
     player_score += (num_tiles * num_tiles)
-                    * (player_level / 10)
+                    * ((player_level >> SCORE_LEVEL_FACTOR_SHIFT) | 1) // | 1 to make sure it's not zero
                     * (UINT16)p_game_settings->score_bonus
                     * SCORE_SCALE_FACTOR;
 
@@ -66,7 +65,7 @@ void score_update(UINT16 num_tiles) {
     print_num_u16(DISPLAY_SCORE_X, DISPLAY_SCORE_Y, player_score);
 
     // // Display number of pet segments completed
-    // print_num_u16(DISPLAY_NUMTILES_X, DISPLAY_NUMTILES_Y, player_numtiles);
+    // print_num_u16(DISPLAY_NUMTILES_X, DISPLAY_NUMTILES__Y, player_numtiles);
 
     // Display number of pets completed
     print_num_u16(DISPLAY_NUMPETS_X, DISPLAY_NUMPETS_Y, player_numpets);

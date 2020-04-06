@@ -8,7 +8,7 @@
 // Speed breakdown by difficulty level
 
 // FpD:   Frames between Drop
-// Inc:   Inc Every N Levels
+// Inc:   Decrease FpD once every Inc Levels
 // Msec:  Msec between Drop
 // Diff:  Subjective Difficulty
 // % Max: Speed % of max
@@ -71,17 +71,18 @@ enum {
 
 // These are offsets for where to start in frames_per_drop_LUT
 // The index for them is option_difficulty_entries
+// See the table above
 #define SPD_ST_EASY   0
 #define SPD_ST_NORMAL 1
 #define SPD_ST_HARD   4
 #define SPD_ST_EXPERT 6
 #define SPD_ST_BEAST  7
 
-#define BONUS_EASY   0
+#define BONUS_EASY   1
 #define BONUS_NORMAL 1
 #define BONUS_HARD   2
-#define BONUS_EXPERT 3
-#define BONUS_BEAST  4
+#define BONUS_EXPERT 5
+#define BONUS_BEAST  10
 
 // Number of tiles in a pet required to get a special-bomb
 // See: spec_bomb_threshold_pettiles
