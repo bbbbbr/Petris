@@ -50,7 +50,6 @@ enum {
 const char * options_type[]         = {"MARATHON    ", "LEVEL UP   ", "PET CLEANUP", "COLLECT    "}; // Must match : option_game_type_entries
 const char * options_difficulty[]   = {"EASY  ", "NORMAL", "HARD  ", "EXPERT ", "BEAST "}; // Must match : option_difficulty_entries
 const char * options_visual_hints[] = {"ON ", "OFF"}; // Must match : option_visual_hints_entries
-// TODO: const char * options_difficulty_abrv[]   = {"EZ ", "NRM", "HRD", "EXP", "BST"}; // Must match : option_difficulty_entries
 
 
 typedef struct opt_item {

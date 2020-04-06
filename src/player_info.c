@@ -63,16 +63,16 @@ void score_update(UINT16 num_tiles) {
                     * SCORE_SCALE_FACTOR;
 
     // Display the score
-    print_num_u16(DISPLAY_SCORE_X, DISPLAY_SCORE_Y, player_score);
+    print_num_u16(DISPLAY_SCORE_X, DISPLAY_SCORE_Y, player_score, DIGITS_5);
 
     // // Display number of pet segments completed
     // print_num_u16(DISPLAY_NUMTILES_X, DISPLAY_NUMTILES__Y, player_numtiles);
 
     // TODO: Debug: frames per drop (requires extern UINT8 game_speed_frames_per_drop;)
-    // print_num_u16(DISPLAY_NUMPETS_X, DISPLAY_NUMPETS_Y + 2, (UINT16)game_speed_frames_per_drop);
+    // print_num_u16(DISPLAY_NUMPETS_X, DISPLAY_NUMPETS_Y + 2, (UINT16)game_speed_frames_per_drop, DIGITS_5);
 
     // Display number of pets completed
-    print_num_u16(DISPLAY_NUMPETS_X, DISPLAY_NUMPETS_Y, player_numpets);
+    print_num_u16(DISPLAY_NUMPETS_X, DISPLAY_NUMPETS_Y, player_numpets, DIGITS_5);
 }
 
 
@@ -102,21 +102,24 @@ void level_increment(void) {
 
     // TODO:    PLAY_SOUND_LEVEL_UP; // TODO: this needs a delay after last piece clear sound
     // TODO: ???? reset or NOT reset number of pets/tiles completed per level? May depend on play mode
-    player_level++;
 
-    // TODO: level_handle_next() ?? Do more things?
+    if (player_level < PLAYER_LEVEL_MAX) {
+        player_level++;
 
-    // TODO: ?? change this to options_frames_per_drop_update() call -> game_speed_frames_per_drop_set()
-    game_speed_frames_per_drop_set( options_frames_per_drop_get(player_level) );
+        // TODO: level_handle_next() ?? Do more things?
 
-    print_num_u16(DISPLAY_LEVEL_X, DISPLAY_LEVEL_Y, player_level);
+        // TODO: ?? change this to options_frames_per_drop_update() call -> game_speed_frames_per_drop_set()
+        game_speed_frames_per_drop_set( options_frames_per_drop_get((UINT8)player_level) );
+
+        level_show();
+    }
 }
 
 
 
 void level_show(void) {
 
-    print_num_u16(DISPLAY_LEVEL_X, DISPLAY_LEVEL_Y, player_level);
+    print_num_u16(DISPLAY_LEVEL_READOUT_X, DISPLAY_LEVEL_Y, player_level, DIGITS_3);
 }
 
 
@@ -136,6 +139,9 @@ void player_info_newgame_reset(void) {
     PRINT(DISPLAY_NEXT_PIECE_TEXT_X,    DISPLAY_NEXT_PIECE_TEXT_Y - 1,    "NEXT:", 0);
 
     PRINT(DISPLAY_LEVEL_X,    DISPLAY_LEVEL_Y - 1,    "LEVEL", 0);
+     // On same line as level readout
+    PRINT(DISPLAY_DIFF_X,     DISPLAY_DIFF_Y,         options_difficulty_abbrev_text_get(), 0);
+
     PRINT(DISPLAY_SCORE_X,    DISPLAY_SCORE_Y - 1,    "SCORE", 0);
     PRINT(DISPLAY_NUMPETS_X,  DISPLAY_NUMPETS_Y - 1,  "PETS", 0);
 //    PRINT(DISPLAY_NUMTILES_X, DISPLAY_NUMTILES_Y - 1, "TILES", 0);
@@ -154,7 +160,7 @@ void player_info_newgame_reset(void) {
     level_counters_reset();
 
     // Should be called after level_counters_reset()
-    game_speed_frames_per_drop_set( options_frames_per_drop_get(player_level) );
+    game_speed_frames_per_drop_set( options_frames_per_drop_get((UINT8)player_level) );
     // TODO: ???? change this to options_frames_per_drop_update() call -> game_speed_frames_per_drop_set()
     // OR, level_update_speed()
     // OR, gameplay_speed_update() <------ ???

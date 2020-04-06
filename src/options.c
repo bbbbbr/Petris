@@ -23,6 +23,8 @@ INT8 option_game_preview_next = NEXT_PREV_DEFAULT;
 const UINT8 frames_per_drop_LUT[]          = {60,45,30,20,15,10,8,7,6,5,4,4,3};
 const UINT8 levels_per_fpd_decrement_LUT[] = { 1, 1, 1, 2, 2, 5,5,0,0,0,0,0,0};
 
+const char * options_difficulty_abrv[]  = {"EZ ", "NM", "HD", "XP", "BT"}; // Must match : option_difficulty_entries
+
 // Presets per difficulty level
 const settings_data settings_LUT[] = {
     {SPD_ST_EASY,   NEXT_PREV_ON,  BONUS_EASY,   BOMB_THR_EASY,   MERGE_THR_EASY},
@@ -35,13 +37,18 @@ const settings_data settings_LUT[] = {
 const settings_data * p_game_settings;
 
 
+const char * options_difficulty_abbrev_text_get(void) {
+    return options_difficulty_abrv[option_game_difficulty];
+}
+
+
 // TODO: ?? use accessor instead of directly accessing option_game_preview_next?
 //UINT8 options_preview_next_enabled_get(UINT8 level) {
 //     option_game_preview_next      = settings_LUT[ option_game_difficulty ].preview_next_enabled;
 //}
 
 
-// NOTE: level must *not* be zero
+// TODO: NOTE: level must *not* be zero <-- no longer true?
 UINT8 options_frames_per_drop_get(UINT8 level) {
 
     UINT8 index;

@@ -4,8 +4,11 @@
 #ifndef GFX_PRINT_H
 #define GFX_PRINT_H
 
-void print_num_u16(UINT8, UINT8, UINT16);
+void print_num_u16(UINT8, UINT8, UINT16, UINT8);
 
+#define DIGITS_5 5
+#define DIGITS_3 3
+#define DIGITS_2 2
 
 extern UINT8 print_x, print_y, font_idx, print_target;
 

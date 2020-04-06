@@ -39,16 +39,19 @@ void print_font_palette_set(UINT8 pal_num) {
 
 
 
-// TODO: accept max_print_digits as param
 // Render a font digit
-void print_num_u16(UINT8 x, UINT8 y, UINT16 num) {
+void print_num_u16(UINT8 x, UINT8 y, UINT16 num, UINT8 print_digits) {
 
     // Initialize index at END of array +1,
     // so that the first pass sets it to the first array position
     UINT8 index = PRINT_MAX_DIGITS;
 
+    if (print_digits > PRINT_MAX_DIGITS)
+        print_digits = PRINT_MAX_DIGITS;
+
     // Bounds checking
-    if (num <= PRINT_MAX_NUM) {
+// TODO: REMOVE?
+//    if (num <= PRINT_MAX_NUM) {
         // Store individual digits of n in reverse order
         // Starting at the END of the array and working forward
         // (using do-while to handle when initial value == 0)
@@ -71,16 +74,18 @@ void print_num_u16(UINT8 x, UINT8 y, UINT16 num) {
 
         // Update BG Tilemap from Game Board
         VBK_REG = 1; // Select BG tile attribute map
-        set_bkg_tiles(x, y,
-                       (PRINT_MAX_DIGITS - index), 1, // 1 tile high
-                       &digits_attribs[index]); // Start at first digit and go to end of array
+        set_bkg_tiles(x,
+                      y,
+                      print_digits, 1, // 1 tile high
+                      &digits_attribs[index + (PRINT_MAX_DIGITS - print_digits) ]); // Start at first digit and go to end of array
 
         // Update BG Tilemap from Game Board
         VBK_REG = 0; // Re-Select regular BG tile map
-        set_bkg_tiles(x, y,
-                      (PRINT_MAX_DIGITS - index), 1, // 1 tile high
-                      &digits[index]); // Start at first digit and go to end of array
-    }
+        set_bkg_tiles(x,
+                      y,
+                      print_digits, 1, // 1 tile high
+                      &digits[index + (PRINT_MAX_DIGITS - print_digits) ]); // Start at first digit and go to end of array
+//    }
 }
 
 

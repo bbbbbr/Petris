@@ -121,6 +121,7 @@ extern INT8 option_game_visual_hints;
 extern INT8 option_game_type;
 extern INT8 option_game_preview_next;
 
+const char * options_difficulty_abbrev_text_get(void);
 UINT8 options_frames_per_drop_get(UINT8);
 void options_player_settings_apply(void);
 
