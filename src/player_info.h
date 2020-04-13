@@ -50,7 +50,7 @@
 #define PLAYER_NUMPIECES_RESET 0
 
 // #define PLAYER_TILES_PER_LEVEL  20 // 25
-#define PLAYER_PETS_PER_LEVEL   10
+#define PLAYER_PETS_PER_LEVEL   20 // TODO: Finalize pets per level? 25?
 
 
 void score_update(UINT16 num_tiles);
