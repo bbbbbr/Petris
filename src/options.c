@@ -21,7 +21,7 @@ INT8 option_game_preview_next = NEXT_PREV_DEFAULT;
 // See spreadsheet for more details
 // Speed increase per level bracket roughly doubles
 const UINT8 frames_per_drop_LUT[]          = {60,45,30,20,15,10,8,7,6,5,4,4,3};
-const UINT8 levels_per_fpd_decrement_LUT[] = { 1, 1, 1, 2, 2, 5,5,0,0,0,0,0,0};
+const UINT8 levels_per_fpd_decrement_LUT[] = { 1, 1, 1, 2, 2, 5,0,0,0,0,0,0,0};
 
 const char * options_difficulty_abrv[]  = {"EZ ", "NM", "HD", "XP", "BT"}; // Must match : option_difficulty_entries
 
