@@ -33,6 +33,7 @@ void new_piece_count_increment(void) {
 
 }
 
+extern game_speed_frames_per_drop; // TODO: DEBUG: REMOVE
 
 
 void score_update(UINT16 num_tiles) {
@@ -67,9 +68,6 @@ void score_update(UINT16 num_tiles) {
 
     // // Display number of pet segments completed
     // print_num_u16(DISPLAY_NUMTILES_X, DISPLAY_NUMTILES__Y, player_numtiles);
-
-    // TODO: Debug: frames per drop (requires extern UINT8 game_speed_frames_per_drop;)
-    // print_num_u16(DISPLAY_NUMPETS_X, DISPLAY_NUMPETS_Y + 2, (UINT16)game_speed_frames_per_drop, DIGITS_5);
 
     // Display number of pets completed
     print_num_u16(DISPLAY_NUMPETS_X, DISPLAY_NUMPETS_Y, player_numpets, DIGITS_5);
@@ -112,6 +110,11 @@ void level_increment(void) {
         game_speed_frames_per_drop_set( options_frames_per_drop_get((UINT8)player_level) );
 
         level_show();
+
+
+// TODO: Debug: frames per drop (requires extern UINT8 game_speed_frames_per_drop;)
+print_num_u16(DISPLAY_NUMPETS_X, DISPLAY_NUMPETS_Y + 2, (UINT16)game_speed_frames_per_drop, DIGITS_5);
+
     }
 }
 
@@ -164,4 +167,7 @@ void player_info_newgame_reset(void) {
     // TODO: ???? change this to options_frames_per_drop_update() call -> game_speed_frames_per_drop_set()
     // OR, level_update_speed()
     // OR, gameplay_speed_update() <------ ???
+
+// TODO: Debug: frames per drop (requires extern UINT8 game_speed_frames_per_drop;)
+print_num_u16(DISPLAY_NUMPETS_X, DISPLAY_NUMPETS_Y + 2, (UINT16)game_speed_frames_per_drop, DIGITS_5);
 }
