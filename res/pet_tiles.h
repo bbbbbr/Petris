@@ -27,10 +27,10 @@
 #define pet_tilesBank 0
 
 /* Super Gameboy palette 0 */
-#define pet_tilesSGBPal0c0 6076
-#define pet_tilesSGBPal0c1 8935
-#define pet_tilesSGBPal0c2 6596
-#define pet_tilesSGBPal0c3 5344
+#define pet_tilesSGBPal0c0 0
+#define pet_tilesSGBPal0c1 0
+#define pet_tilesSGBPal0c2 0
+#define pet_tilesSGBPal0c3 0
 
 /* Super Gameboy palette 1 */
 #define pet_tilesSGBPal1c0 6076
@@ -53,24 +53,24 @@
 /* Gameboy Color palette 0 */
 #define pet_tilesCGBPal0c0 32765
 #define pet_tilesCGBPal0c1 15230
-#define pet_tilesCGBPal0c2 15230
+#define pet_tilesCGBPal0c2 7964
 #define pet_tilesCGBPal0c3 368
 
 /* Gameboy Color palette 1 */
 #define pet_tilesCGBPal1c0 32765
-#define pet_tilesCGBPal1c1 32527
+#define pet_tilesCGBPal1c1 30378
 #define pet_tilesCGBPal1c2 32527
 #define pet_tilesCGBPal1c3 20961
 
 /* Gameboy Color palette 2 */
 #define pet_tilesCGBPal2c0 32765
-#define pet_tilesCGBPal2c1 12203
+#define pet_tilesCGBPal2c1 3939
 #define pet_tilesCGBPal2c2 12203
 #define pet_tilesCGBPal2c3 11814
 
 /* Gameboy Color palette 3 */
 #define pet_tilesCGBPal3c0 32765
-#define pet_tilesCGBPal3c1 31198
+#define pet_tilesCGBPal3c1 29949
 #define pet_tilesCGBPal3c2 31198
 #define pet_tilesCGBPal3c3 17585
 
