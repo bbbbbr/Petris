@@ -70,7 +70,7 @@ void fade_start(INT8 fade_dir) {
                     palette_bg[c] = (*p_bg | FADE_LUT[i]);
                     palette_sp[c] = (*p_sp | FADE_LUT[i]);
 
-                    // // Fade in/out from Black
+                    // // Fade in/out from Black (if enabled, remove: = {FADE_LUT)
                     // palette_bg[c] = ((*p_bg) >> i) & FADE_LUT[5 - i];
                     // palette_sp[c] = ((*p_sp) >> i) & FADE_LUT[5 - i];
 
@@ -81,7 +81,7 @@ void fade_start(INT8 fade_dir) {
             set_bkg_palette(pal, 1, palette_bg);
             set_sprite_palette(pal, 1, palette_sp);
         }
-        // delay(20);
+        delay(10);
         i += fade_dir;
     }
 }
