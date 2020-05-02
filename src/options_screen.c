@@ -10,6 +10,7 @@
 #include "sound.h"
 #include "input.h"
 #include "common.h"
+#include "fade.h"
 
 #include "game_piece_data.h"
 
@@ -188,7 +189,8 @@ void options_screen_sprites_init(void) {
 
     SPRITES_8x8;
 
-    set_sprite_palette(BG_PAL_0, 4, board_pets_palette); // UBYTE first_palette, UBYTE nb_palettes, UWORD *rgb_data
+//    set_sprite_palette(BG_PAL_0, 4, board_pets_palette); // UBYTE first_palette, UBYTE nb_palettes, UWORD *rgb_data, pal_type
+    fade_set_pal(BG_PAL_0, 4, board_pets_palette, FADE_PAL_SPRITES);
     set_sprite_data(0, TILE_COUNT_PETTOTAL, pet_tiles);
 
     set_sprite_tile(SPR_OPTIONS_CURSOR, PET_DOG_HEAD);
@@ -201,6 +203,7 @@ void options_screen_sprites_init(void) {
 
 void options_screen_exit_cleanup(void) {
 
+    fade_start(FADE_OUT);
     HIDE_SPRITES;
 
 }
@@ -211,7 +214,8 @@ void options_screen_init(void) {
 
     INT8 c;
 
-    set_bkg_palette(BG_PAL_4, 4, intro_screen_palette); // UBYTE first_palette, UBYTE nb_palettes, UWORD *rgb_data
+    // set_bkg_palette(BG_PAL_4, 4, intro_screen_palette); // UBYTE first_palette, UBYTE nb_palettes, UWORD *rgb_data
+    fade_set_pal(BG_PAL_4, 4, intro_screen_palette, FADE_PAL_BKG);
 
     // TODO: OPTIMIZE: consolidate this? the same tiles are used in all screens so far
     set_bkg_data(TILES_INTRO_START,     TILE_COUNT_INTRO,     intro_screen_tiles);
@@ -231,6 +235,7 @@ void options_screen_init(void) {
     // Reveal sprite last since other screen setup/drawing is slow
     options_screen_sprites_init();
     options_screen_cursor_update(0);
+    fade_start(FADE_IN);
 }
 
 
@@ -262,7 +267,6 @@ void options_screen_handle(void) {
 
         options_screen_exit_cleanup();
         game_state = GAME_READY_TO_START;
-
     }
     // Start game or update value of current setting
     else if (KEY_TICKED(J_A)) {

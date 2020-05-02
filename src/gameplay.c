@@ -9,6 +9,7 @@
 #include "input.h"
 #include "sound.h"
 #include "gfx_print.h"
+#include "fade.h"
 
 #include "player_piece.h"
 #include "player_hinting.h"
@@ -59,6 +60,7 @@ void gameplay_handle_gameover_screen(void) {
 
 void gameplay_exit_cleanup(void) {
 
+    fade_start(FADE_OUT);
     HIDE_SPRITES;
     // TODO: CLEANUP: hide all extra player sprites
     player_piece_update_xy(PLAYER_PIECE_HIDE);
