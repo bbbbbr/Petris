@@ -4,6 +4,8 @@
 #include "common.h"
 #include "audio_common.h"
 
+#include "fade.h"
+
 // #include "game_board.h"
 // #include "game_board_gfx.h"
 #include "gameplay.h"
@@ -53,6 +55,11 @@ void init (void) {
 
     init_sound();
 
+// SetFadePalBkg(BG_PAL_4, 4, intro_screen_palette, FADE_PAL_BKG);
+FadeColor(FADE_OUT);
+//FadeColor(FADE_IN);
+
+
     DISPLAY_ON;
 
     game_state = GAME_INTRO_INIT;
@@ -79,6 +86,7 @@ void main(void){
         switch (game_state) {
 
             case GAME_INTRO_INIT:
+
                 intro_screen_init();
                 game_state = GAME_INTRO;
                 break;
@@ -87,9 +95,10 @@ void main(void){
             case GAME_INTRO:
                 intro_screen_handle();
                 // Done with intro screen, now start game
-                if (KEY_TICKED(J_START))
-                    //game_state = GAME_READY_TO_START;
-                    game_state = GAME_OPTIONS_INIT; // TODO : enable options
+                if (KEY_TICKED(J_START)) {
+                    game_state = GAME_OPTIONS_INIT;
+                    FadeColor(FADE_OUT);
+                }
                 break;
 
 
