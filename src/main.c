@@ -55,9 +55,7 @@ void init (void) {
 
     init_sound();
 
-// SetFadePalBkg(BG_PAL_4, 4, intro_screen_palette, FADE_PAL_BKG);
-FadeColor(FADE_OUT);
-//FadeColor(FADE_IN);
+    fade_start(FADE_OUT);
 
 
     DISPLAY_ON;
@@ -97,7 +95,7 @@ void main(void){
                 // Done with intro screen, now start game
                 if (KEY_TICKED(J_START)) {
                     game_state = GAME_OPTIONS_INIT;
-                    FadeColor(FADE_OUT);
+                    fade_start(FADE_OUT);
                 }
                 break;
 
