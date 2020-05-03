@@ -10,6 +10,7 @@
 #include "game_board_special_pieces.h"
 #include "game_piece_data.h"
 #include "gfx.h"
+#include "gfx_print.h"
 #include "sound.h"
 #include "player_info.h"
 
@@ -35,37 +36,54 @@ const UINT8 board_blank_row[] = {TILE_ID_BOARD_BLANK_BG,
                                  TILE_ID_BOARD_BLANK_BG,
                                  TILE_ID_BOARD_BLANK_BG};
 
+const UINT8 board_x_row[] = {TILE_ID_BOARD_UP,
+                             TILE_ID_BOARD_UP,
+                             TILE_ID_BOARD_UP,
+                             TILE_ID_BOARD_UP,
+                             TILE_ID_BOARD_UP,
+                             TILE_ID_BOARD_UP,
+                             TILE_ID_BOARD_UP,
+                             TILE_ID_BOARD_UP,
+                             TILE_ID_BOARD_UP,
+                             TILE_ID_BOARD_UP};
+
 const UINT8 board_blank_row_pal[] = {0x04,0x04,0x04,0x04,0x04,0x04,0x04,0x04,0x04,0x04};
 
 // Clears the game board
 //
 // * Called during PAUSE
-void board_hide_all(void) {
+void board_hide_all(UINT16 delay_amount) {
 
-    UINT8 y;
-    // Update BG Attrons from Game Board
-    VBK_REG = 1; // Select regular BG tile map
+    INT8 y;
 
-    // TODO: this could be more efficient
-    // Only sets tile IDs, leaves attrib map in place
-    for (y = BRD_ST_Y; y < (BRD_ST_Y + BRD_HEIGHT); y++) {
+    // for (y = BRD_ST_Y; y < (BRD_ST_Y + BRD_HEIGHT); y++) {
+    // Clear board from bottom up
+    for (y = BRD_END_Y; y >= BRD_ST_Y; y--) {
+
+        // Update BG Attribs from Game Board
+        VBK_REG = 1;
         set_bkg_tiles(BRD_ST_X, y,
                       sizeof(board_blank_row_pal), 1,
                       &board_blank_row_pal[0]);
 
-    }
+        // Update BG Tilemap from Game Board
+        VBK_REG = 0;
 
+        if (delay_amount) {
+            set_bkg_tiles(BRD_ST_X, y,
+                          sizeof(board_x_row), 1,
+                          &board_x_row[0]);
 
-    // Update BG Tilemap from Game Board
-    VBK_REG = 0; // Select regular BG tile map
+            #ifdef CPU_FAST_ENABLED
+                delay(delay_amount * 2);
+            #else
+                delay(delay_amount);
+            #endif
+        }
 
-    // TODO: this could be more efficient
-    // Only sets tile IDs, leaves attrib map in place
-    for (y = BRD_ST_Y; y < (BRD_ST_Y + BRD_HEIGHT); y++) {
         set_bkg_tiles(BRD_ST_X, y,
                       sizeof(board_blank_row), 1,
                       &board_blank_row[0]);
-
     }
 }
 
@@ -125,6 +143,34 @@ void board_reset(void) {
     board_redraw_all();
 }
 
+
+void board_flash_message(UINT8 start_x, UINT8 start_y, char * text, char * ctext, UINT8 repeat) {
+
+    UINT8 c;
+
+    // Hide the game board and player piece
+    board_hide_all(BRD_CLR_DELAY_NONE);
+
+    for (c = 0; c < repeat; c++) {
+        // blank print text using the provided ctext
+        PRINT(start_x, start_y, ctext,0);
+
+        #ifdef CPU_FAST_ENABLED
+            delay(1000);
+        #else
+            delay(500);
+        #endif
+
+        // print provided text
+        PRINT(start_x, start_y, text,0);
+
+        #ifdef CPU_FAST_ENABLED
+            delay(1000);
+        #else
+            delay(500);
+        #endif
+    }
+}
 
 
 // Given x,y board coordinate, what is the lowest continuously open
@@ -322,10 +368,6 @@ void board_handle_pet_completed(UINT8 flags) {
 
     UINT8 c = 0;
 
-    //  Player gets no credit when special piece is used
-    if (!(flags & BRD_CHECK_FLAGS_IGNORE_PET_TYPE))
-        score_update((UINT16)board_tile_clear_count);
-
     while (c < board_tile_clear_count) {
         // TODO: OPTIMIZE: smaller arrays could be used. or pre-calc BG tile location)
         // TODO: OPTION: PET-PILE MODE (don't clear tiles, level is up and totaled when screen is filled
@@ -354,6 +396,11 @@ void board_handle_pet_completed(UINT8 flags) {
         // TODO: increment score as the pieces clear?
         // TODO: animate the peices clearing (with sprite?)
     }
+
+    //  Player gets no credit when special piece is used
+    if (!(flags & BRD_CHECK_FLAGS_IGNORE_PET_TYPE))
+        score_update((UINT16)board_tile_clear_count);
+
 
     board_tile_clear_count = 0;
 }

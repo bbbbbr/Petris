@@ -21,6 +21,7 @@
 #define GP_SPECIAL_BOMB_HINT   0x23U
 #define GP_SPECIAL_MERGE_HINT  0x24U
 #define GP_SPECIAL_DROP_HINT   0x25U
+#define GP_GENERAL_X           0x26U
 
 
 #define GP_PET_UPSHIFT  2
