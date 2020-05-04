@@ -57,7 +57,7 @@
 #define MSG_LEVEL_UP_REPEAT 2
 
 #define BRD_CLR_DELAY_NONE 0
-#define BRD_CLR_DELAY_CLEAR_MED 25
+#define BRD_CLR_DELAY_CLEAR_MED 35// 25
 
 void board_hide_all(UINT16);
 void board_redraw_all(void);
