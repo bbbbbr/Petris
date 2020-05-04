@@ -58,7 +58,9 @@ void game_piece_next_set(UINT8 override_piece) {
     game_piece_next = override_piece;
 
     // Update the next preview display
-    game_piece_next_show(TRUE);
+    // TODO: It looks kind of strange when the override shows up
+    //       for only a second in the preview and then pops up top
+    // game_piece_next_show(TRUE);
 }
 
 
