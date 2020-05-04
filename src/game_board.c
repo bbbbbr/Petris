@@ -206,7 +206,7 @@ UINT8 board_check_open_xy(INT8 x, INT8 y) {
 
 
 // TODO: animation?
-void board_clear_tile_xy(INT8 x, INT8 y, UINT8 anim_mode) {
+void board_clear_tile_xy(INT8 x, INT8 y) {
 
     UINT8 tile_index;
     UINT8 c;
@@ -219,18 +219,13 @@ void board_clear_tile_xy(INT8 x, INT8 y, UINT8 anim_mode) {
     {
         tile_index = x + (y * BRD_WIDTH);
 
-        // If board tile is occupied, animate it's removal
-        // (use attribs/color from existing tile)
-        // If a special piece has requested, always show the animation
-        if ((board_pieces[tile_index] != (GP_EMPTY + TILES_PET_START)) ||
-            (anim_mode == BOARD_CLEAR_ANIM_ALWAYS)) {
+        // Animate removal of board tile, even if blank - i,e called by a bomb/etc
+        // Use attribs/color from existing tile as-is
+        for (c=0; c < ARRAY_LEN(gp_dissolve_anim); c++) {
 
-            for (c=0; c < ARRAY_LEN(gp_dissolve_anim); c++) {
-
-                board_pieces[tile_index] = gp_dissolve_anim[c];
-                board_draw_tile_xy(x, y, tile_index);
-                delay(40);
-            }
+            board_pieces[tile_index] = gp_dissolve_anim[c];
+            board_draw_tile_xy(x, y, tile_index);
+            delay(40);
         }
 
         board_pieces[tile_index] = GP_EMPTY + TILES_PET_START;
@@ -240,6 +235,9 @@ void board_clear_tile_xy(INT8 x, INT8 y, UINT8 anim_mode) {
         board_connect[tile_index] = GP_CONNECT_NONE_BITS;
 
         board_draw_tile_xy(x, y, tile_index);
+
+        // Last extra delay between subsequent tile clearings
+        delay(20);
     }
 }
 
@@ -388,10 +386,7 @@ void board_handle_pet_completed(UINT8 flags) {
         // TODO: move the effects into board_clear_tile_xy?
 
         board_clear_tile_xy(board_tile_clear_cache_x[c],
-                            board_tile_clear_cache_y[c],
-                            BOARD_CLEAR_ANIM_NORM);
-        delay(20);
-
+                            board_tile_clear_cache_y[c]);
         c++;
 
         // TODO: increment score as the pieces clear?

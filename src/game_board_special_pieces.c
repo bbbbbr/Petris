@@ -23,17 +23,14 @@ void board_handle_special_bomb(UINT8 x,UINT8 y) {
     // TODO: OPTIMIZE: make a loop?
     // TODO: move the effects into board_clear_tile_xy?
     PlayFx(CHANNEL_1, 30, 0x1C, 0x81, 0x24, 0x73, 0x86);
-    board_clear_tile_xy(x - 1, y, BOARD_CLEAR_ANIM_ALWAYS);
-    delay(20);
+    board_clear_tile_xy(x - 1, y);
 
     PlayFx(CHANNEL_1, 30, 0x1C, 0x81, 0x24, 0x73, 0x86);
-    board_clear_tile_xy(x + 1, y, BOARD_CLEAR_ANIM_ALWAYS);
-    delay(20);
+    board_clear_tile_xy(x + 1, y);
 
     PlayFx(CHANNEL_1, 30, 0x1C, 0x81, 0x24, 0x73, 0x86);
-    board_clear_tile_xy(x, y - 1, BOARD_CLEAR_ANIM_ALWAYS);
-    delay(20);
+    board_clear_tile_xy(x, y - 1);
 
     PlayFx(CHANNEL_1, 30, 0x1C, 0x81, 0x24, 0x73, 0x86);
-    board_clear_tile_xy(x, y + 1, BOARD_CLEAR_ANIM_ALWAYS);
+    board_clear_tile_xy(x, y + 1);
 }
