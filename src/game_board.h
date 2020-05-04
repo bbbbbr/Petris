@@ -59,13 +59,15 @@
 #define BRD_CLR_DELAY_NONE 0
 #define BRD_CLR_DELAY_CLEAR_MED 25
 
+#define BOARD_CLEAR_ANIM_NORM   0
+#define BOARD_CLEAR_ANIM_ALWAYS 1
 
 void board_hide_all(UINT16);
 void board_redraw_all(void);
 void board_draw_tile_xy(INT8, INT8, UINT8);
 
 void board_reset(void);
-void board_clear_tile_xy(INT8, INT8);
+void board_clear_tile_xy(INT8, INT8, UINT8);
 
 void board_flash_message(UINT8, UINT8, char *, char *, UINT8);
 

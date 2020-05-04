@@ -121,6 +121,14 @@ UINT8 player_piece_connect_get() {
 // TODO: optimize out this function unless it starts doing more
 void player_piece_set_on_board(void) {
 
+    // Hide sprite based piece before setting setting the board
+    // (except for *specials*, which don't get placed).
+    // This happens here so it doesn't obscure board animations
+    // under the sprite based piece
+    if (!(player_piece & GP_SPECIAL_MASK)) {
+        player_piece_update_xy(PLAYER_PIECE_HIDE);
+    }
+    // Now set the piece onto the board
     board_set_tile_xy(player_x, player_y,
                       player_piece,
                       player_attrib,
