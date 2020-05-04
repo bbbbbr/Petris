@@ -49,6 +49,11 @@ const UINT8 board_x_row[] = {TILE_ID_BOARD_UP,
 
 const UINT8 board_blank_row_pal[] = {0x04,0x04,0x04,0x04,0x04,0x04,0x04,0x04,0x04,0x04};
 
+const UINT8 gp_dissolve_anim[] = {GP_DISSOLVE_1 + TILES_PET_START,
+                                  GP_DISSOLVE_2 + TILES_PET_START,
+                                  GP_DISSOLVE_3 + TILES_PET_START};
+
+
 // Clears the game board
 //
 // * Called during PAUSE
@@ -215,9 +220,10 @@ UINT8 board_check_open_xy(INT8 x, INT8 y) {
 
 
 // TODO: animation?
-void board_clear_tile_xy(INT8 x, INT8 y) {
+void board_clear_tile_xy(INT8 x, INT8 y, UINT8 anim_mode) {
 
     UINT8 tile_index;
+    UINT8 c;
 
     // TODO: Bounds checking for board here
     if ((x >= BRD_MIN_X) &&
@@ -226,6 +232,20 @@ void board_clear_tile_xy(INT8 x, INT8 y) {
         (y <= BRD_MAX_Y))
     {
         tile_index = x + (y * BRD_WIDTH);
+
+        // If board tile is occupied, animate it's removal
+        // (use attribs/color from existing tile)
+        // If a special piece has requested, always show the animation
+        if ((board_pieces[tile_index] != (GP_EMPTY + TILES_PET_START)) ||
+            (anim_mode == BOARD_CLEAR_ANIM_ALWAYS)) {
+
+            for (c=0; c < ARRAY_LEN(gp_dissolve_anim); c++) {
+
+                board_pieces[tile_index] = gp_dissolve_anim[c];
+                board_draw_tile_xy(x, y, tile_index);
+                delay(40);
+            }
+        }
 
         board_pieces[tile_index] = GP_EMPTY + TILES_PET_START;
         // Set palette based on pet type (CGB Pal bits are 0x07)
@@ -236,9 +256,6 @@ void board_clear_tile_xy(INT8 x, INT8 y) {
         board_draw_tile_xy(x, y, tile_index);
     }
 }
-
-
-
 
 
 
@@ -385,11 +402,12 @@ void board_handle_pet_completed(UINT8 flags) {
         // TODO: move the effects into board_clear_tile_xy?
 
         board_clear_tile_xy(board_tile_clear_cache_x[c],
-                            board_tile_clear_cache_y[c]);
+                            board_tile_clear_cache_y[c],
+                            BOARD_CLEAR_ANIM_NORM);
         #ifdef CPU_FAST_ENABLED
-            delay(300);
+            delay(40);
         #else
-            delay(150);
+            delay(20);
         #endif
         c++;
 
