@@ -3,6 +3,8 @@
 #ifndef GFX_H
 #define GFX_H
 
+// DEBUG_SHOW
+
 #define BG_PAL_0    0x00
 #define BG_PAL_1    0x01
 #define BG_PAL_2    0x02
@@ -31,9 +33,10 @@
 
 
 #define TILES_INTRO_START      0
-#define TILE_COUNT_INTRO       68
+#define TILE_COUNT_INTRO       69
 #define TILE_ID_BOARD_BLANK_BG (TILES_INTRO_START + 3)
 #define TILE_ID_BOARD_NEXT_PIECE_PREVIEW_BG  (TILES_INTRO_START + 0)
+#define TILE_ID_BOARD_UP        (TILES_INTRO_START + 68)
 
 
 #define TILES_PET_START        96 // This requires ^2 alignment

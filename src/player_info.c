@@ -10,6 +10,7 @@
 #include "player_info.h"
 #include "game_piece.h"
 #include "game_piece_data.h"
+#include "game_board.h"
 #include "game_board_special_pieces.h"
 #include "gameplay.h"
 #include "options.h"
@@ -111,10 +112,33 @@ void level_increment(void) {
 
         level_show();
 
+        // TODO: move to game_mode_handle_level_increment() ? game_mode.c
+        if (option_game_type == OPTION_GAME_TYPE_LEVEL_UP) {
+            // if ((level % MODE_LEVELUP_LEVEL_INCREMENT) == 0) {
 
-// TODO: Debug: frames per drop (requires extern UINT8 game_speed_frames_per_drop;)
-print_num_u16(DISPLAY_NUMPETS_X, DISPLAY_NUMPETS_Y + 2, (UINT16)game_speed_frames_per_drop, DIGITS_5);
+                HIDE_SPRITES;
 
+                PLAY_SOUND_LEVEL_UP;
+                board_hide_all(BRD_CLR_DELAY_CLEAR_MED);
+                // Flash a get ready message to the player
+                board_flash_message(MSG_LEVEL_UP_X, MSG_LEVEL_UP_Y,
+                                    MSG_LEVEL_UP_TEXT, MSG_LEVEL_UP_CTEXT,
+                                    MSG_LEVEL_UP_REPEAT);
+
+                board_reset();
+
+                // Generate the very first piece
+                game_piece_next_reset();
+                game_piece_next_generate();
+
+                SHOW_SPRITES;
+
+        }
+
+    // TODO: Debug: frames per drop (requires extern UINT8 game_speed_frames_per_drop;)
+    #ifdef DEBUG_SHOW
+        print_num_u16(DISPLAY_NUMPETS_X, DISPLAY_NUMPETS_Y + 2, (UINT16)game_speed_frames_per_drop, DIGITS_5);
+    #endif
     }
 }
 
@@ -168,6 +192,8 @@ void player_info_newgame_reset(void) {
     // OR, level_update_speed()
     // OR, gameplay_speed_update() <------ ???
 
-// TODO: Debug: frames per drop (requires extern UINT8 game_speed_frames_per_drop;)
-print_num_u16(DISPLAY_NUMPETS_X, DISPLAY_NUMPETS_Y + 2, (UINT16)game_speed_frames_per_drop, DIGITS_5);
+    // TODO: Debug: frames per drop (requires extern UINT8 game_speed_frames_per_drop;)
+    #ifdef DEBUG_SHOW
+        print_num_u16(DISPLAY_NUMPETS_X, DISPLAY_NUMPETS_Y + 2, (UINT16)game_speed_frames_per_drop, DIGITS_5);
+    #endif
 }

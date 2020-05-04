@@ -81,7 +81,9 @@ void gameplay_init(void) {
     initarand(DIV_REG);
 
     // Flash a get ready message to the player
-    gameplay_handle_get_ready();
+    board_flash_message(MSG_GET_READY_X, MSG_GET_READY_Y,
+                        MSG_GET_READY_TEXT, MSG_GET_READY_CTEXT,
+                        MSG_GET_READY_REPEAT);
 
     board_reset();
 
@@ -113,42 +115,10 @@ void gameplay_init(void) {
 }
 
 
-
-void gameplay_handle_get_ready(void) {
-
-    UINT8 c;
-
-    // Hide the game board and player piece
-    board_hide_all();
-
-    for (c = 0; c < GAMEPLAY_GET_READY_FLASHES; c++) {
-        PRINT(BRD_ST_X + 2,
-              BRD_ST_Y + 5,
-              "    \n\n      ",0);
-
-        #ifdef CPU_FAST_ENABLED
-            delay(1000);
-        #else
-            delay(500);
-        #endif
-
-        PRINT(BRD_ST_X + 2,
-              BRD_ST_Y + 5,
-              " GET\n\nREADY!",0);
-
-        #ifdef CPU_FAST_ENABLED
-            delay(1000);
-        #else
-            delay(500);
-        #endif
-    }
-}
-
-
 void gameplay_handle_pause(void) {
 
     // Hide the game board and player piece
-    board_hide_all();
+    board_hide_all(BRD_CLR_DELAY_NONE);
     // TODO: CONSOLIDATE: these hides are basically a dupe of gameplay_exit_cleanup()
     game_piece_next_show(FALSE);
     player_piece_update_xy(PLAYER_PIECE_HIDE);
