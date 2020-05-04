@@ -79,11 +79,7 @@ void board_hide_all(UINT16 delay_amount) {
                           sizeof(board_x_row), 1,
                           &board_x_row[0]);
 
-            #ifdef CPU_FAST_ENABLED
-                delay(delay_amount * 2);
-            #else
-                delay(delay_amount);
-            #endif
+            delay(delay_amount);
         }
 
         set_bkg_tiles(BRD_ST_X, y,
@@ -159,21 +155,11 @@ void board_flash_message(UINT8 start_x, UINT8 start_y, char * text, char * ctext
     for (c = 0; c < repeat; c++) {
         // blank print text using the provided ctext
         PRINT(start_x, start_y, ctext,0);
-
-        #ifdef CPU_FAST_ENABLED
-            delay(1000);
-        #else
-            delay(500);
-        #endif
+        delay(500);
 
         // print provided text
         PRINT(start_x, start_y, text,0);
-
-        #ifdef CPU_FAST_ENABLED
-            delay(1000);
-        #else
-            delay(500);
-        #endif
+        delay(500);
     }
 }
 
@@ -404,11 +390,8 @@ void board_handle_pet_completed(UINT8 flags) {
         board_clear_tile_xy(board_tile_clear_cache_x[c],
                             board_tile_clear_cache_y[c],
                             BOARD_CLEAR_ANIM_NORM);
-        #ifdef CPU_FAST_ENABLED
-            delay(40);
-        #else
-            delay(20);
-        #endif
+        delay(20);
+
         c++;
 
         // TODO: increment score as the pieces clear?
