@@ -1,6 +1,8 @@
 #include <gb/gb.h>
 #include <gb/cgb.h> // Include cgb functions
 
+// #include "bgb_emu.h" // Used for debugging only, see BGB_MESSAGE
+
 #include "common.h"
 #include "audio_common.h"
 
@@ -18,14 +20,37 @@
 #include "gfx.h"
 #include "gfx_print.h"
 
+#include "../res/font_tiles.h"
+
 void init (void);
 void init_interrupts(void);
 void vbl_update(void);
 void init_sound(void);
 
-
 UINT8 vbl_count;
 UINT8 global_frame_count; // TODO
+
+
+#define ASM_HALT \
+__asm \
+  halt \
+__endasm
+
+void handle_non_cgb() {
+    // TODO: what happens here on a GBA?
+    if (_cpu != CGB_TYPE) {
+        // BGB_MESSAGE("DMG DETECTED");
+        enable_interrupts(); // Make sure interrupts are enabled before calling HALT
+        set_bkg_data(TILES_FONT_START, TILE_COUNT_FONT, font_tiles);
+        PRINT(3,8,"GAMEBOY COLOR\nREQUIRED :(", 0);
+        SHOW_BKG;
+        DISPLAY_ON;
+        // Loop forever
+        while(1) {
+            ASM_HALT; // Use less power while idle
+        }
+    }
+}
 
 
 void vbl_update() {
@@ -47,7 +72,11 @@ void init_interrupts() {
 }
 
 void init (void) {
-    // TODO: POWER: is this speed needed? if not, make it more power efficient
+
+    // Require CGB, otherwise display a warning (DMG/Pocket)
+    handle_non_cgb();
+
+    // OPTIONAL: Extra speed doesn't seem to be required right now
     #ifdef CPU_FAST_ENABLED
         // Switch CGB to fast speed mode
         cpu_fast();
@@ -55,14 +84,14 @@ void init (void) {
 
     init_sound();
 
-    fade_start(FADE_OUT);
+    // fade_start(FADE_OUT); // TODO: this can probably be skipped
 
-
-    DISPLAY_ON;
+    init_interrupts();
 
     game_state = GAME_INTRO_INIT;
-
     global_frame_count = 0;
+
+    DISPLAY_ON;
 }
 
 
