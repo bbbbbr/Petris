@@ -8,13 +8,17 @@
 
 #--- Default build will be release. Can be overidden passing BUILD_TYPE = debug as a parameter
 # ex: Release, Debug, ReleaseColor, DebugColor
+
 BUILD_TYPE = ReleaseColor
+# BUILD_TYPE = DebugColor
 CGB = yes
 
 ifneq (,$(findstring Release,$(BUILD_TYPE)))
 	BUILD_DEFS += -DNDEBUG
 else
 	PROJECT_NAME := $(PROJECT_NAME)_Debug
+	# --debug generates additional SDCC debug symbols
+	CDEBUG = --debug
 endif
 
 # PATH_PREFIX = ../
@@ -23,6 +27,8 @@ PATH_PREFIX =
 OBJDIR = $(PATH_PREFIX)$(BUILD_TYPE)
 OBJDIR_RES = $(PATH_PREFIX)$(BUILD_TYPE)/res
 BINDIR = $(PATH_PREFIX)bin
+
+SRC2SYM = ./src2sym.pl
 
 LCC = $(GBDK_HOME)/bin/lcc
 SDCC = sdcc
@@ -35,13 +41,15 @@ ifeq ($(BGB),)
 endif
 
 ifneq ($(strip $(N_BANKS)),)
-	LFLAGS_NBANKS = -Wl-yt1 -Wl-yo$(N_BANKS)
+	# -Wl-yt1 -> MBC1
+	# LFLAGS_NBANKS = -Wl-yt1 -Wl-yo$(N_BANKS)
+	# lcc defaults to no MBC ("0") in absence of -Wl-yt[MBC#]
+	LFLAGS_NBANKS = -Wl-yo$(N_BANKS)
 endif
 
 # These are SDCC flags (LCC is not used)
-CFLAGS = -mgbz80 --no-std-crt0  --use-stdout -Dnonbanked=  -I $(GBDK_HOME)/include -I $(GBDK_HOME)/include/asm $(BUILD_DEFS) -I$(PATH_PREFIX)include
+CFLAGS = $(CDEBUG) -mgbz80 --no-std-crt0  --use-stdout -Dnonbanked=  -I $(GBDK_HOME)/include -I $(GBDK_HOME)/include/asm $(BUILD_DEFS) -I$(PATH_PREFIX)include
 # --print-search-dirs --verbose
-#-Wa-l -Wl-m -Wl-j
 # --fsigned-char : doesn't seem to be supported currently
 
 EXTENSION = gb
@@ -55,6 +63,14 @@ LFLAGS = $(LFLAGS_NBANKS)
 
 # enable linker map file output
 LFLAGS += -Wl-m
+# enable listing output
+# LFLAGS += -Wa-l
+
+ifdef CDEBUG
+# enable linker no$gmb symbol output on debug builds
+LFLAGS += -Wl-j
+endif
+
 
 current_dir = $(shell pwd)
 
@@ -63,7 +79,6 @@ CLASSES     = $(foreach dir,$(PATH_PREFIX)src,$(notdir $(wildcard $(dir)/*.c)))
 RESOURCES   = $(foreach dir,$(PATH_PREFIX)res,$(notdir $(wildcard $(dir)/*.c)))
 MUSICS      = $(foreach dir,$(PATH_PREFIX)res/music,$(notdir $(wildcard $(dir)/*.mod)))
 OBJS = $(RESOURCES:%.c=$(OBJDIR_RES)/%.o) $(MUSICS:%.mod=$(OBJDIR_RES)/%.mod.o) $(ASMS:%.s=$(OBJDIR)/%.o) $(CLASSES:%.c=$(OBJDIR)/%.o)
-
 
 #dependencies -------------------------------------------------------------------------------------------
 ifneq ($(MAKECMDGOALS),clean)
@@ -113,8 +128,23 @@ $(OBJDIR_RES)/%.mod.o: $(PATH_PREFIX)res/music/%.mod
 
 $(BINDIR)/$(PROJECT_NAME).$(EXTENSION): $(OBJDIR) $(OBJDIR_RES) $(BINDIR) $(OBJS) $(COMMON_OBJS)
 	@echo Linking
-	$(LCC) $(LFLAGS) -v -g -o $(OBJDIR)/$(PROJECT_NAME).$(EXTENSION) $(OBJS) $(COMMON_OBJS)
-	mv $(OBJDIR)/$(PROJECT_NAME).$(EXTENSION) $(BINDIR)/$(PROJECT_NAME).$(EXTENSION)
+	$(LCC) $(LFLAGS) -v -o $(OBJDIR)/$(PROJECT_NAME).$(EXTENSION) $(OBJS) $(COMMON_OBJS)
+	cp $(OBJDIR)/$(PROJECT_NAME).$(EXTENSION) $(BINDIR)/$(PROJECT_NAME).$(EXTENSION)
+
+# if this is a debug build, reprocess the mainsymbol output to include C source
+ifdef CDEBUG
+	@echo Reprocessing Symbols to include C Source
+	mv $(OBJDIR)/$(PROJECT_NAME).sym $(OBJDIR)/$(PROJECT_NAME)_raw.sym
+	$(SRC2SYM) $(OBJDIR)/$(PROJECT_NAME)_raw.sym > $(OBJDIR)/$(PROJECT_NAME).sym
+endif
+
+# Debug builds run from the object dir
+ifdef CDEBUG
+RUNTARGET = $(OBJDIR)/$(PROJECT_NAME).$(EXTENSION)
+else
+RUNTARGET = $(BINDIR)/$(PROJECT_NAME).$(EXTENSION)
+endif
+
 
 build_lib: $(OBJDIR) $(OBJS)
 
@@ -122,7 +152,7 @@ build_gb: $(BINDIR)/$(PROJECT_NAME).$(EXTENSION)
 
 clean:
 	@echo Cleaning $(PROJECT_NAME)
-	@rm -rf $(BINDIR)
+	@rm  -f $(BINDIR)/*.*
 	@rm  -f $(OBJDIR)/*.*
 	@rm  -f $(OBJDIR)/res/*.*
 	@rm -rf .map
@@ -130,7 +160,7 @@ clean:
 
 run: all
 	$(info $$BGB is [${BGB}])
-	@if test -f $(BINDIR)/$(PROJECT_NAME).$(EXTENSION); then \
-		echo Running $(BINDIR)/$(PROJECT_NAME).$(EXTENSION); \
-		$(BGB) $(BINDIR)/$(PROJECT_NAME).$(EXTENSION); \
+	@if test -f $(RUNTARGET); then \
+		echo Running $(RUNTARGET); \
+		$(BGB) $(RUNTARGET); \
 	fi
