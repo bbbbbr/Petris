@@ -65,6 +65,7 @@ const UINT8 gp_dissolve_anim[] = {GP_DISSOLVE_1 + TILES_PET_START,
                                   GP_DISSOLVE_3 + TILES_PET_START};
 
 
+
 // Clears the game board
 //
 // * Called during PAUSE
@@ -441,8 +442,8 @@ UINT8 board_check_completed_pet_xy(INT8 start_x, INT8 start_y, UINT8 piece, UINT
         // Initialize end seg count
         headtail_count = 0;
         // If current piece is an end (tail or head) then increment the end_count
-        if ( ((piece & GP_SEG_MASK) == GP_SEG_TAIL) ||
-             ((piece & GP_SEG_MASK) == GP_SEG_HEAD) ) {
+        if ( ((piece & GP_SEG_MASK) == GP_SEG_TAIL_BITS) ||
+             ((piece & GP_SEG_MASK) == GP_SEG_HEAD_BITS) ) {
             headtail_count++;
         }
 

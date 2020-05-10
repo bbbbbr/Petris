@@ -4,7 +4,18 @@
 #define GAME_PIECE_DATA_H
 
 
-
+// Pet tile bit mapping order
+//
+//  bits  :76543210
+//  attrib:   RPPSS
+//
+//         Tile : 31 ...............16...12...8 ...4 ...0
+//     Rotation : VVVV VVVV VVVV VVVV HHHH HHHH HHHH HHHH
+//     Pet Type : FFFF SSSS CCCC DDDD FFFF SSSS CCCC DDDD
+//     Body Seg : HLMT HLMT HLMT HLMT HLMT HLMT HLMT HLMT
+//
+//     (Head, L-shape, Midriff, Tail)
+//
 #define GP_EMPTY_MASK 0xE0U // .5+
 #define GP_SPECIAL_MASK 0x20U // .5+
 #define GP_ROT_MASK   0x10U // .4
@@ -39,13 +50,17 @@
 #define GP_SEG_TORSO    1
 #define GP_SEG_TURN     2
 #define GP_SEG_HEAD     3
-#define GP_SEG_TURN_BITS 0x2U
+#define GP_SEG_TAIL_BITS  (0x00U << GP_SEG_UPSHIFT)
+#define GP_SEG_TORSO_BITS (0x01U << GP_SEG_UPSHIFT)
+#define GP_SEG_TURN_BITS  (0x02U << GP_SEG_UPSHIFT)
+#define GP_SEG_HEAD_BITS  (0x03U << GP_SEG_UPSHIFT)
+
 
 #define GP_ROT_UPSHIFT  4
 #define GP_ROT_HORZ     0
 #define GP_ROT_VERT     1
-#define GP_ROT_HORZ_BITS  0x00
-#define GP_ROT_VERT_BITS  0x10
+#define GP_ROT_HORZ_BITS  (0x00U << GP_ROT_UPSHIFT)
+#define GP_ROT_VERT_BITS  (0x01U << GP_ROT_UPSHIFT)
 
 // Piece color palettes
 #define GP_PAL_DOG      0x00U
@@ -64,7 +79,7 @@
 #define GP_ROTATE_DEFAULT  GP_ROTATE_0
 #define GP_ROTATE_MIN      GP_ROTATE_0
 #define GP_ROTATE_MAX      GP_ROTATE_270
-#define GP_ROTATE_SEG_TURN_MIRROR_BITS 0x02U
+#define GP_ROTATE_SEG_TURN_180_AND_270_USE_MIRROR_BITS 0x02U // **DO NOT UPSHIFT**
 
 // BG Map Attributes (CGB Mode only)
 // Bit 0-2  Background Palette number  (BGP0-7)
