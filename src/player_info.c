@@ -127,6 +127,7 @@ void level_increment(void) {
         if (option_game_type == OPTION_GAME_TYPE_LEVEL_UP) {
             // if ((level % MODE_LEVELUP_LEVEL_INCREMENT) == 0) {
 
+                // TODO: move this into something like gameplay_level_init()
                 HIDE_SPRITES;
 
                 PLAY_SOUND_LEVEL_UP;
