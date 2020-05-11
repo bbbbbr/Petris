@@ -7,6 +7,8 @@ void board_gfx_init(void);
 void board_gfx_init_sprites(void);
 void board_gfx_init_background(void);
 
+void board_gfx_tail_animate(UINT8);
+
 #endif // GAME_BOARD_GFX_H
 
 

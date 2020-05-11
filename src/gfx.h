@@ -38,6 +38,8 @@
 #define TILE_ID_BOARD_NEXT_PIECE_PREVIEW_BG  (TILES_INTRO_START + 0)
 #define TILE_ID_BOARD_UP        (TILES_INTRO_START + 68)
 
+#define TILE_OFFSET_PET_TAIL_REG 0
+#define TILE_OFFSET_PET_TAIL_WAG 48
 
 #define TILES_PET_START        96 // This requires ^2 alignment
 #define TILE_COUNT_PETS        32

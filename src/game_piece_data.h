@@ -7,20 +7,20 @@
 // Pet tile bit mapping order
 //
 //  bits  :76543210
-//  attrib:   RPPSS
+//  attrib:   SSRPP
 //
 //         Tile : 31 ...............16...12...8 ...4 ...0
-//     Rotation : VVVV VVVV VVVV VVVV HHHH HHHH HHHH HHHH
-//     Pet Type : FFFF SSSS CCCC DDDD FFFF SSSS CCCC DDDD
-//     Body Seg : HLMT HLMT HLMT HLMT HLMT HLMT HLMT HLMT
+//     Body Seg : HHHH HHHH LLLL LLLL MMMM MMMM TTTT TTTT
+//     Rotation : VVVV HHHH VVVV HHHH VVVV HHHH VVVV HHHH
+//     Pet Type : FSCD FSCD FSCD FSCD FSCD FSCD FSCD FSCD
 //
 //     (Head, L-shape, Midriff, Tail)
 //
 #define GP_EMPTY_MASK 0xE0U // .5+
 #define GP_SPECIAL_MASK 0x20U // .5+
-#define GP_ROT_MASK   0x10U // .4
-#define GP_PET_MASK   0x0CU // .3-2
-#define GP_SEG_MASK   0x03U // .1-0
+#define GP_SEG_MASK   0x18U // .4-3
+#define GP_ROT_MASK   0x04U // .2
+#define GP_PET_MASK   0x03U // .1-0
 
 #define GP_PET_BITS_MASK  0x1FU
 
@@ -37,7 +37,7 @@
 #define GP_DISSOLVE_3          0x28U
 
 
-#define GP_PET_UPSHIFT  2
+#define GP_PET_UPSHIFT  0
 #define GP_PET_DOG      0
 #define GP_PET_CAT      1
 #define GP_PET_FISH     2
@@ -45,7 +45,7 @@
 #define GP_PET_NONE     4
 
 
-#define GP_SEG_UPSHIFT  0
+#define GP_SEG_UPSHIFT  3
 #define GP_SEG_TAIL     0
 #define GP_SEG_TORSO    1
 #define GP_SEG_TURN     2
@@ -56,7 +56,7 @@
 #define GP_SEG_HEAD_BITS  (0x03U << GP_SEG_UPSHIFT)
 
 
-#define GP_ROT_UPSHIFT  4
+#define GP_ROT_UPSHIFT  2
 #define GP_ROT_HORZ     0
 #define GP_ROT_VERT     1
 #define GP_ROT_HORZ_BITS  (0x00U << GP_ROT_UPSHIFT)

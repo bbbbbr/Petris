@@ -69,3 +69,98 @@ void board_gfx_init_background(void) {
 
         SHOW_BKG;
 }
+
+#define CGB_TILE_SIZE 16
+#define ANIM_TAIL_BATCH_SIZE 2
+
+// TODO: this could be collapsed into a single set of 4
+const UINT8 pet_tail_anim_tilenum[] = {TILES_PET_START + (ANIM_TAIL_BATCH_SIZE * 0), // Set 1
+                                       TILES_PET_START + (ANIM_TAIL_BATCH_SIZE * 1),
+                                       TILES_PET_START + (ANIM_TAIL_BATCH_SIZE * 2),
+                                       TILES_PET_START + (ANIM_TAIL_BATCH_SIZE * 3),
+
+                                       TILES_PET_START + (ANIM_TAIL_BATCH_SIZE * 0), // Set 2
+                                       TILES_PET_START + (ANIM_TAIL_BATCH_SIZE * 1),
+                                       TILES_PET_START + (ANIM_TAIL_BATCH_SIZE * 2),
+                                       TILES_PET_START + (ANIM_TAIL_BATCH_SIZE * 3)
+                                   };
+
+// TODO: const UINT16 * ??
+const UINT16 pet_tail_anim_srcoffset[] = {
+                                      // Regular Tail
+                                      (TILE_OFFSET_PET_TAIL_REG + (ANIM_TAIL_BATCH_SIZE * 0)) * CGB_TILE_SIZE,
+                                      (TILE_OFFSET_PET_TAIL_REG + (ANIM_TAIL_BATCH_SIZE * 1)) * CGB_TILE_SIZE,
+                                      (TILE_OFFSET_PET_TAIL_REG + (ANIM_TAIL_BATCH_SIZE * 2)) * CGB_TILE_SIZE,
+                                      (TILE_OFFSET_PET_TAIL_REG + (ANIM_TAIL_BATCH_SIZE * 3)) * CGB_TILE_SIZE,
+
+                                      // Wag Tail
+                                      (TILE_OFFSET_PET_TAIL_WAG + (ANIM_TAIL_BATCH_SIZE * 0)) * CGB_TILE_SIZE,
+                                      (TILE_OFFSET_PET_TAIL_WAG + (ANIM_TAIL_BATCH_SIZE * 1)) * CGB_TILE_SIZE,
+                                      (TILE_OFFSET_PET_TAIL_WAG + (ANIM_TAIL_BATCH_SIZE * 2)) * CGB_TILE_SIZE,
+                                      (TILE_OFFSET_PET_TAIL_WAG + (ANIM_TAIL_BATCH_SIZE * 3)) * CGB_TILE_SIZE
+                                          // 0 * CGB_TILE_SIZE, // Regular Tail
+                                          // 2 * CGB_TILE_SIZE,
+                                          // 4 * CGB_TILE_SIZE,
+                                          // 6 * CGB_TILE_SIZE,
+
+                                          // 48 * CGB_TILE_SIZE, //
+                                          // 50 * CGB_TILE_SIZE,
+                                          // 52 * CGB_TILE_SIZE,
+                                          // 54 * CGB_TILE_SIZE
+                                         };
+
+
+// #define ANIM_FRAME_ALTERNATE_BITS 0x40 // (0x08 << 3)
+// #define ANIM_FRAME_MATCH          0x20 // (0x08 << 2)
+// #define ANIM_FRAME_MASK           0x3C // (0x0F << 2)
+// #define ANIM_COUNT_ALT_BITS       0x04 // (0x04)
+// #define ANIM_COUNT_MASK           0x03 // (0x03)
+
+#define ANIM_FRAME_ALTERNATE_BITS 0x20 // (0x04 << 3)
+#define ANIM_FRAME_MATCH          0x10 // (0x04 << 2)
+#define ANIM_FRAME_MASK           0x1C // (0x07 << 2)
+#define ANIM_COUNT_ALT_BITS       0x04 // (0x04)
+#define ANIM_COUNT_MASK           0x03 // (0x03)
+
+// Animate tail wags every N frames
+//
+// A run of (0 -> 3) Once every 32 frames
+//
+// Alternating between .0 -> .1 and .1 -> .2 every *other* 32 frames using .5)
+//
+// 8 7 6|5 4 3|2 1
+//      |- - -|
+//     o*     |* *| Tail Normal / Even
+//     x*   |* *|   Tail Wagged / Off
+//
+void board_gfx_tail_animate(UINT8 frame_count) {
+
+    UINT8 anim;
+
+    if ((frame_count & ANIM_FRAME_MASK) == ANIM_FRAME_MATCH) {
+
+        anim = frame_count & ANIM_COUNT_MASK;
+
+        // alternate high/low every other batch
+        if (frame_count & ANIM_FRAME_ALTERNATE_BITS)
+            anim |= ANIM_COUNT_ALT_BITS;
+
+        set_bkg_data(pet_tail_anim_tilenum[anim],
+                     ANIM_TAIL_BATCH_SIZE,
+                     pet_tiles + pet_tail_anim_srcoffset[anim]);
+    }
+    // if ((frame_count & 0x3C) == 0x20) {
+
+    //     anim = frame_count & 0x07;
+
+    //     if (anim <= 0x03) {
+
+    //         // alternate high/low every other batch
+    //         if (frame_count & 0x40)
+    //             anim = anim |= 0x04;
+
+    //         set_bkg_data(pet_tail_anim_tilenum[anim], 2,
+    //                      pet_tiles + pet_tail_anim_srcoffset[anim]);
+    //     }
+    // }
+}

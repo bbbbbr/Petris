@@ -304,4 +304,5 @@ void gameplay_gravity_update(void) {
     // Update any flickering hint sprite elements
     // NOTE: This should happen after player_piece_move()
     player_hinting_flicker_update(global_frame_count);
+    board_gfx_tail_animate(global_frame_count);
 }
