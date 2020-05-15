@@ -110,28 +110,28 @@ const UINT16 pet_tail_anim_srcoffset[] = {
                                          };
 
 
-// #define ANIM_FRAME_ALTERNATE_BITS 0x40 // (0x08 << 3)
-// #define ANIM_FRAME_MATCH          0x20 // (0x08 << 2)
-// #define ANIM_FRAME_MASK           0x3C // (0x0F << 2)
-// #define ANIM_COUNT_ALT_BITS       0x04 // (0x04)
-// #define ANIM_COUNT_MASK           0x03 // (0x03)
-
-#define ANIM_FRAME_ALTERNATE_BITS 0x20 // (0x04 << 3)
-#define ANIM_FRAME_MATCH          0x10 // (0x04 << 2)
-#define ANIM_FRAME_MASK           0x1C // (0x07 << 2)
+#define ANIM_FRAME_ALTERNATE_BITS 0x40 // (0x08 << 3)
+#define ANIM_FRAME_MATCH          0x20 // (0x08 << 2)
+#define ANIM_FRAME_MASK           0x3C // (0x0F << 2)
 #define ANIM_COUNT_ALT_BITS       0x04 // (0x04)
 #define ANIM_COUNT_MASK           0x03 // (0x03)
 
+// #define ANIM_FRAME_ALTERNATE_BITS 0x20 // (0x04 << 3)
+// #define ANIM_FRAME_MATCH          0x10 // (0x04 << 2)
+// #define ANIM_FRAME_MASK           0x1C // (0x07 << 2)
+// #define ANIM_COUNT_ALT_BITS       0x04 // (0x04)
+// #define ANIM_COUNT_MASK           0x03 // (0x03)
+
 // Animate tail wags every N frames
 //
-// A run of (0 -> 3) Once every 32 frames
+// A run of (0 -> 3) Once every 64 frames
 //
-// Alternating between .0 -> .1 and .1 -> .2 every *other* 32 frames using .5)
+// Alternating between .0 -> .1 and .1 -> .2 every *other* 32 frames using .6)
 //
-// 8 7 6|5 4 3|2 1
-//      |- - -|
-//     o*     |* *| Tail Normal / Even
-//     x*   |* *|   Tail Wagged / Off
+// 8 7|6 5 4 3|2 1
+//    |- - - -|
+//   o *      |* *| Tail Normal / Even
+//   x *    |* *|   Tail Wagged / Off
 //
 void board_gfx_tail_animate(UINT8 frame_count) {
 

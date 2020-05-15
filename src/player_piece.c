@@ -114,16 +114,15 @@ UINT8 player_piece_try_reload(void) {
 
 
 
-// UINT8 player_piece_connect_get(UINT8 piece, UINT8 rotate) {
-UINT8 player_piece_connect_get() {
+UINT8 player_piece_connect_get(UINT8 piece, UINT8 rotate) {
 
     UINT8 connect;
 
     // Get connection info for piece and downshift to use as a LUT index
-    connect = GP_CONNECT_LUT[ (player_piece & GP_SEG_MASK) >> GP_SEG_UPSHIFT ];
+    connect = GP_CONNECT_LUT[ (piece & GP_SEG_MASK) >> GP_SEG_UPSHIFT ];
 
     // Handle rotation (rotate bits up, then handle nybble wraparound)
-    connect = connect << player_rotate;
+    connect = connect << rotate;
     connect = (connect | (connect >> GP_CONNECT_WRAP_DOWNSHIFT)) & GP_CONNECT_MASK;
 
     return (connect);
@@ -133,19 +132,28 @@ UINT8 player_piece_connect_get() {
 // TODO: optimize out this function unless it starts doing more
 void player_piece_set_on_board(void) {
 
-    // Hide sprite based piece before setting setting the board
+    UINT8 player_connect;
+
+    player_connect = player_piece_connect_get(player_piece, player_rotate);
+
+    // Hide sprite based piece before setting setting on the board
     // (except for *specials*, which don't get placed).
     // This happens here so it doesn't obscure board animations
     // under the sprite based piece
     if (!(player_piece & GP_SPECIAL_MASK)) {
         player_piece_update_xy(PLAYER_PIECE_HIDE);
+
+        // Now set the piece onto the board
+        board_set_tile_xy(player_x, player_y,
+                          player_piece,
+                          player_attrib,
+                          player_connect);
     }
-    // Now set the piece onto the board
-    board_set_tile_xy(player_x, player_y,
-                      player_piece,
-                      player_attrib,
-                      player_piece_connect_get());
-}
+
+    board_handle_new_piece(player_x, player_y,
+                           player_piece,
+                           player_connect);
+ }
 
 
 

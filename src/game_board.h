@@ -17,6 +17,7 @@
 #define BRD_MAX_X  (BRD_WIDTH - 1)
 #define BRD_MIN_Y  0
 #define BRD_MAX_Y  (BRD_HEIGHT - 1)
+#define BRD_MIN_Y_RANDOM_FILL 7
 
 
 #define BRD_SIZE     (BRD_WIDTH * BRD_HEIGHT)
@@ -44,20 +45,27 @@
 #define BRD_TILE_COUNT_BONUS_SOUND_THRESHOLD 4
 
 // TODO: move these to a different location?
-#define MSG_GET_READY_X  BRD_ST_X + 2
+#define MSG_GET_READY_X  BRD_ST_X + 0
 #define MSG_GET_READY_Y  BRD_ST_Y + 5
-#define MSG_GET_READY_TEXT   " GET\n\nREADY!"
-#define MSG_GET_READY_CTEXT  "    \n\n      "
+#define MSG_GET_READY_TEXT   "   GET\n\nREADY!"
+#define MSG_GET_READY_CTEXT  "      \n\n      "
 #define MSG_GET_READY_REPEAT 2
 
 #define MSG_LEVEL_UP_X  BRD_ST_X + 1
 #define MSG_LEVEL_UP_Y  BRD_ST_Y + 5
 #define MSG_LEVEL_UP_TEXT   "LEVEL UP \n\n\n  GET\n\n READY!"
 #define MSG_LEVEL_UP_CTEXT  "LEVEL UP \n\n\n     \n\n       "
+
+#define MSG_CLEANUP_START_TEXT  "          \n\n\n   ALL\n\n  TAILS!"
+#define MSG_CLEANUP_START_CTEXT   " CLEAN UP \n\n\n   ALL\n\n  TAILS!"
+#define MSG_CLEANUP_START_REPEAT 3
+
 #define MSG_LEVEL_UP_REPEAT 2
 
 #define BRD_CLR_DELAY_NONE 0
 #define BRD_CLR_DELAY_CLEAR_MED 35// 25
+
+#define BRD_PIECE_CLEAR_COUNT_NONE 0
 
 void board_hide_all(UINT16);
 void board_redraw_all(void);
@@ -71,8 +79,10 @@ void board_flash_message(UINT8, UINT8, char *, char *, UINT8);
 INT8 board_find_lowest_open_in_column(INT8, INT8);
 UINT8 board_check_open_xy(INT8, INT8);
 void board_set_tile_xy(INT8, INT8, UINT8, UINT8, UINT8);
+void board_handle_new_piece(INT8, INT8, UINT8, UINT8);
 
-void board_fill_random(void);
+void game_board_fill_random_tails(UINT8 tail_count);
+// void board_fill_random(void);
 
 UINT8 board_piece_get_xy(INT8, INT8, UINT8 * , UINT8 * );
 UINT8 board_check_connected_xy(INT8, INT8, UINT8, UINT8 *, UINT8);

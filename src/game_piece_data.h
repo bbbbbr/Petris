@@ -43,6 +43,7 @@
 #define GP_PET_FISH     2
 #define GP_PET_SNAKE    3
 #define GP_PET_NONE     4
+#define GP_PET_MASK_NOSHIFT 0x03
 
 
 #define GP_SEG_UPSHIFT  3

@@ -3,7 +3,7 @@
 #ifndef GFX_H
 #define GFX_H
 
-// DEBUG_SHOW
+// #define DEBUG_SHOW
 
 #define BG_PAL_0    0x00
 #define BG_PAL_1    0x01
