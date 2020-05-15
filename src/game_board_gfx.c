@@ -30,7 +30,7 @@
 #define ANIM_TAIL_BATCH_SIZE 2
 #define TAIL_ANIM_COUNT_LOOP_SIZE 60 // One run of updates every N frames
 #define TAIL_ANIM_ALTERNATE_BITS  0x04
-#define TAIL_ANIM_FRAMES_MAX  4
+#define TAIL_ANIM_FRAMES_PER_SET  4
 
 // TODO: this could be collapsed into a single set of 4
 const UINT8 pet_tail_anim_tilenum[] = {TILES_PET_START + (ANIM_TAIL_BATCH_SIZE * 0), // Set 1
@@ -123,7 +123,10 @@ void board_gfx_tail_animate(void) {
         // Switch to alternate tail animation tiles
         tail_anim_alternate ^= TAIL_ANIM_ALTERNATE_BITS;
 
-    } else if (tail_anim_count < TAIL_ANIM_FRAMES_MAX) {
+    }
+
+    // Can't be an else-if since it would miss tail_anim_count = 0
+    if (tail_anim_count < TAIL_ANIM_FRAMES_PER_SET) {
 
         // Note: the OR of tail_anim_alternate only works if it's 8 frames total and one batch
         // otherwise use +
