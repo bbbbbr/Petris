@@ -30,6 +30,7 @@
 #include "input.h"
 #include "gfx.h"
 #include "gfx_print.h"
+// #include "game_board_gfx.h"
 
 #include "../res/font_tiles.h"
 
@@ -66,6 +67,10 @@ void handle_non_cgb() {
 
 void vbl_update() {
     vbl_count ++;
+
+    // TODO: animate can be called from here instead to make it independent of game pause/etc
+    // if (game_state == GAME_PLAYING)
+    //     board_gfx_tail_animate();
 }
 
 
@@ -110,7 +115,8 @@ void main(void){
     init();
 
     while(1) {
-        // Wait for vertical blank
+        // Wait for vertical blank (end of the frame)
+        // before starting to process the next frame
         // (skip if already happened)
         if(!vbl_count)
             wait_vbl_done();
