@@ -84,12 +84,16 @@ void gameplay_exit_cleanup(void) {
 
 void gameplay_init(void) {
 
+    // Mediocre-initialize the random number generator
+    initarand(DIV_REG);
+
     board_gfx_init();
 
     options_player_settings_apply();
 
-    // Mediocre-initialize the random number generator
-    initarand(DIV_REG);
+    // Should be called before game_board_fill_random_tails()
+    player_info_newgame_reset();
+
 
     // Flash a get ready message to the player
     // TODO: function or struct to select game_start_message[option_game_type]
@@ -104,18 +108,7 @@ void gameplay_init(void) {
 
     }
 
-    board_reset();
-
-    // Generate the very first piece
-    game_piece_next_reset();
-    game_piece_next_generate();
-
-    // Hide the player piece and preview sprites initially
-    // They will get displayed after PLAYER_NEWPIECE is handled
-    // which then calls player_piece_try_reload()
-    player_piece_update_xy(PLAYER_PIECE_HIDE);
-    game_piece_next_show(FALSE);
-
+    gameplay_prepare_board();
 
     SHOW_SPRITES;
 
@@ -129,8 +122,30 @@ void gameplay_init(void) {
     gameplay_piece_drop_requested = FALSE;
 
     game_speed_drop_frame_counter = GAME_SPEED_DROP_FRAME_COUNTER_RESET;
+}
 
-    player_info_newgame_reset();
+
+
+// Called on new game and during transition to new level
+// TODO: could be moved to board_prepare_new_level()
+void gameplay_prepare_board(void) {
+
+    board_reset();
+
+    if (option_game_type == OPTION_GAME_TYPE_PET_CLEANUP) {
+            // This will auto-increment game_type_cleanup_tail_count
+            game_board_fill_random_tails( game_type_pet_cleanup_get_tail_count( (UINT8)player_level ));
+    }
+
+    // Generate the very first piece
+    game_piece_next_reset();
+    game_piece_next_generate();
+
+    // Hide the player piece and preview sprites initially
+    // They will get displayed after PLAYER_NEWPIECE is handled
+    // which then calls player_piece_try_reload()
+    player_piece_update_xy(PLAYER_PIECE_HIDE);
+    game_piece_next_show(FALSE);
 }
 
 

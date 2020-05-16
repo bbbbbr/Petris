@@ -53,6 +53,7 @@
 // #define PLAYER_TILES_PER_LEVEL  20 // 25
 #define PLAYER_PETS_PER_LEVEL   10 // TODO: Finalize pets per level? 25?
 
+extern UINT16 player_level;
 
 void score_update(UINT16 num_tiles);
 void score_reset(void);

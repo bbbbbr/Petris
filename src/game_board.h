@@ -47,8 +47,8 @@
 // TODO: move these to a different location?
 #define MSG_GET_READY_X  BRD_ST_X + 0
 #define MSG_GET_READY_Y  BRD_ST_Y + 5
-#define MSG_GET_READY_TEXT   "   GET\n\nREADY!"
-#define MSG_GET_READY_CTEXT  "      \n\n      "
+#define MSG_GET_READY_TEXT   "   GET\n\n  READY!"
+#define MSG_GET_READY_CTEXT  "      \n\n        "
 #define MSG_GET_READY_REPEAT 2
 
 #define MSG_LEVEL_UP_X  BRD_ST_X + 1

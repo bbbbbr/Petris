@@ -18,8 +18,13 @@
 #include "game_piece_data.h"
 #include "game_board.h"
 #include "game_board_gfx.h"
+
 #include "fade.h"
 #include "gfx.h"
+#include "gfx_print.h"
+
+#include "player_info.h"
+#include "options.h"
 
 #include "../res/intro_screen_tiles.h"
 #include "../res/game_board_map.h"
@@ -31,6 +36,10 @@
 #define TAIL_ANIM_COUNT_LOOP_SIZE 60 // One run of updates every N frames
 #define TAIL_ANIM_ALTERNATE_BITS  0x04
 #define TAIL_ANIM_FRAMES_PER_SET  4
+
+const UINT8 NEXT_PIECE_BG_TILE = TILE_ID_BOARD_NEXT_PIECE_PREVIEW_BG;
+const UINT8 NEXT_PIECE_BG_PAL  = BG_PAL_BOARD_NEXT_PIECE_PREVIEW;
+
 
 // TODO: this could be collapsed into a single set of 4
 const UINT8 pet_tail_anim_tilenum[] = {TILES_PET_START + (ANIM_TAIL_BATCH_SIZE * 0), // Set 1
@@ -101,6 +110,33 @@ void board_gfx_init_background(void) {
         // Load BG tile map
         VBK_REG = 0;
         set_bkg_tiles(0, 0, 20, 18, game_board_mapPLN0);
+
+
+        // Set the preview tile area to a white background
+        VBK_REG = 1; // Select BG tile attribute map
+        set_bkg_tiles(GAME_PIECE_NEXT_PREVIEW_BG_X, GAME_PIECE_NEXT_PREVIEW_BG_Y,
+                      1, 1, &NEXT_PIECE_BG_PAL);
+
+        VBK_REG = 0; // Re-Select regular BG tile map
+        set_bkg_tiles(GAME_PIECE_NEXT_PREVIEW_BG_X, GAME_PIECE_NEXT_PREVIEW_BG_Y,
+                      1, 1, &NEXT_PIECE_BG_TILE);
+
+
+        // Set up text areas
+        PRINT(DISPLAY_NEXT_PIECE_TEXT_X,    DISPLAY_NEXT_PIECE_TEXT_Y - 1,    "NEXT:", 0);
+
+        PRINT(DISPLAY_LEVEL_X,    DISPLAY_LEVEL_Y - 1,    "LEVEL", 0);
+         // On same line as level readout
+        PRINT(DISPLAY_DIFF_X,     DISPLAY_DIFF_Y,         options_difficulty_abbrev_text_get(), 0);
+
+        PRINT(DISPLAY_SCORE_X,    DISPLAY_SCORE_Y - 1,    "SCORE", 0);
+
+        if (option_game_type == OPTION_GAME_TYPE_PET_CLEANUP) {
+            PRINT(DISPLAY_NUMPETS_X,  DISPLAY_NUMPETS_Y - 1,  "TAILS", 0);
+        } else {
+            PRINT(DISPLAY_NUMPETS_X,  DISPLAY_NUMPETS_Y - 1,  "PETS", 0);
+        }
+
 
         SHOW_BKG;
 }

@@ -24,6 +24,7 @@
 #include "game_board.h"
 #include "game_board_special_pieces.h"
 #include "gameplay.h"
+#include "gameplay.h"
 #include "options.h"
 
 UINT16 player_score;
@@ -31,9 +32,6 @@ UINT16 player_numtiles; // UINT32?
 UINT16 player_numpets;
 UINT16 player_level;
 UINT16 player_numpieces;
-
-const UINT8 NEXT_PIECE_BG_TILE = TILE_ID_BOARD_NEXT_PIECE_PREVIEW_BG;
-const UINT8 NEXT_PIECE_BG_PAL  = BG_PAL_BOARD_NEXT_PIECE_PREVIEW;
 
 // TODO: move into game_type.c/h ??
 UINT8 game_type_cleanup_tail_count;
@@ -66,6 +64,7 @@ void score_update(UINT16 num_tiles) {
     // TODO: player_numtiles_this_level
     player_numtiles += num_tiles;
 
+
     // Display number of pets completed
     if (option_game_type == OPTION_GAME_TYPE_PET_CLEANUP) {
         // Display Tail remaining count
@@ -78,6 +77,7 @@ void score_update(UINT16 num_tiles) {
     // Should be called after displaying tail/pet count
     // so they display correctly during potential level changes
     level_check_update();
+
 
     // TODO: support x 10 scoring? Need to use a 24 bit Num
     // Scoring:
@@ -95,10 +95,7 @@ void score_update(UINT16 num_tiles) {
 
     // // Display number of pet segments completed
     // print_num_u16(DISPLAY_NUMTILES_X, DISPLAY_NUMTILES__Y, player_numtiles);
-
-
 }
-
 
 
 void score_reset(void) {
@@ -108,18 +105,19 @@ void score_reset(void) {
 
 
 
+// TODO: Optimize: ? convert this to not being a function?
 void level_check_update(void) {
 
+    // Trigger a new level either if it's enqueued (by pet cleanup),
+    // or if the level threshold is crossed and game type *is not* pet cleanup
+    if ((option_game_type != OPTION_GAME_TYPE_PET_CLEANUP) &&
+         (player_numpets >= (PLAYER_PETS_PER_LEVEL * (player_level + 1)))) {
 
-    // TODO: finalize on whether levels increment based on pets or pet tile count
-    //if (player_numtiles >= (PLAYER_TILES_PER_LEVEL * (player_level + 1))) {
-    //  OR could do newlevel = (player_numtiles / PLAYER_TILES_PER_LEVEL) = (PLAYER_TILES_PER_LEVEL * (player_level + 1))
+        level_increment_enqueue = TRUE;
+    }
+
+
     if (level_increment_enqueue == TRUE) {
-
-        level_increment();
-
-    } else if ((option_game_type != OPTION_GAME_TYPE_PET_CLEANUP) &&
-               (player_numpets >= (PLAYER_PETS_PER_LEVEL * (player_level + 1)))) {
 
         level_increment();
     }
@@ -130,74 +128,46 @@ void level_check_update(void) {
 
 void level_increment(void) {
 
-    // TODO:    PLAY_SOUND_LEVEL_UP; // TODO: this needs a delay after last piece clear sound
-    // TODO: ???? reset or NOT reset number of pets/tiles completed per level? May depend on play mode
-
     // Clear possible queued level increment
     level_increment_enqueue = FALSE;
 
     if (player_level < PLAYER_LEVEL_MAX) {
         player_level++;
+    }
 
-        // TODO: level_handle_next() ?? Do more things?
+    // TODO: ?? change this to options_frames_per_drop_update() call -> game_speed_frames_per_drop_set()
+    game_speed_frames_per_drop_set( options_frames_per_drop_get((UINT8)player_level) );
 
-        // TODO: ?? change this to options_frames_per_drop_update() call -> game_speed_frames_per_drop_set()
-        game_speed_frames_per_drop_set( options_frames_per_drop_get((UINT8)player_level) );
 
-        level_show();
+    // Handle level transition
+    if ((option_game_type == OPTION_GAME_TYPE_LEVEL_UP) ||
+        (option_game_type == OPTION_GAME_TYPE_PET_CLEANUP)) {
 
-        // TODO: move to game_type_handle_level_increment() ? game_type.c
-        if (option_game_type == OPTION_GAME_TYPE_LEVEL_UP) {
-            // if ((level % MODE_LEVELUP_LEVEL_INCREMENT) == 0) {
+        // TODO: consolidate with gameplay_init() ??
+        // TODO: move this into something like gameplay_level_init()
+        HIDE_SPRITES;
 
-                // TODO: move this into something like gameplay_level_init()
-                HIDE_SPRITES;
+        PLAY_SOUND_LEVEL_UP;
+        board_hide_all(BRD_CLR_DELAY_CLEAR_MED);
 
-                PLAY_SOUND_LEVEL_UP;
-                board_hide_all(BRD_CLR_DELAY_CLEAR_MED);
-                // Flash a get ready message to the player
-                board_flash_message(MSG_LEVEL_UP_X, MSG_LEVEL_UP_Y,
-                                    MSG_LEVEL_UP_TEXT, MSG_LEVEL_UP_CTEXT,
-                                    MSG_LEVEL_UP_REPEAT);
+        // Flash a get ready message to the player
+        board_flash_message(MSG_LEVEL_UP_X, MSG_LEVEL_UP_Y,
+                            MSG_LEVEL_UP_TEXT, MSG_LEVEL_UP_CTEXT,
+                            MSG_LEVEL_UP_REPEAT);
 
-                board_reset();
+        gameplay_prepare_board();
 
-                // Generate the very first piece
-                game_piece_next_reset();
-                game_piece_next_generate();
+        SHOW_SPRITES;
+    }
 
-                SHOW_SPRITES;
-        }
-        else if (option_game_type == OPTION_GAME_TYPE_PET_CLEANUP) {
+    level_show();
 
-                // TODO: move this into something like gameplay_level_init()
-                HIDE_SPRITES;
-
-                PLAY_SOUND_LEVEL_UP;
-                board_hide_all(BRD_CLR_DELAY_CLEAR_MED);
-                // Flash a get ready message to the player
-                board_flash_message(MSG_LEVEL_UP_X, MSG_LEVEL_UP_Y,
-                                    MSG_LEVEL_UP_TEXT, MSG_LEVEL_UP_CTEXT,
-                                    MSG_LEVEL_UP_REPEAT);
-
-                board_reset();
-
-                // Generate the very first piece
-                game_piece_next_reset();
-                game_piece_next_generate();
-
-                // TODO: consolidate with other call of same
-                // This will auto-increment game_type_cleanup_tail_count
-                game_board_fill_random_tails( game_type_pet_cleanup_get_tail_count( (UINT8)player_level ));
-
-                SHOW_SPRITES;
-        }
 
     // TODO: Debug: frames per drop (requires extern UINT8 game_speed_frames_per_drop;)
     #ifdef DEBUG_SHOW
         print_num_u16(DISPLAY_NUMPETS_X, DISPLAY_NUMPETS_Y + 1, (UINT16)game_speed_frames_per_drop, DIGITS_5);
     #endif
-    }
+
 }
 
 
@@ -222,55 +192,17 @@ void level_counters_reset(void) {
 
 void player_info_newgame_reset(void) {
 
-    PRINT(DISPLAY_NEXT_PIECE_TEXT_X,    DISPLAY_NEXT_PIECE_TEXT_Y - 1,    "NEXT:", 0);
-
-    PRINT(DISPLAY_LEVEL_X,    DISPLAY_LEVEL_Y - 1,    "LEVEL", 0);
-     // On same line as level readout
-    PRINT(DISPLAY_DIFF_X,     DISPLAY_DIFF_Y,         options_difficulty_abbrev_text_get(), 0);
-
-    PRINT(DISPLAY_SCORE_X,    DISPLAY_SCORE_Y - 1,    "SCORE", 0);
-
-    if (option_game_type == OPTION_GAME_TYPE_PET_CLEANUP) {
-        PRINT(DISPLAY_NUMPETS_X,  DISPLAY_NUMPETS_Y - 1,  "TAILS", 0);
-    } else {
-        PRINT(DISPLAY_NUMPETS_X,  DISPLAY_NUMPETS_Y - 1,  "PETS", 0);
-    }
-//    PRINT(DISPLAY_NUMTILES_X, DISPLAY_NUMTILES_Y - 1, "TILES", 0);
-
-    // Set the preview tile area to a white background
-
-    VBK_REG = 1; // Select BG tile attribute map
-    set_bkg_tiles(GAME_PIECE_NEXT_PREVIEW_BG_X, GAME_PIECE_NEXT_PREVIEW_BG_Y,
-                  1, 1, &NEXT_PIECE_BG_PAL);
-
-    VBK_REG = 0; // Re-Select regular BG tile map
-    set_bkg_tiles(GAME_PIECE_NEXT_PREVIEW_BG_X, GAME_PIECE_NEXT_PREVIEW_BG_Y,
-                  1, 1, &NEXT_PIECE_BG_TILE);
-
     score_reset();
     level_counters_reset();
     level_increment_enqueue = FALSE;
 
-    // Should be called after level_counters_reset()
-    game_speed_frames_per_drop_set( options_frames_per_drop_get( (UINT8)player_level) );
     // TODO: ???? change this to options_frames_per_drop_update() call -> game_speed_frames_per_drop_set()
     // OR, level_update_speed()
     // OR, gameplay_speed_update() <------ ???
-
-// TODO CONSOLIDATE ME
-    switch (option_game_type) {
-        case OPTION_GAME_TYPE_PET_CLEANUP:
-            // TODO: consolidate with other call of same
-            // This will auto-increment game_type_cleanup_tail_count
-            game_board_fill_random_tails( game_type_pet_cleanup_get_tail_count( (UINT8)player_level ));
-            break;
-    }
-
-    // TODO: Debug: frames per drop (requires extern UINT8 game_speed_frames_per_drop;)
-    #ifdef DEBUG_SHOW
-        print_num_u16(DISPLAY_NUMPETS_X, DISPLAY_NUMPETS_Y + 1, (UINT16)game_speed_frames_per_drop, DIGITS_5);
-    #endif
+    // Should be called after level_counters_reset()
+    game_speed_frames_per_drop_set( options_frames_per_drop_get( (UINT8)player_level) );
 }
+
 
 #define GAME_TYPE_PET_CLEANUP_TAIL_COUNT_MIN 3
 #define GAME_TYPE_PET_CLEANUP_TAIL_COUNT_MAX 20
@@ -290,16 +222,18 @@ UINT8 game_type_pet_cleanup_get_tail_count(UINT8 player_level) {
 }
 
 
+
 void game_type_pet_cleanup_increment_tail_count(void) {
 
     if (option_game_type == OPTION_GAME_TYPE_PET_CLEANUP) {
-        if (game_type_cleanup_tail_count < 255)
+        if (game_type_cleanup_tail_count < 255) {
             game_type_cleanup_tail_count++;
-    }
+        }
 
-    // TODO: remove?
-    print_num_u16(DISPLAY_NUMPETS_X, DISPLAY_NUMPETS_Y, (UINT16)game_type_cleanup_tail_count, DIGITS_5);
+        print_num_u16(DISPLAY_NUMPETS_X, DISPLAY_NUMPETS_Y, (UINT16)game_type_cleanup_tail_count, DIGITS_5);
+    }
 }
+
 
 
 void game_type_pet_cleanup_decrement_tail_count(void) {
