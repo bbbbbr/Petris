@@ -87,6 +87,7 @@ void gameplay_init(void) {
     // Mediocre-initialize the random number generator
     initarand(DIV_REG);
 
+    board_init();
     board_gfx_init();
 
     options_player_settings_apply();

@@ -67,6 +67,11 @@ const UINT8 gp_dissolve_anim[] = {GP_DISSOLVE_1 + TILES_PET_START,
 
 
 
+// Initializes global vars for board
+void board_init(void) {
+    board_tile_clear_count = 0;
+}
+
 // Clears the game board
 //
 // * Called during PAUSE
@@ -104,6 +109,7 @@ void board_hide_all(UINT16 delay_amount) {
 
 // Redraws the game board from the game board arrays
 void board_redraw_all(void) {
+
     // Update BG Attrib Map from Game Board
     VBK_REG = 1; // Select BG tile attribute map
     set_bkg_tiles(BRD_ST_X, BRD_ST_Y,
@@ -306,6 +312,11 @@ void board_handle_new_piece(INT8 x, INT8 y, UINT8 piece, UINT8 connect) {
         switch (piece) {
             case GP_SPECIAL_BOMB:
                 board_handle_special_bomb(x,y);
+                // Check to see if any piece clearing related level
+                // changes need to happen.
+                // * (board_tile_clear_count == 0)
+                // * Also gets called by other pieces via board_check_completed_pet_xy()
+                board_handle_pet_completed(BRD_CHECK_FLAGS_DONT_ADD_POINTS);
                 break;
 
             case GP_SPECIAL_LIGHTENING:
@@ -314,10 +325,9 @@ void board_handle_new_piece(INT8 x, INT8 y, UINT8 piece, UINT8 connect) {
                 //       set (such as the 4-way Merge), it's an unhandled condition.
                 board_check_completed_pet_xy(x,y, piece,
                                              GP_CONNECT_ALL_WAYS_BITS,
-                                             BRD_CHECK_FLAGS_IGNORE_PET_TYPE);
+                                             BRD_CHECK_FLAGS_IGNORE_PET_TYPE | BRD_CHECK_FLAGS_DONT_ADD_POINTS);
                 break;
         }
-
     } else {
 
         board_check_completed_pet_xy(x, y, piece, connect, BRD_CHECK_FLAGS_NONE); // TODO: use result
@@ -476,12 +486,11 @@ void board_handle_pet_completed(UINT8 flags) {
     }
 
     //  Player gets no credit when special piece is used
-    // TODO: MOVE THIS FURTHER UP CALL STACK, it shouldn't be buried in here
-    if (flags & BRD_CHECK_FLAGS_IGNORE_PET_TYPE)
+    if (flags & BRD_CHECK_FLAGS_DONT_ADD_POINTS) {
         score_update(BRD_PIECE_CLEAR_COUNT_NONE);
-    else
+    } else {
         score_update((UINT16)board_tile_clear_count);
-
+    }
 
     board_tile_clear_count = 0;
 }

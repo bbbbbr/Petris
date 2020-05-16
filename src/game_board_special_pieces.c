@@ -44,11 +44,4 @@ void board_handle_special_bomb(UINT8 x,UINT8 y) {
 
     PlayFx(CHANNEL_1, 30, 0x1C, 0x81, 0x24, 0x73, 0x86);
     board_clear_tile_xy(x, y + 1);
-
-    // Check to see if any piece clearing related level
-    // changes need to happen
-    // TODO: maybe rename to player_pieces_handle_removed()
-    //
-    // TODO: MOVE THIS FURTHER UP CALL STACK, it shouldn't be buried in here
-    score_update(BRD_PIECE_CLEAR_COUNT_NONE);
 }

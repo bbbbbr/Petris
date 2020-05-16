@@ -41,6 +41,7 @@
 
 #define BRD_CHECK_FLAGS_NONE            0x00
 #define BRD_CHECK_FLAGS_IGNORE_PET_TYPE 0x01
+#define BRD_CHECK_FLAGS_DONT_ADD_POINTS 0x80
 
 #define BRD_TILE_COUNT_BONUS_SOUND_THRESHOLD 4
 
@@ -66,6 +67,8 @@
 #define BRD_CLR_DELAY_CLEAR_MED 35// 25
 
 #define BRD_PIECE_CLEAR_COUNT_NONE 0
+
+void board_init(void);
 
 void board_hide_all(UINT16);
 void board_redraw_all(void);
