@@ -52,6 +52,27 @@ void new_piece_count_increment(void) {
 // extern game_speed_frames_per_drop; // TODO: DEBUG: REMOVE
 
 
+void player_info_display(void) {
+
+    // Display the score
+    print_num_u16(DISPLAY_SCORE_X, DISPLAY_SCORE_Y, player_score, DIGITS_5);
+
+    // Display number of pets completed
+    if (option_game_type == OPTION_GAME_TYPE_PET_CLEANUP) {
+        // Display Tail remaining count
+        print_num_u16(DISPLAY_NUMPETS_X, DISPLAY_NUMPETS_Y, (UINT16)game_type_cleanup_tail_count, DIGITS_5);
+    } else {
+        // Display Pet compelted count
+        print_num_u16(DISPLAY_NUMPETS_X, DISPLAY_NUMPETS_Y, player_numpets, DIGITS_5);
+    }
+
+    // TODO: remove?
+    // // Display number of pet segments completed
+    // print_num_u16(DISPLAY_NUMTILES_X, DISPLAY_NUMTILES__Y, player_numtiles);
+}
+
+
+
 void score_update(UINT16 num_tiles) {
 
     // Check to see whether a special piece (bomb) should be delivered
@@ -69,15 +90,6 @@ void score_update(UINT16 num_tiles) {
 
     // == UPDATE DISPLAY INFO AREA ==
 
-    // Display number of pets completed
-    if (option_game_type == OPTION_GAME_TYPE_PET_CLEANUP) {
-        // Display Tail remaining count
-        print_num_u16(DISPLAY_NUMPETS_X, DISPLAY_NUMPETS_Y, (UINT16)game_type_cleanup_tail_count, DIGITS_5);
-    } else {
-        // Display Pet compelted count
-        print_num_u16(DISPLAY_NUMPETS_X, DISPLAY_NUMPETS_Y, player_numpets, DIGITS_5);
-    }
-
     // TODO: support x 10 scoring? Need to use a 24 bit Num
     // Scoring:
     // * Increases exponentially per number of tiles in the pet
@@ -89,13 +101,7 @@ void score_update(UINT16 num_tiles) {
                     * (UINT16)p_game_settings->score_bonus
                     * SCORE_SCALE_FACTOR;
 
-    // Display the score
-    print_num_u16(DISPLAY_SCORE_X, DISPLAY_SCORE_Y, player_score, DIGITS_5);
-
-    // TODO: remove?
-    // // Display number of pet segments completed
-    // print_num_u16(DISPLAY_NUMTILES_X, DISPLAY_NUMTILES__Y, player_numtiles);
-
+    player_info_display();
 
     // == CHECK FOR LEVEL CHANGES ==
     //
@@ -115,8 +121,8 @@ void score_update(UINT16 num_tiles) {
 
 
 void score_reset(void) {
+
     player_score = 0;
-    score_update(0); // TODO: move this out of here?
 }
 
 
@@ -197,4 +203,6 @@ void player_info_newgame_reset(void) {
     // OR, gameplay_speed_update() <------ ???
     // Should be called after level_counters_reset()
     game_speed_frames_per_drop_set( options_frames_per_drop_get( (UINT8)player_level) );
+
+    player_info_display();
 }
