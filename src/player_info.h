@@ -53,6 +53,8 @@
 // #define PLAYER_TILES_PER_LEVEL  20 // 25
 #define PLAYER_PETS_PER_LEVEL   10 // TODO: Finalize pets per level? 25?
 
+extern UINT16 player_level;
+extern UINT8 level_increment_enqueue;
 
 void score_update(UINT16 num_tiles);
 void score_reset(void);
@@ -65,6 +67,10 @@ void level_show(void);
 void player_info_newgame_reset(void);
 
 void new_piece_count_increment(void);
+
+UINT8 game_type_pet_cleanup_get_tail_count(UINT8 player_level);
+void game_type_pet_cleanup_decrement_tail_count(void);
+void game_type_pet_cleanup_increment_tail_count(void);
 
 #endif // PLAYER_INFO_H
 

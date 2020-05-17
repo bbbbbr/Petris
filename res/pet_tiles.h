@@ -10,7 +10,7 @@
   Compression          : None.
   Counter              : None.
   Tile size            : 8 x 8
-  Tiles                : 0 to 40
+  Tiles                : 0 to 55
 
   Palette colors       : Included.
   SGB Palette          : None.
@@ -98,6 +98,6 @@
 #define pet_tilesCGBPal7c2 20083
 #define pet_tilesCGBPal7c3 0
 /* Start of tile array. */
-extern const unsigned char pet_tiles[];
+extern unsigned char pet_tiles[];
 
 /* End of PET_TILES.H */

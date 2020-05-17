@@ -24,6 +24,7 @@
 #include "gfx_print.h"
 #include "sound.h"
 #include "player_info.h"
+#include "player_piece.h"
 
 UINT8 board_pieces[BRD_SIZE];
 UINT8 board_attrib[BRD_SIZE];
@@ -65,6 +66,12 @@ const UINT8 gp_dissolve_anim[] = {GP_DISSOLVE_1 + TILES_PET_START,
                                   GP_DISSOLVE_3 + TILES_PET_START};
 
 
+
+// Initializes global vars for board
+void board_init(void) {
+    board_tile_clear_count = 0;
+}
+
 // Clears the game board
 //
 // * Called during PAUSE
@@ -102,6 +109,7 @@ void board_hide_all(UINT16 delay_amount) {
 
 // Redraws the game board from the game board arrays
 void board_redraw_all(void) {
+
     // Update BG Attrib Map from Game Board
     VBK_REG = 1; // Select BG tile attribute map
     set_bkg_tiles(BRD_ST_X, BRD_ST_Y,
@@ -221,6 +229,7 @@ void board_clear_tile_xy(INT8 x, INT8 y) {
 
     UINT8 tile_index;
     UINT8 c;
+    UINT8 is_tail = FALSE;
 
     // TODO: Bounds checking for board here
     if ((x >= BRD_MIN_X) &&
@@ -229,6 +238,11 @@ void board_clear_tile_xy(INT8 x, INT8 y) {
         (y <= BRD_MAX_Y))
     {
         tile_index = x + (y * BRD_WIDTH);
+
+        // Set the tail flag if the tile isn't empty and it's a tail (in any direction)
+        if (board_pieces[tile_index] != GP_EMPTY + TILES_PET_START) {
+            is_tail = ((board_pieces[tile_index] - TILES_PET_START) & GP_SEG_MASK) == GP_SEG_TAIL_BITS;
+        }
 
         // Animate removal of board tile, even if blank - i,e called by a bomb/etc
         // Use attribs/color from existing tile as-is
@@ -245,38 +259,32 @@ void board_clear_tile_xy(INT8 x, INT8 y) {
         // Update connection setting
         board_connect[tile_index] = GP_CONNECT_NONE_BITS;
 
+
         board_draw_tile_xy(x, y, tile_index);
 
         // Last extra delay between subsequent tile clearings
         delay(20);
     }
+
+    // Decrement tail counter if needed
+    if (is_tail) {
+        game_type_pet_cleanup_decrement_tail_count();
+    }
+
 }
 
 
 
+// Should NOT be called if (piece & GP_SPECIAL_MASK)
 void board_set_tile_xy(INT8 x, INT8 y, UINT8 piece, UINT8 attrib, UINT8 connect) {
 
     UINT8 tile_index;
 
-    // TODO: move this into a function if it grows board_set_special_xy(INT8 x, INT8 y, UINT8 piece, UINT8 attrib, UINT8 connect)
-    if (piece & GP_SPECIAL_MASK) {
+    if (!(piece & GP_SPECIAL_MASK)) {
 
-        switch (piece) {
-            case GP_SPECIAL_BOMB:
-                board_handle_special_bomb(x,y);
-                break;
-
-            case GP_SPECIAL_LIGHTENING:
-                // NOTE: Piece is only passed in for testing, not put on the board.
-                //       **DON'T** set pieces on board with more than 2 connection bits
-                //       set (such as the 4-way Merge), it's an unhandled condition.
-                board_check_completed_pet_xy(x,y, piece,
-                                             GP_CONNECT_ALL_WAYS_BITS,
-                                             BRD_CHECK_FLAGS_IGNORE_PET_TYPE);
-                break;
+        if ((piece & GP_SEG_MASK) == GP_SEG_TAIL_BITS) {
+            game_type_pet_cleanup_increment_tail_count();
         }
-
-    } else {
 
         tile_index = x + (y * BRD_WIDTH);
 
@@ -291,13 +299,86 @@ void board_set_tile_xy(INT8 x, INT8 y, UINT8 piece, UINT8 attrib, UINT8 connect)
         board_connect[tile_index] = connect;
 
         board_draw_tile_xy(x, y, tile_index);
+    }
+}
+
+
+
+void board_handle_new_piece(INT8 x, INT8 y, UINT8 piece, UINT8 connect) {
+
+    // TODO: move this into a function if it grows board_set_special_xy(INT8 x, INT8 y, UINT8 piece, UINT8 attrib, UINT8 connect)
+    if (piece & GP_SPECIAL_MASK) {
+
+        switch (piece) {
+            case GP_SPECIAL_BOMB:
+                board_handle_special_bomb(x,y);
+                // Check to see if any piece clearing related level
+                // changes need to happen.
+                // * (board_tile_clear_count == 0)
+                // * Also gets called by other pieces via board_check_completed_pet_xy()
+                board_handle_pet_completed(BRD_CHECK_FLAGS_DONT_ADD_POINTS);
+                break;
+
+            case GP_SPECIAL_LIGHTENING:
+                // NOTE: Piece is only passed in for testing, not put on the board.
+                //       **DON'T** set pieces on board with more than 2 connection bits
+                //       set (such as the 4-way Merge), it's an unhandled condition.
+                board_check_completed_pet_xy(x,y, piece,
+                                             GP_CONNECT_ALL_WAYS_BITS,
+                                             BRD_CHECK_FLAGS_IGNORE_PET_TYPE | BRD_CHECK_FLAGS_DONT_ADD_POINTS);
+                break;
+        }
+    } else {
 
         board_check_completed_pet_xy(x, y, piece, connect, BRD_CHECK_FLAGS_NONE); // TODO: use result
     }
 }
 
 
-void board_fill_random(void) {
+void game_board_fill_random_tails(UINT8 tail_count) {
+
+    UINT8 x, y;
+    UINT8 piece;
+    UINT8 attrib;
+    UINT8 connect;
+
+    while (tail_count) {
+
+        // Choose X and Y coordinates randomly
+        // and within board bounds
+        x = (UINT8)DIV_REG % (BRD_WIDTH + 1);
+
+        y = ((UINT8)DIV_REG % (BRD_HEIGHT - BRD_MIN_Y_RANDOM_FILL + 1)) + BRD_MIN_Y_RANDOM_FILL ;
+
+        // Loop until the randomly selected spot is free
+        if (board_piece_get_xy(x, y, &piece, &connect)) {
+
+            if (piece == (GP_EMPTY + TILES_PET_START)) {
+
+                // Only decrement the count of added tails
+                // once one is successfully placed on the board
+                tail_count--;
+
+                piece = (((UINT8)DIV_REG & GP_PET_MASK_NOSHIFT) << GP_PET_UPSHIFT) |
+                        (GP_SEG_TAIL << GP_SEG_UPSHIFT) |
+                        (GP_ROT_VERT << GP_ROT_UPSHIFT);
+
+                // Set palette based on pet type (CGB Pal bits are 0x07)
+                // And mirror bits based on rotation setting from LUT
+                attrib = ((piece & GP_PET_MASK) >> GP_PET_UPSHIFT) // Palette
+                          | GP_ROT_LUT_ATTR[GP_ROTATE_270];               // Rotation sprite mirror bits
+
+                board_set_tile_xy((INT8)x, (INT8)y,
+                                  piece, attrib,
+                                  player_piece_connect_get(piece, GP_ROTATE_270));
+            }
+        }
+    }
+
+}
+
+// TODO: remove debug function
+/* void board_fill_random(void) {
 
     INT8 x, y;
     UINT8 piece;
@@ -324,7 +405,7 @@ void board_fill_random(void) {
 
     board_redraw_all();
 }
-
+*/
 
 
 UINT8 board_piece_get_xy(INT8 x, INT8 y, UINT8 * p_piece, UINT8 * p_connect) {
@@ -405,9 +486,11 @@ void board_handle_pet_completed(UINT8 flags) {
     }
 
     //  Player gets no credit when special piece is used
-    if (!(flags & BRD_CHECK_FLAGS_IGNORE_PET_TYPE))
+    if (flags & BRD_CHECK_FLAGS_DONT_ADD_POINTS) {
+        score_update(BRD_PIECE_CLEAR_COUNT_NONE);
+    } else {
         score_update((UINT16)board_tile_clear_count);
-
+    }
 
     board_tile_clear_count = 0;
 }
@@ -441,8 +524,8 @@ UINT8 board_check_completed_pet_xy(INT8 start_x, INT8 start_y, UINT8 piece, UINT
         // Initialize end seg count
         headtail_count = 0;
         // If current piece is an end (tail or head) then increment the end_count
-        if ( ((piece & GP_SEG_MASK) == GP_SEG_TAIL) ||
-             ((piece & GP_SEG_MASK) == GP_SEG_HEAD) ) {
+        if ( ((piece & GP_SEG_MASK) == GP_SEG_TAIL_BITS) ||
+             ((piece & GP_SEG_MASK) == GP_SEG_HEAD_BITS) ) {
             headtail_count++;
         }
 

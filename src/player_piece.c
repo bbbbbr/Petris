@@ -114,15 +114,15 @@ UINT8 player_piece_try_reload(void) {
 
 
 
-// UINT8 player_piece_connect_get(UINT8 piece, UINT8 rotate) {
-UINT8 player_piece_connect_get() {
+UINT8 player_piece_connect_get(UINT8 piece, UINT8 rotate) {
 
     UINT8 connect;
 
-    // Get connection info for piece
-    connect = GP_CONNECT_LUT[ (player_piece & GP_SEG_MASK) ];
+    // Get connection info for piece and downshift to use as a LUT index
+    connect = GP_CONNECT_LUT[ (piece & GP_SEG_MASK) >> GP_SEG_UPSHIFT ];
+
     // Handle rotation (rotate bits up, then handle nybble wraparound)
-    connect = connect << player_rotate;
+    connect = connect << rotate;
     connect = (connect | (connect >> GP_CONNECT_WRAP_DOWNSHIFT)) & GP_CONNECT_MASK;
 
     return (connect);
@@ -132,19 +132,28 @@ UINT8 player_piece_connect_get() {
 // TODO: optimize out this function unless it starts doing more
 void player_piece_set_on_board(void) {
 
-    // Hide sprite based piece before setting setting the board
+    UINT8 player_connect;
+
+    player_connect = player_piece_connect_get(player_piece, player_rotate);
+
+    // Hide sprite based piece before setting setting on the board
     // (except for *specials*, which don't get placed).
     // This happens here so it doesn't obscure board animations
     // under the sprite based piece
     if (!(player_piece & GP_SPECIAL_MASK)) {
         player_piece_update_xy(PLAYER_PIECE_HIDE);
+
+        // Now set the piece onto the board
+        board_set_tile_xy(player_x, player_y,
+                          player_piece,
+                          player_attrib,
+                          player_connect);
     }
-    // Now set the piece onto the board
-    board_set_tile_xy(player_x, player_y,
-                      player_piece,
-                      player_attrib,
-                      player_piece_connect_get());
-}
+
+    board_handle_new_piece(player_x, player_y,
+                           player_piece,
+                           player_connect);
+ }
 
 
 
@@ -226,6 +235,7 @@ void player_piece_update_gfx() {
 
     } else {
         // Update player rotation (clear rotate bits and then set)
+        // This means *generated* rotation will always be overwritten with default rotation
         player_piece = ((player_piece & ~GP_ROT_MASK)
                         | GP_ROT_LUT_TILE[player_rotate]);
 
@@ -234,11 +244,12 @@ void player_piece_update_gfx() {
         player_attrib = ((player_piece & GP_PET_MASK) >> GP_PET_UPSHIFT) // Palette
                          | GP_ROT_LUT_ATTR[player_rotate];               // Rotation sprite mirror bits
 
-        // TODO: This could be simplified by using a full set of pieces instead of 1/2 set and mirroring them
+
         // L Turn pieces require mirror X and Y
         // when rotation is 180 and 270
+        // TODO: This could be simplified by using a full set of pieces instead of 1/2 set and mirroring them
         if (((player_piece & GP_SEG_MASK) ==  GP_SEG_TURN_BITS) &&
-             (player_rotate & GP_ROTATE_SEG_TURN_MIRROR_BITS))
+             (player_rotate & GP_ROTATE_SEG_TURN_180_AND_270_USE_MIRROR_BITS))
             player_attrib |= (GP_MIRROR_X | GP_MIRROR_Y);
     }
 
