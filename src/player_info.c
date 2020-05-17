@@ -113,7 +113,7 @@ void score_update(UINT16 num_tiles) {
     // Check for level updates
     if ((level_increment_enqueue == TRUE) ||
         ((option_game_type != OPTION_GAME_TYPE_PET_CLEANUP) &&
-         (player_numpets >= (PLAYER_PETS_PER_LEVEL * (player_level + 1))))) {
+         (player_numpets >= (PLAYER_PETS_PER_LEVEL * player_level))) ) {
 
         level_increment();
     }

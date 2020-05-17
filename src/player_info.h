@@ -51,7 +51,7 @@
 
 // TODO: move this to a more centralized options/settings area?
 // #define PLAYER_TILES_PER_LEVEL  20 // 25
-#define PLAYER_PETS_PER_LEVEL   10 // TODO: Finalize pets per level? 25?
+#define PLAYER_PETS_PER_LEVEL   20 // 10
 
 extern UINT16 player_level;
 extern UINT8 level_increment_enqueue;
