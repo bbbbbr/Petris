@@ -87,14 +87,15 @@ void gameplay_init(void) {
     // Mediocre-initialize the random number generator
     initarand(DIV_REG);
 
+    game_types_init(); // Call before board_gfx_init()
+
     board_init();
     board_gfx_init();
 
     options_player_settings_apply();
 
-    // Should be called before game_board_fill_random_tails()
+    // Should be called before gameplay_prepare_board() ... -> game_board_fill_random_tails()
     player_info_newgame_reset();
-
 
     // Flash a get ready message to the player
     // TODO: function or struct to select game_start_message[option_game_type]
@@ -134,7 +135,7 @@ void gameplay_prepare_board(void) {
     board_reset();
 
     if (option_game_type == OPTION_GAME_TYPE_PET_CLEANUP) {
-            // This will auto-increment game_type_cleanup_tail_count
+            // This will (indirectly) auto-increment game_type_cleanup_tail_count
             game_board_fill_random_tails( game_type_pet_cleanup_get_tail_count( (UINT8)player_level ));
     }
 

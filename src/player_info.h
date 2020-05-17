@@ -54,6 +54,7 @@
 #define PLAYER_PETS_PER_LEVEL   10 // TODO: Finalize pets per level? 25?
 
 extern UINT16 player_level;
+extern UINT8 level_increment_enqueue;
 
 void score_update(UINT16 num_tiles);
 void score_reset(void);
