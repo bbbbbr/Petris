@@ -32,6 +32,7 @@
 #include "game_piece_data.h"
 #include "game_board.h"
 #include "game_board_gfx.h"
+#include "game_types.h"
 
 #include "gameplay.h"
 
