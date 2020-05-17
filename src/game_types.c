@@ -62,6 +62,9 @@ void game_types_handle_level_transition(void) {
 
         SHOW_SPRITES;
     }
+    else if (option_game_type == OPTION_GAME_TYPE_MARATHON) {
+        PLAY_SOUND_LEVEL_UP;
+    }
 }
 
 
