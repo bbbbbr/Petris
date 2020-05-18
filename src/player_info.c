@@ -55,12 +55,18 @@ void new_piece_count_increment(void) {
 void player_info_display(void) {
 
     // Display the score
+    // TODO: split score out of this
     print_num_u16(DISPLAY_SCORE_X, DISPLAY_SCORE_Y, player_score, DIGITS_5);
 
     // Display number of pets completed
     if (option_game_type == OPTION_GAME_TYPE_PET_CLEANUP) {
         // Display Tail remaining count
         print_num_u16(DISPLAY_NUMPETS_X, DISPLAY_NUMPETS_Y, (UINT16)game_type_cleanup_tail_count, DIGITS_5);
+
+    } else if (option_game_type == OPTION_GAME_TYPE_LONG_PET) {
+        // Display required Pet Size
+        print_num_u16(DISPLAY_NUMPETS_X, DISPLAY_NUMPETS_Y, (UINT16)game_type_long_pet_required_size, DIGITS_5);
+
     } else {
         // Display Pet compelted count
         print_num_u16(DISPLAY_NUMPETS_X, DISPLAY_NUMPETS_Y, player_numpets, DIGITS_5);
@@ -117,6 +123,10 @@ void score_update(UINT16 num_tiles) {
 
         level_increment();
     }
+
+    // TODO: it's a hack to call this before and after level_increment
+    //       but it requires an update at the end of a level and when starting the next
+    player_info_display();
 }
 
 
@@ -155,6 +165,11 @@ void level_increment(void) {
 
     if (player_level < PLAYER_LEVEL_MAX) {
         player_level++;
+    }
+
+    if (option_game_type == OPTION_GAME_TYPE_LONG_PET) {
+        // TODO: could this be moved so that it's only called from one place in the code?
+        game_type_long_pet_set_tail_count( (UINT8)player_level );
     }
 
     // TODO: ?? change this to options_frames_per_drop_update() call -> game_speed_frames_per_drop_set()
@@ -203,6 +218,11 @@ void player_info_newgame_reset(void) {
     // OR, gameplay_speed_update() <------ ???
     // Should be called after level_counters_reset()
     game_speed_frames_per_drop_set( options_frames_per_drop_get( (UINT8)player_level) );
+
+    if (option_game_type == OPTION_GAME_TYPE_LONG_PET) {
+        // TODO: could this be moved so that it's only called from one place in the code?
+        game_type_long_pet_set_tail_count( (UINT8)player_level );
+    }
 
     player_info_display();
 }

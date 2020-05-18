@@ -20,9 +20,11 @@
 #include "game_board.h"
 #include "game_board_special_pieces.h"
 #include "game_piece_data.h"
+#include "game_types.h"
 #include "gfx.h"
 #include "gfx_print.h"
 #include "sound.h"
+#include "options.h"
 #include "player_info.h"
 #include "player_piece.h"
 
@@ -489,9 +491,15 @@ void board_handle_pet_completed(UINT8 flags) {
     if (flags & BRD_CHECK_FLAGS_DONT_ADD_POINTS) {
         score_update(BRD_PIECE_CLEAR_COUNT_NONE);
     } else {
+        // Check completed pet size against level-up size requirement if it's Long pet game type
+        if (option_game_type == OPTION_GAME_TYPE_LONG_PET) {
+            game_type_long_pet_check_size(board_tile_clear_count);
+        }
+
         score_update((UINT16)board_tile_clear_count);
     }
 
+    // Reset global pet size var
     board_tile_clear_count = 0;
 }
 

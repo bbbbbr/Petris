@@ -29,25 +29,33 @@
 #include "game_types.h"
 
 
-// TODO: move into game_type.c/h ??
 UINT8 game_type_cleanup_tail_count;
+UINT8 game_type_long_pet_required_size;
 
 
 #define GAME_TYPE_PET_CLEANUP_TAIL_COUNT_MIN 3
 #define GAME_TYPE_PET_CLEANUP_TAIL_COUNT_MAX 20
 
+#define GAME_TYPE_PET_LONG_PET_SIZE_MIN 3
+#define GAME_TYPE_PET_LONG_PET_SIZE_MAX 40
+
 void game_types_init(void) {
+
     game_type_cleanup_tail_count = 0;
+    game_type_long_pet_required_size = 0;
 }
 
 void game_types_handle_level_transition(void) {
 
     // Handle level transition
+    // TODO: reverse or logic and just test for marathon
     if ((option_game_type == OPTION_GAME_TYPE_LEVEL_UP) ||
-        (option_game_type == OPTION_GAME_TYPE_PET_CLEANUP)) {
+        (option_game_type == OPTION_GAME_TYPE_PET_CLEANUP) ||
+        (option_game_type == OPTION_GAME_TYPE_LONG_PET)) {
 
         // TODO: consolidate with gameplay_init() ??
         // TODO: move this into something like gameplay_level_init()
+        //  level_end() and level_start()
         HIDE_SPRITES;
 
         PLAY_SOUND_LEVEL_UP;
@@ -89,7 +97,7 @@ void game_type_pet_cleanup_increment_tail_count(void) {
         if (game_type_cleanup_tail_count < 255) {
             game_type_cleanup_tail_count++;
         }
-
+        // TODO: deduplicate this with player_info_display
         print_num_u16(DISPLAY_NUMPETS_X, DISPLAY_NUMPETS_Y, (UINT16)game_type_cleanup_tail_count, DIGITS_5);
     }
 }
@@ -109,5 +117,31 @@ void game_type_pet_cleanup_decrement_tail_count(void) {
             // in the middle of clearing pieces off the baord
             level_increment_enqueue = TRUE;
         }
+    }
+}
+
+
+
+void game_type_long_pet_set_tail_count(UINT8 player_level) {
+
+    game_type_long_pet_required_size = player_level + GAME_TYPE_PET_LONG_PET_SIZE_MIN;
+
+    if (game_type_long_pet_required_size > GAME_TYPE_PET_LONG_PET_SIZE_MAX) {
+        game_type_long_pet_required_size = GAME_TYPE_PET_LONG_PET_SIZE_MAX;
+    }
+
+    // Display required Pet Size
+    // TODO: deduplicate this with player_info_display
+    print_num_u16(DISPLAY_NUMPETS_X, DISPLAY_NUMPETS_Y, (UINT16)game_type_long_pet_required_size, DIGITS_5);
+}
+
+
+
+void game_type_long_pet_check_size(UINT8 tile_count) {
+
+    if (tile_count >= game_type_long_pet_required_size) {
+        // Don't increment the level now since it's
+        // in the middle of clearing pieces off the baord
+        level_increment_enqueue = TRUE;
     }
 }

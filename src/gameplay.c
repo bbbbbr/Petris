@@ -101,9 +101,15 @@ void gameplay_init(void) {
     // Flash a get ready message to the player
     // TODO: function or struct to select game_start_message[option_game_type]
     if (option_game_type == OPTION_GAME_TYPE_PET_CLEANUP) {
+
         board_flash_message(MSG_GET_READY_X, MSG_GET_READY_Y,
                             MSG_CLEANUP_START_TEXT, MSG_CLEANUP_START_CTEXT,
                             MSG_CLEANUP_START_REPEAT);
+    } else if (option_game_type == OPTION_GAME_TYPE_LONG_PET) {
+
+        board_flash_message(MSG_GET_READY_X, MSG_GET_READY_Y,
+                            MSG_LONG_PET_START_TEXT, MSG_LONG_PET_START_CTEXT,
+                            MSG_LONG_PET_START_REPEAT);
     } else {
         board_flash_message(MSG_GET_READY_X, MSG_GET_READY_Y,
                             MSG_GET_READY_TEXT, MSG_GET_READY_CTEXT,
