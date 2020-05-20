@@ -625,6 +625,17 @@ UINT8 board_check_completed_pet_xy(INT8 start_x, INT8 start_y, UINT8 piece, UINT
             } // end: if (c & connect)
         } // end: for (c=GP_CONNECT_MIN_BITS;
 
+        // If it's not a special piece
+        if (!(flags & BRD_CHECK_FLAGS_DONT_ADD_POINTS)) {
+            // And this is Long Pet mode
+            if ((option_game_type == OPTION_GAME_TYPE_LONG_PET) &&
+                (piece_count > 1))
+            {
+                // Display last length of completed segment
+                // even if it's not a full pet
+                print_num_u16(DISPLAY_NUMPETS_X + 1, DISPLAY_NUMPETS_Y + 1, (UINT16)piece_count, DIGITS_2);
+            }
+        }
 
         // Check if a completed pet was found
         if ( ((headtail_count >= 2) && (piece_count >= 2)) ||

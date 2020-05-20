@@ -65,7 +65,7 @@ void player_info_display(void) {
 
     } else if (option_game_type == OPTION_GAME_TYPE_LONG_PET) {
         // Display required Pet Size
-        print_num_u16(DISPLAY_NUMPETS_X, DISPLAY_NUMPETS_Y, (UINT16)game_type_long_pet_required_size, DIGITS_5);
+        print_num_u16(DISPLAY_NUMPETS_X, DISPLAY_NUMPETS_Y, (UINT16)game_type_long_pet_required_size, DIGITS_3);
 
     } else {
         // Display Pet compelted count
@@ -92,7 +92,6 @@ void score_update(UINT16 num_tiles) {
     // Increment the total title count
     // TODO: player_numtiles_this_level
     player_numtiles += num_tiles;
-
 
     // == UPDATE DISPLAY INFO AREA ==
 
@@ -167,15 +166,15 @@ void level_increment(void) {
         player_level++;
     }
 
-    if (option_game_type == OPTION_GAME_TYPE_LONG_PET) {
-        // TODO: could this be moved so that it's only called from one place in the code?
-        game_type_long_pet_set_tail_count( (UINT8)player_level );
-    }
-
     // TODO: ?? change this to options_frames_per_drop_update() call -> game_speed_frames_per_drop_set()
     game_speed_frames_per_drop_set( options_frames_per_drop_get((UINT8)player_level) );
 
     game_types_handle_level_transition();
+
+    if (option_game_type == OPTION_GAME_TYPE_LONG_PET) {
+        // TODO: could this be moved so that it's only called from one place in the code?
+        game_type_long_pet_set_pet_size( (UINT8)player_level );
+    }
 
     level_show();
 
@@ -221,7 +220,7 @@ void player_info_newgame_reset(void) {
 
     if (option_game_type == OPTION_GAME_TYPE_LONG_PET) {
         // TODO: could this be moved so that it's only called from one place in the code?
-        game_type_long_pet_set_tail_count( (UINT8)player_level );
+        game_type_long_pet_set_pet_size( (UINT8)player_level );
     }
 
     player_info_display();

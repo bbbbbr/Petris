@@ -134,7 +134,8 @@ void board_gfx_init_background(void) {
         if (option_game_type == OPTION_GAME_TYPE_PET_CLEANUP) {
             PRINT(DISPLAY_NUMPETS_X,  DISPLAY_NUMPETS_Y - 1,  "TAILS", 0);
         } else if (option_game_type == OPTION_GAME_TYPE_LONG_PET) {
-            PRINT(DISPLAY_NUMPETS_X,  DISPLAY_NUMPETS_Y - 1,  "SIZE", 0);
+            PRINT(DISPLAY_NUMPETS_X,  DISPLAY_NUMPETS_Y - 2,  "PET\nSIZE", 0);
+            PRINT(DISPLAY_NUMPETS_X,  DISPLAY_NUMPETS_Y + 1,"(  )", 0);
         } else {
             PRINT(DISPLAY_NUMPETS_X,  DISPLAY_NUMPETS_Y - 1,  "PETS", 0);
         }

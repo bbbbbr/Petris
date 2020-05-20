@@ -58,6 +58,11 @@ void game_types_handle_level_transition(void) {
         //  level_end() and level_start()
         HIDE_SPRITES;
 
+        if (option_game_type == OPTION_GAME_TYPE_LONG_PET) {
+            // Clear display of last length of completed segment
+            PRINT(DISPLAY_NUMPETS_X + 1, DISPLAY_NUMPETS_Y + 1, "  ",0);
+        }
+
         PLAY_SOUND_LEVEL_UP;
         board_hide_all(BRD_CLR_DELAY_CLEAR_MED);
 
@@ -122,7 +127,7 @@ void game_type_pet_cleanup_decrement_tail_count(void) {
 
 
 
-void game_type_long_pet_set_tail_count(UINT8 player_level) {
+void game_type_long_pet_set_pet_size(UINT8 player_level) {
 
     game_type_long_pet_required_size = player_level + GAME_TYPE_PET_LONG_PET_SIZE_MIN;
 
@@ -132,7 +137,7 @@ void game_type_long_pet_set_tail_count(UINT8 player_level) {
 
     // Display required Pet Size
     // TODO: deduplicate this with player_info_display
-    print_num_u16(DISPLAY_NUMPETS_X, DISPLAY_NUMPETS_Y, (UINT16)game_type_long_pet_required_size, DIGITS_5);
+    print_num_u16(DISPLAY_NUMPETS_X, DISPLAY_NUMPETS_Y, (UINT16)game_type_long_pet_required_size, DIGITS_3);
 }
 
 

@@ -168,3 +168,19 @@ void player_hinting_drop_update(void) {
     }
 }
 
+/*
+#define BRD_PET_LENGTH_POPUP_OFFSET_X 10
+#define BRD_PET_LENGTH_POPUP_OFFSET_Y 10
+
+void pet_length_popup_show(int8 board_x, int8 board_y, UINT8 tile_count) {
+
+    UINT8 c;
+
+    for (c = 0; c < 3; c++) {
+        move_sprite(SPR_PET_LEN_POPUP_DIGIT[c],
+                    (board_x * BRD_UNIT_SIZE) + BRD_PET_LENGTH_POPUP_OFFSET_X,
+                    (board_y * BRD_UNIT_SIZE) + BRD_PET_LENGTH_POPUP_OFFSET_Y);
+        set_sprite_tile(SPR_PET_LEN_POPUP_DIGIT[c], pet_length_popup_digits[c] + TILES_FONT_NUMS_START);
+    }
+}
+*/
