@@ -13,6 +13,9 @@
 #define SPR_SPECIAL_HINT_2  0x04 // Start of hint sprites
 #define SPR_SPECIAL_HINT_3  0x05 // Start of hint sprites
 #define SPR_SPECIAL_HINT_4  0x06 // Start of hint sprites
+#define SPR_LONG_PET_HINT_START 0x0A // 0x0A -> 0x13
+#define SPR_LONG_PET_HINT_COUNT_MAX 10
+
 
 
 #endif // PLAYER_GFX_H

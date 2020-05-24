@@ -35,6 +35,7 @@
 #define GP_DISSOLVE_1          0x26U
 #define GP_DISSOLVE_2          0x27U
 #define GP_DISSOLVE_3          0x28U
+#define GP_CROSS               0x29U
 
 
 #define GP_PET_UPSHIFT  0
@@ -71,6 +72,8 @@
 #define GP_PAL_EMPTY    0x00U // Use first pet palette
 #define GP_PAL_SPECIAL  0x04U
 #define GP_PAL_DROPHINT 0x04U
+#define GP_PAL_CROSS    0x07U
+// NOTE: adding pieces here requires an update here: TILE_COUNT_PETTOTAL
 
 
 #define GP_ROTATE_0        0

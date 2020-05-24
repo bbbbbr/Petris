@@ -10,6 +10,6 @@
 //#define PIECE_SPECIAL_THRESHOLD_MERGE 0x003F // once every 64 // TODO: create real criteria for giving the user a special piece
 // #define PIECE_SPECIAL_THRESHOLD_MERGE 0x003 // once every 4 // TODO: create real criteria for giving the user a special piece
 
-void board_handle_special_bomb(UINT8,UINT8);
+void board_handle_special_bomb(INT8,INT8);
 
 #endif // GAME_BOARD_SPECIAL_PIECES_H

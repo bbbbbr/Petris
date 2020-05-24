@@ -23,6 +23,7 @@
 #include "gameplay.h"
 
 #include "player_info.h"
+#include "player_hinting.h"
 
 #include "options.h"
 
@@ -45,6 +46,7 @@ void game_types_init(void) {
     game_type_long_pet_required_size = 0;
 }
 
+// TODO: should probably be moved to gameplay_handle_level_transition()
 void game_types_handle_level_transition(void) {
 
     // Handle level transition
@@ -59,6 +61,10 @@ void game_types_handle_level_transition(void) {
         HIDE_SPRITES;
 
         if (option_game_type == OPTION_GAME_TYPE_LONG_PET) {
+
+            // Remove player pet length hinting sprites
+            player_hinting_pet_length_reset();
+
             // Clear display of last length of completed segment
             PRINT(DISPLAY_NUMPETS_X + 1, DISPLAY_NUMPETS_Y + 1, "  ",0);
         }

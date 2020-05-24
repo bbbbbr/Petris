@@ -79,6 +79,7 @@ void gameplay_exit_cleanup(void) {
     game_piece_next_show(FALSE);
     player_hinting_special_show(FALSE);
     player_hinting_drop_show(FALSE);
+    player_hinting_pet_length_reset();
 }
 
 
@@ -92,6 +93,7 @@ void gameplay_init(void) {
 
     board_init();
     board_gfx_init();
+    player_hinting_pet_length_reset();
 
     options_player_settings_apply();
 
@@ -167,6 +169,7 @@ void gameplay_handle_pause(void) {
     player_piece_update_xy(PLAYER_PIECE_HIDE);
     player_hinting_special_show(FALSE);
     player_hinting_drop_show(FALSE);
+    player_hinting_pet_length_all_show(FALSE);
 
     PRINT(BRD_ST_X + 2,
           BRD_ST_Y + 5,
@@ -189,6 +192,7 @@ void gameplay_handle_pause(void) {
     board_redraw_all();
     player_piece_update_xy(PLAYER_PIECE_SHOW);
     game_piece_next_show(TRUE);
+    player_hinting_pet_length_all_show(TRUE);
 }
 
 

@@ -48,6 +48,11 @@ const UINT8 GP_SPECIAL_HINT_LUT[] = {GP_SPECIAL_BOMB_HINT, // for GP_SPECIAL_BOM
 UINT8 hint_special_tile;
 
 
+INT8 spr_long_pet_hint_x[SPR_LONG_PET_HINT_COUNT_MAX];
+INT8 spr_long_pet_hint_y[SPR_LONG_PET_HINT_COUNT_MAX];
+UINT8 spr_long_pet_hint_max;
+
+
 // Apply sprite flicker to special piece hinting and drop hinting if needed
 void player_hinting_flicker_update(UINT8 frame_count) {
 
@@ -88,6 +93,7 @@ void player_hinting_special_show(UINT8 do_show) {
 // NOTE: expects to only be called if (player_piece & GP_SPECIAL_MASK)
 //
 //
+// TODO: OPTIMIZE: if there is CPU time left, roll this into a loop?
 void player_hinting_special_move(void) {
 
         // TODO : OPTIMIZE : Better to avoid re-multiplying and adding all of these each time
@@ -109,10 +115,10 @@ void player_hinting_special_move(void) {
 }
 
 
-
 // NOTE: expects to only be called if (player_piece & GP_SPECIAL_MASK)
 //
 //
+// TODO: OPTIMIZE: if there is CPU time left, roll this into a loop?
 void player_hinting_special_update_gfx() {
 
         hint_special_tile = GP_SPECIAL_HINT_LUT[ player_piece - GP_SPECIAL_START ];
@@ -168,7 +174,150 @@ void player_hinting_drop_update(void) {
     }
 }
 
+
+
+#define HINT_PET_LENGTH_SLOT_EMPTY -1
+
+
+// ISSUES:
+//
+// x * BUG: hinting doesn't get removed when pet shortened by Bomb
+// x * BUG: hinting doesn't get removed when pet removed by Merge
+// x * BUG: hint gets placed at 1 location PAST end of pet when piece landed was a head/tail
+// x * BUG: doesn't add hint if adding piece in middle of pet to make it > length
+//   *   BUG: hinting should get re-calculated when any segment removed by bomb, even if it creates 2 separate pets
+//
+// * ISSUE: hinting doesn't help for split-pets
+//
+//
+
+void player_hinting_pet_length_reset(void) {
+
+    UINT8 c;
+
+    // Make sure all the sprites are hidden
+    // and the location cache is cleared
+
+    spr_long_pet_hint_max = 0;
+
+    for (c = 0; c < SPR_LONG_PET_HINT_COUNT_MAX; c++) {
+
+        // Hide sprite
+        move_sprite(SPR_LONG_PET_HINT_START + c, 0,0);
+
+        spr_long_pet_hint_x[c] = HINT_PET_LENGTH_SLOT_EMPTY;
+        spr_long_pet_hint_y[c] = HINT_PET_LENGTH_SLOT_EMPTY;
+
+        // Set sprite tile and pal
+        set_sprite_tile(SPR_LONG_PET_HINT_START + c, GP_CROSS);
+        set_sprite_prop(SPR_LONG_PET_HINT_START + c, GP_PAL_CROSS);
+    }
+
+}
+
+
+
+// Adds a pet length hint sprite overlay
+// for pets that almost meeting required Long Pet length
+void player_hinting_pet_length_add(INT8 board_x, INT8 board_y) {
+
+    UINT8 c;
+
+    c = 0;
+    // Search for first open slot
+    while (spr_long_pet_hint_x[c] != HINT_PET_LENGTH_SLOT_EMPTY) {
+        c++;
+
+        // Abort if no slots are open
+        if (c >= SPR_LONG_PET_HINT_COUNT_MAX) {
+            return;
+        }
+    }
+
+    if (c > spr_long_pet_hint_max) {
+        spr_long_pet_hint_max = c;
+    }
+    // set_sprite_tile(SPR_LONG_PET_HINT_START + spr_long_pet_hint_count, GP_CROSS);
+    // set_sprite_prop(SPR_LONG_PET_HINT_START + spr_long_pet_hint_count, GP_PAL_CROSS);
+
+    // Move the sprite into view at board position
+    move_sprite(SPR_LONG_PET_HINT_START + c,
+                (board_x * BRD_UNIT_SIZE) + BRD_PIECE_X_OFFSET,
+                (board_y * BRD_UNIT_SIZE) + BRD_PIECE_Y_OFFSET);
+
+    // Cache it's x/y location for
+    // later removal testing and show/hide on pause
+    spr_long_pet_hint_x[c] = board_x;
+    spr_long_pet_hint_y[c] = board_y;
+}
+
+
+
+// Note: This just hides sprites but doesn't prune the list.
+//       So if enough are removed and added again then it will run out
+//       even if only 1 or 2 were on active display
+void player_hinting_pet_length_remove(INT8 board_x, INT8 board_y)
+ {
+
+    UINT8 c;
+
+    // Only search within max number of added hints
+    // Ignore sdcc bug: warning 94: comparison is always false due to limited range of data type
+    // TODO: FIXME: SDCC generating a warning here?
+    for (c = 0; c <= spr_long_pet_hint_max; c++) {
+
+        if ((board_x == spr_long_pet_hint_x[c]) &&
+            (board_y == spr_long_pet_hint_y[c])) {
+
+            // Clear location cache entry
+            spr_long_pet_hint_x[c] = HINT_PET_LENGTH_SLOT_EMPTY;
+            spr_long_pet_hint_y[c] = HINT_PET_LENGTH_SLOT_EMPTY;
+
+            // Hide sprite by moving off screen
+            move_sprite(SPR_LONG_PET_HINT_START + c, 0,0);
+
+            // set_sprite_tile(SPR_LONG_PET_HINT_START + c, GP_EMPTY);
+
+            // stop search
+            return;
+        }
+    }
+}
+
+
+
+// Hides all sprites and resets location cache counter
+void player_hinting_pet_length_all_show(UINT8 do_show) {
+
+    UINT8 c;
+    for (c = 0; c < SPR_LONG_PET_HINT_COUNT_MAX; c++) {
+
+        if ((do_show) && (spr_long_pet_hint_x[c] != HINT_PET_LENGTH_SLOT_EMPTY)) {
+
+                move_sprite(SPR_LONG_PET_HINT_START + c,
+                            (spr_long_pet_hint_x[c] * BRD_UNIT_SIZE) + BRD_PIECE_X_OFFSET,
+                            (spr_long_pet_hint_y[c] * BRD_UNIT_SIZE) + BRD_PIECE_Y_OFFSET);
+
+            //set_sprite_tile(SPR_LONG_PET_HINT_START + c, GP_CROSS);
+            //set_sprite_prop(SPR_LONG_PET_HINT_START + c, GP_PAL_CROSS);
+
+        } else {
+            // Hide sprite by moving off screen
+            move_sprite(SPR_LONG_PET_HINT_START + c, 0,0);
+
+            // set_sprite_tile(SPR_LONG_PET_HINT_START + c, GP_EMPTY);
+        }
+    }
+}
+
+
+
+
+
 /*
+
+
+
 #define BRD_PET_LENGTH_POPUP_OFFSET_X 10
 #define BRD_PET_LENGTH_POPUP_OFFSET_Y 10
 
