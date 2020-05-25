@@ -518,7 +518,7 @@ void board_handle_pet_completed(UINT8 flags) {
 UINT8 board_check_completed_pet_xy(INT8 start_x, INT8 start_y, UINT8 piece, UINT8 connect, UINT8 flags) {
 
     UINT8 piece_count, headtail_count;
-     INT8 check_x = 0, check_y = 0;  // Inits here and this_connect are just to quiet the compiler re long pet hinting
+     INT8 check_x = 0, check_y = 0;  // Inits here and this_connect are just to quiet the compiler re long pet hinting add() location non-initialization
     UINT8 this_connect = 0;
     UINT8 last_connect;
     UINT8 source_cur_dir;
@@ -527,10 +527,10 @@ UINT8 board_check_completed_pet_xy(INT8 start_x, INT8 start_y, UINT8 piece, UINT
         // Reset tile clear cache (add one entry, current piece)
         board_tile_clear_cache_x[0] = start_x; // = start_x + (start_y * BRD_WIDTH);
         board_tile_clear_cache_y[0] = start_y;
-        board_tile_clear_count = 1; // TODO: this could just piggy back on piece_count
+        board_tile_clear_count = 1;
 
         // Initialize piece count (include current)
-        piece_count = 1;
+        piece_count = 1;  // TODO: this could be merged into board_tile_clear_count
 
         // Initialize end seg count
         headtail_count = 0;
@@ -636,69 +636,47 @@ UINT8 board_check_completed_pet_xy(INT8 start_x, INT8 start_y, UINT8 piece, UINT
             } // end: if (c & connect)
         } // end: for (c=GP_CONNECT_MIN_BITS;
 
-// BUG-1: bomb is completing pets
-// BUG-2: bomb needs to remove pet segments before re-testing pet for removal
-        // Bug-2A (predicted) - need to remove hint before bomb removes piece
-        // Move hint deletion into bomb special instead of in here?
-        // (use cached list of pet tiles)
-        // it could be cleaner... but still have to print pet length here
-        // Bug-2B, removing piece before would prevent proper testing
-        //  of whether removed piece actually connected to a pet
-        // so instead maybe remove it after using cached list?
-        // (it would be first in list)
-//
+
+        // ===== PET SCANNING IS COMPLETE, NOW HANDLE RESULT =====
+
+
+        // Check for a completed pet, process if it's done
         if ( ((headtail_count >= 2) && (piece_count >= 2)) ||
              (flags & BRD_CHECK_FLAGS_IGNORE_PET_TYPE)) {
 
+            // Don't finalize the pet if this was just a pet-scan
+            // to remove/update pet length overlays (called via Bomb special piece)
             if (!(flags & BRD_CHECK_FLAGS_DONT_HANDLE_PET_COMPLETED)) {
 
-                // Check if a completed pet was found
+                // Process the pet if it was completed or is being cleared via a merge
                 board_handle_pet_completed(flags);
                 return (TRUE);
             }
-        } else {
-
-            // Reduncant with above, don't check
-            // // Only process if it's not a special Merge piece
-            // if (!(flags & BRD_CHECK_FLAGS_IGNORE_PET_TYPE)) {
-
-
-            // Only update Pet length info in Long Pet mode
-            // Don't update if called via a bomb special piece
-            if ((option_game_type == OPTION_GAME_TYPE_LONG_PET) &&
-                (piece_count > 1) &&
-                (!(flags & BRD_CHECK_FLAGS_DONT_HANDLE_PET_COMPLETED)))
-            {
-// TODO: REMOVE PRINTING OF LAST PET LENGTH
-                // Display last length of completed segment
-                // even if it's not a full pet
-                print_num_u16(DISPLAY_NUMPETS_X + 1, DISPLAY_NUMPETS_Y + 1, (UINT16)piece_count, DIGITS_2);
-
-                // if (piece_count == game_type_long_pet_required_size - 1) {
-                // if (piece_count >= game_type_long_pet_required_size - 1) {
-                if (piece_count >= HINT_LONG_PET_MIN_SIZE) {
-                    // If current piece is an end (tail or head)
-                    // then use the opposite piece
-                    if ( ((piece & GP_SEG_MASK) == GP_SEG_TAIL_BITS) ||
-                         ((piece & GP_SEG_MASK) == GP_SEG_HEAD_BITS) ) {
-                        // Piece landed was a head/tail, so put hint at opposite end
-                        // Fix x,y location being 1 past the end of pet
-                        // by reverse the next piece connection lookup
-                        hinting_petlength_add(check_x - GP_CONNECT_NEXT_X_LUT[this_connect],
-                                                          check_y - GP_CONNECT_NEXT_Y_LUT[this_connect],
-                                                          piece_count,
-                                                          piece);
-                    } else {
-                        // piece landed was non head/tail so put hint on landed piece
-                        hinting_petlength_add(start_x, start_y, piece_count, piece);
-                    }
-                }
+        }
+        // Otherwise, if this is Long Pet mode, update pet length overlays
+        // (Don't update this was just a pet-scan called via a Bomb special piece)
+        else if ((option_game_type == OPTION_GAME_TYPE_LONG_PET)
+                && (piece_count >= HINT_LONG_PET_MIN_SIZE)
+                && (!(flags & BRD_CHECK_FLAGS_DONT_HANDLE_PET_COMPLETED)))
+        {
+            // If current piece is an end (tail or head)
+            // then use the opposite piece for the hint
+            if ( ((piece & GP_SEG_MASK) == GP_SEG_TAIL_BITS) ||
+                 ((piece & GP_SEG_MASK) == GP_SEG_HEAD_BITS) ) {
+                // Piece landed was a head/tail, so put hint at opposite end
+                // Fix x,y location being 1 past the end of pet
+                // by reversing the next piece connection lookup
+                hinting_petlength_add(check_x - GP_CONNECT_NEXT_X_LUT[this_connect],
+                                      check_y - GP_CONNECT_NEXT_Y_LUT[this_connect],
+                                      piece_count,
+                                      piece);
+            } else {
+                // piece landed was non head/tail so put hint on landed piece
+                hinting_petlength_add(start_x, start_y, piece_count, piece);
             }
-//            }
 
         }
 
-//    } // end: if (piece != GP_EMPTY)
 
     // Reset global pet size var now that processing is completed
     board_tile_clear_count = 0;

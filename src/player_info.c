@@ -178,7 +178,6 @@ void level_increment(void) {
 
     level_show();
 
-
     // TODO: Debug: frames per drop (requires extern UINT8 game_speed_frames_per_drop;)
     #ifdef DEBUG_SHOW
         print_num_u16(DISPLAY_NUMPETS_X, DISPLAY_NUMPETS_Y + 1, (UINT16)game_speed_frames_per_drop, DIGITS_5);

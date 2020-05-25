@@ -48,10 +48,10 @@ const UINT8 GP_SPECIAL_HINT_LUT[] = {GP_SPECIAL_BOMB_HINT, // for GP_SPECIAL_BOM
 
 UINT8 hint_special_tile;
 
-INT8  hinting_petlength_x[SPR_LONG_PET_HINT_NUM_POOL_SIZE];
-INT8  hinting_petlength_y[SPR_LONG_PET_HINT_NUM_POOL_SIZE];
-UINT8 hinting_petlength_num_1[SPR_LONG_PET_HINT_NUM_POOL_SIZE];
-UINT8 hinting_petlength_num_2[SPR_LONG_PET_HINT_NUM_POOL_SIZE];
+INT8  hinting_petlength_x[SPR_LONG_PET_HINT_POOL_SIZE];
+INT8  hinting_petlength_y[SPR_LONG_PET_HINT_POOL_SIZE];
+UINT8 hinting_petlength_num_1[SPR_LONG_PET_HINT_POOL_SIZE];
+UINT8 hinting_petlength_num_2[SPR_LONG_PET_HINT_POOL_SIZE];
 
 UINT8 hinting_petlength_enabled;
 UINT8 hinting_petlength_slot;
@@ -180,6 +180,8 @@ void player_hinting_drop_update(void) {
 }
 
 
+// ==== PET LENGTH HINTING ====
+
 
 void hinting_petlength_reset(void) {
 
@@ -195,7 +197,7 @@ void hinting_petlength_reset(void) {
 
     sprite_idx = SPR_LONG_PET_HINT_NUM_START;
 
-    for (c = 0; c < SPR_LONG_PET_HINT_NUM_POOL_SIZE; c++) {
+    for (c = 0; c < SPR_LONG_PET_HINT_POOL_SIZE; c++) {
 
         // Reset positions
         // Just update X, since Y doesn't get tested for EMPTY X since that's what gets
@@ -246,7 +248,7 @@ void hinting_petlength_add(INT8 board_x, INT8 board_y, UINT8 length, UINT8 piece
         // Move to next slot
         hinting_petlength_slot++;
         // Wrap slot around if needed, overwriting previous old entries
-        if (hinting_petlength_slot >= SPR_LONG_PET_HINT_NUM_POOL_SIZE) {
+        if (hinting_petlength_slot >= SPR_LONG_PET_HINT_POOL_SIZE) {
             hinting_petlength_slot = 0;
         }
     }
@@ -309,7 +311,7 @@ void hinting_petlength_show(void) {
     // Set initial offset for hint sprites
     sprite_idx = SPR_LONG_PET_HINT_NUM_START;
 
-    for (c = 0; c < SPR_LONG_PET_HINT_NUM_POOL_SIZE; c++) {
+    for (c = 0; c < SPR_LONG_PET_HINT_POOL_SIZE; c++) {
 
         // Show the entry if it's populated
         if ((hinting_petlength_enabled)
@@ -349,7 +351,7 @@ void hinting_petlength_remove(INT8 board_x, INT8 board_y) {
     UINT8 sprite_idx;
 
     // Only search within max number of added hints
-    for (c = 0; c <= SPR_LONG_PET_HINT_NUM_POOL_SIZE; c++) {
+    for (c = 0; c <= SPR_LONG_PET_HINT_POOL_SIZE; c++) {
 
         if ((board_x == hinting_petlength_x[c]) &&
             (board_y == hinting_petlength_y[c])) {

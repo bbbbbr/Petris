@@ -13,14 +13,9 @@
 #define SPR_SPECIAL_HINT_2  0x04 // Start of hint sprites
 #define SPR_SPECIAL_HINT_3  0x05 // Start of hint sprites
 #define SPR_SPECIAL_HINT_4  0x06 // Start of hint sprites
-//#define SPR_LONG_PET_HINT_START 0x0A // 0x0A -> 0x13
-// #define SPR_LONG_PET_HINT_COUNT_MAX 10
-// #define SPR_LONG_PET_HINT_NUM_1 0x0A
-// #define SPR_LONG_PET_HINT_NUM_2 (SPR_LONG_PET_HINT_NUM_1 + 1)
-// #define SPR_LONG_PET_HINT_NUM_POOL_SIZE 5
 #define SPR_LONG_PET_HINT_NUM_START     0x0A
 #define SPR_LONG_PET_HINT_NUM_TILES_PER 2
-#define SPR_LONG_PET_HINT_NUM_POOL_SIZE 5 // (2 x this number of sprites used)
+#define SPR_LONG_PET_HINT_POOL_SIZE     6 // Last N pet lengths shown (2 x this number of sprites used)
 
 
 

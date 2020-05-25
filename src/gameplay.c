@@ -162,14 +162,17 @@ void gameplay_prepare_board(void) {
 
 void gameplay_handle_pause(void) {
 
-    // Hide the game board and player piece
-// board_hide_all(BRD_CLR_DELAY_NONE);
+    // Hide the game board and player piece (except in long-pet mode)
+    // TODO: allow in all other modes?
+    if (option_game_type != OPTION_GAME_TYPE_LONG_PET) {
+        board_hide_all(BRD_CLR_DELAY_NONE);
+    }
+
     // TODO: CONSOLIDATE: these hides are basically a dupe of gameplay_exit_cleanup()
     game_piece_next_show(FALSE);
     player_piece_update_xy(PLAYER_PIECE_HIDE);
     player_hinting_special_show(FALSE);
     player_hinting_drop_show(FALSE);
-//    hinting_petlength_show(FALSE);
 
     PRINT(BRD_ST_X + 2,
           BRD_ST_Y + 2,
@@ -192,7 +195,6 @@ void gameplay_handle_pause(void) {
     board_redraw_all();
     player_piece_update_xy(PLAYER_PIECE_SHOW);
     game_piece_next_show(TRUE);
-//    hinting_petlength_show(TRUE);
 }
 
 

@@ -10,9 +10,7 @@
 #define SPR_LONG_PET_HINT_OFFSET_Y (BRD_PIECE_Y_OFFSET + 3)
 #define HINT_LONG_PET_MIN_SIZE 3
 #define HINT_PET_LENGTH_SLOT_EMPTY -1
-#define HINT_PET_LENGTH_SLOT_NONE 99
-
-
+#define HINT_PET_LENGTH_SLOT_NONE 255
 
 
 void player_hinting_flicker_update(UINT8);
