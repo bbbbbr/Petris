@@ -322,10 +322,6 @@ void gameplay_update(void) {
 
     // Handle board animation updates
     board_gfx_tail_animate();
-
-    if ((global_frame_count & 0x3F) == 0x3F) {
-        hinting_petlength_show(HINT_LONG_PET_INCREMENT_YES);
-    }
 }
 
 
