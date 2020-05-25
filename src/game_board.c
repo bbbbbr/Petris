@@ -540,8 +540,10 @@ UINT8 board_check_completed_pet_xy(INT8 start_x, INT8 start_y, UINT8 piece, UINT
             headtail_count++;
         }
 
-
-player_hinting_pet_length_remove(start_x, start_y);
+        // Clear overlay hint from piece (may get re-added later in a different location)
+        if (option_game_type == OPTION_GAME_TYPE_LONG_PET) {
+            hinting_petlength_remove(start_x, start_y);
+        }
 
         // Loop through possible connect directions (Left/Right/Up/Down)
         for (source_cur_dir = GP_CONNECT_MIN_BITS;
@@ -577,7 +579,10 @@ player_hinting_pet_length_remove(start_x, start_y);
                     //                   Now has the next-connections bits pointing from the just-tested position
                     //                   toward the next x/y to check (with it's preceding direction bits masked out)
 
-player_hinting_pet_length_remove(check_x, check_y);
+                    // Clear overlay hint from piece (may get re-added later in a different location)
+                    if (option_game_type == OPTION_GAME_TYPE_LONG_PET) {
+                        hinting_petlength_remove(check_x, check_y);
+                    }
 
                     // Check to see if the pet is a loop with no head/tail (current position == starting position)
                     // Important: must be tested *before* incrementing piece_count and updating check_x/Y
@@ -664,12 +669,14 @@ player_hinting_pet_length_remove(check_x, check_y);
                 (piece_count > 1) &&
                 (!(flags & BRD_CHECK_FLAGS_DONT_HANDLE_PET_COMPLETED)))
             {
+// TODO: REMOVE PRINTING OF LAST PET LENGTH
                 // Display last length of completed segment
                 // even if it's not a full pet
                 print_num_u16(DISPLAY_NUMPETS_X + 1, DISPLAY_NUMPETS_Y + 1, (UINT16)piece_count, DIGITS_2);
 
                 // if (piece_count == game_type_long_pet_required_size - 1) {
-                if (piece_count >= game_type_long_pet_required_size - 1) {
+                // if (piece_count >= game_type_long_pet_required_size - 1) {
+                if (piece_count >= HINT_LONG_PET_MIN_SIZE) {
                     // If current piece is an end (tail or head)
                     // then use the opposite piece
                     if ( ((piece & GP_SEG_MASK) == GP_SEG_TAIL_BITS) ||
@@ -677,11 +684,13 @@ player_hinting_pet_length_remove(check_x, check_y);
                         // Piece landed was a head/tail, so put hint at opposite end
                         // Fix x,y location being 1 past the end of pet
                         // by reverse the next piece connection lookup
-                        player_hinting_pet_length_add(check_x - GP_CONNECT_NEXT_X_LUT[this_connect],
-                                                      check_y - GP_CONNECT_NEXT_Y_LUT[this_connect]);
+                        hinting_petlength_add(check_x - GP_CONNECT_NEXT_X_LUT[this_connect],
+                                                          check_y - GP_CONNECT_NEXT_Y_LUT[this_connect],
+                                                          piece_count,
+                                                          piece);
                     } else {
                         // piece landed was non head/tail so put hint on landed piece
-                        player_hinting_pet_length_add(start_x, start_y);
+                        hinting_petlength_add(start_x, start_y, piece_count, piece);
                     }
                 }
             }

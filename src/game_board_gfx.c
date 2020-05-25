@@ -87,6 +87,9 @@ void board_gfx_init_sprites(void) {
     fade_set_pal(BG_PAL_0, 4, board_pets_palette,     FADE_PAL_SPRITES);
     fade_set_pal(BG_PAL_4, 1, board_specials_palette, FADE_PAL_SPRITES);
     set_sprite_data(0, TILE_COUNT_PETTOTAL, pet_tiles);
+    // Load overlay font data after sprite data
+    set_sprite_data(SPRITE_TILE_FONT_DIGITS_START, TILE_COUNT_FONT_NUMS,
+                    font_tiles + (TILES_FONT_CHARS_LEN * CGB_TILE_SIZE));
 }
 
 

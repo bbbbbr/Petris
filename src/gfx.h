@@ -50,14 +50,19 @@
 #define TILE_COUNT_LONG_PET_HINT  1
 #define TILE_COUNT_PETTOTAL    (TILE_COUNT_PETS + TILE_COUNT_PETBLANK + TILE_COUNT_PETSPECIAL + TILE_COUNT_DROP_HINT + TILE_COUNT_DISSOLVE + TILE_COUNT_LONG_PET_HINT)
 
+// Start sprite font digit tiles after pet tiles
+#define SPRITE_TILE_FONT_DIGITS_START TILE_COUNT_PETTOTAL
+
 // Font gets loaded at the end of tile RAM
 #define TILE_COUNT_FONT     45 //Tiles in order: <blank>ABC...XYZ0123456789!'()-.:?
 #define TILES_FONT_START    (255 - TILE_COUNT_FONT) // (TILES_BG_START + TILE_COUNT_BG)
     #define TILE_ID_FONT_BLANK  TILES_FONT_START // blank tile
-    #define TILES_FONT_CHARS_START  (TILES_FONT_START  + 1)
+    #define TILES_FONT_BLANK_LEN    1
+    #define TILES_FONT_CHARS_START  (TILES_FONT_START  + TILES_FONT_BLANK_LEN)
     // Numeric tiles are a subset of main font
     // So these are just for convenience
-    #define TILES_FONT_NUMS_START  (TILES_FONT_START  + 27)
+    #define TILES_FONT_CHARS_LEN   27
+    #define TILES_FONT_NUMS_START  (TILES_FONT_START  + TILES_FONT_CHARS_LEN)
     #define TILE_COUNT_FONT_NUMS   11 //Tiles in order: 0123456789<blank>
 
 extern const UWORD board_pets_palette[];

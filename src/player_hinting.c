@@ -17,6 +17,7 @@
 #include "common.h"
 #include "input.h"
 #include "sound.h"
+#include "gfx.h"
 #include "gfx_print.h"
 
 #include "game_piece.h"
@@ -47,10 +48,12 @@ const UINT8 GP_SPECIAL_HINT_LUT[] = {GP_SPECIAL_BOMB_HINT, // for GP_SPECIAL_BOM
 
 UINT8 hint_special_tile;
 
+#define HINT_PET_LENGTH_SLOT_EMPTY -1
 
-INT8 spr_long_pet_hint_x[SPR_LONG_PET_HINT_COUNT_MAX];
-INT8 spr_long_pet_hint_y[SPR_LONG_PET_HINT_COUNT_MAX];
-UINT8 spr_long_pet_hint_max;
+// INT8  spr_long_pet_hint_x[SPR_LONG_PET_HINT_COUNT_MAX];
+// INT8  spr_long_pet_hint_y[SPR_LONG_PET_HINT_COUNT_MAX];
+// UINT8 spr_long_pet_hint_max;
+
 
 
 // Apply sprite flicker to special piece hinting and drop hinting if needed
@@ -175,161 +178,189 @@ void player_hinting_drop_update(void) {
 }
 
 
+#define SPR_LONG_PET_HINT_OFFSET_X (BRD_PIECE_X_OFFSET + 3)
+#define SPR_LONG_PET_HINT_OFFSET_Y (BRD_PIECE_Y_OFFSET + 3)
 
-#define HINT_PET_LENGTH_SLOT_EMPTY -1
+
+INT8 spr_long_pet_hint_num_x[SPR_LONG_PET_HINT_NUM_POOL_SIZE];
+INT8 spr_long_pet_hint_num_y[SPR_LONG_PET_HINT_NUM_POOL_SIZE];
+UINT8 spr_long_pet_hint_num_1[SPR_LONG_PET_HINT_NUM_POOL_SIZE];
+UINT8 spr_long_pet_hint_num_2[SPR_LONG_PET_HINT_NUM_POOL_SIZE];
+UINT8 spr_long_pet_hint_num_attrib[SPR_LONG_PET_HINT_NUM_POOL_SIZE];
+UINT8 spr_long_pet_hint_num_counter;
+UINT8 spr_long_pet_hint_num_slot;
+UINT8 spr_long_pet_hint_num_enabled;
 
 
-// ISSUES:
-//
-// x * BUG: hinting doesn't get removed when pet shortened by Bomb
-// x * BUG: hinting doesn't get removed when pet removed by Merge
-// x * BUG: hint gets placed at 1 location PAST end of pet when piece landed was a head/tail
-// x * BUG: doesn't add hint if adding piece in middle of pet to make it > length
-//   *   BUG: hinting should get re-calculated when any segment removed by bomb, even if it creates 2 separate pets
-//
-// * ISSUE: hinting doesn't help for split-pets
-//
-//
 
-void player_hinting_pet_length_reset(void) {
+
+
+void hinting_petlength_reset(void) {
 
     UINT8 c;
 
     // Make sure all the sprites are hidden
     // and the location cache is cleared
 
-    spr_long_pet_hint_max = 0;
+    // spr_long_pet_hint_num_enabled = FALSE;
+    spr_long_pet_hint_num_enabled = TRUE;
+    spr_long_pet_hint_num_counter = 0;
+    spr_long_pet_hint_num_slot = 0;
 
-    for (c = 0; c < SPR_LONG_PET_HINT_COUNT_MAX; c++) {
+    for (c = 0; c < SPR_LONG_PET_HINT_NUM_POOL_SIZE; c++) {
 
         // Hide sprite
-        move_sprite(SPR_LONG_PET_HINT_START + c, 0,0);
+        move_sprite(SPR_LONG_PET_HINT_NUM_1, 0,0);
+        move_sprite(SPR_LONG_PET_HINT_NUM_2, 0,0);
 
-        spr_long_pet_hint_x[c] = HINT_PET_LENGTH_SLOT_EMPTY;
-        spr_long_pet_hint_y[c] = HINT_PET_LENGTH_SLOT_EMPTY;
+        // Reset positions
+        // Just update X, since Y doesn't get tested for EMPTY X since that's what gets
+        spr_long_pet_hint_num_x[c] = HINT_PET_LENGTH_SLOT_EMPTY;
 
-        // Set sprite tile and pal
-        set_sprite_tile(SPR_LONG_PET_HINT_START + c, GP_CROSS);
-        set_sprite_prop(SPR_LONG_PET_HINT_START + c, GP_PAL_CROSS);
+        // Set sprite
+        set_sprite_tile(SPR_LONG_PET_HINT_NUM_1, GP_CROSS);
+        set_sprite_tile(SPR_LONG_PET_HINT_NUM_2, GP_CROSS);
+
+    // TODO: fix palette (add special for this, or use pet pals OR fix font transparency
+       // set_sprite_prop(SPR_LONG_PET_HINT_NUM_1, GP_PAL_SPECIAL);
+       // set_sprite_prop(SPR_LONG_PET_HINT_NUM_2, GP_PAL_SPECIAL);
+
     }
 
 }
 
+
+void hinting_petlength_toggle_enabled(void) {
+
+    spr_long_pet_hint_num_enabled ^= 1;
+
+    // Hide hinting if not enabled
+    if (spr_long_pet_hint_num_enabled == FALSE) {
+        hinting_petlength_hide();
+    }
+}
 
 
 // Adds a pet length hint sprite overlay
 // for pets that almost meeting required Long Pet length
-void player_hinting_pet_length_add(INT8 board_x, INT8 board_y) {
+void hinting_petlength_add(INT8 board_x, INT8 board_y, UINT8 length, UINT8 piece) {
 
-    UINT8 c;
+    // Cache board x,y and sprite digits
+    spr_long_pet_hint_num_x[spr_long_pet_hint_num_slot] = board_x;
+    spr_long_pet_hint_num_y[spr_long_pet_hint_num_slot] = board_y;
+    spr_long_pet_hint_num_attrib[spr_long_pet_hint_num_slot] = ((piece & GP_PET_MASK) >> GP_PET_UPSHIFT); // Palette
 
-    c = 0;
-    // Search for first open slot
-    while (spr_long_pet_hint_x[c] != HINT_PET_LENGTH_SLOT_EMPTY) {
-        c++;
+    if (length <= 9) {
+        spr_long_pet_hint_num_1[spr_long_pet_hint_num_slot] = SPRITE_TILE_FONT_DIGITS_START + length;
+        spr_long_pet_hint_num_2[spr_long_pet_hint_num_slot] = GP_EMPTY;
+    } else if (length <= 99) {
+        spr_long_pet_hint_num_1[spr_long_pet_hint_num_slot] = SPRITE_TILE_FONT_DIGITS_START + (length / 10);
+        spr_long_pet_hint_num_2[spr_long_pet_hint_num_slot] = SPRITE_TILE_FONT_DIGITS_START + (length % 10);
+    }
 
-        // Abort if no slots are open
-        if (c >= SPR_LONG_PET_HINT_COUNT_MAX) {
-            return;
+    // Update sprite counter to show current sprite
+    spr_long_pet_hint_num_counter = spr_long_pet_hint_num_slot;
+
+    hinting_petlength_show(HINT_LONG_PET_INCREMENT_NO); // TODO: change to a define NO_INCREMENT
+
+
+    // // Find next open slot
+    // while (spr_long_pet_hint_num_x[spr_long_pet_hint_num_slot] != HINT_PET_LENGTH_SLOT_EMPTY) {
+
+        // Move to next slot
+        spr_long_pet_hint_num_slot++;
+
+        // If there is no slot open, overwrite the first
+        // Wrap slot around is needed, overwriting previous old entries
+        if (spr_long_pet_hint_num_slot >= SPR_LONG_PET_HINT_NUM_POOL_SIZE) {
+            spr_long_pet_hint_num_slot = 0;
+//                break;
         }
-    }
+//    }
 
-    if (c > spr_long_pet_hint_max) {
-        spr_long_pet_hint_max = c;
-    }
-    // set_sprite_tile(SPR_LONG_PET_HINT_START + spr_long_pet_hint_count, GP_CROSS);
-    // set_sprite_prop(SPR_LONG_PET_HINT_START + spr_long_pet_hint_count, GP_PAL_CROSS);
-
-    // Move the sprite into view at board position
-    move_sprite(SPR_LONG_PET_HINT_START + c,
-                (board_x * BRD_UNIT_SIZE) + BRD_PIECE_X_OFFSET,
-                (board_y * BRD_UNIT_SIZE) + BRD_PIECE_Y_OFFSET);
-
-    // Cache it's x/y location for
-    // later removal testing and show/hide on pause
-    spr_long_pet_hint_x[c] = board_x;
-    spr_long_pet_hint_y[c] = board_y;
 }
 
 
 
-// Note: This just hides sprites but doesn't prune the list.
-//       So if enough are removed and added again then it will run out
-//       even if only 1 or 2 were on active display
-void player_hinting_pet_length_remove(INT8 board_x, INT8 board_y)
- {
+void hinting_petlength_hide(void) {
+
+    // Hide sprite
+    move_sprite(SPR_LONG_PET_HINT_NUM_1, 0,0);
+    move_sprite(SPR_LONG_PET_HINT_NUM_2, 0,0);
+}
+
+
+
+// TODO Convert this to just show ALL numbers and not loop through them
+void hinting_petlength_show(UINT8 do_increment) {
+
+    if (spr_long_pet_hint_num_enabled) {
+
+        if (do_increment) {
+
+            do {
+                spr_long_pet_hint_num_counter++;
+
+                if (spr_long_pet_hint_num_counter >= SPR_LONG_PET_HINT_NUM_POOL_SIZE) {
+                    spr_long_pet_hint_num_counter = 0;
+                    break; // TODO: FIXME: breaking here instead of doing a full 1-pass loop is sub-optimal, should be SPR_LONG_PET_HINT_NUM_POOL_SIZE loops MAX
+                }
+            } while (spr_long_pet_hint_num_x[spr_long_pet_hint_num_counter] == HINT_PET_LENGTH_SLOT_EMPTY);
+        }
+
+        // Show the entry if it's populated
+        if (spr_long_pet_hint_num_x[spr_long_pet_hint_num_counter] != HINT_PET_LENGTH_SLOT_EMPTY) {
+            // Set sprite tiles to show cached digits
+            set_sprite_tile(SPR_LONG_PET_HINT_NUM_1, spr_long_pet_hint_num_1[spr_long_pet_hint_num_counter]);
+            set_sprite_tile(SPR_LONG_PET_HINT_NUM_2, spr_long_pet_hint_num_2[spr_long_pet_hint_num_counter]);
+
+            set_sprite_prop(SPR_LONG_PET_HINT_NUM_1, spr_long_pet_hint_num_attrib[spr_long_pet_hint_num_counter]);
+            set_sprite_prop(SPR_LONG_PET_HINT_NUM_2, spr_long_pet_hint_num_attrib[spr_long_pet_hint_num_counter]);
+
+            // Move the sprite into view at board position
+            move_sprite(SPR_LONG_PET_HINT_NUM_1,
+                        (spr_long_pet_hint_num_x[spr_long_pet_hint_num_counter] * BRD_UNIT_SIZE) + SPR_LONG_PET_HINT_OFFSET_X,
+                        (spr_long_pet_hint_num_y[spr_long_pet_hint_num_counter] * BRD_UNIT_SIZE) + SPR_LONG_PET_HINT_OFFSET_Y);
+            // Move the sprite into view at board position
+            move_sprite(SPR_LONG_PET_HINT_NUM_2,
+                        (spr_long_pet_hint_num_x[spr_long_pet_hint_num_counter] * BRD_UNIT_SIZE) + SPR_LONG_PET_HINT_OFFSET_X + 8,
+                        (spr_long_pet_hint_num_y[spr_long_pet_hint_num_counter] * BRD_UNIT_SIZE) + SPR_LONG_PET_HINT_OFFSET_Y);
+        }
+        // Otherwise just leave the existing sprite
+        // else {
+        //     // Otherwise hide it
+        //     hinting_petlength_hide();
+        // }
+    }
+}
+
+
+void hinting_petlength_remove(INT8 board_x, INT8 board_y) {
 
     UINT8 c;
 
+//    if (spr_long_pet_hint_num_enabled) {
     // Only search within max number of added hints
-    // Ignore sdcc bug: warning 94: comparison is always false due to limited range of data type
-    // TODO: FIXME: SDCC generating a warning here?
-    for (c = 0; c <= spr_long_pet_hint_max; c++) {
+    for (c = 0; c <= SPR_LONG_PET_HINT_NUM_POOL_SIZE; c++) {
 
-        if ((board_x == spr_long_pet_hint_x[c]) &&
-            (board_y == spr_long_pet_hint_y[c])) {
+        if ((board_x == spr_long_pet_hint_num_x[c]) &&
+            (board_y == spr_long_pet_hint_num_y[c])) {
 
             // Clear location cache entry
-            spr_long_pet_hint_x[c] = HINT_PET_LENGTH_SLOT_EMPTY;
-            spr_long_pet_hint_y[c] = HINT_PET_LENGTH_SLOT_EMPTY;
+            // Just update X, since Y doesn't get tested for EMPTY X since that's what gets
+            spr_long_pet_hint_num_x[c] = HINT_PET_LENGTH_SLOT_EMPTY;
 
-            // Hide sprite by moving off screen
-            move_sprite(SPR_LONG_PET_HINT_START + c, 0,0);
-
-            // set_sprite_tile(SPR_LONG_PET_HINT_START + c, GP_EMPTY);
+            // Hide sprite by moving off screen if currently selected
+            if ((c == spr_long_pet_hint_num_counter) &&
+                (spr_long_pet_hint_num_enabled)) {
+                hinting_petlength_hide();
+            }
 
             // stop search
             return;
         }
     }
+//    }
 }
 
 
-
-// Hides all sprites and resets location cache counter
-void player_hinting_pet_length_all_show(UINT8 do_show) {
-
-    UINT8 c;
-    for (c = 0; c < SPR_LONG_PET_HINT_COUNT_MAX; c++) {
-
-        if ((do_show) && (spr_long_pet_hint_x[c] != HINT_PET_LENGTH_SLOT_EMPTY)) {
-
-                move_sprite(SPR_LONG_PET_HINT_START + c,
-                            (spr_long_pet_hint_x[c] * BRD_UNIT_SIZE) + BRD_PIECE_X_OFFSET,
-                            (spr_long_pet_hint_y[c] * BRD_UNIT_SIZE) + BRD_PIECE_Y_OFFSET);
-
-            //set_sprite_tile(SPR_LONG_PET_HINT_START + c, GP_CROSS);
-            //set_sprite_prop(SPR_LONG_PET_HINT_START + c, GP_PAL_CROSS);
-
-        } else {
-            // Hide sprite by moving off screen
-            move_sprite(SPR_LONG_PET_HINT_START + c, 0,0);
-
-            // set_sprite_tile(SPR_LONG_PET_HINT_START + c, GP_EMPTY);
-        }
-    }
-}
-
-
-
-
-
-/*
-
-
-
-#define BRD_PET_LENGTH_POPUP_OFFSET_X 10
-#define BRD_PET_LENGTH_POPUP_OFFSET_Y 10
-
-void pet_length_popup_show(int8 board_x, int8 board_y, UINT8 tile_count) {
-
-    UINT8 c;
-
-    for (c = 0; c < 3; c++) {
-        move_sprite(SPR_PET_LEN_POPUP_DIGIT[c],
-                    (board_x * BRD_UNIT_SIZE) + BRD_PET_LENGTH_POPUP_OFFSET_X,
-                    (board_y * BRD_UNIT_SIZE) + BRD_PET_LENGTH_POPUP_OFFSET_Y);
-        set_sprite_tile(SPR_PET_LEN_POPUP_DIGIT[c], pet_length_popup_digits[c] + TILES_FONT_NUMS_START);
-    }
-}
-*/

@@ -63,7 +63,7 @@ void game_types_handle_level_transition(void) {
         if (option_game_type == OPTION_GAME_TYPE_LONG_PET) {
 
             // Remove player pet length hinting sprites
-            player_hinting_pet_length_reset();
+            hinting_petlength_reset();
 
             // Clear display of last length of completed segment
             PRINT(DISPLAY_NUMPETS_X + 1, DISPLAY_NUMPETS_Y + 1, "  ",0);
