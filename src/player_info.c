@@ -115,11 +115,18 @@ void score_update(UINT16 num_tiles) {
     // Should be called after displaying tail/pet count
     // so they display correctly during potential level changes
 
-    // Check for level updates
-    if ((level_increment_enqueue == TRUE) ||
-        ((option_game_type != OPTION_GAME_TYPE_PET_CLEANUP) &&
-         (player_numpets >= (PLAYER_PETS_PER_LEVEL * player_level))) ) {
+    // Queue Check for level change in game types based on
+    // number of pets completed
+    if ((option_game_type == OPTION_GAME_TYPE_MARATHON) ||
+        (option_game_type == OPTION_GAME_TYPE_LEVEL_UP)) {
 
+        if (player_numpets >= (PLAYER_PETS_PER_LEVEL * player_level)) {
+            level_increment_enqueue = TRUE;
+        }
+    }
+
+    // Check for level updates
+    if (level_increment_enqueue == TRUE) {
         level_increment();
     }
 
