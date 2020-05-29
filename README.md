@@ -1,7 +1,9 @@
 Petris - A puzzle game of shapely pets for the Game Boy Color (CGB)
 ===========
 
-Make your favorite pets in all shapes and sizes, keep ahead of the dropping pieces
+(CURRENTLY A WORK IN PROGRESS, NOT YET RELEASED)
+
+Build your favorite pets in all shapes and sizes, keep ahead of dropping pieces and make it to the next level.
 
 Petris is a new home-brew 2D puzzle game built for the Game Boy Color (CGB) and will run on original hardware.
 
@@ -18,7 +20,8 @@ Several game play types to choose from:
 * Tails Cleanup
 * Long Pet
 
-
+Difficulty levels for all players, from relaxing to breakneck fast:
+* Easy / Normal / Hard / Expert / Beast
 
 
 Tools used
