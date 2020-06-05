@@ -109,10 +109,11 @@ void gameplay_init(void) {
                             MSG_CLEANUP_START_REPEAT);
     } else if (option_game_type == OPTION_GAME_TYPE_LONG_PET) {
 
-        board_flash_message(MSG_GET_READY_X, MSG_GET_READY_Y,
+        board_flash_message(MSG_LONG_PET_X, MSG_LONG_PET_Y,
                             MSG_LONG_PET_START_TEXT, MSG_LONG_PET_START_CTEXT,
                             MSG_LONG_PET_START_REPEAT);
     } else {
+        // Default Get Ready Message
         board_flash_message(MSG_GET_READY_X, MSG_GET_READY_Y,
                             MSG_GET_READY_TEXT, MSG_GET_READY_CTEXT,
                             MSG_GET_READY_REPEAT);

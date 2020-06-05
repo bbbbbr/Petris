@@ -62,8 +62,10 @@
 #define MSG_CLEANUP_START_CTEXT   " CLEAN UP \n\n\n   ALL\n\n  TAILS!"
 #define MSG_CLEANUP_START_REPEAT 3
 
-#define MSG_LONG_PET_START_TEXT    "        \n\n   LONG\n   PET!\n\n (PRESS\n  SELECT\n  FOR PET\n  SIZE)\n "
-#define MSG_LONG_PET_START_CTEXT   "  MAKE A\n\n   LONG\n   PET!\n\n (PRESS\n  SELECT\n  FOR PET\n  SIZE)\n "
+#define MSG_LONG_PET_X  BRD_ST_X + 0
+#define MSG_LONG_PET_Y  BRD_ST_Y + 3
+#define MSG_LONG_PET_START_TEXT    "        \n\n   LONG\n   PET!\n\n (PRESS\n  SELECT\n\n  FOR PET\n  SIZES)\n "
+#define MSG_LONG_PET_START_CTEXT   "  MAKE A\n\n   LONG\n   PET!\n\n (PRESS\n  SELECT\n\n  FOR PET\n  SIZES)\n "
 #define MSG_LONG_PET_START_REPEAT 3
 
 #define MSG_LEVEL_UP_REPEAT 2
