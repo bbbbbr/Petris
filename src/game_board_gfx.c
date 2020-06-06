@@ -87,6 +87,9 @@ void board_gfx_init_sprites(void) {
     fade_set_pal(BG_PAL_0, 4, board_pets_palette,     FADE_PAL_SPRITES);
     fade_set_pal(BG_PAL_4, 1, board_specials_palette, FADE_PAL_SPRITES);
     set_sprite_data(0, TILE_COUNT_PETTOTAL, pet_tiles);
+    // Load overlay font data after sprite data
+    set_sprite_data(SPRITE_TILE_FONT_DIGITS_START, TILE_COUNT_FONT_NUMS,
+                    font_tiles + (TILES_FONT_CHARS_LEN * CGB_TILE_SIZE));
 }
 
 
@@ -133,6 +136,8 @@ void board_gfx_init_background(void) {
 
         if (option_game_type == OPTION_GAME_TYPE_PET_CLEANUP) {
             PRINT(DISPLAY_NUMPETS_X,  DISPLAY_NUMPETS_Y - 1,  "TAILS", 0);
+        } else if (option_game_type == OPTION_GAME_TYPE_LONG_PET) {
+            PRINT(DISPLAY_NUMPETS_X,  DISPLAY_NUMPETS_Y - 2,  "PET\nSIZE", 0);
         } else {
             PRINT(DISPLAY_NUMPETS_X,  DISPLAY_NUMPETS_Y - 1,  "PETS", 0);
         }

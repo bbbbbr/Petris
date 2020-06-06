@@ -39,9 +39,10 @@
 #define BRD_CONNECT_NO  0
 #define BRD_CONNECT_YES 1
 
-#define BRD_CHECK_FLAGS_NONE            0x00
-#define BRD_CHECK_FLAGS_IGNORE_PET_TYPE 0x01
-#define BRD_CHECK_FLAGS_DONT_ADD_POINTS 0x80
+#define BRD_CHECK_FLAGS_NONE                  0x00
+#define BRD_CHECK_FLAGS_IGNORE_PET_TYPE       0x01
+#define BRD_CHECK_FLAGS_DONT_HANDLE_PET_COMPLETED  0x20
+#define BRD_CHECK_FLAGS_DONT_ADD_POINTS       0x80
 
 #define BRD_TILE_COUNT_BONUS_SOUND_THRESHOLD 4
 
@@ -57,9 +58,15 @@
 #define MSG_LEVEL_UP_TEXT   "LEVEL UP \n\n\n  GET\n\n READY!"
 #define MSG_LEVEL_UP_CTEXT  "LEVEL UP \n\n\n     \n\n       "
 
-#define MSG_CLEANUP_START_TEXT  "          \n\n\n   ALL\n\n  TAILS!"
+#define MSG_CLEANUP_START_TEXT    "          \n\n\n   ALL\n\n  TAILS!"
 #define MSG_CLEANUP_START_CTEXT   " CLEAN UP \n\n\n   ALL\n\n  TAILS!"
 #define MSG_CLEANUP_START_REPEAT 3
+
+#define MSG_LONG_PET_X  BRD_ST_X + 0
+#define MSG_LONG_PET_Y  BRD_ST_Y + 3
+#define MSG_LONG_PET_START_TEXT    "        \n\n   LONG\n   PET!\n\n (PRESS\n  SELECT\n\n  FOR PET\n  SIZES)\n "
+#define MSG_LONG_PET_START_CTEXT   "  MAKE A\n\n   LONG\n   PET!\n\n (PRESS\n  SELECT\n\n  FOR PET\n  SIZES)\n "
+#define MSG_LONG_PET_START_REPEAT 3
 
 #define MSG_LEVEL_UP_REPEAT 2
 

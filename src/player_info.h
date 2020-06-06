@@ -69,9 +69,5 @@ void player_info_newgame_reset(void);
 
 void new_piece_count_increment(void);
 
-UINT8 game_type_pet_cleanup_get_tail_count(UINT8 player_level);
-void game_type_pet_cleanup_decrement_tail_count(void);
-void game_type_pet_cleanup_increment_tail_count(void);
-
 #endif // PLAYER_INFO_H
 

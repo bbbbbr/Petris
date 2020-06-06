@@ -79,6 +79,7 @@ void gameplay_exit_cleanup(void) {
     game_piece_next_show(FALSE);
     player_hinting_special_show(FALSE);
     player_hinting_drop_show(FALSE);
+    hinting_petlength_reset();
 }
 
 
@@ -92,6 +93,7 @@ void gameplay_init(void) {
 
     board_init();
     board_gfx_init();
+    hinting_petlength_reset();
 
     options_player_settings_apply();
 
@@ -101,10 +103,17 @@ void gameplay_init(void) {
     // Flash a get ready message to the player
     // TODO: function or struct to select game_start_message[option_game_type]
     if (option_game_type == OPTION_GAME_TYPE_PET_CLEANUP) {
+
         board_flash_message(MSG_GET_READY_X, MSG_GET_READY_Y,
                             MSG_CLEANUP_START_TEXT, MSG_CLEANUP_START_CTEXT,
                             MSG_CLEANUP_START_REPEAT);
+    } else if (option_game_type == OPTION_GAME_TYPE_LONG_PET) {
+
+        board_flash_message(MSG_LONG_PET_X, MSG_LONG_PET_Y,
+                            MSG_LONG_PET_START_TEXT, MSG_LONG_PET_START_CTEXT,
+                            MSG_LONG_PET_START_REPEAT);
     } else {
+        // Default Get Ready Message
         board_flash_message(MSG_GET_READY_X, MSG_GET_READY_Y,
                             MSG_GET_READY_TEXT, MSG_GET_READY_CTEXT,
                             MSG_GET_READY_REPEAT);
@@ -154,8 +163,12 @@ void gameplay_prepare_board(void) {
 
 void gameplay_handle_pause(void) {
 
-    // Hide the game board and player piece
-    board_hide_all(BRD_CLR_DELAY_NONE);
+    // Hide the game board and player piece (except in long-pet mode)
+    // TODO: allow in all other modes?
+    if (option_game_type != OPTION_GAME_TYPE_LONG_PET) {
+        board_hide_all(BRD_CLR_DELAY_NONE);
+    }
+
     // TODO: CONSOLIDATE: these hides are basically a dupe of gameplay_exit_cleanup()
     game_piece_next_show(FALSE);
     player_piece_update_xy(PLAYER_PIECE_HIDE);
@@ -163,7 +176,7 @@ void gameplay_handle_pause(void) {
     player_hinting_drop_show(FALSE);
 
     PRINT(BRD_ST_X + 2,
-          BRD_ST_Y + 5,
+          BRD_ST_Y + 2,
           "PAUSED",0);
 
 
@@ -248,6 +261,15 @@ void gameplay_handle_input(void) {
         gameplay_handle_pause();
     }
 
+
+    // Toggle Pet Length overlay
+    if (KEY_TICKED(J_SELECT)) {
+
+        if (option_game_type == OPTION_GAME_TYPE_LONG_PET) {
+            hinting_petlength_turn_on();
+        }
+    }
+
 }
 
 
@@ -303,6 +325,15 @@ void gameplay_update(void) {
 
     // Handle board animation updates
     board_gfx_tail_animate();
+
+    // Handle timeout of Pet Length Overlay if applicable
+    if (hinting_petlength_enabled) {
+
+        hinting_petlength_enabled--;
+
+        if (hinting_petlength_enabled == 0)
+            hinting_petlength_show();
+    }
 }
 
 
