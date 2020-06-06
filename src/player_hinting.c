@@ -233,10 +233,9 @@ void hinting_petlength_reset(void) {
 }
 
 
-// TODO optimize this out
-void hinting_petlength_toggle_enabled(void) {
+void hinting_petlength_turn_on(void) {
 
-    hinting_petlength_enabled ^= 1;
+    hinting_petlength_enabled = HINT_PET_LENGTH_TIMEOUT;
 
     // Update display
     hinting_petlength_show();

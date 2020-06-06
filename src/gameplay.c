@@ -266,7 +266,7 @@ void gameplay_handle_input(void) {
     if (KEY_TICKED(J_SELECT)) {
 
         if (option_game_type == OPTION_GAME_TYPE_LONG_PET) {
-            hinting_petlength_toggle_enabled();
+            hinting_petlength_turn_on();
         }
     }
 
@@ -325,6 +325,15 @@ void gameplay_update(void) {
 
     // Handle board animation updates
     board_gfx_tail_animate();
+
+    // Handle timeout of Pet Length Overlay if applicable
+    if (hinting_petlength_enabled) {
+
+        hinting_petlength_enabled--;
+
+        if (hinting_petlength_enabled == 0)
+            hinting_petlength_show();
+    }
 }
 
 

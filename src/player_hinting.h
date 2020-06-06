@@ -15,6 +15,9 @@
 #define HINT_PET_LENGTH_SLOT_EMPTY -1
 #define HINT_PET_LENGTH_SLOT_NONE 255
 
+#define HINT_PET_LENGTH_TIMEOUT 150 // In Frames. TODO: Tune this
+
+extern UINT8 hinting_petlength_enabled;
 
 void player_hinting_flicker_update(UINT8);
 
@@ -26,7 +29,7 @@ void player_hinting_drop_show(UINT8);
 void player_hinting_drop_update(void);
 
 void hinting_petlength_reset(void);
-void hinting_petlength_toggle_enabled(void);
+void hinting_petlength_turn_on(void);
 void hinting_petlength_add(INT8 board_x, INT8 board_y, UINT8 length, UINT8 attrib);
 void hinting_petlength_hide(void);
 void hinting_petlength_show(void);
