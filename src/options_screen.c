@@ -59,8 +59,15 @@ enum {
 
 
 // Trailing spaces are to clear out previous option value text
-const char * options_type[]         = {"MARATHON    ", "LEVEL UP   ", "PET CLEANUP", "LONG PET   ", "COLLECT    "}; // Must match : option_game_type_entries
-const char * options_difficulty[]   = {"EASY  ", "NORMAL", "HARD  ", "EXPERT ", "BEAST "}; // Must match : option_difficulty_entries
+const char * options_type[]         = {"LONG PET   ",
+                                       "PET CLEANUP",
+                                       "LEVEL UP   ",
+                                       "MARATHON    "}; // Must match : option_game_type_entries
+const char * options_difficulty[]   = {"EASY  ",
+                                       "NORMAL",
+                                       "HARD  ",
+                                       "EXPERT ",
+                                       "BEAST "}; // Must match : option_difficulty_entries
 const char * options_visual_hints[] = {"ON ", "OFF"}; // Must match : option_visual_hints_entries
 
 
