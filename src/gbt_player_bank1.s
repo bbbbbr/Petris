@@ -35,7 +35,9 @@
 
 ; -----------------------------------------------------------------------
 
-	.area	_CODE_1
+; WARNING: re-enable if using banking with an MBC
+;	.area	_CODE_1
+    .area   _CODE
 
 gbt_wave: ; 8 sounds
 	.DB	0xA5,0xD7,0xC9,0xE1,0xBC,0x9A,0x76,0x31,0x0C,0xBA,0xDE,0x60,0x1B,0xCA,0x03,0x93 ; random :P

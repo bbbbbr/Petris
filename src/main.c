@@ -15,6 +15,7 @@
 // #include "bgb_emu.h" // Used for debugging only, see BGB_MESSAGE
 
 #include "common.h"
+#include "gbt_player.h"
 #include "audio_common.h"
 
 #include "fade.h"
@@ -64,6 +65,24 @@ void handle_non_cgb() {
     }
 }
 
+void * last_music = 0;
+// void PlayMusic(const unsigned char * music[], unsigned char bank, unsigned char loop) {
+void PlayMusic(const unsigned char * music[], unsigned char loop) {
+
+    if (music != last_music) {
+        last_music = music;
+        // gbt_play(music, bank, 7);
+        gbt_play(music, 0, 7); // Force bank to 0, no bank
+        gbt_loop(loop);
+        // REFRESH_BANK; // WARNING: re-enable if using banking with an MBC
+    }
+}
+
+void update_gbt_music() {
+    gbt_update();
+    // REFRESH_BANK; // WARNING: re-enable if using banking with an MBC
+}
+
 
 void vbl_update() {
     vbl_count ++;
@@ -83,7 +102,18 @@ void init_sound(void) {
 void init_interrupts() {
     disable_interrupts();
     add_VBL(vbl_update);
-    set_interrupts(VBL_IFLAG);
+    add_TIM(update_gbt_music);
+
+    //#ifdef CGB
+    #ifdef CPU_FAST_ENABLED
+        TMA_REG = _cpu == CGB_TYPE ? 120U : 0xBCU;
+    #else
+        TMA_REG = 0xBCU;
+    #endif
+        TAC_REG = 0x04U;
+
+    set_interrupts(VBL_IFLAG | TIM_IFLAG);
+
     enable_interrupts();
 }
 
@@ -113,6 +143,9 @@ void init (void) {
 
 void main(void){
     init();
+
+    // PlayMusic(TRACK3_VAR, TRACK3_BANK, 1); // param3 loop = yes
+    PlayMusic(TRACK3_VAR, 1); // param3 loop = yes
 
     while(1) {
         // Wait for vertical blank (end of the frame)

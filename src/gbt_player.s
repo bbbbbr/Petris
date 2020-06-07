@@ -106,9 +106,9 @@ gbt_get_pattern_ptr:: ; a = pattern number
 
 	ld	e,a
 	ld	d,#0
-
-	ld	a,(gbt_bank)
-	ld	(#0x2000),a ; MBC1, MBC3, MBC5 - Set bank
+; WARNING: RENABLE IF USING BANKING
+;	ld	a,(gbt_bank)
+;	ld	(#0x2000),a ; MBC1, MBC3, MBC5 - Set bank
 
 	ld	hl,#gbt_song
 	ld	a,(hl+)
@@ -334,8 +334,9 @@ gbt_update:
 	jr	z,.dontexit
 
 	; Tick != Speed, update effects and exit
-	ld	a,#0x01
-	ld	(#0x2000),a ; MBC1, MBC3, MBC5 - Set bank 1
+; WARNING: RENABLE IF USING BANKING
+;	ld	a,#0x01
+;	ld	(#0x2000),a ; MBC1, MBC3, MBC5 - Set bank 1
 	call	gbt_update_effects_bank1 ; Call update function in bank 1 (in gbt_player_bank1.s)
 
 	ret
@@ -360,9 +361,9 @@ gbt_update:
 
 	; Update effects
 	; --------------
-
-	ld	a,#0x01
-	ld	(#0x2000),a ; MBC1, MBC3, MBC5 - Set bank 1
+; WARNING: RENABLE IF USING BANKING
+;	ld	a,#0x01
+;	ld	(#0x2000),a ; MBC1, MBC3, MBC5 - Set bank 1
 	call	gbt_update_effects_bank1 ; Call update function in bank 1 (in gbt_player_bank1.s)
 
 	; Check if last step
@@ -383,9 +384,9 @@ gbt_update:
 	; ------------------
 
 	; Change to bank with song data
-
-	ld	a,(gbt_bank)
-	ld	(#0x2000),a ; MBC1, MBC3, MBC5
+; WARNING: RENABLE IF USING BANKING
+;	ld	a,(gbt_bank)
+;	ld	(#0x2000),a ; MBC1, MBC3, MBC5
 
 	; Get step data
 
@@ -487,9 +488,9 @@ gbt_update:
 .dont_increment_pattern:
 
 .end_handling_steps_pattern:
-
-	ld	a,#0x01
-	ld	(#0x2000),a ; MBC1, MBC3, MBC5 - Set bank 1
+; WARNING: RENABLE IF USING BANKING
+;	ld	a,#0x01
+;	ld	(#0x2000),a ; MBC1, MBC3, MBC5 - Set bank 1
 	call	gbt_update_bank1 ; Call update function in bank 1 (in gbt_player_bank1.s)
 
 	; Check if any effect has changed the pattern or step
@@ -510,9 +511,9 @@ gbt_update:
 	; Search the step
 
 	; Change to bank with song data
-
-	ld	a,(gbt_bank)
-	ld	(#0x2000),a ; MBC1, MBC3, MBC5
+; WARNING: RENABLE IF USING BANKING
+;	ld	a,(gbt_bank)
+;	ld	(#0x2000),a ; MBC1, MBC3, MBC5
 
 	ld	a,(gbt_current_step_data_ptr)
 	ld	l,a

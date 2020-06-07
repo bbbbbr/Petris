@@ -8,6 +8,9 @@
 
 #define ARRAY_LEN(A)  sizeof(A) / sizeof(A[0])
 
+#define TRACK3_VAR track3_mod_Data
+extern const unsigned char * TRACK3_VAR[];
+
 typedef enum {
     GAME_INTRO_INIT = 0,
     GAME_INTRO,
