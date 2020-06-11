@@ -1,7 +1,10 @@
 #include "sound.h"
 
 #include <stdarg.h>
-// #include "gbt_player.h"
+#include "gbt_player.h"
+
+UINT8 music_mute_frames;
+void * last_music = 0;
 
 const UINT8 FX_REG_SIZES[] = {5, 4, 5, 4, 3};
 const UINT16 FX_ADDRESS[] = {0xFF10, 0xFF16, 0xFF1A, 0xFF20, 0xFF24};
@@ -19,9 +22,28 @@ void PlayFx(SOUND_CHANNEL channel, UINT8 mute_frames, ...) {
 	}
 	va_end(list);
 
-	// if(channel != CHANNEL_5) {
-	// 	gbt_enable_channels(~(0xF & (1 << channel)));
-	// }
+	if (channel != CHANNEL_5) {
+		gbt_enable_channels(~(0xF & (1 << channel)));
+	}
 
-	// music_mute_frames = mute_frames;
+	music_mute_frames = mute_frames;
+}
+
+
+// void PlayMusic(const unsigned char * music[], unsigned char bank, unsigned char loop) {
+void PlayMusic(const unsigned char * music[], unsigned char loop) {
+
+    if (music != last_music) {
+        last_music = music;
+        // gbt_play(music, bank, 7);
+        gbt_play(music, 0, 7); // Force bank to 0, no bank
+        gbt_loop(loop);
+        // REFRESH_BANK; // WARNING: re-enable if using banking with an MBC
+    }
+}
+
+
+void update_gbt_music() {
+    gbt_update();
+    // REFRESH_BANK; // WARNING: re-enable if using banking with an MBC
 }

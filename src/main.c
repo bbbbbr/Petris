@@ -15,6 +15,8 @@
 // #include "bgb_emu.h" // Used for debugging only, see BGB_MESSAGE
 
 #include "common.h"
+
+#include "sound.h"
 #include "gbt_player.h"
 #include "audio_common.h"
 
@@ -41,8 +43,7 @@ void vbl_update(void);
 void init_sound(void);
 
 UINT8 vbl_count;
-UINT8 global_frame_count; // TODO
-
+UINT8 global_frame_count;
 
 #define ASM_HALT \
 __asm \
@@ -65,24 +66,6 @@ void handle_non_cgb() {
     }
 }
 
-void * last_music = 0;
-// void PlayMusic(const unsigned char * music[], unsigned char bank, unsigned char loop) {
-void PlayMusic(const unsigned char * music[], unsigned char loop) {
-
-    if (music != last_music) {
-        last_music = music;
-        // gbt_play(music, bank, 7);
-        gbt_play(music, 0, 7); // Force bank to 0, no bank
-        gbt_loop(loop);
-        // REFRESH_BANK; // WARNING: re-enable if using banking with an MBC
-    }
-}
-
-void update_gbt_music() {
-    gbt_update();
-    // REFRESH_BANK; // WARNING: re-enable if using banking with an MBC
-}
-
 
 void vbl_update() {
     vbl_count ++;
@@ -90,6 +73,14 @@ void vbl_update() {
     // TODO: animate can be called from here instead to make it independent of game pause/etc
     // if (game_state == GAME_PLAYING)
     //     board_gfx_tail_animate();
+    if(music_mute_frames != 0) {
+
+        music_mute_frames --;
+
+        if(music_mute_frames == 0) {
+            gbt_enable_channels(0xF);
+        }
+    }
 }
 
 
@@ -118,6 +109,9 @@ void init_interrupts() {
 }
 
 void init (void) {
+    music_mute_frames = 0;
+    game_state = GAME_INTRO_INIT;
+    global_frame_count = 0;
 
     // Require CGB, otherwise display a warning (DMG/Pocket)
     handle_non_cgb();
@@ -133,9 +127,6 @@ void init (void) {
     // fade_start(FADE_OUT); // TODO: this can probably be skipped
 
     init_interrupts();
-
-    game_state = GAME_INTRO_INIT;
-    global_frame_count = 0;
 
     DISPLAY_ON;
 }
