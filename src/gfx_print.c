@@ -162,6 +162,6 @@ void print_text(const char* txt, unsigned char delay_time){
         // if (delay_time)
         //     delay(delay_time);
             // OPTIONAL: enable or remove sounds while printing text
-            // PlayFx(CHANNEL_1, 0,  0x20, 0x81, 0x43, 0x59, 0x86);
+            // PLAY_SOUND_PRINT_CHAR;
     }
 }

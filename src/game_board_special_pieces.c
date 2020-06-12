@@ -15,6 +15,7 @@
 #include <gb/cgb.h> // Include cgb functions
 #include <stdlib.h>
 
+#include "audio_common.h"
 #include "common.h"
 
 #include "game_board.h"
@@ -59,21 +60,21 @@ void board_handle_special_bomb(INT8 x,INT8 y) {
                                      | BRD_CHECK_FLAGS_DONT_HANDLE_PET_COMPLETED);
 
         // Remove the piece
-        PlayFx(CHANNEL_1, 30, 0x1C, 0x81, 0x24, 0x73, 0x86);
+        PLAY_SOUND_TILE_CLEAR_BOMB;
         board_clear_tile_xy(tx, ty);
 
         c++;
     }
 
-    // PlayFx(CHANNEL_1, 30, 0x1C, 0x81, 0x24, 0x73, 0x86);
+    // PLAY_SOUND_TILE_CLEAR_BOMB;
     // board_clear_tile_xy(x - 1, y);
 
-    // PlayFx(CHANNEL_1, 30, 0x1C, 0x81, 0x24, 0x73, 0x86);
+    // PLAY_SOUND_TILE_CLEAR_BOMB;
     // board_clear_tile_xy(x + 1, y);
 
-    // PlayFx(CHANNEL_1, 30, 0x1C, 0x81, 0x24, 0x73, 0x86);
+    // PLAY_SOUND_TILE_CLEAR_BOMB;
     // board_clear_tile_xy(x, y - 1);
 
-    // PlayFx(CHANNEL_1, 30, 0x1C, 0x81, 0x24, 0x73, 0x86);
+    // PLAY_SOUND_TILE_CLEAR_BOMB;
     // board_clear_tile_xy(x, y + 1);
 }

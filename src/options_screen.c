@@ -20,6 +20,7 @@
 #include "gfx_print.h"
 #include "sound.h"
 #include "input.h"
+#include "audio_common.h"
 #include "common.h"
 #include "fade.h"
 
@@ -101,7 +102,7 @@ void options_screen_cursor_update(INT8 dir) {
 
     // Play a sound when moving the cursor
     if (dir != 0)
-        PlayFx(CHANNEL_1, 30, 0x24, 0x80, 0x14, 0x94, 0x86);
+        PLAY_SOUND_OPTION_CURSOR_MOVE;
 
     // Update menu selection
     options_menu_index += dir;
@@ -130,7 +131,7 @@ void options_screen_setting_update(INT8 dir) {
 
         // Play a sound when moving the cursor
         if (dir != 0) {
-            PlayFx(CHANNEL_1, 30, 0x24, 0x80, 0x14, 0x94, 0x86);
+            PLAY_SOUND_OPTION_CURSOR_MOVE;
         }
 
         // Update setting

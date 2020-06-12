@@ -16,10 +16,12 @@
 #include <rand.h>
 
 #include "common.h"
+
+#include "audio_common.h"
 #include "gbt_player.h"
+#include "sound.h"
 
 #include "input.h"
-#include "sound.h"
 #include "gfx_print.h"
 #include "fade.h"
 
@@ -324,7 +326,7 @@ void gameplay_update(void) {
 
 
         case PLAYER_PIECE_LANDED:
-            PlayFx(CHANNEL_1, 30, 0x1C, 0x81, 0x24, 0x73, 0x86);
+            PLAY_SOUND_PIECE_LANDED;
 
             // Sets the piece on the board
             // Then checks for completed pet removal
