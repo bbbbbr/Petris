@@ -18,9 +18,12 @@
 
 #include "gfx.h"
 #include "gfx_print.h"
-#include "sound.h"
 #include "input.h"
+
+#include "sound.h"
+#include "gbt_player.h"
 #include "audio_common.h"
+
 #include "common.h"
 #include "fade.h"
 
@@ -47,12 +50,14 @@ const UINT8 options_screen_tiles[] = {TILES_INTRO_START + 0,
                                       TILES_INTRO_START + 2,
                                       TILES_INTRO_START + 3};
 
+// TODO: fold this into the options menu array?
 enum {
     OPTION_MENU_MIN = 0,
 
     OPTION_MENU_TYPE = OPTION_MENU_MIN,
     OPTION_MENU_LEVEL,
     OPTION_MENU_VISUAL_HINTS,
+    OPTION_MENU_MUSIC,
     OPTION_MENU_STARTGAME,
 
     OPTION_MENU_MAX = OPTION_MENU_STARTGAME
@@ -71,6 +76,8 @@ const char * options_difficulty[]   = {"EASY  ",
                                        "BEAST "}; // Must match : option_difficulty_entries
 const char * options_visual_hints[] = {"ON ", "OFF"}; // Must match : option_visual_hints_entries
 
+const char * options_music[] = {"ON ", "OFF"}; // Must match : option_music_entries
+
 
 typedef struct opt_item {
 
@@ -83,12 +90,13 @@ typedef struct opt_item {
 
 } option_item;
 
-
+// See above for meaning of each element
 const option_item options[] = {
-        { 6, "TYPE: ",         (INT8)ARRAY_LEN(options_type),         &options_type[0]        , &option_game_type},
-        { 8, "LEVEL: ",        (INT8)ARRAY_LEN(options_difficulty),   &options_difficulty[0]  , &option_game_difficulty},
-        { 10,"VISUAL HINTS: ", (INT8)ARRAY_LEN(options_visual_hints), &options_visual_hints[0], &option_game_visual_hints},
-        { 14,"   START GAME ", (INT8)ARRAY_LEN(options_visual_hints), NULL,                     NULL}
+        { 5, "TYPE: ",         (INT8)ARRAY_LEN(options_type),         &options_type[0]        , &option_game_type},
+        { 7, "LEVEL: ",        (INT8)ARRAY_LEN(options_difficulty),   &options_difficulty[0]  , &option_game_difficulty},
+        { 9,"VISUAL HINTS: ",  (INT8)ARRAY_LEN(options_visual_hints), &options_visual_hints[0], &option_game_visual_hints},
+        { 11,"MUSIC: ",        (INT8)ARRAY_LEN(options_music),        &options_music[0],        &option_game_music},
+        { 14,"   START GAME ", (INT8)ARRAY_LEN(options_visual_hints), NULL, NULL}
     };
 
 
@@ -146,6 +154,16 @@ void options_screen_setting_update(INT8 dir) {
         }
 
         options_screen_setting_draw(options_menu_index);
+
+        // Turn music on/off to preview music option
+        if (options_menu_index == OPTION_MENU_MUSIC) {
+
+            if (*(options[options_menu_index].p_curval) == OPTION_MUSIC_ON)
+                PlayMusic(twilight_drive_mod_Data, GBT_LOOP_YES);
+            else
+                StopMusic();
+        }
+
     }
 }
 
@@ -199,7 +217,7 @@ void options_screen_draw(void) {
     } // end x loop
 
 
-    PRINT(6,4, "OPTIONS", 0);
+    PRINT(6,3, "OPTIONS", 0);
 }
 
 
@@ -255,6 +273,10 @@ void options_screen_init(void) {
     options_screen_sprites_init();
     options_screen_cursor_update(0);
     fade_start(FADE_IN);
+
+    // Update music status to match option menu setting
+    if (option_game_music == OPTION_MUSIC_ON)
+        PlayMusic(twilight_drive_mod_Data, GBT_LOOP_YES);
 }
 
 

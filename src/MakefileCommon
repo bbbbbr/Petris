@@ -139,7 +139,7 @@ $(OBJDIR_RES)/%.o: $(PATH_PREFIX)res/%.c
 $(OBJDIR_RES)/%.mod.o: $(PATH_PREFIX)res/music/%.mod
 	@echo compiling music: $<
 	# $(MOD2GBT) $< $(basename $(basename $(notdir $<)))_mod -c $(subst .b,,$(suffix $(<:%.mod=%))) > /dev/null
-	$(MOD2GBT) $< $(basename $(basename $(notdir $<)))_mod $(subst .b,,$(suffix $(<:%.mod=%))) > /dev/null
+	$(MOD2GBT) $< $(basename $(basename $(notdir $<)))_mod $(subst .b,,$(suffix $(<:%.mod=%))) q1 > /dev/null
 	@mv output.c $(OBJDIR)/music_tmp.c
 	@$(SDCC) $(CFLAGS) -c -o $@ $(OBJDIR)/music_tmp.c
 

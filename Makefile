@@ -4,7 +4,8 @@ export GBDK_HOME="/opt/gbdk"
 export BGB="../tools/bgbw64-1.5.7/bgb64.exe"
 # export MOD2GBT="../tools/mod2gbt/mod2gbt.exe"
 # export MOD2GBT="../tools/mod2gbt_withunbanked/mod2gbt"
- export MOD2GBT="tools/mod2gbt_withunbanked"
+# export MOD2GBT="tools/mod2gbt_withunbanked"
+export MOD2GBT="tools/mod2gbt_withunbanked_withvolshift"
 
 all: build_gb
 

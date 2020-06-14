@@ -30,6 +30,18 @@ void PlayFx(SOUND_CHANNEL channel, UINT8 mute_frames, ...) {
 }
 
 
+void StopMusic(void) {
+    gbt_stop();
+
+    // Reset last_music so that music will resume properly.
+    last_music = 0;
+
+    // Restore sound registers that get turned off
+    NR52_REG = 0x80; // Enables sound, always set this first
+    NR51_REG = 0xFF; // Enables all channels (left and right)
+    NR50_REG = 0x77; // Max volume
+}
+
 // void PlayMusic(const unsigned char * music[], unsigned char bank, unsigned char loop) {
 void PlayMusic(const unsigned char * music[], unsigned char loop) {
 

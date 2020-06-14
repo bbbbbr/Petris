@@ -28,6 +28,7 @@
 #include "intro_screen.h"
 #include "options_screen.h"
 
+#include "options.h"
 #include "player_hinting.h"
 
 #include "input.h"
@@ -135,9 +136,6 @@ void init (void) {
 void main(void){
     init();
 
-    // PlayMusic(TRACK3_VAR, TRACK3_BANK, 1); // param3 loop = yes
-    PlayMusic(TRACK3_VAR, 1); // param3 loop = yes
-
     while(1) {
         // Wait for vertical blank (end of the frame)
         // before starting to process the next frame
@@ -155,7 +153,9 @@ void main(void){
 
             case GAME_INTRO_INIT:
 
+                StopMusic();
                 intro_screen_init();
+                PlayMusic(boss_fight_mod_Data, GBT_LOOP_YES);
                 game_state = GAME_INTRO;
                 break;
 
@@ -171,7 +171,10 @@ void main(void){
 
 
             case GAME_OPTIONS_INIT:
+                StopMusic();
                 options_screen_init();
+                // Options screen will re-start music if music option = ON
+
                 game_state = GAME_OPTIONS;
                 break;
 
@@ -182,11 +185,11 @@ void main(void){
 
 
             case GAME_READY_TO_START:
-                // board_gfx_init(); // moved to gameplay_init
-                //     game_state = GAME_START; // TODO: remove this state
-                //     break;
-                // case GAME_START: // TODO: move to GAME_BOARD_INIT
+                StopMusic();
                 gameplay_init();
+
+                if (option_game_music == OPTION_MUSIC_ON)
+                    PlayMusic(twilight_drive_mod_Data, GBT_LOOP_YES);
 
                 game_state = GAME_PLAYING;
                 break;

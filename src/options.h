@@ -67,6 +67,15 @@ enum {
 } option_visual_hints_entries;
 
 
+// Music Status
+enum {
+    OPTION_MUSIC_ON,
+    OPTION_MUSIC_OFF,
+
+    OPTION_MUSIC_DEFAULT = OPTION_MUSIC_ON
+} option_music_entries;
+
+
 #define NEXT_PREV_OFF  0
 #define NEXT_PREV_ON  1
 #define NEXT_PREV_DEFAULT NEXT_PREV_ON
@@ -121,6 +130,7 @@ extern const settings_data * p_game_settings;
 extern INT8 option_game_difficulty;
 extern INT8 option_game_visual_hints;
 extern INT8 option_game_type;
+extern INT8 option_game_music;
 extern INT8 option_game_preview_next;
 
 const char * options_difficulty_abbrev_text_get(void);
