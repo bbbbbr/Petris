@@ -109,7 +109,8 @@ gbt_get_pattern_ptr:: ; a = pattern number
 	ld	d,#0
 
 	ld	a,(gbt_bank)
-	ld	(#0x2000),a ; MBC1, MBC3, MBC5 - Set bank
+; WARNING: re-enable if using banking with an MBC
+;	ld	(#0x2000),a ; MBC1, MBC3, MBC5 - Set bank
 
 	ld	hl,#gbt_song
 	ld	a,(hl+)
@@ -342,7 +343,8 @@ gbt_update:
 
 	; Tick != Speed, update effects and exit
 	ld	a,#0x01
-	ld	(#0x2000),a ; MBC1, MBC3, MBC5 - Set bank 1
+; WARNING: re-enable if using banking with an MBC
+;	ld	(#0x2000),a ; MBC1, MBC3, MBC5 - Set bank 1
 	call	gbt_update_effects_bank1 ; Call update function in bank 1
 
 	ret
@@ -369,7 +371,8 @@ gbt_update:
 	; --------------
 
 	ld	a,#0x01
-	ld	(#0x2000),a ; MBC1, MBC3, MBC5 - Set bank 1
+; WARNING: re-enable if using banking with an MBC
+;	ld	(#0x2000),a ; MBC1, MBC3, MBC5 - Set bank 1
 	call	gbt_update_effects_bank1 ; Call update function in bank 1
 
 	; Check if last step
@@ -392,7 +395,8 @@ gbt_update:
 	; Change to bank with song data
 
 	ld	a,(gbt_bank)
-	ld	(#0x2000),a ; MBC1, MBC3, MBC5
+; WARNING: re-enable if using banking with an MBC
+;	ld	(#0x2000),a ; MBC1, MBC3, MBC5
 
 	; Get step data
 
@@ -496,7 +500,8 @@ gbt_update:
 .end_handling_steps_pattern:
 
 	ld	a,#0x01
-	ld	(#0x2000),a ; MBC1, MBC3, MBC5 - Set bank 1
+; WARNING: re-enable if using banking with an MBC
+;	ld	(#0x2000),a ; MBC1, MBC3, MBC5 - Set bank 1
 	call	gbt_update_bank1 ; Call update function in bank 1
 
 	; Check if any effect has changed the pattern or step
@@ -519,7 +524,8 @@ gbt_update:
 	; Change to bank with song data
 
 	ld	a,(gbt_bank)
-	ld	(#0x2000),a ; MBC1, MBC3, MBC5
+; WARNING: re-enable if using banking with an MBC
+;	ld	(#0x2000),a ; MBC1, MBC3, MBC5
 
 	ld	a,(gbt_current_step_data_ptr)
 	ld	l,a
