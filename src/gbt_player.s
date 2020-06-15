@@ -1,15 +1,12 @@
-
-;        --------------------------------------------------------------
-;        ---                                                        ---
-;        ---                                                        ---
-;        ---                       GBT PLAYER  v2.1.0               ---
-;        ---                                                        ---
-;        ---                                                        ---
-;        ---              Copyright (C) 2009-2014 Antonio Niño Díaz ---
-;        ---                      All rights reserved.              ---
-;        --------------------------------------------------------------
+;-------------------------------------------------------------------------------
 ;
-;                                          antonio_nd@outlook.com
+; GBT Player v2.1.3
+;
+; SPDX-License-Identifier: MIT
+;
+; Copyright (c) 2009-2020, Antonio Niño Díaz <antonio_nd@outlook.com>
+;
+;-------------------------------------------------------------------------------
 
 	.NR10 = 0xFF10
 	.NR11 = 0xFF11
@@ -33,7 +30,11 @@
 	.NR51 = 0xFF25
 	.NR52 = 0xFF26
 
+;-------------------------------------------------------------------------------
+
 	.area	_DATA
+
+;-------------------------------------------------------------------------------
 
 gbt_playing::
 	.ds	1
@@ -94,11 +95,11 @@ gbt_have_to_stop_next_step::
 gbt_update_pattern_pointers::
 	.ds 1 ; set to 1 by jump effects
 
-; -----------------------------------------------------------------------
+;-------------------------------------------------------------------------------
 
 	.area	_CODE
 
-; -----------------------------------------------------------------------
+;-------------------------------------------------------------------------------
 
 gbt_get_pattern_ptr:: ; a = pattern number
 
@@ -116,7 +117,7 @@ gbt_get_pattern_ptr:: ; a = pattern number
 	ld	h,a
 
 	; hl = pointer to list of pointers
-	; de = patter number
+	; de = pattern number
 
 	add	hl,de
 	add	hl,de
@@ -136,7 +137,7 @@ gbt_get_pattern_ptr:: ; a = pattern number
 
 	ret
 
-; -----------------------------------------------------------------------
+;-------------------------------------------------------------------------------
 
 _gbt_play::
 
@@ -262,7 +263,7 @@ _gbt_play::
 	pop	bc
 	ret
 
-; -----------------------------------------------------------------------
+;-------------------------------------------------------------------------------
 
 _gbt_pause::
 	lda	hl,2(sp)
@@ -280,7 +281,7 @@ _gbt_pause::
 	ldh	(#.NR50),a ; Restore L & R sound levels to 100%
 	ret
 
-; -----------------------------------------------------------------------
+;-------------------------------------------------------------------------------
 
 _gbt_loop::
 	lda	hl,2(sp)
@@ -288,7 +289,7 @@ _gbt_loop::
 	ld	(gbt_loop_enabled),a
 	ret
 
-; -----------------------------------------------------------------------
+;-------------------------------------------------------------------------------
 
 _gbt_stop::
 	xor	a
@@ -298,7 +299,7 @@ _gbt_stop::
 	ldh	(#.NR52),a
 	ret
 
-; -----------------------------------------------------------------------
+;-------------------------------------------------------------------------------
 
 _gbt_enable_channels::
 	lda	hl,2(sp)
@@ -306,7 +307,7 @@ _gbt_enable_channels::
 	ld	(gbt_channels_enabled),a
 	ret
 
-; -----------------------------------------------------------------------
+;-------------------------------------------------------------------------------
 
 _gbt_update::
 
@@ -321,7 +322,7 @@ _gbt_update::
 
 	ret
 
-; -----------------------------------------------------------------------
+;-------------------------------------------------------------------------------
 
 gbt_update:
 
@@ -342,7 +343,7 @@ gbt_update:
 	; Tick != Speed, update effects and exit
 	ld	a,#0x01
 	ld	(#0x2000),a ; MBC1, MBC3, MBC5 - Set bank 1
-	call	gbt_update_effects_bank1 ; Call update function in bank 1 (in gbt_player_bank1.s)
+	call	gbt_update_effects_bank1 ; Call update function in bank 1
 
 	ret
 
@@ -369,7 +370,7 @@ gbt_update:
 
 	ld	a,#0x01
 	ld	(#0x2000),a ; MBC1, MBC3, MBC5 - Set bank 1
-	call	gbt_update_effects_bank1 ; Call update function in bank 1 (in gbt_player_bank1.s)
+	call	gbt_update_effects_bank1 ; Call update function in bank 1
 
 	; Check if last step
 	; ------------------
@@ -496,7 +497,7 @@ gbt_update:
 
 	ld	a,#0x01
 	ld	(#0x2000),a ; MBC1, MBC3, MBC5 - Set bank 1
-	call	gbt_update_bank1 ; Call update function in bank 1 (in gbt_player_bank1.s)
+	call	gbt_update_bank1 ; Call update function in bank 1
 
 	; Check if any effect has changed the pattern or step
 
@@ -563,3 +564,4 @@ gbt_update:
 
 	ret
 
+;-------------------------------------------------------------------------------

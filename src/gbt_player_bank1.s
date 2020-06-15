@@ -1,15 +1,12 @@
-
-;        --------------------------------------------------------------
-;        ---                                                        ---
-;        ---                                                        ---
-;        ---                       GBT PLAYER  v2.1.0               ---
-;        ---                                                        ---
-;        ---                                                        ---
-;        ---              Copyright (C) 2009-2014 Antonio Niño Díaz ---
-;        ---                      All rights reserved.              ---
-;        --------------------------------------------------------------
+;-------------------------------------------------------------------------------
 ;
-;                                          antonio_nd@outlook.com
+; GBT Player v2.1.3
+;
+; SPDX-License-Identifier: MIT
+;
+; Copyright (c) 2009-2020, Antonio Niño Díaz <antonio_nd@outlook.com>
+;
+;-------------------------------------------------------------------------------
 
 	.NR10 = 0xFF10
 	.NR11 = 0xFF11
@@ -33,11 +30,13 @@
 	.NR51 = 0xFF25
 	.NR52 = 0xFF26
 
-; -----------------------------------------------------------------------
+;-------------------------------------------------------------------------------
 
-; WARNING: re-enable if using banking with an MBC
-;	.area	_CODE_1
-    .area   _CODE
+	; WARNING: re-enable if using banking with an MBC
+	;.area	_CODE_1
+	.area	_CODE
+
+;-------------------------------------------------------------------------------
 
 gbt_wave: ; 8 sounds
 	.DB	0xA5,0xD7,0xC9,0xE1,0xBC,0x9A,0x76,0x31,0x0C,0xBA,0xDE,0x60,0x1B,0xCA,0x03,0x93 ; random :P
@@ -64,7 +63,7 @@ gbt_frequencies:
 	.DW	1923, 1930, 1936, 1943, 1949, 1954, 1959, 1964, 1969, 1974, 1978, 1982
 	.DW	1985, 1988, 1992, 1995, 1998, 2001, 2004, 2006, 2009, 2011, 2013, 2015
 
-; -----------------------------------------------------------------------
+;-------------------------------------------------------------------------------
 
 _gbt_get_freq_from_index: ; a = index, bc = returned freq
 	ld	hl,#gbt_frequencies
@@ -77,9 +76,9 @@ _gbt_get_freq_from_index: ; a = index, bc = returned freq
 	ld	b,(hl)
 	ret
 
-; -----------------------------------------------------------------------
-; ------------------------------ Channel 1 ------------------------------
-; -----------------------------------------------------------------------
+;-------------------------------------------------------------------------------
+;---------------------------------- Channel 1 ----------------------------------
+;-------------------------------------------------------------------------------
 
 gbt_channel_1_handle:: ; de = info
 
@@ -225,7 +224,7 @@ ch1_freq_instr_and_effect$:
 
 refresh_channel1_regs$:
 
-	; fall through!!!!!
+	; fall through!
 
 ; -----------------
 
@@ -378,8 +377,8 @@ gbt_ch1_jump_table$:
 gbt_ch1_pan$:
 	and	a,#0x11
 	ld	(gbt_pan+0),a
-	ld	a,#1
-	ret ; ret 1
+	xor	a,a
+	ret ; ret 0 do not update registers, only NR51 at end.
 
 gbt_ch1_arpeggio$:
 	ld	b,a ; b = params
@@ -412,9 +411,9 @@ gbt_ch1_cut_note$:
 	xor	a,a ; ret 0
 	ret
 
-; -----------------------------------------------------------------------
-; ------------------------------ Channel 2 ------------------------------
-; -----------------------------------------------------------------------
+;-------------------------------------------------------------------------------
+;---------------------------------- Channel 2 ----------------------------------
+;-------------------------------------------------------------------------------
 
 gbt_channel_2_handle:: ; de = info
 
@@ -560,7 +559,7 @@ ch2_freq_instr_and_effect$:
 
 refresh_channel2_regs$:
 
-	; fall through!!!!!
+	; fall through!
 
 ; -----------------
 
@@ -580,7 +579,7 @@ channel2_refresh_registers:
 
 ; ------------------
 
-channel2_update_effects: ; returns 1 in a if it is needed to update sound registers
+channel2_update_effects: ; returns 1 in a if it is needed to update sound regs
 
 	; Cut note
 	; --------
@@ -711,8 +710,8 @@ gbt_ch2_jump_table$:
 gbt_ch2_pan$:
 	and	a,#0x22
 	ld	(gbt_pan+1),a
-	ld	a,#1
-	ret ; ret 1
+	xor	a,a ; ret 0
+	ret ; Should not update registers, only NR51 at end.
 
 gbt_ch2_arpeggio$:
 	ld	b,a ; b = params
@@ -745,9 +744,9 @@ gbt_ch2_cut_note$:
 	xor	a,a ; ret 0
 	ret
 
-; -----------------------------------------------------------------------
-; ------------------------------ Channel 3 ------------------------------
-; -----------------------------------------------------------------------
+;-------------------------------------------------------------------------------
+;---------------------------------- Channel 3 ----------------------------------
+;-------------------------------------------------------------------------------
 
 gbt_channel_3_handle:: ; de = info
 
@@ -882,7 +881,7 @@ ch3_freq_instr_and_effect$:
 
 refresh_channel3_regs$:
 
-	; fall through!!!!!
+	; fall through!
 
 ; -----------------
 
@@ -937,7 +936,7 @@ ch3_loop$:
 
 ; ------------------
 
-channel3_update_effects: ; returns 1 in a if it is needed to update sound registers
+channel3_update_effects: ; returns 1 in a if it is needed to update sound regs
 
 	; Cut note
 	; --------
@@ -1071,8 +1070,8 @@ gbt_ch3_jump_table$:
 gbt_ch3_pan$:
 	and	a,#0x44
 	ld	(gbt_pan+2),a
-	ld	a,#1
-	ret ; ret 1
+	xor	a,a ; ret 0
+	ret ; do not update registers, only NR51 at end.
 
 gbt_ch3_arpeggio$:
 	ld	b,a ; b = params
@@ -1105,9 +1104,9 @@ gbt_ch3_cut_note$:
 	xor	a,a ; ret 0
 	ret
 
-; -----------------------------------------------------------------------
-; ------------------------------ Channel 4 ------------------------------
-; -----------------------------------------------------------------------
+;-------------------------------------------------------------------------------
+;---------------------------------- Channel 4 ----------------------------------
+;-------------------------------------------------------------------------------
 
 gbt_channel_4_handle:: ; de = info
 
@@ -1227,7 +1226,7 @@ ch4_instr_and_effect$:
 
 refresh_channel4_regs$:
 
-	; fall through!!!!!
+	; fall through!
 
 ; -----------------
 
@@ -1246,7 +1245,7 @@ channel4_refresh_registers:
 
 ; ------------------
 
-channel4_update_effects: ; returns 1 in a if it is needed to update sound registers
+channel4_update_effects: ; returns 1 in a if it is needed to update sound regs
 
 	; Cut note
 	; --------
@@ -1308,17 +1307,17 @@ gbt_ch4_jump_table$:
 	.DW	gbt_ch1234_nop
 
 gbt_ch4_pan$:
-	and	a,#0x44
+	and	a,#0x88
 	ld	(gbt_pan+3),a
-	ld	a,#1
-	ret ; ret 1
+	xor	a,a ; ret 0
+	ret ; do not update registers, only NR51 at end.
 
 gbt_ch4_cut_note$:
 	ld	(gbt_cut_note_tick+3),a
 	xor	a,a ; ret 0
 	ret
 
-; -----------------------------------------------------------------------
+;-------------------------------------------------------------------------------
 
 ; Common effects go here:
 
@@ -1340,6 +1339,20 @@ gbt_ch1234_jump_position:
 	ld	(gbt_current_step),a
 	ld	hl,#gbt_current_pattern
 	inc	(hl)
+
+	; Check to see if jump puts us past end of song
+	ld	a,(hl)
+	call	gbt_get_pattern_ptr
+	ld	hl,#gbt_current_step_data_ptr
+	ld	a,(hl+)
+	ld	b,a
+	ld	a,(hl)
+	or	a,b
+	jr	nz,dont_loop$
+	xor	a,a
+	ld	(gbt_current_pattern), a
+dont_loop$:
+
 	ld	a,#1
 	ld	(gbt_update_pattern_pointers),a
 	xor	a,a ;ret 0
@@ -1351,7 +1364,7 @@ gbt_ch1234_speed:
 	ld	(gbt_ticks_elapsed),a
 	ret ;ret 0
 
-; -----------------------------------------------------------------------
+;-------------------------------------------------------------------------------
 
 gbt_update_bank1::
 
@@ -1380,7 +1393,7 @@ gbt_update_bank1::
 
 	ret
 
-; -----------------------------------------------------------------------
+;-------------------------------------------------------------------------------
 
 gbt_update_effects_bank1::
 
@@ -1402,5 +1415,4 @@ gbt_update_effects_bank1::
 
 	ret
 
-; -----------------------------------------------------------------------
-
+;-------------------------------------------------------------------------------
