@@ -76,7 +76,9 @@ const char * options_difficulty[]   = {"EASY  ",
                                        "BEAST "}; // Must match : option_difficulty_entries
 const char * options_visual_hints[] = {"ON ", "OFF"}; // Must match : option_visual_hints_entries
 
-const char * options_music[] = {"ON ", "OFF"}; // Must match : option_music_entries
+const char * options_music[] = {"TWILIGHT",
+                                "UPBEAT  ",
+                                "OFF     "}; // Must match : option_music_entries
 
 
 typedef struct opt_item {
@@ -158,10 +160,16 @@ void options_screen_setting_update(INT8 dir) {
         // Turn music on/off to preview music option
         if (options_menu_index == OPTION_MENU_MUSIC) {
 
-            if (*(options[options_menu_index].p_curval) == OPTION_MUSIC_ON)
-                PlayMusic(twilight_drive_mod_Data, GBT_LOOP_YES);
-            else
-                StopMusic();
+            // TODO: could deduplicate this to UpdateMusicStatus();
+            // Can test using the var linked from the options menu
+            // here, since it should be updated by now
+            MusicUpdateStatus();
+            // if (option_game_music == OPTION_MUSIC_1)
+            //     MusicPlay(twilight_drive_mod_Data, GBT_LOOP_YES);
+            // else if (option_game_music == OPTION_MUSIC_2)
+            //     MusicPlay(freeost_charselect_mod_Data, GBT_LOOP_YES);
+            // else
+            //     MusicStop();
         }
 
     }
@@ -217,7 +225,7 @@ void options_screen_draw(void) {
     } // end x loop
 
 
-    PRINT(6,3, "OPTIONS", 0);
+    PRINT(2,3, "--- OPTIONS ---", 0);
 }
 
 
@@ -275,8 +283,11 @@ void options_screen_init(void) {
     fade_start(FADE_IN);
 
     // Update music status to match option menu setting
-    if (option_game_music == OPTION_MUSIC_ON)
-        PlayMusic(twilight_drive_mod_Data, GBT_LOOP_YES);
+    MusicUpdateStatus();
+    // if (option_game_music == OPTION_MUSIC_1)
+    //     MusicPlay(twilight_drive_mod_Data, GBT_LOOP_YES);
+    // else if (option_game_music == OPTION_MUSIC_2)
+    //     MusicPlay(freeost_charselect_mod_Data, GBT_LOOP_YES);
 }
 
 

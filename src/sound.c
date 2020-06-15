@@ -1,10 +1,15 @@
-#include "sound.h"
+// Some of this code is imported from ZGB
 
 #include <stdarg.h>
-#include "gbt_player.h"
 
+#include "sound.h"
+
+#include "gbt_player.h"
+#include "options.h"
+
+#define MUSIC_NONE 0
 UINT8 music_mute_frames;
-void * last_music = 0;
+void * last_music = MUSIC_NONE;
 
 const UINT8 FX_REG_SIZES[] = {5, 4, 5, 4, 3};
 const UINT16 FX_ADDRESS[] = {0xFF10, 0xFF16, 0xFF1A, 0xFF20, 0xFF24};
@@ -30,11 +35,11 @@ void PlayFx(SOUND_CHANNEL channel, UINT8 mute_frames, ...) {
 }
 
 
-void StopMusic(void) {
+void MusicStop(void) {
     gbt_stop();
 
     // Reset last_music so that music will resume properly.
-    last_music = 0;
+    last_music = MUSIC_NONE;
 
     // Restore sound registers that get turned off
     NR52_REG = 0x80; // Enables sound, always set this first
@@ -42,8 +47,10 @@ void StopMusic(void) {
     NR50_REG = 0x77; // Max volume
 }
 
-// void PlayMusic(const unsigned char * music[], unsigned char bank, unsigned char loop) {
-void PlayMusic(const unsigned char * music[], unsigned char loop) {
+
+// Removed banking support
+// void MusicPlay(const unsigned char * music[], unsigned char bank, unsigned char loop) {
+void MusicPlay(const unsigned char * music[], unsigned char loop) {
 
     if (music != last_music) {
         last_music = music;
@@ -54,6 +61,16 @@ void PlayMusic(const unsigned char * music[], unsigned char loop) {
     }
 }
 
+
+void MusicUpdateStatus() {
+
+    if (option_game_music == OPTION_MUSIC_1)
+        MusicPlay(twilight_drive_mod_Data, GBT_LOOP_YES);
+    else if (option_game_music == OPTION_MUSIC_2)
+        MusicPlay(freeost_charselect_mod_Data, GBT_LOOP_YES);
+    else
+        MusicStop();
+}
 
 void update_gbt_music() {
     gbt_update();

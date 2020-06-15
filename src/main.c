@@ -153,9 +153,9 @@ void main(void){
 
             case GAME_INTRO_INIT:
 
-                StopMusic();
+                MusicStop();
                 intro_screen_init();
-                PlayMusic(boss_fight_mod_Data, GBT_LOOP_YES);
+                MusicPlay(boss_fight_mod_Data, GBT_LOOP_YES);
                 game_state = GAME_INTRO;
                 break;
 
@@ -171,7 +171,7 @@ void main(void){
 
 
             case GAME_OPTIONS_INIT:
-                StopMusic();
+                MusicStop();
                 options_screen_init();
                 // Options screen will re-start music if music option = ON
 
@@ -185,11 +185,14 @@ void main(void){
 
 
             case GAME_READY_TO_START:
-                StopMusic();
+                MusicStop();
                 gameplay_init();
 
-                if (option_game_music == OPTION_MUSIC_ON)
-                    PlayMusic(twilight_drive_mod_Data, GBT_LOOP_YES);
+                MusicUpdateStatus();
+                // if (option_game_music == OPTION_MUSIC_1)
+                //     MusicPlay(twilight_drive_mod_Data, GBT_LOOP_YES);
+                // else if (option_game_music == OPTION_MUSIC_2)
+                //     MusicPlay(freeost_charselect_mod_Data, GBT_LOOP_YES);
 
                 game_state = GAME_PLAYING;
                 break;

@@ -18,13 +18,15 @@ typedef enum {
 // External mod music data from gbt_player's mod2gbt
 extern const unsigned char * boss_fight_mod_Data[];
 extern const unsigned char * twilight_drive_mod_Data[];
+extern const unsigned char * freeost_charselect_mod_Data[];
 
 
 extern UINT8 music_mute_frames;
 
 void PlayFx(SOUND_CHANNEL channel, UINT8 mute_frames, ...);
-void PlayMusic(const unsigned char * music[], unsigned char loop);
-void StopMusic(void);
+void MusicPlay(const unsigned char * music[], unsigned char loop);
+void MusicUpdateStatus(void);
+void MusicStop(void);
 void update_gbt_music();
 
 #endif

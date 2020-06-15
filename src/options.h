@@ -69,10 +69,11 @@ enum {
 
 // Music Status
 enum {
-    OPTION_MUSIC_ON,
+    OPTION_MUSIC_1,
+    OPTION_MUSIC_2,
     OPTION_MUSIC_OFF,
 
-    OPTION_MUSIC_DEFAULT = OPTION_MUSIC_ON
+    OPTION_MUSIC_DEFAULT = OPTION_MUSIC_1
 } option_music_entries;
 
 
