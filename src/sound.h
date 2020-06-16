@@ -19,6 +19,7 @@ typedef enum {
 extern const unsigned char * boss_fight_mod_Data[];
 extern const unsigned char * twilight_drive_mod_Data[];
 extern const unsigned char * freeost_charselect_mod_Data[];
+extern const unsigned char * villainsofhiphop_mod_Data[];
 
 
 extern UINT8 music_mute_frames;

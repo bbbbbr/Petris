@@ -64,10 +64,12 @@ void MusicPlay(const unsigned char * music[], unsigned char loop) {
 
 void MusicUpdateStatus() {
 
-    if (option_game_music == OPTION_MUSIC_1)
+    if (option_game_music == OPTION_MUSIC_TWILIGHT)
         MusicPlay(twilight_drive_mod_Data, GBT_LOOP_YES);
-    else if (option_game_music == OPTION_MUSIC_2)
+    else if (option_game_music == OPTION_MUSIC_UPBEAT)
         MusicPlay(freeost_charselect_mod_Data, GBT_LOOP_YES);
+    else if (option_game_music == OPTION_MUSIC_CHILL)
+        MusicPlay(villainsofhiphop_mod_Data, GBT_LOOP_YES);
     else
         MusicStop();
 }
