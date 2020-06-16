@@ -74,6 +74,9 @@ void vbl_update() {
     // TODO: animate can be called from here instead to make it independent of game pause/etc
     // if (game_state == GAME_PLAYING)
     //     board_gfx_tail_animate();
+
+    update_gbt_music();
+
     if(music_mute_frames != 0) {
 
         music_mute_frames --;
@@ -94,7 +97,7 @@ void init_sound(void) {
 void init_interrupts() {
     disable_interrupts();
     add_VBL(vbl_update);
-    add_TIM(update_gbt_music);
+    // add_TIM(update_gbt_music); // Moved this into vbl_udpate() as workaround for occasional gfx glitches
 
     //#ifdef CGB
     #ifdef CPU_FAST_ENABLED
@@ -104,7 +107,8 @@ void init_interrupts() {
     #endif
         TAC_REG = 0x04U;
 
-    set_interrupts(VBL_IFLAG | TIM_IFLAG);
+    // set_interrupts(VBL_IFLAG | TIM_IFLAG);
+    set_interrupts(VBL_IFLAG);
 
     enable_interrupts();
 }
