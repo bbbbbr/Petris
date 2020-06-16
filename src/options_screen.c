@@ -160,16 +160,9 @@ void options_screen_setting_update(INT8 dir) {
         // Turn music on/off to preview music option
         if (options_menu_index == OPTION_MENU_MUSIC) {
 
-            // TODO: could deduplicate this to UpdateMusicStatus();
             // Can test using the var linked from the options menu
             // here, since it should be updated by now
             MusicUpdateStatus();
-            // if (option_game_music == OPTION_MUSIC_1)
-            //     MusicPlay(twilight_drive_mod_Data, GBT_LOOP_YES);
-            // else if (option_game_music == OPTION_MUSIC_2)
-            //     MusicPlay(freeost_charselect_mod_Data, GBT_LOOP_YES);
-            // else
-            //     MusicStop();
         }
 
     }
@@ -284,10 +277,6 @@ void options_screen_init(void) {
 
     // Update music status to match option menu setting
     MusicUpdateStatus();
-    // if (option_game_music == OPTION_MUSIC_1)
-    //     MusicPlay(twilight_drive_mod_Data, GBT_LOOP_YES);
-    // else if (option_game_music == OPTION_MUSIC_2)
-    //     MusicPlay(freeost_charselect_mod_Data, GBT_LOOP_YES);
 }
 
 
