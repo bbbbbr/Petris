@@ -41,7 +41,7 @@ void game_piece_next_generate(void) {
         game_piece_next_stash = GAME_PIECE_STASH_NONE;
 
     } else {
-        // Otherwise geenrate a new piece
+        // Otherwise generate a new piece
 
         // TODO: IMPROVE NEW PIECE SELECTION
         // For now, choose single random pet tile (using div register)
@@ -49,6 +49,15 @@ void game_piece_next_generate(void) {
         // game_piece_next = ((GP_PET_DOG  << GP_PET_UPSHIFT) |
         //                    (GP_SEG_TAIL << GP_SEG_UPSHIFT) |
         //                     GP_ROT_HORZ << GP_ROT_UPSHIFT);// + TILES_PET_START;
+
+        // If this is pet tail cleanup mode then
+        // suppress tail pieces to make it less frustrating
+        if ((option_game_type == OPTION_GAME_TYPE_PET_CLEANUP) &&
+            ((game_piece_next & GP_SEG_MASK) == GP_SEG_TAIL_BITS)) {
+
+            // Translate tail pieces to head pieces
+            game_piece_next = (game_piece_next & ~GP_SEG_MASK) | GP_SEG_HEAD_BITS;
+        }
     }
 }
 
