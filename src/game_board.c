@@ -15,6 +15,7 @@
 #include <gb/cgb.h> // Include cgb functions
 #include <stdlib.h>
 
+#include "audio_common.h"
 #include "common.h"
 
 #include "game_board.h"
@@ -474,11 +475,11 @@ void board_handle_pet_completed(UINT8 flags) {
         // TODO: or just play a single special sound when crossing the threshold instead?
         // TODO: suppress bonus threshold on special pieces? if (!(flags & BRD_CHECK_FLAGS_IGNORE_PET_TYPE))
         if (flags & BRD_CHECK_FLAGS_IGNORE_PET_TYPE)
-            PlayFx(CHANNEL_1, 30, 0x1C, 0x81, 0x24, 0x73, 0x86); // Special piece no points sound (bomb) // PlayFx(CHANNEL_1, 30, 0x45, 0xC3, 0x53, 0x00, 0x87);
+            PLAY_SOUND_TILE_CLEAR_SPECIAL; // Special piece no points sound (bomb)
         else if (c >= BRD_TILE_COUNT_BONUS_SOUND_THRESHOLD)
-            PlayFx(CHANNEL_1, 30, 0x76, 0xC3, 0x53, 0x80, 0x87); // Bonus sound
+            PLAY_SOUND_TILE_CLEAR_BONUS; // Bonus sound
         else
-            PlayFx(CHANNEL_1, 30, 0x76, 0xC3, 0x53, 0x40, 0x87); // Normal sound
+            PLAY_SOUND_TILE_CLEAR_NORMAL; // Normal sound
 
         // TODO: move the effects into board_clear_tile_xy?
 

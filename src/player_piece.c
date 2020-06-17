@@ -16,6 +16,7 @@
 
 #include "common.h"
 #include "input.h"
+#include "audio_common.h"
 #include "sound.h"
 #include "gfx_print.h"
 
@@ -160,9 +161,8 @@ void player_piece_set_on_board(void) {
 void player_piece_rotate_apply(UINT8 dir) {
 
     // Rotate sound
-    //PlayFx(CHANNEL_1, 30, 0x74, 0x80, 0x24, 0xC6, 0x86);
-    //PlayFx(CHANNEL_1, 30, 0x24, 0x80, 0x24, 0xA4, 0x86);
-      PlayFx(CHANNEL_1, 30, 0x24, 0x80, 0x14, 0x94, 0x86);
+    PLAY_SOUND_PIECE_ROTATE;
+
     // TODO: For larger pieces test whether they can turn
     if (dir == PLAYER_ROT_LEFT)
         player_rotate--;
@@ -197,11 +197,7 @@ UINT8 player_piece_move(INT8 dir_x, INT8 dir_y) {
          board_check_open_xy(new_x, new_y)) {
 
         // TODO: TICK sound??
-        // PlayFx(CHANNEL_1, 30, 0x00, 0xC0, 0x31, 0x8F, 0x85);
-        // PlayFx(CHANNEL_1, 30, 0x30, 0x81, 0x33, 0x37, 0x87);
-        // PlayFx(CHANNEL_1, 30, 0x74, 0x80, 0x22, 0xD6, 0x86);
-        // PlayFx(CHANNEL_1, 30, 0x74, 0x80, 0x12, 0xD6, 0x86);
-        // PlayFx(CHANNEL_1, 30, 0x74, 0x80, 0x12, 0xA6, 0x86);
+        // PLAY_SOUND_PIECE_MOVE;
 
         player_x = new_x;
         player_y = new_y;

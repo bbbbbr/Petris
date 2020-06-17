@@ -17,8 +17,11 @@
 
 #include "common.h"
 
-#include "input.h"
+#include "audio_common.h"
+#include "gbt_player.h"
 #include "sound.h"
+
+#include "input.h"
 #include "gfx_print.h"
 #include "fade.h"
 
@@ -163,6 +166,13 @@ void gameplay_prepare_board(void) {
 
 void gameplay_handle_pause(void) {
 
+    if (option_game_music != OPTION_MUSIC_OFF) {
+        gbt_pause(1);
+        // Mute output of all sound since gpt_pause just freezes the sound and holds the current note
+        //NR50_REG = 0x00; // Max volume .[2..0] Right Main Vol, .[6..4] Left Main Volume
+        NR51_REG = 0x00; // Turn off all channels (left and right)
+    }
+
     // Hide the game board and player piece (except in long-pet mode)
     // TODO: allow in all other modes?
     if (option_game_type != OPTION_GAME_TYPE_LONG_PET) {
@@ -178,6 +188,7 @@ void gameplay_handle_pause(void) {
     PRINT(BRD_ST_X + 2,
           BRD_ST_Y + 2,
           "PAUSED",0);
+
 
 
     // TODO: This could probably be done better (interrupts?)
@@ -196,6 +207,12 @@ void gameplay_handle_pause(void) {
     board_redraw_all();
     player_piece_update_xy(PLAYER_PIECE_SHOW);
     game_piece_next_show(TRUE);
+
+    if (option_game_music != OPTION_MUSIC_OFF) {
+        gbt_pause(0);
+        //NR50_REG = 0x77; // Max volume .[2..0] Right Main Vol, .[6..4] Left Main Volume
+        NR51_REG = 0xFF; // Turn ON all channels (left and right)
+    }
 }
 
 
@@ -313,7 +330,7 @@ void gameplay_update(void) {
 
 
         case PLAYER_PIECE_LANDED:
-            PlayFx(CHANNEL_1, 30, 0x1C, 0x81, 0x24, 0x73, 0x86);
+            PLAY_SOUND_PIECE_LANDED;
 
             // Sets the piece on the board
             // Then checks for completed pet removal

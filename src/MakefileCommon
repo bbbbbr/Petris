@@ -40,11 +40,27 @@ ifeq ($(BGB),)
 	BGB = $(ZGB_PATH_UNIX)/../env/bgb/bgb
 endif
 
+# http://gbdk.sourceforge.net/doc/html/c0303.html
+#
+# When linking all the object files together the number
+# of banks used should be specified with the flags:
+#   -Wl-yox
+#   -Wl-yax
+# and the MCB type with the flag:
+#   -Wl-ytx
+# The current supported values for x in -Wl-ytx are:
+#
+# 0 : ROM ONLY <-- No banking, so _CODE is a full 32K (instead of 16K), AND DON'T use _CODE_1
+# 1 : ROM+MBC1
+# 2 : ROM+MBC1+RAM
+# 3 : ROM+MBC1+RAM+BATTERY
+# 5 : ROM+MBC2
+# 6 : ROM+MBC2+BATTERY
 ifneq ($(strip $(N_BANKS)),)
 	# -Wl-yt1 -> MBC1
 	# LFLAGS_NBANKS = -Wl-yt1 -Wl-yo$(N_BANKS)
 	# lcc defaults to no MBC ("0") in absence of -Wl-yt[MBC#]
-	LFLAGS_NBANKS = -Wl-yo$(N_BANKS)
+	LFLAGS_NBANKS = -Wl-yt0 -Wl-yo$(N_BANKS)
 endif
 
 # These are SDCC flags (LCC is not used)
@@ -122,7 +138,8 @@ $(OBJDIR_RES)/%.o: $(PATH_PREFIX)res/%.c
 
 $(OBJDIR_RES)/%.mod.o: $(PATH_PREFIX)res/music/%.mod
 	@echo compiling music: $<
-	$(MOD2GBT) $< $(basename $(basename $(notdir $<)))_mod -c $(subst .b,,$(suffix $(<:%.mod=%))) > /dev/null
+	# $(MOD2GBT) $< $(basename $(basename $(notdir $<)))_mod -c $(subst .b,,$(suffix $(<:%.mod=%))) > /dev/null
+	$(MOD2GBT) $< $(basename $(basename $(notdir $<)))_mod $(subst .b,,$(suffix $(<:%.mod=%))) > /dev/null
 	@mv output.c $(OBJDIR)/music_tmp.c
 	@$(SDCC) $(CFLAGS) -c -o $@ $(OBJDIR)/music_tmp.c
 

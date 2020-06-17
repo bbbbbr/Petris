@@ -15,6 +15,9 @@
 // #include "bgb_emu.h" // Used for debugging only, see BGB_MESSAGE
 
 #include "common.h"
+
+#include "sound.h"
+#include "gbt_player.h"
 #include "audio_common.h"
 
 #include "fade.h"
@@ -25,6 +28,7 @@
 #include "intro_screen.h"
 #include "options_screen.h"
 
+#include "options.h"
 #include "player_hinting.h"
 
 #include "input.h"
@@ -40,8 +44,7 @@ void vbl_update(void);
 void init_sound(void);
 
 UINT8 vbl_count;
-UINT8 global_frame_count; // TODO
-
+UINT8 global_frame_count;
 
 #define ASM_HALT \
 __asm \
@@ -71,6 +74,17 @@ void vbl_update() {
     // TODO: animate can be called from here instead to make it independent of game pause/etc
     // if (game_state == GAME_PLAYING)
     //     board_gfx_tail_animate();
+
+    update_gbt_music();
+
+    if(music_mute_frames != 0) {
+
+        music_mute_frames --;
+
+        if(music_mute_frames == 0) {
+            gbt_enable_channels(0xF);
+        }
+    }
 }
 
 
@@ -83,11 +97,26 @@ void init_sound(void) {
 void init_interrupts() {
     disable_interrupts();
     add_VBL(vbl_update);
+    // add_TIM(update_gbt_music); // Moved this into vbl_udpate() as workaround for occasional gfx glitches
+
+    //#ifdef CGB
+    #ifdef CPU_FAST_ENABLED
+        TMA_REG = _cpu == CGB_TYPE ? 120U : 0xBCU;
+    #else
+        TMA_REG = 0xBCU;
+    #endif
+        TAC_REG = 0x04U;
+
+    // set_interrupts(VBL_IFLAG | TIM_IFLAG);
     set_interrupts(VBL_IFLAG);
+
     enable_interrupts();
 }
 
 void init (void) {
+    music_mute_frames = 0;
+    game_state = GAME_INTRO_INIT;
+    global_frame_count = 0;
 
     // Require CGB, otherwise display a warning (DMG/Pocket)
     handle_non_cgb();
@@ -103,9 +132,6 @@ void init (void) {
     // fade_start(FADE_OUT); // TODO: this can probably be skipped
 
     init_interrupts();
-
-    game_state = GAME_INTRO_INIT;
-    global_frame_count = 0;
 
     DISPLAY_ON;
 }
@@ -132,6 +158,7 @@ void main(void){
             case GAME_INTRO_INIT:
 
                 intro_screen_init();
+                MusicPlay(boss_fight_mod_Data, GBT_LOOP_YES);
                 game_state = GAME_INTRO;
                 break;
 
@@ -148,6 +175,8 @@ void main(void){
 
             case GAME_OPTIONS_INIT:
                 options_screen_init();
+                // Options screen will re-start music if music option = ON
+
                 game_state = GAME_OPTIONS;
                 break;
 
@@ -158,11 +187,8 @@ void main(void){
 
 
             case GAME_READY_TO_START:
-                // board_gfx_init(); // moved to gameplay_init
-                //     game_state = GAME_START; // TODO: remove this state
-                //     break;
-                // case GAME_START: // TODO: move to GAME_BOARD_INIT
                 gameplay_init();
+                MusicUpdateStatus();
 
                 game_state = GAME_PLAYING;
                 break;
@@ -175,6 +201,7 @@ void main(void){
 
             case GAME_ENDED:
                 // TODO: add some animation / sounds for game ended
+                MusicStop();
                 gameplay_handle_gameover_screen();
                 PLAY_SOUND_GAME_OVER;
 
