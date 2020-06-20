@@ -39,9 +39,9 @@
 #define DISPLAY_NUMTILES_X 1
 #define DISPLAY_NUMTILES_Y 16
 
-
 // #define SCORE_SCALE_FACTOR 4 //10
 #define SCORE_RESET        0
+#define SCORE_MAX          0xFFFF
 #define SCORE_LEVEL_FACTOR_SHIFT 2
 #define SCORE_LENGTH_FACTOR_SHIFT 2
 #define PLAYER_LEVEL_RESET    1

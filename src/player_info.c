@@ -33,6 +33,7 @@
 #include "options.h"
 
 UINT16 player_score;
+UINT16 player_score_last;
 UINT16 player_numtiles;
 UINT16 player_numpets;
 UINT16 player_level;
@@ -104,11 +105,15 @@ void score_update(UINT16 num_tiles) {
     // * Multiplied by (player_level >> N) + 1
     // * Multiplied by game difficulty type factor: score_bonus
     // * Multiplied by a general scale factor: SCORE_SCALE_FACTOR
+    player_score_last = player_score;
     player_score += num_tiles
                     * ((num_tiles >> SCORE_LENGTH_FACTOR_SHIFT) + 1)  // + Scale up based on pet length (add 1 to make sure it's not zero)
                     * ((player_level >> SCORE_LEVEL_FACTOR_SHIFT) + 1) // | 1 to make sure it's not zero
                     * (UINT16)p_game_settings->score_bonus;
                     // * SCORE_SCALE_FACTOR;
+    // Prevent wraparound
+    if (player_score < player_score_last)
+        player_score = SCORE_MAX;
 
 
 
@@ -144,7 +149,7 @@ void score_update(UINT16 num_tiles) {
 
 void score_reset(void) {
 
-    player_score = 0;
+    player_score_last = player_score = SCORE_RESET;
 }
 
 
