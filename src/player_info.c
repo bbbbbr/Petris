@@ -58,7 +58,10 @@ void player_info_display(void) {
     // Display the score
     // TODO: split score out of this
     // There is a static trailing zero after the actual score
-    if (player_score > 0) {
+    if (player_score == SCORE_MAX) {
+        PRINT(DISPLAY_SCORE_X -1, DISPLAY_SCORE_Y,"max!:)", 0);
+    }
+    else if (player_score > 0) {
         print_num_u16(DISPLAY_SCORE_X - 1, DISPLAY_SCORE_Y, player_score, DIGITS_5);
     }
 
@@ -149,7 +152,7 @@ void score_update(UINT16 num_tiles) {
 
 void score_reset(void) {
 
-    player_score_last = player_score = SCORE_RESET;
+    player_score_last = player_score = 0xFFFC; //SCORE_RESET;
 }
 
 
