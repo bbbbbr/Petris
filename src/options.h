@@ -94,7 +94,7 @@ enum {
 #define BONUS_EASY   1
 #define BONUS_NORMAL 1
 #define BONUS_HARD   2
-#define BONUS_EXPERT 5
+#define BONUS_EXPERT 3
 #define BONUS_BEAST  10
 
 // Number of tiles in a pet required to get a special-bomb

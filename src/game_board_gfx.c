@@ -133,6 +133,8 @@ void board_gfx_init_background(void) {
         PRINT(DISPLAY_DIFF_X,     DISPLAY_DIFF_Y,         options_difficulty_abbrev_text_get(), 0);
 
         PRINT(DISPLAY_SCORE_X,    DISPLAY_SCORE_Y - 1,    "SCORE", 0);
+        // Display static trailing zero for score (inflates score apparent value)
+        PRINT(DISPLAY_SCORE_X + 4, DISPLAY_SCORE_Y,      "0", 0);
 
         if (option_game_type == OPTION_GAME_TYPE_PET_CLEANUP) {
             PRINT(DISPLAY_NUMPETS_X,  DISPLAY_NUMPETS_Y - 1,  "TAILS", 0);

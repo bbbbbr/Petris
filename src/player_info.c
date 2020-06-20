@@ -33,7 +33,7 @@
 #include "options.h"
 
 UINT16 player_score;
-UINT16 player_numtiles; // UINT32?
+UINT16 player_numtiles;
 UINT16 player_numpets;
 UINT16 player_level;
 UINT16 player_numpieces;
@@ -56,7 +56,10 @@ void player_info_display(void) {
 
     // Display the score
     // TODO: split score out of this
-    print_num_u16(DISPLAY_SCORE_X, DISPLAY_SCORE_Y, player_score, DIGITS_5);
+    // There is a static trailing zero after the actual score
+    if (player_score > 0) {
+        print_num_u16(DISPLAY_SCORE_X - 1, DISPLAY_SCORE_Y, player_score, DIGITS_5);
+    }
 
     // Display number of pets completed
     if (option_game_type == OPTION_GAME_TYPE_PET_CLEANUP) {
@@ -89,7 +92,7 @@ void score_update(UINT16 num_tiles) {
     if (num_tiles > 1)
         player_numpets++;
 
-    // Increment the total title count
+    // Increment the total tile count
     // TODO: player_numtiles_this_level
     player_numtiles += num_tiles;
 
@@ -97,14 +100,17 @@ void score_update(UINT16 num_tiles) {
 
     // TODO: support x 10 scoring? Need to use a 24 bit Num
     // Scoring:
-    // * Increases exponentially per number of tiles in the pet
-    // * Multiplied by (player_level / 10)
+    // * Increases semi-exponentially per number of tiles in the pet
+    // * Multiplied by (player_level >> N) + 1
     // * Multiplied by game difficulty type factor: score_bonus
     // * Multiplied by a general scale factor: SCORE_SCALE_FACTOR
-    player_score += (num_tiles * num_tiles)
+    player_score += num_tiles
+                    * ((num_tiles >> SCORE_LENGTH_FACTOR_SHIFT) + 1)  // + Scale up based on pet length (add 1 to make sure it's not zero)
                     * ((player_level >> SCORE_LEVEL_FACTOR_SHIFT) + 1) // | 1 to make sure it's not zero
-                    * (UINT16)p_game_settings->score_bonus
-                    * SCORE_SCALE_FACTOR;
+                    * (UINT16)p_game_settings->score_bonus;
+                    // * SCORE_SCALE_FACTOR;
+
+
 
     player_info_display();
 

@@ -472,8 +472,7 @@ void board_handle_pet_completed(UINT8 flags) {
         // TODO: OPTION: PET-PILE MODE (don't clear tiles, level is up and totaled when screen is filled
 
         // Play special sound (per tile) when more than N tiles have been cleared for a pet
-        // TODO: or just play a single special sound when crossing the threshold instead?
-        // TODO: suppress bonus threshold on special pieces? if (!(flags & BRD_CHECK_FLAGS_IGNORE_PET_TYPE))
+        // Suppress bonus threshold on special pieces
         if (flags & BRD_CHECK_FLAGS_IGNORE_PET_TYPE)
             PLAY_SOUND_TILE_CLEAR_SPECIAL; // Special piece no points sound (bomb)
         else if (c >= BRD_TILE_COUNT_BONUS_SOUND_THRESHOLD)
@@ -481,14 +480,9 @@ void board_handle_pet_completed(UINT8 flags) {
         else
             PLAY_SOUND_TILE_CLEAR_NORMAL; // Normal sound
 
-        // TODO: move the effects into board_clear_tile_xy?
-
         board_clear_tile_xy(board_tile_clear_cache_x[c],
                             board_tile_clear_cache_y[c]);
         c++;
-
-        // TODO: increment score as the pieces clear?
-        // TODO: animate the peices clearing (with sprite?)
     }
 
     //  Player gets no credit when special piece is used
