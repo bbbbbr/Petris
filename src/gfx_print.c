@@ -25,10 +25,6 @@
 #include "gfx_print.h"
 
 
-#define PRINT_MAX_DIGITS  5
-#define PRINT_MAX_NUM     99999 // ((10 ^ PRINT_MAX_DIGITS) - 1)
-#define PRINT_ATTRIB_PAL_MASK    0x03
-#define PRINT_ATTRIB_PAL_DEFAULT 0x04
 UINT8 digits[PRINT_MAX_DIGITS];
 UINT8 digits_attribs[PRINT_MAX_DIGITS] = {PRINT_ATTRIB_PAL_DEFAULT,
                                           PRINT_ATTRIB_PAL_DEFAULT,
@@ -122,9 +118,9 @@ void print_text(const char* txt, unsigned char delay_time){
             c = TILES_FONT_CHARS_START + *txt - 'A';
         } else if(*txt >= 'a' && *txt <= 'z') {
             c = TILES_FONT_CHARS_START + *txt - 'a';
-        } /* else if(*txt >= '0' && *txt <= '9') {
-            c = font_idx + 27 + *txt - '0';
-        } */ else {
+        } else if(*txt >= '0' && *txt <= '9') {
+            c = TILES_FONT_NUMS_START + *txt - '0';
+        } else {
             switch(*txt) {
                 case  '!': c = TILES_FONT_START + 37; break;
                 case '\'': c = TILES_FONT_START + 38; break;

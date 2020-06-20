@@ -10,6 +10,11 @@ void print_num_u16(UINT8, UINT8, UINT16, UINT8);
 #define DIGITS_3 3
 #define DIGITS_2 2
 
+#define PRINT_MAX_DIGITS  5
+#define PRINT_MAX_NUM     99999 // ((10 ^ PRINT_MAX_DIGITS) - 1)
+#define PRINT_ATTRIB_PAL_MASK    0x03
+#define PRINT_ATTRIB_PAL_DEFAULT 0x04
+
 extern UINT8 print_x, print_y, font_idx, print_target;
 
 typedef enum {
