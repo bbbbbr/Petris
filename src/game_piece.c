@@ -15,6 +15,8 @@
 #include <gb/cgb.h> // Include cgb functions
 #include <rand.h>
 
+#include "common.h"
+
 #include "options.h"
 #include "game_piece.h"
 #include "game_piece_data.h"
@@ -87,6 +89,7 @@ void game_piece_next_set(UINT8 override_piece) {
 
 void game_piece_next_show(UINT8 do_show) {
 
+    UINT8 attrib;
     // TODO: this could get animated to launch the next piece
     //       to the top of the board
 
@@ -104,13 +107,19 @@ void game_piece_next_show(UINT8 do_show) {
         // And mirror bits based on rotation setting from LUT
         if (game_piece_next & GP_SPECIAL_MASK) {
             // Special sprites have one palette and no rotation/etc
-            set_sprite_prop(SPR_PLAYER_NEXT, GP_PAL_SPECIAL);
+            attrib = GP_PAL_SPECIAL;
 
         } else {
-            set_sprite_prop(SPR_PLAYER_NEXT,
-                            ((game_piece_next & GP_PET_MASK) >> GP_PET_UPSHIFT) // Palette
-                            | GP_ROT_LUT_ATTR[GP_ROTATE_DEFAULT]);               // Rotation sprite mirror bits
+            attrib = ((game_piece_next & GP_PET_MASK) >> GP_PET_UPSHIFT) // Palette
+                      | GP_ROT_LUT_ATTR[GP_ROTATE_DEFAULT];               // Rotation sprite mirror bits
         }
+
+        #ifdef GFX_HIGH_CONTRAST
+            // Strip Palette info in high contrast mode
+            attrib &= 0xF8;
+        #endif
+
+        set_sprite_prop(SPR_PLAYER_NEXT, attrib);
 
         // Make sure the sprite is visible (this could probs be optimized out with better planning / logic)
         move_sprite(SPR_PLAYER_NEXT,

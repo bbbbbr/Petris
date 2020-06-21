@@ -119,7 +119,7 @@ void init (void) {
     global_frame_count = 0;
 
     // Require CGB, otherwise display a warning (DMG/Pocket)
-    handle_non_cgb();
+//     handle_non_cgb();
 
     // OPTIONAL: Extra speed doesn't seem to be required right now
     #ifdef CPU_FAST_ENABLED

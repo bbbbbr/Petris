@@ -38,19 +38,25 @@ UINT8 board_tile_clear_cache_x[BRD_SIZE];
 UINT8 board_tile_clear_cache_y[BRD_SIZE];
 UINT8 board_tile_clear_count;
 
+#ifdef GFX_HIGH_CONTRAST
+    #define TILE_ID_BOARD_BLANK_ROW_BG TILE_ID_BOARD_BLANK_BG_BW
+#else
+    #define TILE_ID_BOARD_BLANK_ROW_BG TILE_ID_BOARD_BLANK_BG
+#endif
+
 // 10 tiles wide for clearing the game board one row at a time
 // This MUST match game board width
 // TODO: move this to game_board_gfx.h
-const UINT8 board_blank_row[] = {TILE_ID_BOARD_BLANK_BG,
-                                 TILE_ID_BOARD_BLANK_BG,
-                                 TILE_ID_BOARD_BLANK_BG,
-                                 TILE_ID_BOARD_BLANK_BG,
-                                 TILE_ID_BOARD_BLANK_BG,
-                                 TILE_ID_BOARD_BLANK_BG,
-                                 TILE_ID_BOARD_BLANK_BG,
-                                 TILE_ID_BOARD_BLANK_BG,
-                                 TILE_ID_BOARD_BLANK_BG,
-                                 TILE_ID_BOARD_BLANK_BG};
+const UINT8 board_blank_row[] = {TILE_ID_BOARD_BLANK_ROW_BG,
+                                 TILE_ID_BOARD_BLANK_ROW_BG,
+                                 TILE_ID_BOARD_BLANK_ROW_BG,
+                                 TILE_ID_BOARD_BLANK_ROW_BG,
+                                 TILE_ID_BOARD_BLANK_ROW_BG,
+                                 TILE_ID_BOARD_BLANK_ROW_BG,
+                                 TILE_ID_BOARD_BLANK_ROW_BG,
+                                 TILE_ID_BOARD_BLANK_ROW_BG,
+                                 TILE_ID_BOARD_BLANK_ROW_BG,
+                                 TILE_ID_BOARD_BLANK_ROW_BG};
 
 const UINT8 board_x_row[] = {TILE_ID_BOARD_UP,
                              TILE_ID_BOARD_UP,
@@ -131,6 +137,7 @@ void board_redraw_all(void) {
 // Redraws single tile on board
 //
 void board_draw_tile_xy(INT8 x, INT8 y, UINT8 tile_index) {
+
     // Update BG Tilemap from Game Board
     VBK_REG = 1; // Select BG tile attribute map
     set_bkg_tiles(BRD_ST_X + x, BRD_ST_Y + y,
@@ -294,6 +301,11 @@ void board_set_tile_xy(INT8 x, INT8 y, UINT8 piece, UINT8 attrib, UINT8 connect)
 
         // Add in offset to start of BG tile piece data
         piece += TILES_PET_START;
+
+        #ifdef GFX_HIGH_CONTRAST
+            // Strip Palette info in high contrast mode
+            attrib &= 0xF8;
+        #endif
 
         // TODO: Bounds checking for board here
         board_pieces[tile_index] = piece;
