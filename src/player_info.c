@@ -152,7 +152,7 @@ void score_update(UINT16 num_tiles) {
 
 void score_reset(void) {
 
-    player_score_last = player_score = 0xFFFC; //SCORE_RESET;
+    player_score_last = player_score = SCORE_RESET;
 }
 
 
