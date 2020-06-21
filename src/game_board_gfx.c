@@ -31,7 +31,12 @@
 #include "../res/intro_screen_tiles.h"
 #include "../res/game_board_map.h"
 #include "../res/pet_tiles.h"
-#include "../res/pet_tiles_bw.h"
+#ifdef GFX_HIGH_CONTRAST
+    #include "../res/pet_tiles_hc.h"
+#endif
+#ifdef GFX_BLACK_AND_WHITE
+    #include "../res/pet_tiles_bw.h"
+#endif
 #include "../res/font_tiles.h"
 
 #define CGB_TILE_SIZE 16
@@ -90,7 +95,7 @@ void board_gfx_init_sprites(void) {
     fade_set_pal(BG_PAL_0, 4, board_pets_palette,     FADE_PAL_SPRITES);
     fade_set_pal(BG_PAL_4, 1, board_specials_palette, FADE_PAL_SPRITES);
 
-    #ifdef GFX_HIGH_CONTRAST
+    #ifdef GFX_BLACK_AND_WHITE
         set_sprite_data(0, TILE_COUNT_PETTOTAL, pet_tiles_bw);
 
         // Set Object palette to
@@ -100,7 +105,11 @@ void board_gfx_init_sprites(void) {
         // // 3= 3(black),2= 1 (l.gray), 1= 0 (white),  0= 2 (d.gray) TRANSP w/ PRIOR
         // OBP0_REG = 0xD2U; //0x00 | 0x30 | 0x04 | 0x02;
     #else
-        set_sprite_data(0, TILE_COUNT_PETTOTAL, pet_tiles);
+        #ifdef GFX_HIGH_CONTRAST
+            set_sprite_data(0, TILE_COUNT_PETTOTAL, pet_tiles_hc);
+        #else
+            set_sprite_data(0, TILE_COUNT_PETTOTAL, pet_tiles);
+        #endif
     #endif
 
     // Load overlay font data after sprite data
@@ -121,7 +130,7 @@ void board_gfx_init_background(void) {
         // TODO: move fonts to a global shared gfx init: print_gfx_init() ?
         set_bkg_data(TILES_FONT_START,      TILE_COUNT_FONT,      font_tiles);
 
-        #ifdef GFX_HIGH_CONTRAST
+        #ifdef GFX_BLACK_AND_WHITE
             set_bkg_data(TILES_PET_START,       TILE_COUNT_PETTOTAL,  pet_tiles_bw);
             // Set Background / Window palette to
             // 3= 3(black),2= 2 (d.gray), 1= 0 (white),  0= 1 (l.gray) TRANSP w/ PRIOR
@@ -129,7 +138,11 @@ void board_gfx_init_background(void) {
             // // 3= 3(black),2= 1 (l.gray), 1= 0 (white),  0= 2 (d.gray) TRANSP w/ PRIOR
             // BGP_REG = 0xD2U; // 0xC0 | 0x10 | 0x00 | 0x02;
         #else
-            set_bkg_data(TILES_PET_START,       TILE_COUNT_PETTOTAL,  pet_tiles);
+            #ifdef GFX_HIGH_CONTRAST
+                set_bkg_data(TILES_PET_START,       TILE_COUNT_PETTOTAL,  pet_tiles_hc);
+            #else
+                set_bkg_data(TILES_PET_START,       TILE_COUNT_PETTOTAL,  pet_tiles);
+            #endif
         #endif
 
         // Load BG tile attribute map
@@ -199,14 +212,20 @@ void board_gfx_tail_animate(void) {
 
         // Note: the OR of tail_anim_alternate only works if it's 8 frames total and one batch
         // otherwise use +
-    #ifdef GFX_HIGH_CONTRAST
+    #ifdef GFX_BLACK_AND_WHITE
         set_bkg_data(pet_tail_anim_tilenum[tail_anim_count | tail_anim_alternate],
                      ANIM_TAIL_BATCH_SIZE,
                      pet_tiles_bw + pet_tail_anim_srcoffset[tail_anim_count | tail_anim_alternate]);
     #else
+        #ifdef GFX_HIGH_CONTRAST
+        set_bkg_data(pet_tail_anim_tilenum[tail_anim_count | tail_anim_alternate],
+                     ANIM_TAIL_BATCH_SIZE,
+                     pet_tiles_hc + pet_tail_anim_srcoffset[tail_anim_count | tail_anim_alternate]);
+        #else
         set_bkg_data(pet_tail_anim_tilenum[tail_anim_count | tail_anim_alternate],
                      ANIM_TAIL_BATCH_SIZE,
                      pet_tiles + pet_tail_anim_srcoffset[tail_anim_count | tail_anim_alternate]);
+        #endif
     #endif
 
     }

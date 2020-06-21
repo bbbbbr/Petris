@@ -7,6 +7,7 @@
 // #define CPU_FAST_ENABLED
 
 // Use High Contrast pet shapes and colors
+// #define GFX_BLACK_AND_WHITE
 #define GFX_HIGH_CONTRAST
 
 #define ARRAY_LEN(A)  sizeof(A) / sizeof(A[0])

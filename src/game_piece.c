@@ -114,7 +114,7 @@ void game_piece_next_show(UINT8 do_show) {
                       | GP_ROT_LUT_ATTR[GP_ROTATE_DEFAULT];               // Rotation sprite mirror bits
         }
 
-        #ifdef GFX_HIGH_CONTRAST
+        #ifdef GFX_BLACK_AND_WHITE
             // Strip Palette info in high contrast mode
             attrib &= 0xF8;
         #endif

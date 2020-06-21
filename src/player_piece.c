@@ -248,7 +248,7 @@ void player_piece_update_gfx() {
              (player_rotate & GP_ROTATE_SEG_TURN_180_AND_270_USE_MIRROR_BITS))
             player_attrib |= (GP_MIRROR_X | GP_MIRROR_Y);
     }
-    #ifdef GFX_HIGH_CONTRAST
+    #ifdef GFX_BLACK_AND_WHITE
         // Strip Palette info in high contrast mode
         player_attrib &= 0xF8;
     #endif
