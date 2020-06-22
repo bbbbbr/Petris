@@ -232,6 +232,7 @@ void options_screen_sprites_init(void) {
     SPRITES_8x8;
 
 //    set_sprite_palette(BG_PAL_0, 4, board_pets_palette); // UBYTE first_palette, UBYTE nb_palettes, UWORD *rgb_data, pal_type
+    // No need for high-contrast here (user has not yet selected high-contrast)
     fade_set_pal(BG_PAL_0, 4, board_pets_palette, FADE_PAL_SPRITES);
     set_sprite_data(0, TILE_COUNT_PETTOTAL, pet_tiles);
 

@@ -114,11 +114,6 @@ void game_piece_next_show(UINT8 do_show) {
                       | GP_ROT_LUT_ATTR[GP_ROTATE_DEFAULT];               // Rotation sprite mirror bits
         }
 
-        #ifdef GFX_BLACK_AND_WHITE
-            // Strip Palette info in high contrast mode
-            attrib &= 0xF8;
-        #endif
-
         set_sprite_prop(SPR_PLAYER_NEXT, attrib);
 
         // Make sure the sprite is visible (this could probs be optimized out with better planning / logic)

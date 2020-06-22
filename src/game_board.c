@@ -38,11 +38,7 @@ UINT8 board_tile_clear_cache_x[BRD_SIZE];
 UINT8 board_tile_clear_cache_y[BRD_SIZE];
 UINT8 board_tile_clear_count;
 
-#ifdef GFX_BLACK_AND_WHITE
-    #define TILE_ID_BOARD_BLANK_ROW_BG TILE_ID_BOARD_BLANK_BG_BW
-#else
-    #define TILE_ID_BOARD_BLANK_ROW_BG TILE_ID_BOARD_BLANK_BG
-#endif
+#define TILE_ID_BOARD_BLANK_ROW_BG TILE_ID_BOARD_BLANK_BG
 
 // 10 tiles wide for clearing the game board one row at a time
 // This MUST match game board width
@@ -301,11 +297,6 @@ void board_set_tile_xy(INT8 x, INT8 y, UINT8 piece, UINT8 attrib, UINT8 connect)
 
         // Add in offset to start of BG tile piece data
         piece += TILES_PET_START;
-
-        #ifdef GFX_BLACK_AND_WHITE
-            // Strip Palette info in high contrast mode
-            attrib &= 0xF8;
-        #endif
 
         // TODO: Bounds checking for board here
         board_pieces[tile_index] = piece;

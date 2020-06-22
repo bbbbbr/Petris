@@ -31,12 +31,8 @@
 #include "../res/intro_screen_tiles.h"
 #include "../res/game_board_map.h"
 #include "../res/pet_tiles.h"
-#ifdef GFX_HIGH_CONTRAST
-    #include "../res/pet_tiles_hc.h"
-#endif
-#ifdef GFX_BLACK_AND_WHITE
-    #include "../res/pet_tiles_bw.h"
-#endif
+#include "../res/pet_tiles_hicontrast.h"
+#include "../res/special_tiles.h"
 #include "../res/font_tiles.h"
 
 #define CGB_TILE_SIZE 16
@@ -81,6 +77,12 @@ UINT8 tail_anim_alternate = 0;
 
 void board_gfx_init(void) {
 
+    // Use High Contrast tile set if option is enabled
+    if (option_game_high_contrast == OPTION_HIGH_CONTRAST_ON)
+        p_pet_tiles = pet_tiles_hicontrast;
+    else
+        p_pet_tiles = pet_tiles;
+
     board_gfx_init_background();
     board_gfx_init_sprites();
     fade_start(FADE_IN);
@@ -92,25 +94,19 @@ void board_gfx_init_sprites(void) {
     SPRITES_8x8;
     //set_sprite_palette(BG_PAL_0, 4, board_pets_palette); // UBYTE first_palette, UBYTE nb_palettes, UWORD *rgb_data
     //set_sprite_palette(BG_PAL_4, 1, board_specials_palette); // UBYTE first_palette, UBYTE nb_palettes, UWORD *rgb_data
-    fade_set_pal(BG_PAL_0, 4, board_pets_palette,     FADE_PAL_SPRITES);
+
+    // Use High Contrast tile set if option is enabled
+    if (option_game_high_contrast == OPTION_HIGH_CONTRAST_ON)
+        fade_set_pal(BG_PAL_0, 4, board_pets_palette_high_contrast, FADE_PAL_SPRITES);
+    else
+        fade_set_pal(BG_PAL_0, 4, board_pets_palette, FADE_PAL_SPRITES);
+
     fade_set_pal(BG_PAL_4, 1, board_specials_palette, FADE_PAL_SPRITES);
 
-    #ifdef GFX_BLACK_AND_WHITE
-        set_sprite_data(0, TILE_COUNT_PETTOTAL, pet_tiles_bw);
+    set_sprite_data(SPRITE_TILE_PET_START, TILE_COUNT_PETTOTAL, p_pet_tiles);
 
-        // Set Object palette to
-        // 3= 3(black),2= 2 (d.gray), 1= 0 (white),  0= 1 (l.gray) TRANSP w/ PRIOR
-        OBP0_REG = 0xC0 | 0x20 | 0x00 | 0x01;
-
-        // // 3= 3(black),2= 1 (l.gray), 1= 0 (white),  0= 2 (d.gray) TRANSP w/ PRIOR
-        // OBP0_REG = 0xD2U; //0x00 | 0x30 | 0x04 | 0x02;
-    #else
-        #ifdef GFX_HIGH_CONTRAST
-            set_sprite_data(0, TILE_COUNT_PETTOTAL, pet_tiles_hc);
-        #else
-            set_sprite_data(0, TILE_COUNT_PETTOTAL, pet_tiles);
-        #endif
-    #endif
+    // Load special sprite data after pet data
+    set_sprite_data(SPRITE_TILE_SPECIAL_START, TILE_COUNT_SPECIALTOTAL, special_tiles);
 
     // Load overlay font data after sprite data
     set_sprite_data(SPRITE_TILE_FONT_DIGITS_START, TILE_COUNT_FONT_NUMS,
@@ -123,27 +119,24 @@ void board_gfx_init_background(void) {
 
         //set_bkg_palette(BG_PAL_0, 4, board_pets_palette); // UBYTE first_palette, UBYTE nb_palettes, UWORD *rgb_data
         //set_bkg_palette(BG_PAL_4, 4, intro_screen_palette); // UBYTE first_palette, UBYTE nb_palettes, UWORD *rgb_data
-        fade_set_pal(BG_PAL_0, 4, board_pets_palette,   FADE_PAL_BKG);
+
+        // Use High Contrast tile set if option is enabled
+        if (option_game_high_contrast == OPTION_HIGH_CONTRAST_ON)
+            fade_set_pal(BG_PAL_0, 4, board_pets_palette_high_contrast,   FADE_PAL_BKG);
+        else
+            fade_set_pal(BG_PAL_0, 4, board_pets_palette,   FADE_PAL_BKG);
+
         fade_set_pal(BG_PAL_4, 4, intro_screen_palette, FADE_PAL_BKG);
 
         set_bkg_data(TILES_INTRO_START,     TILE_COUNT_INTRO,     intro_screen_tiles);
         // TODO: move fonts to a global shared gfx init: print_gfx_init() ?
         set_bkg_data(TILES_FONT_START,      TILE_COUNT_FONT,      font_tiles);
 
-        #ifdef GFX_BLACK_AND_WHITE
-            set_bkg_data(TILES_PET_START,       TILE_COUNT_PETTOTAL,  pet_tiles_bw);
-            // Set Background / Window palette to
-            // 3= 3(black),2= 2 (d.gray), 1= 0 (white),  0= 1 (l.gray) TRANSP w/ PRIOR
-            BGP_REG = 0xC0 | 0x20 | 0x00 | 0x01;
-            // // 3= 3(black),2= 1 (l.gray), 1= 0 (white),  0= 2 (d.gray) TRANSP w/ PRIOR
-            // BGP_REG = 0xD2U; // 0xC0 | 0x10 | 0x00 | 0x02;
-        #else
-            #ifdef GFX_HIGH_CONTRAST
-                set_bkg_data(TILES_PET_START,       TILE_COUNT_PETTOTAL,  pet_tiles_hc);
-            #else
-                set_bkg_data(TILES_PET_START,       TILE_COUNT_PETTOTAL,  pet_tiles);
-            #endif
-        #endif
+        set_bkg_data(TILES_PET_START,       TILE_COUNT_PETTOTAL,  p_pet_tiles);
+
+        // Load special sprite data after pet data
+        set_bkg_data(TILES_SPECIAL_START,   TILE_COUNT_SPECIALTOTAL, special_tiles);
+
 
         // Load BG tile attribute map
         VBK_REG = 1;
@@ -212,21 +205,8 @@ void board_gfx_tail_animate(void) {
 
         // Note: the OR of tail_anim_alternate only works if it's 8 frames total and one batch
         // otherwise use +
-    #ifdef GFX_BLACK_AND_WHITE
         set_bkg_data(pet_tail_anim_tilenum[tail_anim_count | tail_anim_alternate],
                      ANIM_TAIL_BATCH_SIZE,
-                     pet_tiles_bw + pet_tail_anim_srcoffset[tail_anim_count | tail_anim_alternate]);
-    #else
-        #ifdef GFX_HIGH_CONTRAST
-        set_bkg_data(pet_tail_anim_tilenum[tail_anim_count | tail_anim_alternate],
-                     ANIM_TAIL_BATCH_SIZE,
-                     pet_tiles_hc + pet_tail_anim_srcoffset[tail_anim_count | tail_anim_alternate]);
-        #else
-        set_bkg_data(pet_tail_anim_tilenum[tail_anim_count | tail_anim_alternate],
-                     ANIM_TAIL_BATCH_SIZE,
-                     pet_tiles + pet_tail_anim_srcoffset[tail_anim_count | tail_anim_alternate]);
-        #endif
-    #endif
-
+                     p_pet_tiles + pet_tail_anim_srcoffset[tail_anim_count | tail_anim_alternate]);
     }
 }

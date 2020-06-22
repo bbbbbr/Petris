@@ -128,6 +128,8 @@ void player_hinting_special_move(void) {
 // TODO: OPTIMIZE: if there is CPU time left, roll this into a loop?
 void player_hinting_special_update_gfx() {
 
+        // Load the corresponding special tile (for 4-direction preview)
+        // The LUT is zero based, so get an offset from the start of the special tiles
         hint_special_tile = GP_SPECIAL_HINT_LUT[ player_piece - GP_SPECIAL_START ];
 
         set_sprite_tile(SPR_SPECIAL_HINT_1, hint_special_tile);
