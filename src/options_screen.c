@@ -56,11 +56,12 @@ enum {
 
     OPTION_MENU_TYPE = OPTION_MENU_MIN,
     OPTION_MENU_LEVEL,
-    OPTION_MENU_VISUAL_HINTS,
     OPTION_MENU_MUSIC,
     OPTION_MENU_STARTGAME,
+    OPTION_MENU_VISUAL_HINTS,
+    OPTION_MENU_HIGH_CONTRAST,
 
-    OPTION_MENU_MAX = OPTION_MENU_STARTGAME
+    OPTION_MENU_MAX = OPTION_MENU_HIGH_CONTRAST
 } option_menu_entries;
 
 
@@ -75,6 +76,7 @@ const char * options_difficulty[]   = {"EASY  ",
                                        "EXPERT ",
                                        "BEAST "}; // Must match : option_difficulty_entries
 const char * options_visual_hints[] = {"ON ", "OFF"}; // Must match : option_visual_hints_entries
+const char * options_high_contrast[] = {"ON ", "OFF"}; // Must match : option_visual_hints_entries
 
 const char * options_music[] = {"TWILIGHT",
                                 "CHILL   ",
@@ -97,9 +99,10 @@ typedef struct opt_item {
 const option_item options[] = {
         { 5, "TYPE: ",         (INT8)ARRAY_LEN(options_type),         &options_type[0]        , &option_game_type},
         { 7, "LEVEL: ",        (INT8)ARRAY_LEN(options_difficulty),   &options_difficulty[0]  , &option_game_difficulty},
-        { 9,"VISUAL HINTS: ",  (INT8)ARRAY_LEN(options_visual_hints), &options_visual_hints[0], &option_game_visual_hints},
-        { 11,"MUSIC: ",        (INT8)ARRAY_LEN(options_music),        &options_music[0],        &option_game_music},
-        { 14,"   START GAME ", (INT8)ARRAY_LEN(options_visual_hints), NULL, NULL}
+        { 9,"MUSIC: ",        (INT8)ARRAY_LEN(options_music),        &options_music[0],        &option_game_music},
+        { 12,"   START GAME ", (INT8)ARRAY_LEN(options_visual_hints), NULL, NULL},
+        { 15,"VISUAL HINTS: ",  (INT8)ARRAY_LEN(options_visual_hints), &options_visual_hints[0], &option_game_visual_hints},
+        { 16,"HI CONTRAST : ", (INT8)ARRAY_LEN(options_high_contrast), &options_high_contrast[0], &option_game_high_contrast},
     };
 
 

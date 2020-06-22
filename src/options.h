@@ -67,6 +67,15 @@ enum {
 } option_visual_hints_entries;
 
 
+// Visual Hinting
+enum {
+    OPTION_HIGH_CONTRAST_ON,// = OPTION_HIGH_CONTRAST_MIN,
+    OPTION_HIGH_CONTRAST_OFF,
+
+    OPTION_HIGH_CONTRAST_DEFAULT = OPTION_VISUAL_HINTS_OFF
+} option_high_contrast_entries;
+
+
 // Music Status
 enum {
     OPTION_MUSIC_TWILIGHT,
@@ -131,6 +140,7 @@ extern const settings_data * p_game_settings;
 
 extern INT8 option_game_difficulty;
 extern INT8 option_game_visual_hints;
+extern INT8 option_game_high_contrast;
 extern INT8 option_game_type;
 extern INT8 option_game_music;
 extern INT8 option_game_preview_next;

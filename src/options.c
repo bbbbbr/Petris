@@ -27,6 +27,7 @@
 INT8 option_game_type         = OPTION_GAME_TYPE_DEFAULT;
 INT8 option_game_difficulty   = OPTION_DIFFICULTY_DEFAULT;
 INT8 option_game_visual_hints = OPTION_VISUAL_HINTS_DEFAULT;
+INT8 option_game_high_contrast = OPTION_HIGH_CONTRAST_DEFAULT;
 INT8 option_game_music        = OPTION_MUSIC_DEFAULT;
 INT8 option_game_preview_next = NEXT_PREV_DEFAULT;
 
