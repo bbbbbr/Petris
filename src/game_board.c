@@ -38,19 +38,21 @@ UINT8 board_tile_clear_cache_x[BRD_SIZE];
 UINT8 board_tile_clear_cache_y[BRD_SIZE];
 UINT8 board_tile_clear_count;
 
+#define TILE_ID_BOARD_BLANK_ROW_BG TILE_ID_BOARD_BLANK_BG
+
 // 10 tiles wide for clearing the game board one row at a time
 // This MUST match game board width
 // TODO: move this to game_board_gfx.h
-const UINT8 board_blank_row[] = {TILE_ID_BOARD_BLANK_BG,
-                                 TILE_ID_BOARD_BLANK_BG,
-                                 TILE_ID_BOARD_BLANK_BG,
-                                 TILE_ID_BOARD_BLANK_BG,
-                                 TILE_ID_BOARD_BLANK_BG,
-                                 TILE_ID_BOARD_BLANK_BG,
-                                 TILE_ID_BOARD_BLANK_BG,
-                                 TILE_ID_BOARD_BLANK_BG,
-                                 TILE_ID_BOARD_BLANK_BG,
-                                 TILE_ID_BOARD_BLANK_BG};
+const UINT8 board_blank_row[] = {TILE_ID_BOARD_BLANK_ROW_BG,
+                                 TILE_ID_BOARD_BLANK_ROW_BG,
+                                 TILE_ID_BOARD_BLANK_ROW_BG,
+                                 TILE_ID_BOARD_BLANK_ROW_BG,
+                                 TILE_ID_BOARD_BLANK_ROW_BG,
+                                 TILE_ID_BOARD_BLANK_ROW_BG,
+                                 TILE_ID_BOARD_BLANK_ROW_BG,
+                                 TILE_ID_BOARD_BLANK_ROW_BG,
+                                 TILE_ID_BOARD_BLANK_ROW_BG,
+                                 TILE_ID_BOARD_BLANK_ROW_BG};
 
 const UINT8 board_x_row[] = {TILE_ID_BOARD_UP,
                              TILE_ID_BOARD_UP,
@@ -131,6 +133,7 @@ void board_redraw_all(void) {
 // Redraws single tile on board
 //
 void board_draw_tile_xy(INT8 x, INT8 y, UINT8 tile_index) {
+
     // Update BG Tilemap from Game Board
     VBK_REG = 1; // Select BG tile attribute map
     set_bkg_tiles(BRD_ST_X + x, BRD_ST_Y + y,

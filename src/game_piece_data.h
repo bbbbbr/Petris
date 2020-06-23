@@ -4,6 +4,15 @@
 #define GAME_PIECE_DATA_H
 
 
+// Locations for loading Game Piece tile sprite data
+#define SPRITE_TILE_PET_START  0 // Load at start of sprite tile RAM
+#define SPRITE_TILE_SPECIAL_START  (SPRITE_TILE_PET_START + TILE_COUNT_PETTOTAL) // Load directly after pet tiles
+
+// Start sprite font digit tiles after pet tiles
+#define SPRITE_TILE_FONT_DIGITS_START (SPRITE_TILE_SPECIAL_START + TILE_COUNT_SPECIALTOTAL)
+
+
+
 // Pet tile bit mapping order
 //
 //  bits  :76543210
@@ -24,18 +33,23 @@
 
 #define GP_PET_BITS_MASK  0x1FU
 
+
 // Extra tiles above pet tiles
-#define GP_EMPTY               0x20U // TODO : Tiles, move empty to be after specials?
-#define GP_SPECIAL_START       0x21U
-#define GP_SPECIAL_BOMB        0x21U
-#define GP_SPECIAL_LIGHTENING  0x22U
-#define GP_SPECIAL_BOMB_HINT   0x23U
-#define GP_SPECIAL_MERGE_HINT  0x24U
-#define GP_SPECIAL_DROP_HINT   0x25U
-#define GP_DISSOLVE_1          0x26U
-#define GP_DISSOLVE_2          0x27U
-#define GP_DISSOLVE_3          0x28U
-#define GP_CROSS               0x29U
+// Just one that gets loaded: the board empty tile piece
+#define GP_EMPTY               0x20U
+
+#define GP_SPECIAL_START       (SPRITE_TILE_SPECIAL_START)
+
+// Special tiles (loaded from separate set)
+#define GP_SPECIAL_BOMB        (0 + GP_SPECIAL_START)
+#define GP_SPECIAL_LIGHTENING  (1 + GP_SPECIAL_START)
+#define GP_SPECIAL_BOMB_HINT   (2 + GP_SPECIAL_START)
+#define GP_SPECIAL_MERGE_HINT  (3 + GP_SPECIAL_START)
+#define GP_SPECIAL_DROP_HINT   (4 + GP_SPECIAL_START)
+#define GP_DISSOLVE_1          (5 + GP_SPECIAL_START)
+#define GP_DISSOLVE_2          (6 + GP_SPECIAL_START)
+#define GP_DISSOLVE_3          (7 + GP_SPECIAL_START)
+#define GP_CROSS               (8 + GP_SPECIAL_START)
 
 
 #define GP_PET_UPSHIFT  0

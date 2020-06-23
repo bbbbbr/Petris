@@ -31,27 +31,33 @@
 //#define TILES_BG_START          0
 //#define TILE_COUNT_BG          16
 
-
 #define TILES_INTRO_START      0
 #define TILE_COUNT_INTRO       69
-#define TILE_ID_BOARD_BLANK_BG (TILES_INTRO_START + 3)
+#define TILE_ID_BOARD_BLANK_BG    (TILES_INTRO_START + 3)
+#define TILE_ID_BOARD_BLANK_BG_BW (TILES_INTRO_START + 0)
 #define TILE_ID_BOARD_NEXT_PIECE_PREVIEW_BG  (TILES_INTRO_START + 0)
 #define TILE_ID_BOARD_UP        (TILES_INTRO_START + 68)
 
+
 #define TILE_OFFSET_PET_TAIL_REG 0
-#define TILE_OFFSET_PET_TAIL_WAG 48
+#define TILE_OFFSET_PET_TAIL_WAG 33 // Offset to tail wag alternate tiles
+
 
 #define TILES_PET_START        96 // This requires ^2 alignment
 #define TILE_COUNT_PETS        32
 #define TILE_COUNT_PETBLANK     1
-#define TILE_COUNT_PETSPECIAL   4
-#define TILE_COUNT_DROP_HINT    1
-#define TILE_COUNT_DISSOLVE     3
-#define TILE_COUNT_LONG_PET_HINT  1
-#define TILE_COUNT_PETTOTAL    (TILE_COUNT_PETS + TILE_COUNT_PETBLANK + TILE_COUNT_PETSPECIAL + TILE_COUNT_DROP_HINT + TILE_COUNT_DISSOLVE + TILE_COUNT_LONG_PET_HINT)
+#define TILE_COUNT_PET_ANIM____NOTLOADED_ONSTART____  8 // These don't get loaded at startup, just used to replace existing tiles
 
-// Start sprite font digit tiles after pet tiles
-#define SPRITE_TILE_FONT_DIGITS_START TILE_COUNT_PETTOTAL
+#define TILE_COUNT_PETTOTAL    (TILE_COUNT_PETS + TILE_COUNT_PETBLANK)
+
+
+#define TILES_SPECIAL_START     (TILES_PET_START + TILE_COUNT_PETTOTAL) // Load right after pet tiles
+#define TILE_COUNT_PETSPECIAL     4  // Special pieces and their hinting tiles
+#define TILE_COUNT_DROP_HINT      1  // Crosshair Sights
+#define TILE_COUNT_DISSOLVE       3  // 3 Dissolve tiles
+#define TILE_COUNT_LONG_PET_HINT  1  // Cross shape
+
+#define TILE_COUNT_SPECIALTOTAL (TILE_COUNT_PETSPECIAL + TILE_COUNT_DROP_HINT + TILE_COUNT_DISSOLVE + TILE_COUNT_LONG_PET_HINT)
 
 // Font gets loaded at the end of tile RAM
 #define TILE_COUNT_FONT     45 //Tiles in order: <blank>ABC...XYZ0123456789!'()-.:?
@@ -65,7 +71,10 @@
     #define TILES_FONT_NUMS_START  (TILES_FONT_START  + TILES_FONT_CHARS_LEN)
     #define TILE_COUNT_FONT_NUMS   11 //Tiles in order: 0123456789<blank>
 
+extern UINT8 * p_pet_tiles;
+
 extern const UWORD board_pets_palette[];
+extern const UWORD board_pets_palette_high_contrast[];
 extern const UWORD board_specials_palette[];
 extern const UWORD intro_screen_palette[];
 
