@@ -67,7 +67,7 @@ enum {
 } option_visual_hints_entries;
 
 
-// Visual Hinting
+// High Contrast mode for non-backlit and small sized displays
 enum {
     OPTION_HIGH_CONTRAST_ON,// = OPTION_HIGH_CONTRAST_MIN,
     OPTION_HIGH_CONTRAST_OFF,
