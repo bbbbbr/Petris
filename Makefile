@@ -1,4 +1,4 @@
-PROJECT_NAME = PETRIS
+PROJECT_NAME = Petris
 
 export GBDK_HOME="/opt/gbdk"
 export BGB="../tools/bgbw64-1.5.7/bgb64.exe"

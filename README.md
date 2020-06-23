@@ -23,6 +23,14 @@ Several game play types to choose from:
 Difficulty levels for all players, from relaxing to breakneck fast:
 * Easy / Normal / Hard / Expert / Beast
 
+Other Options:
+* Choose from multiple sound tracks (or none)
+* Piece drop and other visual hinting can be turned on/off
+* High Contrast mode for small and non-backlit screens
+
+===========
+Music Credits:
+* .....
 
 Tools used
  * GBDK - http://gbdk.sourceforge.net/
