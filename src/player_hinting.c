@@ -20,6 +20,7 @@
 #include "gfx.h"
 #include "gfx_print.h"
 
+#include "options.h"
 #include "game_piece.h"
 #include "game_piece_data.h"
 #include "game_board.h"
@@ -185,6 +186,12 @@ void player_hinting_drop_update(void) {
 
 
 // ==== PET LENGTH HINTING ====
+//
+// Sprite IDs
+// sprite_idx + 0  = Left Length Digit
+// sprite_idx + 1  = Right Length Digit
+// sprite_idx + 2  = Cross / Penultiamte length marer
+//
 
 
 void hinting_petlength_reset(void) {
@@ -305,10 +312,14 @@ void hinting_petlength_add(INT8 board_x, INT8 board_y, UINT8 length, UINT8 piece
 
     // If pet length is greater than required length -1 then
     // add a size hint, regardless of overlay status
-    if (length >= (game_type_long_pet_required_size - 1)) {
-        move_sprite(sprite_idx + 2,
-                    (board_x * BRD_UNIT_SIZE) + SPR_LONG_PET_SIZE_OFFSET_X,
-                    (board_y * BRD_UNIT_SIZE) + SPR_LONG_PET_SIZE_OFFSET_Y);
+    //
+    // PET_LENGTH_PREVIEW_ENABLED_FOR_ALL_MODES
+    if (option_game_type == OPTION_GAME_TYPE_LONG_PET) {
+        if (length >= (game_type_long_pet_required_size - 1)) {
+            move_sprite(sprite_idx + 2,
+                        (board_x * BRD_UNIT_SIZE) + SPR_LONG_PET_SIZE_OFFSET_X,
+                        (board_y * BRD_UNIT_SIZE) + SPR_LONG_PET_SIZE_OFFSET_Y);
+        }
     }
 }
 

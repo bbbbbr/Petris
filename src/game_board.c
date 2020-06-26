@@ -539,9 +539,12 @@ UINT8 board_check_completed_pet_xy(INT8 start_x, INT8 start_y, UINT8 piece, UINT
         }
 
         // Clear overlay hint from piece (may get re-added later in a different location)
-        if (option_game_type == OPTION_GAME_TYPE_LONG_PET) {
+        //
+        // PET_LENGTH_PREVIEW_ENABLED_FOR_ALL_MODES
+        //
+        // if (option_game_type == OPTION_GAME_TYPE_LONG_PET) {
             hinting_petlength_remove(start_x, start_y);
-        }
+        // }
 
         // Loop through possible connect directions (Left/Right/Up/Down)
         for (source_cur_dir = GP_CONNECT_MIN_BITS;
@@ -578,9 +581,12 @@ UINT8 board_check_completed_pet_xy(INT8 start_x, INT8 start_y, UINT8 piece, UINT
                     //                   toward the next x/y to check (with it's preceding direction bits masked out)
 
                     // Clear overlay hint from piece (may get re-added later in a different location)
-                    if (option_game_type == OPTION_GAME_TYPE_LONG_PET) {
+                    //
+                    // PET_LENGTH_PREVIEW_ENABLED_FOR_ALL_MODES
+                    //
+                    // if (option_game_type == OPTION_GAME_TYPE_LONG_PET) {
                         hinting_petlength_remove(check_x, check_y);
-                    }
+                    // }
 
                     // Check to see if the pet is a loop with no head/tail (current position == starting position)
                     // Important: must be tested *before* incrementing piece_count and updating check_x/Y
@@ -652,9 +658,15 @@ UINT8 board_check_completed_pet_xy(INT8 start_x, INT8 start_y, UINT8 piece, UINT
             }
         }
         // Otherwise, if this is Long Pet mode, update pet length overlays
+
         // (Don't update this was just a pet-scan called via a Bomb special piece)
-        else if ((option_game_type == OPTION_GAME_TYPE_LONG_PET)
-                && (piece_count >= HINT_LONG_PET_MIN_SIZE)
+        //
+        // PET_LENGTH_PREVIEW_ENABLED_FOR_ALL_MODES
+        //
+        // else if ((option_game_type == OPTION_GAME_TYPE_LONG_PET)
+        //         && (piece_count >= HINT_LONG_PET_MIN_SIZE)
+        //         && (!(flags & BRD_CHECK_FLAGS_DONT_HANDLE_PET_COMPLETED)))
+        else if ((piece_count >= HINT_LONG_PET_MIN_SIZE)
                 && (!(flags & BRD_CHECK_FLAGS_DONT_HANDLE_PET_COMPLETED)))
         {
             // If current piece is an end (tail or head)

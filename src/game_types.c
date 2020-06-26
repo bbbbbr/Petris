@@ -60,11 +60,12 @@ void game_types_handle_level_transition(void) {
         //  level_end() and level_start()
         HIDE_SPRITES;
 
-        if (option_game_type == OPTION_GAME_TYPE_LONG_PET) {
-
+        // PET_LENGTH_PREVIEW_ENABLED_FOR_ALL_MODES
+        //
+        // if (option_game_type == OPTION_GAME_TYPE_LONG_PET) {
             // Remove player pet length hinting sprites
             hinting_petlength_reset();
-        }
+        // }
 
         PLAY_SOUND_LEVEL_UP;
         board_hide_all(BRD_CLR_DELAY_CLEAR_MED);
