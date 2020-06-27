@@ -219,7 +219,7 @@ void board_gfx_tail_animate(void) {
 }
 
 
-// #ifdef GAMEOVER_ANIMATE_RAINBOW_PALS
+// #define GAMEOVER_ANIMATE_RAINBOW_PALS
 #define SPR_PAL_PRINT BG_PAL_5
 
 const INT8 SPR_GAMEOVER_CHARS[] = {'G' - 'A' + TILES_FONT_CHARS_START,
