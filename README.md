@@ -39,3 +39,5 @@ Tools used
  * GIMP TileMap GB - https://github.com/bbbbbr/gimp-tilemap
  * Game Boy Map Builder - http://www.devrs.com/gb/hmgd/gbmb.html
  * A little code from ZGB - https://github.com/Zal0/ZGB
+ * GBT Player - https://github.com/AntonioND/gbt-player
+ * Music from GB Studio Community Assets (krümel/crumb) - https://github.com/DeerTears/GB-Studio-Community-Assets
