@@ -202,8 +202,8 @@ void main(void){
             case GAME_ENDED:
                 // TODO: add some animation / sounds for game ended
                 MusicStop();
-                gameplay_handle_gameover_screen();
                 PLAY_SOUND_GAME_OVER;
+                gameplay_handle_gameover_screen();
 
                 game_state = GAME_OVER_SCREEN;
                 break;

@@ -25,6 +25,7 @@
 #include "gfx.h"
 #include "gfx_print.h"
 
+#include "player_gfx.h"
 #include "player_info.h"
 #include "options.h"
 
@@ -85,6 +86,9 @@ void board_gfx_init(void) {
 
     board_gfx_init_background();
     board_gfx_init_sprites();
+
+    board_gameover_animate_reset();
+
     fade_start(FADE_IN);
 }
 
@@ -208,5 +212,120 @@ void board_gfx_tail_animate(void) {
         set_bkg_data(pet_tail_anim_tilenum[tail_anim_count | tail_anim_alternate],
                      ANIM_TAIL_BATCH_SIZE,
                      p_pet_tiles + pet_tail_anim_srcoffset[tail_anim_count | tail_anim_alternate]);
+    }
+}
+
+
+const INT8 SPR_GAMEOVER_CHARS[] = {'G' - 'A' + TILES_FONT_CHARS_START,
+                                    'A' - 'A' + TILES_FONT_CHARS_START,
+                                    'M' - 'A' + TILES_FONT_CHARS_START,
+                                    'E' - 'A' + TILES_FONT_CHARS_START,
+                                    'O' - 'A' + TILES_FONT_CHARS_START,
+                                    'V' - 'A' + TILES_FONT_CHARS_START,
+                                    'E' - 'A' + TILES_FONT_CHARS_START,
+                                    'R' - 'A' + TILES_FONT_CHARS_START};
+
+#define SPR_GAMEOVER_MAX_Y ((BRD_ST_Y + 8) * 8)
+#define SPR_GAMEOVER_START_X (((BRD_ST_X + 1) * 8) + 2) // 2 Pixels right of left board edge
+
+const UINT8 SPR_GAMEOVER_LUT_X[] = {SPR_GAMEOVER_START_X,
+                                    SPR_GAMEOVER_START_X + (8 * 1) + 1, // 1 pixel between each letter
+                                    SPR_GAMEOVER_START_X + (8 * 2) + 2,
+                                    SPR_GAMEOVER_START_X + (8 * 3) + 3,
+                                    // Gap between GANE -- and -- OVER
+                                    SPR_GAMEOVER_START_X + (8 * 4) + 9,
+                                    SPR_GAMEOVER_START_X + (8 * 5) + 10,
+                                    SPR_GAMEOVER_START_X + (8 * 6) + 11,
+                                    SPR_GAMEOVER_START_X + (8 * 7) + 12};
+
+
+INT8 spr_gameover_y[SPR_GAMEOVER_COUNT];
+INT8 spr_gameover_vel[SPR_GAMEOVER_COUNT];
+
+#define GAMEOVER_UPDATE_MASK 0x1F // Only update cursor once every 8 frames
+#define SPR_GAMEOVER_GRAVITY 1
+#define SPR_GAMEOVER_LANDED  127
+
+UINT8 spr_gameover_landed_count;
+
+
+// TODO: OPTIMIZE: This could probably be rewritten more efficiently and with a LUT
+//
+// Drop "G A M E   O V E R" letters with a bounce, starting from left to right
+void board_gameover_animate(void) {
+
+    UINT8 c;
+    UINT8 max_spr = 0; // Used for delay launch left to right
+
+    // Loop exits when all sprites have landed
+    while (spr_gameover_landed_count < SPR_GAMEOVER_COUNT) {
+
+
+        // Periodic Update
+        if ((sys_time & 0x03) == 0x03) { //  & GAMEOVER_UPDATE_MASK) {
+
+            wait_vbl_done();
+
+            // Delay launch from left to right
+            if (max_spr < SPR_GAMEOVER_COUNT)
+                max_spr++;
+
+            // Reset landed count for each animation pass
+            spr_gameover_landed_count = 0;
+
+            for (c = 0; c < max_spr; c++) {
+
+                // If a letter has landed, make note and don't animate it
+                if (spr_gameover_vel[c] == SPR_GAMEOVER_LANDED) {
+
+                    spr_gameover_landed_count++;
+                } else {
+
+                    // Apply gravity to velocity
+                    spr_gameover_vel[c] += SPR_GAMEOVER_GRAVITY;
+
+                    // Apply velocity to position
+                    spr_gameover_y[c] += spr_gameover_vel[c];
+
+                    // Bounce back if ground was reached
+                    if (spr_gameover_y[c] >= SPR_GAMEOVER_MAX_Y) {
+                        // spr_gameover_vel[c] /= -2; // Reverse direction by 1/2
+
+                        // Decrease max speed on first big bounce a little
+                        if (spr_gameover_vel[c] > 4)
+                            spr_gameover_vel[c] -= 2;
+
+                        // Reverse direction
+                        spr_gameover_vel[c] *= -1; // spr_gameover_vel[c] = ~spr_gameover_vel[c] + 1; // * -1
+
+                        spr_gameover_y[c] = SPR_GAMEOVER_MAX_Y; // Cap max Y
+
+                        // Record if sprite has landed and stopped moving
+                        if (spr_gameover_vel[c] == 0) {
+                            spr_gameover_vel[c] = SPR_GAMEOVER_LANDED;
+                        }
+                    }
+
+                    move_sprite(SPR_GAMEOVER_START + c,
+                        SPR_GAMEOVER_LUT_X[c],
+                        spr_gameover_y[c]);
+                }
+            }
+        }
+    }
+}
+
+void board_gameover_animate_reset(void) {
+
+    UINT8 c;
+
+    for (c = 0; c< SPR_GAMEOVER_COUNT; c++) {
+        spr_gameover_y[c] = 0;
+        spr_gameover_vel[c] = 0;  // Start with a little zero velocity
+
+        move_sprite(SPR_GAMEOVER_START + c, 0,0);
+        set_sprite_tile(SPR_GAMEOVER_START + c, SPR_GAMEOVER_CHARS[c]);
+        set_sprite_prop(SPR_GAMEOVER_START + c, c & 0x03);
+
     }
 }

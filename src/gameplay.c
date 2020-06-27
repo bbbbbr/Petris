@@ -65,10 +65,7 @@ void game_speed_frames_per_drop_set(UINT8 new_val) {
 
 void gameplay_handle_gameover_screen(void) {
 
-    // TODO: add some animation?
-    PRINT(BRD_ST_X,
-          BRD_ST_Y + 5,
-          "GAME  OVER",0);
+    board_gameover_animate();
 }
 
 
@@ -83,6 +80,7 @@ void gameplay_exit_cleanup(void) {
     player_hinting_special_show(FALSE);
     player_hinting_drop_show(FALSE);
     hinting_petlength_reset();
+    board_gameover_animate_reset();
 }
 
 
