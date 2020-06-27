@@ -40,9 +40,14 @@
 #define SPR_OPTIONS_CURSOR 0 // Cursor is sprite "0"
 #define PET_DOG_HEAD       ((GP_PET_DOG << GP_PET_UPSHIFT) | (GP_SEG_HEAD << GP_SEG_UPSHIFT))
 
-#define OPTION_MENU_X 3
-#define OPTION_CURSOR_X (2 * 8)
+#define OPTION_MENU_X_START 2
+#define OPTION_CURSOR_X     12 // (tiles from Left Edge: 1.5 x 8 pixels per tile)
 
+#define CURSOR_UPDATE_MASK 0x07 // Only update cursor once every 8 frames
+#define CURSOR_BITSHIFT    2
+#define CURSOR_LUT_MASK    0x07 << CURSOR_BITSHIFT // 8 offset entries in the LUT
+
+const UINT8 spr_cursor_offset[] = {0,1,2,3,3,2,1,0};
 
 const UINT8 options_screen_attrib_pal = BG_PAL_4;
 const UINT8 options_screen_tiles[] = {TILES_INTRO_START + 0,
@@ -66,9 +71,9 @@ enum {
 
 
 // Trailing spaces are to clear out previous option value text
-const char * options_type[]         = {"LONG PET   ",
-                                       "PET CLEANUP",
-                                       "LEVEL UP   ",
+const char * options_type[]         = {"LONG PET    ",
+                                       "TAIL CLEANUP",
+                                       "LEVEL UP    ",
                                        "MARATHON    "}; // Must match : option_game_type_entries
 const char * options_difficulty[]   = {"EASY  ",
                                        "NORMAL",
@@ -97,11 +102,11 @@ typedef struct opt_item {
 
 // See above for meaning of each element
 const option_item options[] = {
-        { 5, "TYPE: ",         (INT8)ARRAY_LEN(options_type),         &options_type[0]        , &option_game_type},
-        { 7, "LEVEL: ",        (INT8)ARRAY_LEN(options_difficulty),   &options_difficulty[0]  , &option_game_difficulty},
-        { 9,"MUSIC: ",        (INT8)ARRAY_LEN(options_music),        &options_music[0],        &option_game_music},
+        {  5,"TYPE: ",         (INT8)ARRAY_LEN(options_type),         &options_type[0]        , &option_game_type},
+        {  7,"LEVEL: ",        (INT8)ARRAY_LEN(options_difficulty),   &options_difficulty[0]  , &option_game_difficulty},
+        {  9,"MUSIC: ",        (INT8)ARRAY_LEN(options_music),        &options_music[0],        &option_game_music},
         { 12,"   START GAME ", (INT8)ARRAY_LEN(options_visual_hints), NULL, NULL},
-        { 15,"VISUAL HINTS: ",  (INT8)ARRAY_LEN(options_visual_hints), &options_visual_hints[0], &option_game_visual_hints},
+        { 15,"VISUAL HINTS: ", (INT8)ARRAY_LEN(options_visual_hints), &options_visual_hints[0], &option_game_visual_hints},
         { 16,"HI CONTRAST : ", (INT8)ARRAY_LEN(options_high_contrast), &options_high_contrast[0], &option_game_high_contrast},
     };
 
@@ -129,9 +134,11 @@ void options_screen_cursor_update(INT8 dir) {
         options_menu_index = OPTION_MENU_MIN;
     }
 
-    move_sprite(SPR_OPTIONS_CURSOR,
-                OPTION_CURSOR_X,
-                (options[options_menu_index].menu_y + 2) * 8);
+    // Turns off here: Intead, this gets updated in the main options screen handler
+    //
+    // move_sprite(SPR_OPTIONS_CURSOR,
+    //             OPTION_CURSOR_X,
+    //             (options[options_menu_index].menu_y + 2) * 8);
 }
 
 
@@ -179,7 +186,7 @@ void options_screen_setting_draw(INT8 option_id) {
 
     // Print option Title
     // (they have trailing spaces)
-    PRINT(OPTION_MENU_X,
+    PRINT(OPTION_MENU_X_START,
           options[option_id].menu_y,
           options[option_id].label, 0);
 
@@ -333,4 +340,12 @@ void options_screen_handle(void) {
         game_state = GAME_INTRO_INIT;
     }
 
+    // Update cursor every N frames
+    if (sys_time & CURSOR_UPDATE_MASK) {
+        // Animate the cursor with a mild bounce
+        move_sprite(SPR_OPTIONS_CURSOR,
+                    OPTION_CURSOR_X,
+                    ((options[options_menu_index].menu_y + 2) * 8)  // + 2 is sprite vs bg offset
+                    + spr_cursor_offset[(sys_time & CURSOR_LUT_MASK) >> CURSOR_BITSHIFT] - 2);
+    }
 }
