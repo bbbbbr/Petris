@@ -242,11 +242,9 @@ const UINT8 SPR_GAMEOVER_LUT_X[] = {SPR_GAMEOVER_START_X,
 INT8 spr_gameover_y[SPR_GAMEOVER_COUNT];
 INT8 spr_gameover_vel[SPR_GAMEOVER_COUNT];
 
-#define GAMEOVER_UPDATE_MASK 0x1F // Only update cursor once every 8 frames
+#define GAMEOVER_UPDATE_MASK 0x03 // Only update cursor once every 8 frames
 #define SPR_GAMEOVER_GRAVITY 1
 #define SPR_GAMEOVER_LANDED  127
-
-UINT8 spr_gameover_landed_count;
 
 
 // TODO: OPTIMIZE: This could probably be rewritten more efficiently and with a LUT
@@ -255,64 +253,60 @@ UINT8 spr_gameover_landed_count;
 void board_gameover_animate(void) {
 
     UINT8 c;
+    UINT8 min_spr = 0; // Used to slowly exit the loop as pieces land
     UINT8 max_spr = 0; // Used for delay launch left to right
 
     // Loop exits when all sprites have landed
-    while (spr_gameover_landed_count < SPR_GAMEOVER_COUNT) {
+    while (min_spr != SPR_GAMEOVER_COUNT) {
 
 
         // Periodic Update
-        if ((sys_time & 0x03) == 0x03) { //  & GAMEOVER_UPDATE_MASK) {
+        if ((sys_time & GAMEOVER_UPDATE_MASK) == GAMEOVER_UPDATE_MASK) {
 
             wait_vbl_done();
 
             // Delay launch from left to right
+            // by adding one more sprite during each animation pass
             if (max_spr < SPR_GAMEOVER_COUNT)
                 max_spr++;
 
-            // Reset landed count for each animation pass
-            spr_gameover_landed_count = 0;
+            for (c = min_spr; c < max_spr; c++) {
 
-            for (c = 0; c < max_spr; c++) {
+                // Apply gravity to velocity
+                // and then velocity to position
+                spr_gameover_vel[c] += SPR_GAMEOVER_GRAVITY;
+                spr_gameover_y[c] += spr_gameover_vel[c];
 
-                // If a letter has landed, make note and don't animate it
-                if (spr_gameover_vel[c] == SPR_GAMEOVER_LANDED) {
+                // Bounce back if ground was reached
+                if (spr_gameover_y[c] >= SPR_GAMEOVER_MAX_Y) {
 
-                    spr_gameover_landed_count++;
-                } else {
+                    // Decrease max speed a little on first big bounce
+                    if (spr_gameover_vel[c] > 4)
+                        spr_gameover_vel[c] -= 2;
 
-                    // Apply gravity to velocity
-                    spr_gameover_vel[c] += SPR_GAMEOVER_GRAVITY;
+                    // Reverse direction
+                    // spr_gameover_vel[c] *= -1;
+                    spr_gameover_vel[c] = ~spr_gameover_vel[c] + 1; // i.e. *= -1
 
-                    // Apply velocity to position
-                    spr_gameover_y[c] += spr_gameover_vel[c];
+                    spr_gameover_y[c] = SPR_GAMEOVER_MAX_Y; // Cap max Y
 
-                    // Bounce back if ground was reached
-                    if (spr_gameover_y[c] >= SPR_GAMEOVER_MAX_Y) {
-                        // spr_gameover_vel[c] /= -2; // Reverse direction by 1/2
-
-                        // Decrease max speed on first big bounce a little
-                        if (spr_gameover_vel[c] > 4)
-                            spr_gameover_vel[c] -= 2;
-
-                        // Reverse direction
-                        spr_gameover_vel[c] *= -1; // spr_gameover_vel[c] = ~spr_gameover_vel[c] + 1; // * -1
-
-                        spr_gameover_y[c] = SPR_GAMEOVER_MAX_Y; // Cap max Y
-
-                        // Record if sprite has landed and stopped moving
-                        if (spr_gameover_vel[c] == 0) {
-                            spr_gameover_vel[c] = SPR_GAMEOVER_LANDED;
-                        }
+                    // If sprite landed and stopped moving then de-activate it
+                    if (spr_gameover_vel[c] == 0) {
+                        // Sprites launch one after another from left to right
+                        // and land in the same order. So the landed sprite is
+                        // always the current left-most (min_spr).
+                        // De-activate by excluding it from the loop start
+                        min_spr++;
                     }
-
-                    move_sprite(SPR_GAMEOVER_START + c,
-                        SPR_GAMEOVER_LUT_X[c],
-                        spr_gameover_y[c]);
                 }
+
+                move_sprite(SPR_GAMEOVER_START + c,
+                            SPR_GAMEOVER_LUT_X[c],
+                            spr_gameover_y[c]);
+
             }
-        }
-    }
+        } // if ((sys_time & 0x03) == 0x03)
+    } // while (min_spr != SPR_GAMEOVER_COUNT)
 }
 
 void board_gameover_animate_reset(void) {
