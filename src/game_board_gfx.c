@@ -107,6 +107,9 @@ void board_gfx_init_sprites(void) {
 
     fade_set_pal(BG_PAL_4, 1, board_specials_palette, FADE_PAL_SPRITES);
 
+    // Just load first of 4 pals from this -> for printing font to sprites
+    fade_set_pal(BG_PAL_5, 1, intro_screen_palette, FADE_PAL_SPRITES);
+
     set_sprite_data(SPRITE_TILE_PET_START, TILE_COUNT_PETTOTAL, p_pet_tiles);
 
     // Load special sprite data after pet data
@@ -216,6 +219,9 @@ void board_gfx_tail_animate(void) {
 }
 
 
+// #ifdef GAMEOVER_ANIMATE_RAINBOW_PALS
+#define SPR_PAL_PRINT BG_PAL_5
+
 const INT8 SPR_GAMEOVER_CHARS[] = {'G' - 'A' + TILES_FONT_CHARS_START,
                                     'A' - 'A' + TILES_FONT_CHARS_START,
                                     'M' - 'A' + TILES_FONT_CHARS_START,
@@ -304,7 +310,7 @@ void board_gameover_animate(void) {
                             SPR_GAMEOVER_LUT_X[c],
                             spr_gameover_y[c]);
 
-            }
+            } // for (c = min_spr; c < max_spr; c++) {
         } // if ((sys_time & 0x03) == 0x03)
     } // while (min_spr != SPR_GAMEOVER_COUNT)
 }
@@ -319,7 +325,14 @@ void board_gameover_animate_reset(void) {
 
         move_sprite(SPR_GAMEOVER_START + c, 0,0);
         set_sprite_tile(SPR_GAMEOVER_START + c, SPR_GAMEOVER_CHARS[c]);
-        set_sprite_prop(SPR_GAMEOVER_START + c, c & 0x03);
+
+        #ifdef GAMEOVER_ANIMATE_RAINBOW_PALS
+            // Use rainbow of pet tile palettes for different letters
+            set_sprite_prop(SPR_GAMEOVER_START + c, c & 0x03);
+        #else
+            // Use solid color palette for all letter
+            set_sprite_prop(SPR_GAMEOVER_START + c, SPR_PAL_PRINT);
+        #endif
 
     }
 }
