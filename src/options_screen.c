@@ -43,7 +43,7 @@
 #define OPTION_MENU_X_START 2
 #define OPTION_CURSOR_X     12 // (tiles from Left Edge: 1.5 x 8 pixels per tile)
 
-#define CURSOR_UPDATE_MASK 0x07 // Only update cursor once every 8 frames
+#define CURSOR_UPDATE_MASK 0x03 // Only update cursor once every 8 frames
 #define CURSOR_BITSHIFT    2
 #define CURSOR_LUT_MASK    0x07 << CURSOR_BITSHIFT // 8 offset entries in the LUT
 
@@ -341,7 +341,7 @@ void options_screen_handle(void) {
     }
 
     // Update cursor every N frames
-    if (sys_time & CURSOR_UPDATE_MASK) {
+    if ((sys_time & CURSOR_UPDATE_MASK) == CURSOR_UPDATE_MASK) {
         // Animate the cursor with a mild bounce
         move_sprite(SPR_OPTIONS_CURSOR,
                     OPTION_CURSOR_X,
