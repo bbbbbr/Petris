@@ -1,5 +1,33 @@
 #!/usr/bin/perl -w
 
+# == Source-ish debugging in BGB ==
+#
+# Merges C Source into the symbol labels.
+# This isn't the "Real Thing" and looks messy in BGB,
+# but does work and can give a little more clarity when
+# stepping in the debugger (or figuring out where to set
+# your breakpoint without having to consult the .sym + .asm output).
+
+# The labels get truncated if they're too long.
+# Using the Tab key you can easily turn the symbol view on/off.
+#
+# These are the flags added :
+# SDCC: --debug
+# LCC: -Wl-j
+#
+# Then the main symbol file has the "A$..." lines stripped,
+# and the "C$..." (C source) lines are used to pull in the
+# source from the .asm files generated during compile time.
+#
+# Example use in a makefile:
+# ifdef CDEBUG
+#     @echo Reprocessing Symbols to include C Source
+#     mv $(OBJDIR)/$(PROJECT_NAME).sym $(OBJDIR)/$(PROJECT_NAME)_raw.sym
+#     $(SRC2SYM) $(OBJDIR)/$(PROJECT_NAME)_raw.sym > $(OBJDIR)/$(PROJECT_NAME).sym
+# endif
+
+
+
 use strict;
 use warnings;
 use File::Basename;
@@ -74,11 +102,11 @@ sub FindSourceLine {
             }
             close(SourceFile);
         } else {
-            # print "file not found: $SourceFileFullPath\n";
+            # print "Source file scan: File not found: $SourceFileFullPath\n";
         }
 
     } else {
-        # print "Please specify main symbol file (located in same dir as individual .asm files)\n";
+        # print "Source file scan: Missing one of the following: Directory, Filename or C Line Number\n";
     }
 }
 
