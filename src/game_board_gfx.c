@@ -25,6 +25,7 @@
 #include "gfx.h"
 #include "gfx_print.h"
 
+#include "player_gfx.h"
 #include "player_info.h"
 #include "options.h"
 
@@ -85,6 +86,9 @@ void board_gfx_init(void) {
 
     board_gfx_init_background();
     board_gfx_init_sprites();
+
+    board_gameover_animate_reset();
+
     fade_start(FADE_IN);
 }
 
@@ -102,6 +106,9 @@ void board_gfx_init_sprites(void) {
         fade_set_pal(BG_PAL_0, 4, board_pets_palette, FADE_PAL_SPRITES);
 
     fade_set_pal(BG_PAL_4, 1, board_specials_palette, FADE_PAL_SPRITES);
+
+    // Just load first of 4 pals from this -> for printing font to sprites
+    fade_set_pal(BG_PAL_5, 1, intro_screen_palette, FADE_PAL_SPRITES);
 
     set_sprite_data(SPRITE_TILE_PET_START, TILE_COUNT_PETTOTAL, p_pet_tiles);
 
@@ -208,5 +215,124 @@ void board_gfx_tail_animate(void) {
         set_bkg_data(pet_tail_anim_tilenum[tail_anim_count | tail_anim_alternate],
                      ANIM_TAIL_BATCH_SIZE,
                      p_pet_tiles + pet_tail_anim_srcoffset[tail_anim_count | tail_anim_alternate]);
+    }
+}
+
+
+// #define GAMEOVER_ANIMATE_RAINBOW_PALS
+#define SPR_PAL_PRINT BG_PAL_5
+
+const INT8 SPR_GAMEOVER_CHARS[] = {'G' - 'A' + TILES_FONT_CHARS_START,
+                                    'A' - 'A' + TILES_FONT_CHARS_START,
+                                    'M' - 'A' + TILES_FONT_CHARS_START,
+                                    'E' - 'A' + TILES_FONT_CHARS_START,
+                                    'O' - 'A' + TILES_FONT_CHARS_START,
+                                    'V' - 'A' + TILES_FONT_CHARS_START,
+                                    'E' - 'A' + TILES_FONT_CHARS_START,
+                                    'R' - 'A' + TILES_FONT_CHARS_START};
+
+#define SPR_GAMEOVER_MAX_Y ((BRD_ST_Y + 8) * 8)
+#define SPR_GAMEOVER_START_X (((BRD_ST_X + 1) * 8) + 2) // 2 Pixels right of left board edge
+
+const UINT8 SPR_GAMEOVER_LUT_X[] = {SPR_GAMEOVER_START_X,
+                                    SPR_GAMEOVER_START_X + (8 * 1) + 1, // 1 pixel between each letter
+                                    SPR_GAMEOVER_START_X + (8 * 2) + 2,
+                                    SPR_GAMEOVER_START_X + (8 * 3) + 3,
+                                    // Gap between GANE -- and -- OVER
+                                    SPR_GAMEOVER_START_X + (8 * 4) + 9,
+                                    SPR_GAMEOVER_START_X + (8 * 5) + 10,
+                                    SPR_GAMEOVER_START_X + (8 * 6) + 11,
+                                    SPR_GAMEOVER_START_X + (8 * 7) + 12};
+
+
+INT8 spr_gameover_y[SPR_GAMEOVER_COUNT];
+INT8 spr_gameover_vel[SPR_GAMEOVER_COUNT];
+
+#define GAMEOVER_UPDATE_MASK 0x03 // Only update cursor once every 8 frames
+#define SPR_GAMEOVER_GRAVITY 1
+#define SPR_GAMEOVER_LANDED  127
+
+
+// TODO: OPTIMIZE: This could probably be rewritten more efficiently and with a LUT
+//
+// Drop "G A M E   O V E R" letters with a bounce, starting from left to right
+void board_gameover_animate(void) {
+
+    UINT8 c;
+    UINT8 min_spr = 0; // Used to slowly exit the loop as pieces land
+    UINT8 max_spr = 0; // Used for delay launch left to right
+
+    // Loop exits when all sprites have landed
+    while (min_spr != SPR_GAMEOVER_COUNT) {
+
+
+        // Periodic Update
+        if ((sys_time & GAMEOVER_UPDATE_MASK) == GAMEOVER_UPDATE_MASK) {
+
+            wait_vbl_done();
+
+            // Delay launch from left to right
+            // by adding one more sprite during each animation pass
+            if (max_spr < SPR_GAMEOVER_COUNT)
+                max_spr++;
+
+            for (c = min_spr; c < max_spr; c++) {
+
+                // Apply gravity to velocity
+                // and then velocity to position
+                spr_gameover_vel[c] += SPR_GAMEOVER_GRAVITY;
+                spr_gameover_y[c] += spr_gameover_vel[c];
+
+                // Bounce back if ground was reached
+                if (spr_gameover_y[c] >= SPR_GAMEOVER_MAX_Y) {
+
+                    // Decrease max speed a little on first big bounce
+                    if (spr_gameover_vel[c] > 4)
+                        spr_gameover_vel[c] -= 2;
+
+                    // Reverse direction
+                    // spr_gameover_vel[c] *= -1;
+                    spr_gameover_vel[c] = ~spr_gameover_vel[c] + 1; // i.e. *= -1
+
+                    spr_gameover_y[c] = SPR_GAMEOVER_MAX_Y; // Cap max Y
+
+                    // If sprite landed and stopped moving then de-activate it
+                    if (spr_gameover_vel[c] == 0) {
+                        // Sprites launch one after another from left to right
+                        // and land in the same order. So the landed sprite is
+                        // always the current left-most (min_spr).
+                        // De-activate by excluding it from the loop start
+                        min_spr++;
+                    }
+                }
+
+                move_sprite(SPR_GAMEOVER_START + c,
+                            SPR_GAMEOVER_LUT_X[c],
+                            spr_gameover_y[c]);
+
+            } // for (c = min_spr; c < max_spr; c++) {
+        } // if ((sys_time & 0x03) == 0x03)
+    } // while (min_spr != SPR_GAMEOVER_COUNT)
+}
+
+void board_gameover_animate_reset(void) {
+
+    UINT8 c;
+
+    for (c = 0; c< SPR_GAMEOVER_COUNT; c++) {
+        spr_gameover_y[c] = 0;
+        spr_gameover_vel[c] = 0;  // Start with a little zero velocity
+
+        move_sprite(SPR_GAMEOVER_START + c, 0,0);
+        set_sprite_tile(SPR_GAMEOVER_START + c, SPR_GAMEOVER_CHARS[c]);
+
+        #ifdef GAMEOVER_ANIMATE_RAINBOW_PALS
+            // Use rainbow of pet tile palettes for different letters
+            set_sprite_prop(SPR_GAMEOVER_START + c, c & 0x03);
+        #else
+            // Use solid color palette for all letter
+            set_sprite_prop(SPR_GAMEOVER_START + c, SPR_PAL_PRINT);
+        #endif
+
     }
 }
