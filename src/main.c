@@ -68,6 +68,7 @@ void handle_non_cgb() {
 }
 
 
+
 void vbl_update() {
     vbl_count ++;
 
@@ -86,6 +87,7 @@ void vbl_update() {
         }
     }
 }
+
 
 
 void init_sound(void) {
@@ -169,6 +171,7 @@ void main(void){
                 if (KEY_TICKED(J_START)) {
                     game_state = GAME_OPTIONS_INIT;
                     fade_start(FADE_OUT);
+                    intro_clouds_cleanup();
                 }
                 break;
 

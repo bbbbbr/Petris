@@ -32,7 +32,7 @@
 //#define TILE_COUNT_BG          16
 
 #define TILES_INTRO_START      0
-#define TILE_COUNT_INTRO       69
+#define TILE_COUNT_INTRO       62 // v3  // v2: 53 // v1: 69
 #define TILE_ID_BOARD_BLANK_BG    (TILES_INTRO_START + 3)
 #define TILE_ID_BOARD_BLANK_BG_BW (TILES_INTRO_START + 0)
 #define TILE_ID_BOARD_NEXT_PIECE_PREVIEW_BG  (TILES_INTRO_START + 0)
@@ -76,6 +76,7 @@ extern UINT8 * p_pet_tiles;
 extern const UWORD board_pets_palette[];
 extern const UWORD board_pets_palette_high_contrast[];
 extern const UWORD board_specials_palette[];
+extern const UWORD intro_screen_logo_palette[];
 extern const UWORD intro_screen_palette[];
 
 void print_font_palette_set(UINT8);
