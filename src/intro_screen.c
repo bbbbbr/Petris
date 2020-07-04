@@ -27,18 +27,11 @@
 #include "../res/intro_screen_map.h"
 #include "../res/pet_tiles.h"
 #include "../res/font_tiles.h"
-#include "../res/cloud_tiles.h"
 
-
-
-
-const UWORD clouds_sprite_palette[] = {
-    cloud_tilesCGBPal0c0, cloud_tilesCGBPal0c1, cloud_tilesCGBPal0c2, cloud_tilesCGBPal0c3,
-};
 
 
 #define SPR_PAL_CLOUDS         BG_PAL_4
-#define SPR_TILE_COUNT_CLOUDS  9
+#define SPR_TILE_COUNT_CLOUDS  TILE_COUNT_CLOUDS
 #define SPR_CLOUDS_START       0
 
 #define CLOUD_LEN_1 5
@@ -91,8 +84,7 @@ void intro_clouds_init(void) {
     // Sprites
     SPRITES_8x8;
     fade_set_pal(BG_PAL_4, 1, clouds_sprite_palette, FADE_PAL_SPRITES);
-
-    set_sprite_data(SPR_CLOUDS_START, SPR_TILE_COUNT_CLOUDS, cloud_tiles);
+    set_sprite_data(SPR_CLOUDS_START, SPR_TILE_COUNT_CLOUDS, intro_screen_tiles + TILE_OFFSET_CLOUDS);
 
     // Loop through all cloud sprites
     for(c = SPR_CLOUD_START; c <= SPR_CLOUD_MAX; c++) {

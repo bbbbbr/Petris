@@ -22,6 +22,7 @@
 #include "../res/special_tiles.h"
 #include "../res/intro_screen_tiles.h"
 
+// On Game Board Palettes 0 - 3 are used for the Pet Tile Game Board Pieces
 // Palettes 0..3
 const UWORD board_pets_palette_high_contrast[] = {
     pet_tiles_hicontrastCGBPal0c0, pet_tiles_hicontrastCGBPal0c1, pet_tiles_hicontrastCGBPal0c2, pet_tiles_hicontrastCGBPal0c3, // Pet 0
@@ -36,6 +37,11 @@ const UWORD board_pets_palette[] = {
     pet_tilesCGBPal2c0, pet_tilesCGBPal2c1, pet_tilesCGBPal2c2, pet_tilesCGBPal2c3, // Pet 2
     pet_tilesCGBPal3c0, pet_tilesCGBPal3c1, pet_tilesCGBPal3c2, pet_tilesCGBPal3c3, // Pet 3
 };
+
+const UWORD clouds_sprite_palette[] = {
+    intro_screen_tilesCGBPal7c0, intro_screen_tilesCGBPal7c1, intro_screen_tilesCGBPal7c2, intro_screen_tilesCGBPal7c3,
+};
+
 
 const UWORD board_specials_palette[] = {
     pet_tilesCGBPal4c0, pet_tilesCGBPal4c1, pet_tilesCGBPal4c2, pet_tilesCGBPal4c3, // Specials
