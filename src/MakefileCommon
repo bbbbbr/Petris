@@ -1,5 +1,9 @@
 # Makefile derived from Zal0/ZGB
 
+# Currently uses GBDK x.xx
+# May rely on bug fix patched remove_vbl()
+# Uses patched gbt_player with gbt_pause logic de-inverted and mute fixed
+
 # # Only set GBDK_HOME if it has no env value
 # ifeq ($(GBDK_HOME),)
 # 	GBDK_HOME := $(ZGB_PATH_UNIX)/../env/gbdk
@@ -70,6 +74,9 @@ CFLAGS = $(CDEBUG) -mgbz80 --no-std-crt0  --use-stdout -Dnonbanked=  -I $(GBDK_H
 
 EXTENSION = gb
 ifneq (,$(findstring Color,$(BUILD_TYPE)))
+	# Enable CGB mode
+	# 0x80 for games which support both CGB and monochrome
+    # 0xC0 for games which work on CGBs only
 	LFLAGS_NBANKS += -Wl-yp0x143=0xC0
 	CFLAGS += -DCGB
 	EXTENSION = gbc

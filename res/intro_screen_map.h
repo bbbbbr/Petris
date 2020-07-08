@@ -5,10 +5,10 @@
  Map Include File.
 
  Info:
-   Section       :
+   Section       : 
    Bank          : 0
    Map size      : 20 x 18
-   Tile set      : intro_screen_2bit.gbm.tiles.gbr
+   Tile set      : intro_screen_tiles_3.gbr
    Plane count   : 2 planes (16 bits)
    Plane order   : Planes are continues
    Tile offset   : 0
@@ -23,7 +23,7 @@
 #define intro_screen_mapBank 0
 
 #define intro_screen_map intro_screen_mapPLN0
-extern const unsigned char intro_screen_mapPLN0[];
-extern const unsigned char intro_screen_mapPLN1[];
+extern unsigned char intro_screen_mapPLN0[];
+extern unsigned char intro_screen_mapPLN1[];
 
 /* End of INTRO_SCREEN_MAP.H */

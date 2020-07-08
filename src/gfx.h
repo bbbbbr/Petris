@@ -30,14 +30,19 @@
 
 //#define TILES_BG_START          0
 //#define TILE_COUNT_BG          16
+#define TILE_SIZE_BYTES          16 // (8x8 pixels, 2 bits per pixel)
 
 #define TILES_INTRO_START      0
-#define TILE_COUNT_INTRO       69
+#define TILE_COUNT_INTRO       73 // v3  // v2: 53 // v1: 69
 #define TILE_ID_BOARD_BLANK_BG    (TILES_INTRO_START + 3)
 #define TILE_ID_BOARD_BLANK_BG_BW (TILES_INTRO_START + 0)
 #define TILE_ID_BOARD_NEXT_PIECE_PREVIEW_BG  (TILES_INTRO_START + 0)
-#define TILE_ID_BOARD_UP        (TILES_INTRO_START + 68)
+#define TILE_ID_BOARD_UP        (TILES_INTRO_START + 63)
 
+// Clouds are stored at end of intro tiles
+#define TILE_COUNT_CLOUDS      9
+#define TILE_ID_CLOUDS_START   (TILE_COUNT_INTRO - TILE_COUNT_CLOUDS)
+#define TILE_OFFSET_CLOUDS     (TILE_ID_CLOUDS_START * TILE_SIZE_BYTES)
 
 #define TILE_OFFSET_PET_TAIL_REG 0
 #define TILE_OFFSET_PET_TAIL_WAG 33 // Offset to tail wag alternate tiles
@@ -76,6 +81,8 @@ extern UINT8 * p_pet_tiles;
 extern const UWORD board_pets_palette[];
 extern const UWORD board_pets_palette_high_contrast[];
 extern const UWORD board_specials_palette[];
+extern const UWORD clouds_sprite_palette[];
+extern const UWORD intro_screen_logo_palette[];
 extern const UWORD intro_screen_palette[];
 
 void print_font_palette_set(UINT8);
