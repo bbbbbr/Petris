@@ -47,6 +47,8 @@
 #define CURSOR_BITSHIFT    2
 #define CURSOR_LUT_MASK    0x07 << CURSOR_BITSHIFT // 8 offset entries in the LUT
 
+#define OPTION_TITLE_PRINT_PAL BG_PAL_3
+
 const UINT8 spr_cursor_offset[] = {0,1,2,3,3,2,1,0};
 
 const UINT8 options_screen_attrib_pal = BG_PAL_4;
@@ -184,11 +186,19 @@ void options_screen_setting_update(INT8 dir) {
 // Print an option's name and current value
 void options_screen_setting_draw(INT8 option_id) {
 
+    // Display option Titles using a lighter font (except Start)
+    if (option_id != OPTION_MENU_STARTGAME) {
+        PRINT_PAL(OPTION_TITLE_PRINT_PAL);
+    }
+
     // Print option Title
     // (they have trailing spaces)
     PRINT(OPTION_MENU_X_START,
           options[option_id].menu_y,
           options[option_id].label, 0);
+
+    // Restore default palette
+    PRINT_PAL(PRINT_ATTRIB_PAL_DEFAULT);
 
     // Next print the current setting value, using the
     // print cursor at the end of the previous print
@@ -264,8 +274,11 @@ void options_screen_init(void) {
 
     INT8 c;
 
-    // set_bkg_palette(BG_PAL_4, 4, intro_screen_palette); // UBYTE first_palette, UBYTE nb_palettes, UWORD *rgb_data
+    // Add a lighter font for options
+    fade_set_pal(OPTION_TITLE_PRINT_PAL, 1, option_title_palette, FADE_PAL_BKG);
+    // Upper 4 palettes from intro screen
     fade_set_pal(BG_PAL_4, 4, intro_screen_palette, FADE_PAL_BKG);
+
 
     // TODO: OPTIMIZE: consolidate this? the same tiles are used in all screens so far
     set_bkg_data(TILES_INTRO_START,     TILE_COUNT_INTRO,     intro_screen_tiles);
