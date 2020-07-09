@@ -44,7 +44,6 @@ void vbl_update(void);
 void init_sound(void);
 
 UINT8 vbl_count;
-UINT8 global_frame_count;
 
 #define ASM_HALT \
 __asm \
@@ -118,7 +117,6 @@ void init_interrupts() {
 void init (void) {
     music_mute_frames = 0;
     game_state = GAME_INTRO_INIT;
-    global_frame_count = 0;
 
     // Require CGB, otherwise display a warning (DMG/Pocket)
     handle_non_cgb();
@@ -149,7 +147,6 @@ void main(void){
         if(!vbl_count)
             wait_vbl_done();
         vbl_count = 0;
-        global_frame_count++; // TODO: share this with game_player
 
         // Handle keyboard input
         UPDATE_KEYS();
