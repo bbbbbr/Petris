@@ -59,6 +59,13 @@ const UWORD clouds_sprite_palette[] = {
     intro_screen_tilesCGBPal7c0, intro_screen_tilesCGBPal7c1, intro_screen_tilesCGBPal7c2, intro_screen_tilesCGBPal7c3,
 };
 
+// Mostly the same as default text pal (intro screen .4) except lighter final color
+const UWORD option_title_palette[] = {
+    intro_screen_tilesCGBPal4c0,
+    intro_screen_tilesCGBPal4c1,
+    intro_screen_tilesCGBPal4c2,
+    ((172 >> 3) <<10) | ((145 >> 3) << 5) | (80 >> 3) // Lighter text color (B, G, R)
+};
 
 // Palettes 0..1
 const UWORD intro_screen_logo_palette[] = {

@@ -31,19 +31,11 @@ UINT8 digits_attribs[PRINT_MAX_DIGITS] = {PRINT_ATTRIB_PAL_DEFAULT,
                                           PRINT_ATTRIB_PAL_DEFAULT,
                                           PRINT_ATTRIB_PAL_DEFAULT,
                                           PRINT_ATTRIB_PAL_DEFAULT};
-UINT8 print_tile_cleared_attribs = PRINT_ATTRIB_PAL_DEFAULT;
 
 UINT8 print_x  = 0;
 UINT8 print_y  = 0;
 UINT8 print_target = PRINT_BKG;
-
-
-
-// Set font to use for printing
-void print_font_palette_set(UINT8 pal_num) {
-    print_tile_cleared_attribs = pal_num & PRINT_ATTRIB_PAL_MASK;
-}
-
+UINT8 print_tile_attribs = PRINT_ATTRIB_PAL_DEFAULT;
 
 
 // Render a font digit
@@ -144,7 +136,7 @@ void print_text(const char* txt, unsigned char delay_time){
         if(print_target == PRINT_BKG) {
 
             VBK_REG = 1; // Select BG tile attribute map
-            set_bkg_tiles(0x1F & (print_x), 0x1F & (print_y), 1, 1, &print_tile_cleared_attribs);
+            set_bkg_tiles(0x1F & (print_x), 0x1F & (print_y), 1, 1, &print_tile_attribs);
 
             VBK_REG = 0; // Select BG tile map
             set_bkg_tiles(0x1F & (print_x), 0x1F & (print_y), 1, 1, &c);

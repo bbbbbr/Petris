@@ -15,7 +15,7 @@ void print_num_u16(UINT8, UINT8, UINT16, UINT8);
 #define PRINT_ATTRIB_PAL_MASK    0x03
 #define PRINT_ATTRIB_PAL_DEFAULT 0x04
 
-extern UINT8 print_x, print_y, font_idx, print_target;
+extern UINT8 print_x, print_y, font_idx, print_target, print_tile_attribs;
 
 typedef enum {
     PRINT_BKG,
@@ -23,6 +23,8 @@ typedef enum {
 } PRINT_TARGET;
 
 void print_text(const char* txt, unsigned char delay_time);
+
+#define PRINT_PAL(SELECTED_PAL) print_tile_attribs = SELECTED_PAL
 #define PRINT_POS(X, Y) print_x = X; print_y  = Y
 #define PRINT(X, Y, TXT, DELAY) PRINT_POS(X,Y); print_text(TXT, DELAY)
 #define SET_PRINT_TARGET(TARGET) print_target = TARGET
