@@ -39,8 +39,6 @@
 
 #include "gameplay.h"
 
-extern UINT8 global_frame_count;
-
 UINT8 game_speed_drop_frame_counter;
 UINT8 game_speed_frames_per_drop;
 
@@ -87,7 +85,7 @@ void gameplay_exit_cleanup(void) {
 
 void gameplay_init(void) {
 
-    // Mediocre-initialize the random number generator
+    // Initialize the random number generator
     initarand(DIV_REG);
 
     game_types_init(); // Call before board_gfx_init()
@@ -353,7 +351,7 @@ void gameplay_update(void) {
 void gameplay_gravity_update(void) {
 
     // Move the piece down automatically every N ticks
-    game_speed_drop_frame_counter++; // TODO: possible to merge in with global_frame_count?
+    game_speed_drop_frame_counter++;
 
     if ((game_speed_drop_frame_counter >= game_speed_frames_per_drop)
         || (gameplay_piece_drop_requested)) {
@@ -375,5 +373,5 @@ void gameplay_gravity_update(void) {
 
     // Update any flickering hint sprite elements
     // NOTE: This should happen after player_piece_move()
-    player_hinting_flicker_update(global_frame_count);
+    player_hinting_flicker_update();
 }

@@ -95,8 +95,6 @@ void intro_clouds_init(void) {
 
 }
 
-extern UINT8 global_frame_count;
-
 void intro_clouds_update(void) {
 
     UINT8 c;
@@ -109,15 +107,19 @@ void intro_clouds_update(void) {
 
     // Loop through all cloud sprites
     for(c = 0; c <= SPR_CLOUD_MAX; c++) {
-        // spr_clouds_x[c] -= SPR_CLOUDS_VEL[c];
-        //if ((sys_time & SPR_CLOUDS_VEL[c]) == SPR_CLOUDS_VEL[c]) {
-        if ((SPR_CLOUDS_VEL[c] == 1) || (global_frame_count & SPR_CLOUDS_VEL[c])) {
+
+        // Move each cloud left every X out of Y frames
+        if ((SPR_CLOUDS_VEL[c] == 1) || (sys_time & SPR_CLOUDS_VEL[c])) {
+
             spr_clouds_x[c]--;
-            if (spr_clouds_x[c] == 0) spr_clouds_x[c]+= 168;
+
+            // Wrap cloud sprites around if the reach the left edge
+            if (spr_clouds_x[c] == 0)
+                spr_clouds_x[c]+= 168;
+
             move_sprite(c, spr_clouds_x[c], SPR_CLOUDS_Y[c]);
         }
     }
-
 }
 
 

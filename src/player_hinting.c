@@ -62,11 +62,11 @@ UINT8 hinting_petlength_last_removed;
 
 
 // Apply sprite flicker to special piece hinting and drop hinting if needed
-void player_hinting_flicker_update(UINT8 frame_count) {
+void player_hinting_flicker_update() {
 
-    if ((frame_count & 0x0F) == 0x00)
+    if ((sys_time & 0x0F) == 0x00)
         player_hinting_special_show(TRUE);
-    else if ((frame_count & 0x0F) == 0x08)
+    else if ((sys_time & 0x0F) == 0x08)
         player_hinting_special_show(FALSE);
 }
 
