@@ -81,7 +81,7 @@ const char * options_difficulty[]   = {"EASY  ",
                                        "EXPERT ",
                                        "BEAST "}; // Must match : option_difficulty_entries
 const char * options_visual_hints[] = {"ON ", "OFF"}; // Must match : option_visual_hints_entries
-const char * options_high_contrast[] = {"ON ", "OFF"}; // Must match : option_visual_hints_entries
+const char * options_high_contrast[] = {"OFF", "MED", "HI "}; // Must match : option_visual_hints_entries
 
 const char * options_music[] = {"TWILIGHT",
                                 "CHILL   ",

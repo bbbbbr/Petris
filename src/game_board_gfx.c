@@ -32,7 +32,6 @@
 #include "../res/intro_screen_tiles.h"
 #include "../res/game_board_map.h"
 #include "../res/pet_tiles.h"
-#include "../res/pet_tiles_hicontrast.h"
 #include "../res/special_tiles.h"
 #include "../res/font_tiles.h"
 
@@ -78,11 +77,15 @@ UINT8 tail_anim_alternate = 0;
 
 void board_gfx_init(void) {
 
-    // Use High Contrast tile set if option is enabled
-    if (option_game_high_contrast == OPTION_HIGH_CONTRAST_ON)
-        p_pet_tiles = pet_tiles_hicontrast;
-    else
+    if (option_game_high_contrast == OPTION_HIGH_CONTRAST_OFF) {
         p_pet_tiles = pet_tiles;
+        p_pet_palette = (UWORD *)board_pets_palette;
+    }
+    else { // Implied: OPTION_HIGH_CONTRAST_MED or OPTION_HIGH_CONTRAST_HI
+        pet_tiles_hicontrast_prepare();
+        p_pet_tiles = pet_tiles_hicontrast_ram;
+    }
+
 
     board_gfx_init_background();
     board_gfx_init_sprites();
@@ -96,16 +99,9 @@ void board_gfx_init(void) {
 void board_gfx_init_sprites(void) {
 
     SPRITES_8x8;
-    //set_sprite_palette(BG_PAL_0, 4, board_pets_palette); // UBYTE first_palette, UBYTE nb_palettes, UWORD *rgb_data
-    //set_sprite_palette(BG_PAL_4, 1, board_specials_palette); // UBYTE first_palette, UBYTE nb_palettes, UWORD *rgb_data
 
-    // Use High Contrast tile set if option is enabled
-    if (option_game_high_contrast == OPTION_HIGH_CONTRAST_ON)
-        fade_set_pal(BG_PAL_0, 4, board_pets_palette_high_contrast, FADE_PAL_SPRITES);
-    else
-        fade_set_pal(BG_PAL_0, 4, board_pets_palette, FADE_PAL_SPRITES);
-
-    fade_set_pal(BG_PAL_4, 1, board_specials_palette, FADE_PAL_SPRITES);
+    // Uses High Contrast tile set if option is enabled
+    fade_set_pal(BG_PAL_0, 5, p_pet_palette, FADE_PAL_SPRITES); // Includes Specials palette as #5
 
     // Just load first of 4 pals from this -> for printing font to sprites
     fade_set_pal(BG_PAL_5, 1, intro_screen_palette, FADE_PAL_SPRITES);
@@ -127,12 +123,8 @@ void board_gfx_init_background(void) {
         //set_bkg_palette(BG_PAL_0, 4, board_pets_palette); // UBYTE first_palette, UBYTE nb_palettes, UWORD *rgb_data
         //set_bkg_palette(BG_PAL_4, 4, intro_screen_palette); // UBYTE first_palette, UBYTE nb_palettes, UWORD *rgb_data
 
-        // Use High Contrast tile set if option is enabled
-        if (option_game_high_contrast == OPTION_HIGH_CONTRAST_ON)
-            fade_set_pal(BG_PAL_0, 4, board_pets_palette_high_contrast,   FADE_PAL_BKG);
-        else
-            fade_set_pal(BG_PAL_0, 4, board_pets_palette,   FADE_PAL_BKG);
-
+        // Uses High Contrast tile set if option is enabled
+        fade_set_pal(BG_PAL_0, 4, p_pet_palette,   FADE_PAL_BKG);
         fade_set_pal(BG_PAL_4, 4, intro_screen_palette, FADE_PAL_BKG);
 
         set_bkg_data(TILES_INTRO_START,     TILE_COUNT_INTRO,     intro_screen_tiles);

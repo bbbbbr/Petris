@@ -51,9 +51,9 @@
 #define TILES_PET_START        96 // This requires ^2 alignment
 #define TILE_COUNT_PETS        32
 #define TILE_COUNT_PETBLANK     1
-#define TILE_COUNT_PET_ANIM____NOTLOADED_ONSTART____  8 // These don't get loaded at startup, just used to replace existing tiles
+#define TILE_COUNT_PET_ANIM__NOTLOADED_ONSTART__  8 // These don't get loaded at startup, just used to replace existing tiles
 
-#define TILE_COUNT_PETTOTAL    (TILE_COUNT_PETS + TILE_COUNT_PETBLANK)
+#define TILE_COUNT_PETTOTAL      (TILE_COUNT_PETS + TILE_COUNT_PETBLANK)
 
 
 #define TILES_SPECIAL_START     (TILES_PET_START + TILE_COUNT_PETTOTAL) // Load right after pet tiles
@@ -77,15 +77,21 @@
     #define TILE_COUNT_FONT_NUMS   11 //Tiles in order: 0123456789<blank>
 
 extern UINT8 * p_pet_tiles;
+extern UWORD * p_pet_palette;
+extern UINT8 pet_tiles_hicontrast_ram[];
+
 
 extern const UWORD board_pets_palette[];
 extern const UWORD board_pets_palette_high_contrast[];
-extern const UWORD board_specials_palette[];
+extern const UWORD board_pets_palette_med_contrast[];
+
 extern const UWORD clouds_sprite_palette[];
 extern const UWORD intro_screen_logo_palette[];
 extern const UWORD intro_screen_palette[];
 
+
 void print_font_palette_set(UINT8);
+void pet_tiles_hicontrast_prepare();
 
 #endif // GFX_H
 

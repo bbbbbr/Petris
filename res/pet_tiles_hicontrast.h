@@ -10,7 +10,7 @@
   Compression          : None.
   Counter              : None.
   Tile size            : 8 x 8
-  Tiles                : 0 to 40
+  Tiles                : 0 to 10
 
   Palette colors       : Included.
   SGB Palette          : None.
@@ -51,34 +51,34 @@
 #define pet_tiles_hicontrastSGBPal3c3 5344
 
 /* Gameboy Color palette 0 */
-#define pet_tiles_hicontrastCGBPal0c0 32765
-#define pet_tiles_hicontrastCGBPal0c1 863
-#define pet_tiles_hicontrastCGBPal0c2 863
-#define pet_tiles_hicontrastCGBPal0c3 235
+#define pet_tiles_hicontrastCGBPal0c0 0
+#define pet_tiles_hicontrastCGBPal0c1 32767
+#define pet_tiles_hicontrastCGBPal0c2 32767
+#define pet_tiles_hicontrastCGBPal0c3 0
 
 /* Gameboy Color palette 1 */
-#define pet_tiles_hicontrastCGBPal1c0 32765
-#define pet_tiles_hicontrastCGBPal1c1 32512
-#define pet_tiles_hicontrastCGBPal1c2 32512
-#define pet_tiles_hicontrastCGBPal1c3 11488
+#define pet_tiles_hicontrastCGBPal1c0 0
+#define pet_tiles_hicontrastCGBPal1c1 32224
+#define pet_tiles_hicontrastCGBPal1c2 32224
+#define pet_tiles_hicontrastCGBPal1c3 0
 
 /* Gameboy Color palette 2 */
-#define pet_tiles_hicontrastCGBPal2c0 32765
-#define pet_tiles_hicontrastCGBPal2c1 16361
-#define pet_tiles_hicontrastCGBPal2c2 16233
-#define pet_tiles_hicontrastCGBPal2c3 5472
+#define pet_tiles_hicontrastCGBPal2c0 0
+#define pet_tiles_hicontrastCGBPal2c1 15391
+#define pet_tiles_hicontrastCGBPal2c2 15391
+#define pet_tiles_hicontrastCGBPal2c3 0
 
 /* Gameboy Color palette 3 */
-#define pet_tiles_hicontrastCGBPal3c0 32765
-#define pet_tiles_hicontrastCGBPal3c1 31775
-#define pet_tiles_hicontrastCGBPal3c2 31775
-#define pet_tiles_hicontrastCGBPal3c3 11275
+#define pet_tiles_hicontrastCGBPal3c0 0
+#define pet_tiles_hicontrastCGBPal3c1 928
+#define pet_tiles_hicontrastCGBPal3c2 992
+#define pet_tiles_hicontrastCGBPal3c3 0
 
 /* Gameboy Color palette 4 */
-#define pet_tiles_hicontrastCGBPal4c0 32765
-#define pet_tiles_hicontrastCGBPal4c1 32696
-#define pet_tiles_hicontrastCGBPal4c2 20083
-#define pet_tiles_hicontrastCGBPal4c3 7399
+#define pet_tiles_hicontrastCGBPal4c0 0
+#define pet_tiles_hicontrastCGBPal4c1 10570
+#define pet_tiles_hicontrastCGBPal4c2 21140
+#define pet_tiles_hicontrastCGBPal4c3 32767
 
 /* Gameboy Color palette 5 */
 #define pet_tiles_hicontrastCGBPal5c0 16233

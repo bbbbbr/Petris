@@ -85,8 +85,9 @@
 #define GP_PAL_SNAKE    0x03U
 #define GP_PAL_EMPTY    0x00U // Use first pet palette
 #define GP_PAL_SPECIAL  0x04U
-#define GP_PAL_DROPHINT 0x04U
-#define GP_PAL_CROSS    0x07U
+#define GP_PAL_CLEAR    GP_PAL_SPECIAL
+#define GP_PAL_DROPHINT GP_PAL_SPECIAL
+#define GP_PAL_CROSS    GP_PAL_SPECIAL
 // NOTE: adding pieces here requires an update here: TILE_COUNT_PETTOTAL
 
 
