@@ -75,8 +75,8 @@
 #define intro_screen_tilesCGBPal3c3 3171
 
 /* Gameboy Color palette 4 */
-#define intro_screen_tilesCGBPal4c0 30614
-#define intro_screen_tilesCGBPal4c1 30578
+#define intro_screen_tilesCGBPal4c0 32728
+#define intro_screen_tilesCGBPal4c1 31636
 #define intro_screen_tilesCGBPal4c2 29520
 #define intro_screen_tilesCGBPal4c3 17792
 
