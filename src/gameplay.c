@@ -189,15 +189,10 @@ void gameplay_handle_pause(void) {
 
 
 
-    // TODO: This could probably be done better (interrupts?)
-    // Need a delay for joypad to start returning updated values
-    while (joypad() & J_START); // Wait until Start is released
+    waitpad_lowcpu(J_START, J_NO_BUTTONS); // Wait until Start is released
 
-    delay(100);
-    while (!(joypad() & J_START)); // Wait for start
-
-    delay(100);
-    while (joypad() & J_START); // Wait until Start is released
+    waitpad_lowcpu(J_START, J_START);  // Wait for start and then wait again until it's released
+    waitpad_lowcpu(J_START, J_NO_BUTTONS);
 
     UPDATE_KEYS(); // refresh key state to make sure it's in sync
 

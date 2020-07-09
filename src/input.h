@@ -3,6 +3,7 @@
 #ifndef INPUT_H
 #define INPUT_H
 
+#define J_NO_BUTTONS 0x00
 
 #define UPDATE_KEYS() previous_keys = keys; keys = joypad()
 #define UPDATE_KEY_REPEAT(MASK) if (MASK & previous_keys & keys) { key_repeat_count++; } else { key_repeat_count=0; }
@@ -13,6 +14,8 @@
 #define KEY_RELEASED(K) (!(keys & (K)) && (previous_keys & (K)))
 
 #define ANY_KEY_PRESSED (keys)
+
+void waitpad_lowcpu(UINT8, UINT8);
 
 extern UINT8 keys;
 extern UINT8 previous_keys;
