@@ -90,6 +90,7 @@ extern const UWORD option_title_palette[];
 extern const UWORD intro_screen_logo_palette[];
 extern const UWORD intro_screen_palette[];
 
+extern const const UWORD intro_cat_palette[];
 
 // void print_font_palette_set(UINT8);
 void pet_tiles_hicontrast_prepare();
