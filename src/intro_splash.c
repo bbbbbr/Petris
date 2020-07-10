@@ -32,17 +32,21 @@
 UINT8  effect_y_line;
 #define EFFECT_Y_LINE_MAX  143
 #define EFFECT_START_Y      16
-#define SCX_SCY_XOR_BITS    0xFA
+#define SCX_INVERT_WAVE_BITS   0xFA
 
 void hblank_effect_isr() {
 
     // Scroll in the Y direction by -1 every 1 scanlines
-    // after the effect start line is reached.
-    // This causes scanline at effect_y_line to
+    // after [effect_y_line] is reached.
+    // This makes the scanline at [effect_y_line]
     // stretch-repeat down to the bottom of the screen
 
-    // Then XOR the updated value in SCY to create horizontal
-    //  waves that vary based on the Y scanline
+    // Then XOR the updated value in SCY to create diagonal
+    // waves that vary based on the Y scanline and move
+    // farther left toward the bottom of the screen
+
+    // This doesn't always make timing, which is
+    // ok since that adds some useful visual artifacts
 
     // Don't start until line [effect_y_line]
     if (LY_REG > effect_y_line) {
@@ -50,7 +54,12 @@ void hblank_effect_isr() {
         // Update the scroll Y register to scroll back
         // to and repeat the scanline at [effect_y_line]
         SCY_REG = (effect_y_line - LY_REG);
-        SCX_REG = SCY_REG ^ SCX_SCY_XOR_BITS;
+        SCX_REG = SCY_REG ^ SCX_INVERT_WAVE_BITS;
+
+        // Alternate slide in from Right Edge
+        // that's a little more subtle
+        // if (SCY_REG > (256 - 16))
+        //     SCX_REG = (SCY_REG << 3);
     }
 }
 
