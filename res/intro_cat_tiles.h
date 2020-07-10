@@ -10,7 +10,7 @@
   Compression          : None.
   Counter              : None.
   Tile size            : 8 x 8
-  Tiles                : 0 to 16
+  Tiles                : 0 to 17
 
   Palette colors       : Included.
   SGB Palette          : None.
@@ -28,9 +28,9 @@
 
 /* Super Gameboy palette 0 */
 #define intro_cat_tilesSGBPal0c0 0
-#define intro_cat_tilesSGBPal0c1 25120
-#define intro_cat_tilesSGBPal0c2 6218
-#define intro_cat_tilesSGBPal0c3 15
+#define intro_cat_tilesSGBPal0c1 0
+#define intro_cat_tilesSGBPal0c2 0
+#define intro_cat_tilesSGBPal0c3 0
 
 /* Super Gameboy palette 1 */
 #define intro_cat_tilesSGBPal1c0 6076

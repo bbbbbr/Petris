@@ -26,7 +26,7 @@
 #include "../res/intro_cat_map.h"
 
 #define TILES_SPLASH_START 0
-#define TILE_COUNT_SPLASH  17
+#define TILE_COUNT_SPLASH  18
 
 
 UINT8  effect_y_line;
