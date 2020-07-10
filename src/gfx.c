@@ -65,7 +65,7 @@ const UWORD option_title_palette[] = {
     intro_screen_tilesCGBPal4c0,
     intro_screen_tilesCGBPal4c1,
     intro_screen_tilesCGBPal4c2,
-    ((172 >> 3) <<10) | ((145 >> 3) << 5) | (80 >> 3) // Lighter text color (B, G, R)
+    ((90 >> 3) <<10) | ((90 >> 3) << 5) | (90 >> 3) // Lighter text color (B, G, R)
 };
 
 // Palettes 0..1
@@ -83,7 +83,7 @@ const UWORD intro_screen_palette[] = {
     intro_screen_tilesCGBPal7c0, intro_screen_tilesCGBPal7c1, intro_screen_tilesCGBPal7c2, intro_screen_tilesCGBPal7c3,
 };
 
-// Mostly the same as default text pal (intro screen .4) except lighter final color
+// Intro Splash screen only uses Palette 1
 const UWORD intro_cat_palette[] = {
     intro_cat_tilesCGBPal0c0, intro_cat_tilesCGBPal0c1, intro_cat_tilesCGBPal0c2, intro_cat_tilesCGBPal0c3
 };
