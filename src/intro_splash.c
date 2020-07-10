@@ -28,7 +28,37 @@
 #define TILES_SPLASH_START 0
 #define TILE_COUNT_SPLASH  17
 
+
+UINT8  effect_y_line;
+#define EFFECT_Y_LINE_MAX  143
+#define EFFECT_START_Y      16
+#define SCX_SCY_XOR_BITS    0xFA
+
+void hblank_effect_isr() {
+
+    // Scroll in the Y direction by -1 every 1 scanlines
+    // after the effect start line is reached.
+    // This causes scanline at effect_y_line to
+    // stretch-repeat down to the bottom of the screen
+
+    // Then XOR the updated value in SCY to create horizontal
+    //  waves that vary based on the Y scanline
+
+    // Don't start until line [effect_y_line]
+    if (LY_REG > effect_y_line) {
+
+        // Update the scroll Y register to scroll back
+        // to and repeat the scanline at [effect_y_line]
+        SCY_REG = (effect_y_line - LY_REG);
+        SCX_REG = SCY_REG ^ SCX_SCY_XOR_BITS;
+    }
+}
+
+
 void intro_splash(void) {
+
+    // Scroll so graphics are off-screen to start
+    SCY_REG = 100;
 
     fade_set_pal(BG_PAL_0, 1, intro_cat_palette, FADE_PAL_BKG);
 
@@ -45,9 +75,39 @@ void intro_splash(void) {
     SHOW_BKG;
 
     fade_start(FADE_IN);
-    delay(1700);
-    // waitpad_lowcpu(J_START, J_START);
+
+
+    // ========== START EFFECT ==========
+    //
+    // Slide in diagonal effect
+
+    effect_y_line           = 0 + EFFECT_START_Y;  // Start with effect at bottom of screen
+
+    // Add the hblank ISR and enable it
+    STAT_REG = 0x18;
+    add_LCD(hblank_effect_isr);
+    set_interrupts(VBL_IFLAG | LCD_IFLAG);
+
+    // Repeat until effect_y_line reaches the bottom of the screen
+    while (effect_y_line <= EFFECT_Y_LINE_MAX) {
+        wait_vbl_done();
+
+        // Reset scroll registers to zero
+        // at the start of every frame
+        SCY_REG = 0;
+        SCX_REG = 0;
+
+        // Increment effect position downward by one
+        // scanline every other frame
+        if (sys_time & 0x01)
+            effect_y_line++; // Move effect down screen
+    }
+
+    // Disable HBlank interrupt
+    set_interrupts(VBL_IFLAG);
+
+    // ========== START EFFECT ==========
+
+    delay(1500);
     fade_start(FADE_OUT);
-
-
 }
