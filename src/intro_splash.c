@@ -117,6 +117,6 @@ void intro_splash(void) {
 
     // ========== START EFFECT ==========
 
-    delay(1500);
+    delay(500);
     fade_start(FADE_OUT);
 }
