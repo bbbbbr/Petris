@@ -23,6 +23,7 @@
 #include "../res/pet_tiles_medcontrast.h"
 #include "../res/special_tiles.h"
 #include "../res/intro_screen_tiles.h"
+#include "../res/intro_cat_tiles.h"
 
 // On Game Board Palettes 0 - 3 are used for the Pet Tile Game Board Pieces
 // Palettes 0..3
@@ -81,6 +82,12 @@ const UWORD intro_screen_palette[] = {
     intro_screen_tilesCGBPal6c0, intro_screen_tilesCGBPal6c1, intro_screen_tilesCGBPal6c2, intro_screen_tilesCGBPal6c3, // Ground Bottom
     intro_screen_tilesCGBPal7c0, intro_screen_tilesCGBPal7c1, intro_screen_tilesCGBPal7c2, intro_screen_tilesCGBPal7c3,
 };
+
+// Mostly the same as default text pal (intro screen .4) except lighter final color
+const UWORD intro_cat_palette[] = {
+    intro_cat_tilesCGBPal0c0, intro_cat_tilesCGBPal0c1, intro_cat_tilesCGBPal0c2, intro_cat_tilesCGBPal0c3
+};
+
 
 // Pointer used to load pet tiles/palettes,
 // allows tile sets/palettes to be easily swapped out

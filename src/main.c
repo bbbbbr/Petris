@@ -25,6 +25,7 @@
 // #include "game_board.h"
 // #include "game_board_gfx.h"
 #include "gameplay.h"
+#include "intro_splash.h"
 #include "intro_screen.h"
 #include "options_screen.h"
 
@@ -139,6 +140,8 @@ void init (void) {
 
 void main(void){
     init();
+
+    intro_splash();
 
     while(1) {
         // Wait for vertical blank (end of the frame)
