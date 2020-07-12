@@ -93,9 +93,11 @@ void intro_splash(void) {
     effect_y_line           = 0 + EFFECT_START_Y;  // Start with effect at bottom of screen
 
     // Add the hblank ISR and enable it
+    disable_interrupts();
     STAT_REG = 0x18;
     add_LCD(hblank_effect_isr);
     set_interrupts(VBL_IFLAG | LCD_IFLAG);
+    enable_interrupts();
 
     // Repeat until effect_y_line reaches the bottom of the screen
     while (effect_y_line <= EFFECT_Y_LINE_MAX) {
