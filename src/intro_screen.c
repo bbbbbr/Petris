@@ -91,6 +91,9 @@ void intro_clouds_init(void) {
 
         set_sprite_tile(c, SPR_CLOUDS_TILES[c]);
         set_sprite_prop(c, SPR_PAL_CLOUDS);
+
+        // Ensure sprite is off-screen to start
+        move_sprite(c, 0,0);
     }
 
 }
