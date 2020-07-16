@@ -4,8 +4,8 @@
 #include "fade.h"
 
 
-#define PAL_FADE_WHITE
-// #define PAL_FADE_BLACK
+// #define PAL_FADE_WHITE
+#define PAL_FADE_BLACK
 // #define PAL_FADE_NONE
 
 #define FADE_IN_START 5
