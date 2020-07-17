@@ -237,16 +237,92 @@ const UINT8 SPR_GAMEOVER_LUT_X[] = {SPR_GAMEOVER_START_X,
                                     SPR_GAMEOVER_START_X + (8 * 7) + 12};
 
 
-INT8 spr_gameover_y[SPR_GAMEOVER_COUNT];
-INT8 spr_gameover_vel[SPR_GAMEOVER_COUNT];
+// Pre-calculated bounce LUT
+// For calculation ref commented out version of board_gameover_animate() below
+const INT8 SPR_GAMEOVER_LUT_Y[] = {
+    0x01, 0x03, 0x06, 0x0A, 0x0F, 0x15, 0x1C, 0x24,
+    0x2D, 0x37, 0x38, 0x31, 0x2B, 0x26, 0x22, 0x1F,
+    0x1D, 0x1C, 0x1C, 0x1D, 0x1F, 0x22, 0x26, 0x2B,
+    0x31, 0x38, 0x40, 0x3B, 0x37, 0x34, 0x32, 0x31,
+    0x31, 0x32, 0x34, 0x37, 0x3B, 0x40, 0x3E, 0x3D,
+    0x3D, 0x3E, 0x40, 0x3F, 0x3F, 0x40, 0x40};
+
+#define SPR_GAMEOVER_LUT_Y_MAX (ARRAY_LEN(SPR_GAMEOVER_LUT_Y) - 1)
 
 #define GAMEOVER_UPDATE_MASK 0x03 // Only update cursor once every 8 frames
 #define SPR_GAMEOVER_GRAVITY 1
 #define SPR_GAMEOVER_LANDED  127
 
+UINT8 spr_gameover_y_idx[SPR_GAMEOVER_COUNT];
 
-// TODO: OPTIMIZE: This could probably be rewritten more efficiently and with a LUT
-//
+
+// Drop "G A M E   O V E R" letters with a bounce, starting from left to right
+void board_gameover_animate(void) {
+
+    UINT8 c;
+    UINT8 min_spr = 0; // Used to slowly exit the loop as pieces land
+    UINT8 max_spr = 0; // Used for delay launch left to right
+
+    // Loop exits when all sprites have landed
+    while (min_spr != SPR_GAMEOVER_COUNT) {
+
+        // Periodic Update
+        if ((sys_time & GAMEOVER_UPDATE_MASK) == GAMEOVER_UPDATE_MASK) {
+
+            wait_vbl_done();
+
+            // Delay launch from left to right
+            // by adding one more sprite during each animation pass
+            if (max_spr < SPR_GAMEOVER_COUNT)
+                max_spr++;
+
+            for (c = min_spr; c < max_spr; c++) {
+
+                // Move sprite to next Y LUT position
+                spr_gameover_y_idx[c]++;
+
+                // If it's at the end of the LUT then it's landing
+                // is complete. Increment the starting sprite past it
+                // so that on the next iteration it's excluded
+                if (spr_gameover_y_idx[c] >= SPR_GAMEOVER_LUT_Y_MAX) {
+                    min_spr++;
+                }
+
+                move_sprite(SPR_GAMEOVER_START + c,
+                            SPR_GAMEOVER_LUT_X[c],
+                            SPR_GAMEOVER_LUT_Y[ spr_gameover_y_idx[c] ]);
+
+            } // for (c = min_spr; c < max_spr; c++) {
+        } // if ((sys_time & 0x03) == 0x03)
+    } // while (min_spr != SPR_GAMEOVER_COUNT)
+}
+
+
+void board_gameover_animate_reset(void) {
+
+    UINT8 c;
+
+    for (c = 0; c< SPR_GAMEOVER_COUNT; c++) {
+        spr_gameover_y_idx[c] = 0; // Reset Y LUT position
+
+        move_sprite(SPR_GAMEOVER_START + c, 0,0);
+        set_sprite_tile(SPR_GAMEOVER_START + c, SPR_GAMEOVER_CHARS[c]);
+
+        #ifdef GAMEOVER_ANIMATE_RAINBOW_PALS
+            // Use rainbow of pet tile palettes for different letters
+            set_sprite_prop(SPR_GAMEOVER_START + c, c & 0x03);
+        #else
+            // Use solid color palette for all letter
+            set_sprite_prop(SPR_GAMEOVER_START + c, SPR_PAL_PRINT);
+        #endif
+
+    }
+}
+
+
+
+// Non-LUT version for reference
+/*
 // Drop "G A M E   O V E R" letters with a bounce, starting from left to right
 void board_gameover_animate(void) {
 
@@ -306,25 +382,4 @@ void board_gameover_animate(void) {
         } // if ((sys_time & 0x03) == 0x03)
     } // while (min_spr != SPR_GAMEOVER_COUNT)
 }
-
-void board_gameover_animate_reset(void) {
-
-    UINT8 c;
-
-    for (c = 0; c< SPR_GAMEOVER_COUNT; c++) {
-        spr_gameover_y[c] = 0;
-        spr_gameover_vel[c] = 0;  // Start with a little zero velocity
-
-        move_sprite(SPR_GAMEOVER_START + c, 0,0);
-        set_sprite_tile(SPR_GAMEOVER_START + c, SPR_GAMEOVER_CHARS[c]);
-
-        #ifdef GAMEOVER_ANIMATE_RAINBOW_PALS
-            // Use rainbow of pet tile palettes for different letters
-            set_sprite_prop(SPR_GAMEOVER_START + c, c & 0x03);
-        #else
-            // Use solid color palette for all letter
-            set_sprite_prop(SPR_GAMEOVER_START + c, SPR_PAL_PRINT);
-        #endif
-
-    }
-}
+*/
