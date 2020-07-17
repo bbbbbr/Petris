@@ -23,7 +23,7 @@
 #include "fade.h"
 
 // #include "game_board.h"
-// #include "game_board_gfx.h"
+#include "game_board_gfx.h"
 #include "gameplay.h"
 #include "intro_splash.h"
 #include "intro_screen.h"
@@ -203,10 +203,10 @@ void main(void){
 
 
             case GAME_ENDED:
-                // TODO: add some animation / sounds for game ended
                 MusicStop();
                 PLAY_SOUND_GAME_OVER;
-                gameplay_handle_gameover_screen();
+                // gameplay_handle_gameover_screen();
+                board_gameover_animate();
 
                 game_state = GAME_OVER_SCREEN;
                 break;

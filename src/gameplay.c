@@ -60,11 +60,12 @@ void game_speed_frames_per_drop_set(UINT8 new_val) {
 }
 
 
-
-void gameplay_handle_gameover_screen(void) {
-
-    board_gameover_animate();
-}
+// Turning this off for now since it's just a pass-through
+// void gameplay_handle_gameover_screen(void) {
+//
+//     // OPTIONAL:
+//     board_gameover_animate();
+// }
 
 
 
@@ -72,7 +73,7 @@ void gameplay_exit_cleanup(void) {
 
     fade_start(FADE_OUT);
     HIDE_SPRITES;
-    // TODO: CLEANUP: hide all extra player sprites
+
     player_piece_update_xy(PLAYER_PIECE_HIDE);
     game_piece_next_show(FALSE);
     player_hinting_special_show(FALSE);
