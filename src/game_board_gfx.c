@@ -266,10 +266,11 @@ void board_gameover_animate(void) {
     // Loop exits when all sprites have landed
     while (min_spr != SPR_GAMEOVER_COUNT) {
 
+        // Add some delay and go easy on the processor
+        wait_vbl_done();
+
         // Periodic Update
         if ((sys_time & GAMEOVER_UPDATE_MASK) == GAMEOVER_UPDATE_MASK) {
-
-            wait_vbl_done();
 
             // Delay launch from left to right
             // by adding one more sprite during each animation pass
