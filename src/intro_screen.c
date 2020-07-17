@@ -143,10 +143,6 @@ void intro_screen_init(void) {
 
     intro_clouds_init();
 
-    // set_bkg_palette(BG_PAL_4, 4, intro_screen_palette); // UBYTE first_palette, UBYTE nb_palettes, UWORD *rgb_data
-    fade_set_pal(BG_PAL_0, 3, intro_screen_logo_palette, FADE_PAL_BKG);
-    fade_set_pal(BG_PAL_4, 3, intro_screen_palette, FADE_PAL_BKG);
-
     set_bkg_data(TILES_INTRO_START,     TILE_COUNT_INTRO,     intro_screen_tiles);
     set_bkg_data(TILES_FONT_START,      TILE_COUNT_FONT,      font_tiles);
     set_bkg_data(TILES_PET_START,       TILE_COUNT_PETTOTAL,  pet_tiles);
@@ -160,6 +156,10 @@ void intro_screen_init(void) {
     // Load BG tile map
     VBK_REG = 0;
     set_bkg_tiles(0, 0, 20, 18, intro_screen_mapPLN0);
+
+    // set_bkg_palette(BG_PAL_4, 4, intro_screen_palette); // UBYTE first_palette, UBYTE nb_palettes, UWORD *rgb_data
+    fade_set_pal(BG_PAL_0, 3, intro_screen_logo_palette, FADE_PAL_BKG);
+    fade_set_pal(BG_PAL_4, 3, intro_screen_palette, FADE_PAL_BKG);
 
     SHOW_BKG;
     SHOW_SPRITES;
