@@ -63,6 +63,8 @@ void fade_start(INT8 fade_dir) {
     UWORD * p_mod_sp;
     UWORD fade_mask;
 
+    // disable_interrupts();
+
     i = (fade_dir == FADE_OUT) ? FADE_OUT_START : FADE_IN_START; // Set loop start (5 for fade in, 0 for fade out)
 
     while ((i != -1) && (i != 6)) {
@@ -109,21 +111,31 @@ void fade_start(INT8 fade_dir) {
         }
         // Apply current step of faded palette colors
 
-        // To avoid flickering:
-        // Wait until VBlank (mode == 1) and then write palette in one big chunk
-        while((STAT_REG & 0x03) != 0x01);
-        set_bkg_palette(0, 8, ModPalBg);
 
-        while((STAT_REG & 0x03) != 0x01);
-        set_sprite_palette(0, 8, ModPalSprite);
+        // TODO: FIXME: this seems like it shouldn't be needed, but
+        // there is occasional glitching on load of intro screen cloud tiles
+        __critical {
 
-        // Wait a little while before performing the next step
-        #ifdef CPU_FAST_ENABLED
-            delay(70);
-        #else
-            delay(35);
-        #endif
+            // To avoid flickering:
+            // Wait until VBlank (mode == 1) and then write palette in one big chunk
+            // Doing the opposite and gating with wait_vbl_done() yields mild top-of-screen flicker
+            while((STAT_REG & 0x03) != 0x01);
+            set_bkg_palette(0, 8, ModPalBg);
 
-        i += fade_dir;
+            while((STAT_REG & 0x03) != 0x01);
+            set_sprite_palette(0, 8, ModPalSprite);
+
+            // Wait a little while before performing the next step
+            #ifdef CPU_FAST_ENABLED
+                delay(70);
+            #else
+                delay(40);
+            #endif
+
+            i += fade_dir;
+        }
     }
+
+    // enable_interrupts();
+
 }
