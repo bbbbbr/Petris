@@ -382,6 +382,9 @@ void game_board_fill_random_tails(UINT8 tail_count) {
                 board_set_tile_xy((INT8)x, (INT8)y,
                                   piece, attrib,
                                   player_piece_connect_get(piece, GP_ROTATE_270));
+
+                PLAY_SOUND_SQUEEK;
+                delay(150);
             }
         }
     }
