@@ -30,7 +30,7 @@ Other Options:
 
 ===========
 Music Credits:
-* .....
+ * Krümel (crumb) / GB Studio Community Assets - https://github.com/DeerTears/GB-Studio-Community-Assets
 
 Tools used
  * GBDK - http://gbdk.sourceforge.net/
@@ -38,6 +38,7 @@ Tools used
  * Game Boy Tile Designer - http://www.devrs.com/gb/hmgd/gbtd.html
  * GIMP TileMap GB - https://github.com/bbbbbr/gimp-tilemap
  * Game Boy Map Builder - http://www.devrs.com/gb/hmgd/gbmb.html
- * A little code from ZGB - https://github.com/Zal0/ZGB
  * GBT Player - https://github.com/AntonioND/gbt-player
- * Music from GB Studio Community Assets (krümel/crumb) - https://github.com/DeerTears/GB-Studio-Community-Assets
+ * A little code from ZGB - https://github.com/Zal0/ZGB
+ * Some GBDK patches by Toxa - https://github.com/untoxa
+
