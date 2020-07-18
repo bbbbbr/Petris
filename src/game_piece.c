@@ -45,9 +45,11 @@ void game_piece_next_generate(void) {
     } else {
         // Otherwise generate a new piece
 
-        // TODO: IMPROVE NEW PIECE SELECTION
-        // For now, choose single random pet tile (using div register)
-        game_piece_next = ((UINT8)DIV_REG & 0x1F);
+        // OPTIONAL: IMPROVE NEW PIECE SELECTION
+        // For now, choose single random pet tile
+        // game_piece_next = ((UINT8)DIV_REG & 0x1F);
+        game_piece_next = ((UINT8)rand() & 0x1F);
+
         // game_piece_next = ((GP_PET_DOG  << GP_PET_UPSHIFT) |
         //                    (GP_SEG_TAIL << GP_SEG_UPSHIFT) |
         //                     GP_ROT_HORZ << GP_ROT_UPSHIFT);// + TILES_PET_START;

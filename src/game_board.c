@@ -14,6 +14,7 @@
 #include <gb/gb.h>
 #include <gb/cgb.h> // Include cgb functions
 #include <stdlib.h>
+#include <rand.h>
 
 #include "audio_common.h"
 #include "common.h"
@@ -354,9 +355,10 @@ void game_board_fill_random_tails(UINT8 tail_count) {
 
         // Choose X and Y coordinates randomly
         // and within board bounds
-        x = (UINT8)DIV_REG % (BRD_WIDTH + 1);
-
-        y = ((UINT8)DIV_REG % (BRD_HEIGHT - BRD_MIN_Y_RANDOM_FILL + 1)) + BRD_MIN_Y_RANDOM_FILL ;
+        // x = (UINT8)DIV_REG % (BRD_WIDTH + 1);
+        // y = ((UINT8)DIV_REG % (BRD_HEIGHT - BRD_MIN_Y_RANDOM_FILL + 1)) + BRD_MIN_Y_RANDOM_FILL ;
+        x = (UINT8)rand() % (BRD_WIDTH + 1);
+        y = ((UINT8)rand() % (BRD_HEIGHT - BRD_MIN_Y_RANDOM_FILL + 1)) + BRD_MIN_Y_RANDOM_FILL ;
 
         // Loop until the randomly selected spot is free
         if (board_piece_get_xy(x, y, &piece, &connect)) {
@@ -367,7 +369,8 @@ void game_board_fill_random_tails(UINT8 tail_count) {
                 // once one is successfully placed on the board
                 tail_count--;
 
-                piece = (((UINT8)DIV_REG & GP_PET_MASK_NOSHIFT) << GP_PET_UPSHIFT) |
+                // piece = (((UINT8)DIV_REG & GP_PET_MASK_NOSHIFT) << GP_PET_UPSHIFT) |
+                piece = (((UINT8)rand() & GP_PET_MASK_NOSHIFT) << GP_PET_UPSHIFT) |
                         (GP_SEG_TAIL << GP_SEG_UPSHIFT) |
                         (GP_ROT_VERT << GP_ROT_UPSHIFT);
 
