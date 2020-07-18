@@ -188,10 +188,10 @@ void gameplay_handle_pause(void) {
 
 
 
-    waitpad_lowcpu(J_START, J_NO_BUTTONS); // Wait until Start is released
+    waitpad_lowcpu(J_START, J_WAIT_ALL_RELEASED); // Wait until Start is released
 
-    waitpad_lowcpu(J_START, J_START);  // Wait for start and then wait again until it's released
-    waitpad_lowcpu(J_START, J_NO_BUTTONS);
+    waitpad_lowcpu(J_START, J_WAIT_ANY_PRESSED);  // Wait for start and then wait again until it's released
+    waitpad_lowcpu(J_START, J_WAIT_ALL_RELEASED);
 
     UPDATE_KEYS(); // refresh key state to make sure it's in sync
 

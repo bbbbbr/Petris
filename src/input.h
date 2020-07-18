@@ -3,7 +3,8 @@
 #ifndef INPUT_H
 #define INPUT_H
 
-#define J_NO_BUTTONS 0x00
+#define J_WAIT_ALL_RELEASED 0xFF
+#define J_WAIT_ANY_PRESSED  0x00
 
 #define UPDATE_KEYS() previous_keys = keys; keys = joypad()
 #define UPDATE_KEY_REPEAT(MASK) if (MASK & previous_keys & keys) { key_repeat_count++; } else { key_repeat_count=0; }
