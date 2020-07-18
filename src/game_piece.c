@@ -47,8 +47,9 @@ void game_piece_next_generate(void) {
 
         // OPTIONAL: IMPROVE NEW PIECE SELECTION
         // For now, choose single random pet tile
+        // Use rand() ^ DIV_REG to add more variety to the random number sequence
         // game_piece_next = ((UINT8)DIV_REG & 0x1F);
-        game_piece_next = ((UINT8)rand() & 0x1F);
+        game_piece_next = ((UINT8)(rand() ^ DIV_REG) & 0x1F);
 
         // game_piece_next = ((GP_PET_DOG  << GP_PET_UPSHIFT) |
         //                    (GP_SEG_TAIL << GP_SEG_UPSHIFT) |
