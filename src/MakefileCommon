@@ -1,8 +1,14 @@
 # Makefile derived from Zal0/ZGB
 
-# Currently uses GBDK x.xx
+# Currently uses GBDK 2.96(?)
+# SDCC from linux package manager
 # May rely on bug fix patched remove_vbl()
 # Uses patched gbt_player with gbt_pause logic de-inverted and mute fixed
+# Uses patched cgb.s to improve cgb palette write speed
+# Uses patched crt0.s with VRAM exception fixes for startup and interrupt exit
+# See:
+# https://github.com/Zal0/gbdk-2020/commit/f24d34bb0037dc2f1aad5dfd747d7b8353386e21
+# https://github.com/Zal0/gbdk-2020/commit/69c510d4058d316c7b5733f6d39d3007d6f04113
 
 # # Only set GBDK_HOME if it has no env value
 # ifeq ($(GBDK_HOME),)
