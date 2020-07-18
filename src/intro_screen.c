@@ -52,7 +52,7 @@ const UINT8 SPR_CLOUDS_LEN[]   = {CLOUD_LEN_1,
 
 // Convert to 2D arrays if there is enough processor time left
 #define SPR_CLOUD_START 0
-#define SPR_CLOUD_COUNT 3
+
       UINT8 spr_clouds_x[]     = {20,28,36,44,52, // Start x is first in row, + 8 for each tile
                                   80,88,96,
                                   120,128,136,144,
