@@ -76,6 +76,8 @@ void vbl_update() {
     // if (game_state == GAME_PLAYING)
     //     board_gfx_tail_animate();
 
+    // OPTIONAL: Now that crt0.s is patched for ISR related VRAM exceptions,
+    // this could be moved back to the TIM interrupt
     update_gbt_music();
 
     if(music_mute_frames != 0) {
