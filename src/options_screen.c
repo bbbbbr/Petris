@@ -104,9 +104,9 @@ typedef struct opt_item {
 
 // See above for meaning of each element
 const option_item options[] = {
-        {  5,"TYPE: ",         (INT8)ARRAY_LEN(options_type),         &options_type[0]        , &option_game_type},
-        {  7,"LEVEL: ",        (INT8)ARRAY_LEN(options_difficulty),   &options_difficulty[0]  , &option_game_difficulty},
-        {  9,"MUSIC: ",        (INT8)ARRAY_LEN(options_music),        &options_music[0],        &option_game_music},
+        {  5,"TYPE :",         (INT8)ARRAY_LEN(options_type),         &options_type[0]        , &option_game_type},
+        {  7,"LEVEL:",        (INT8)ARRAY_LEN(options_difficulty),   &options_difficulty[0]  , &option_game_difficulty},
+        {  9,"MUSIC:",        (INT8)ARRAY_LEN(options_music),        &options_music[0],        &option_game_music},
         { 12,"   START GAME ", (INT8)ARRAY_LEN(options_visual_hints), NULL, NULL},
         { 15,"VISUAL HINTS: ", (INT8)ARRAY_LEN(options_visual_hints), &options_visual_hints[0], &option_game_visual_hints},
         { 16,"HI CONTRAST : ", (INT8)ARRAY_LEN(options_high_contrast), &options_high_contrast[0], &option_game_high_contrast},
