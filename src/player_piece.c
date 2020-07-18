@@ -157,7 +157,6 @@ void player_piece_set_on_board(void) {
  }
 
 
-
 void player_piece_rotate_apply(UINT8 dir) {
 
     // Rotate sound
@@ -219,10 +218,6 @@ UINT8 player_piece_move(INT8 dir_x, INT8 dir_y) {
 }
 
 
-// TODO: move to player_piece.c
-// TODO: change up allow preview update : ??
-//       -> Then how to handle that it updates the local global vars for player_piece and player_attrib?
-// void player_piece_update_gfx(UINT8 sprite_id, UINT8 t_player_piece, UINT8 t_player_rotate) {
 void player_piece_update_gfx() {
 
     if (player_piece & GP_SPECIAL_MASK) {
@@ -252,4 +247,20 @@ void player_piece_update_gfx() {
     // set_sprite_tile(SPR_PLAYER, (player_piece & GP_PET_BITS_MASK));
     set_sprite_tile(SPR_PLAYER, player_piece);
     set_sprite_prop(SPR_PLAYER, player_attrib);
+}
+
+
+// Cycle through Pet types
+void player_piece_cycle_pet_types(void) {
+
+    if (!(player_piece & GP_SPECIAL_MASK)) {
+
+        PLAY_SOUND_SQUEEK;
+
+        // Extract, increment pet type bits only then re-apply them
+        player_piece = (player_piece & ~GP_PET_MASK)
+                       | ((((player_piece >> GP_PET_UPSHIFT) + 1) << GP_PET_UPSHIFT) & GP_PET_MASK);
+
+        player_piece_update_gfx();
+    }
 }

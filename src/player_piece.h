@@ -16,5 +16,6 @@ UINT8 player_piece_move(INT8, INT8);
 void  player_piece_update_gfx(void);
 void  player_piece_rotate_apply(UINT8);
 
+void player_piece_cycle_pet_types(void);
 
 #endif // PLAYER_PIECE_H
