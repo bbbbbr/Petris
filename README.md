@@ -12,7 +12,8 @@ You can [download the game here](/bin/PETRIS.gbc) or visit the [itch.io page](ht
 Run it either in an emulator such as [BGB](http://bgb.bircd.org/) or on a Game Boy Color if you have a flashable cartridge.
 
 
-![Petris game in Long pet game type](/info/Petris_LongPet.png)
+![Petris game in Long Pet game type](/info/Petris_LongPet.png)
+![Petris game in Tail Cleanup game type](/info/petris_tail_cleanup.gif)
 
 Several game play types to choose from:
 * Marathon
