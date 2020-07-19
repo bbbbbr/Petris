@@ -7,7 +7,7 @@ Build your favorite pets in all shapes and sizes, keep ahead of dropping pieces 
 
 Petris is a new home-brew 2D puzzle game built for the Game Boy Color (CGB) and will run on original hardware.
 
-You can [download the game here](/bin/PETRIS.gbc) or visit the [itch.io page](https://bbbbbr.itch.io/petris).
+You can [download the game here](/rom/Petris.gbc) or visit the [itch.io page](https://bbbbbr.itch.io/petris).
 
 Run it either in an emulator such as [BGB](http://bgb.bircd.org/) or on a Game Boy Color if you have a flashable cartridge.
 
