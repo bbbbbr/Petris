@@ -1,0 +1,6 @@
+# All of these have been improved/fixed in gbdk-2020
+
+# Uses patched crt0.s with fixed remove_vbl()
+# Uses patched cgb.s to improve cgb palette write speed
+# Uses patched crt0.s with VRAM exception fixes for startup and interrupt exit
+
