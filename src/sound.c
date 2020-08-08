@@ -6,6 +6,7 @@
 
 #include "gbt_player.h"
 #include "options.h"
+#include "unapack.h"
 
 #define MUSIC_NONE 0
 UINT8 music_mute_frames;
@@ -14,7 +15,20 @@ void * last_music = MUSIC_NONE;
 const UINT8 FX_REG_SIZES[] = {5, 4, 5, 4, 3};
 const UINT16 FX_ADDRESS[] = {0xFF10, 0xFF16, 0xFF1A, 0xFF20, 0xFF24};
 
-// extern UINT8 music_mute_frames;
+// uncompressed sizes of audio tracks
+//
+// villainsofhiphop.b0.mod,CODE,3045,
+// boss_fight.b0.mod,CODE,1217,
+// freeost_charselect.b0.mod,CODE,2411,
+// twilight_drive.b0.mod,CODE,2998,
+//
+// Arrays for storing the decompressed audio output in non-banked RAM
+#define MUSIC_LEN_BYTES_MAX      3100 // WARNING: MUST UPDATE if uncompressed audio size increases
+#define MUSIC_SEQ_ADDR_COUNT_MAX 20
+UINT8 music_decompressed[MUSIC_LEN_BYTES_MAX];
+unsigned char * music_seq_addrs[MUSIC_SEQ_ADDR_COUNT_MAX];
+
+
 
 void PlayFx(SOUND_CHANNEL channel, UINT8 mute_frames, ...) {
 	UINT8 i;
@@ -48,14 +62,50 @@ void MusicStop(void) {
 }
 
 
-// Removed banking support
 // void MusicPlay(const unsigned char * music[], unsigned char bank, unsigned char loop) {
-void MusicPlay(const unsigned char * music[], unsigned char loop) {
 
-    if (music != last_music) {
-        last_music = music;
-        // gbt_play(music, bank, 7);
-        gbt_play(music, 0, 7); // Force bank to 0, no bank
+// Removed banking support
+// void MusicPlay(const unsigned char * music[], unsigned char loop) {
+//
+//     if (music != last_music) {
+//         last_music = music;
+//         // gbt_play(music, bank, 7);
+//         gbt_play(music, 0, 7); // Force bank to 0, no bank
+//         gbt_loop(loop);
+//         // REFRESH_BANK; // WARNING: re-enable if using banking with an MBC
+//     }
+// }
+
+// Added decompression support
+// Requires modified mod2gbt which produces a single large array and list of offsets
+void MusicPlay(const unsigned char music_compressed[], const unsigned int music_seq_offset[], unsigned char loop) {
+
+    UINT8 c;
+
+    if (music_compressed != last_music) {
+
+        // Pause music before starting decompression so that
+        gbt_stop();
+
+        // Decompress music
+        UNAPACK(music_compressed, music_decompressed);
+
+        // Rewrite sequence table
+        for (c = 0; c < MUSIC_SEQ_ADDR_COUNT_MAX; c++) {
+
+            // If address offset is end-of-sequence indicator
+            // rewrite it to 0x0000 that gbt_player expects
+            // and break out of the loop
+            if (music_seq_offset[c] == 0xFFFF) {
+                music_seq_addrs[c] = 0x0000;
+                break;
+            } else {
+                music_seq_addrs[c] = music_decompressed + music_seq_offset[c];
+            }
+        }
+
+        last_music = (void *) music_compressed;
+        gbt_play(music_seq_addrs, 0, 7); // Force bank to 0, no bank
         gbt_loop(loop);
         // REFRESH_BANK; // WARNING: re-enable if using banking with an MBC
     }
@@ -65,11 +115,11 @@ void MusicPlay(const unsigned char * music[], unsigned char loop) {
 void MusicUpdateStatus() {
 
     if (option_game_music == OPTION_MUSIC_TWILIGHT)
-        MusicPlay(twilight_drive_mod_Data, GBT_LOOP_YES);
+        MusicPlay(twilight_drive_mod, twilight_drive_mod_Data, GBT_LOOP_YES);
     else if (option_game_music == OPTION_MUSIC_UPBEAT)
-        MusicPlay(freeost_charselect_mod_Data, GBT_LOOP_YES);
-    else if (option_game_music == OPTION_MUSIC_CHILL)
-        MusicPlay(villainsofhiphop_mod_Data, GBT_LOOP_YES);
+        MusicPlay(freeost_charselect_mod, freeost_charselect_mod_Data, GBT_LOOP_YES);
+   else if (option_game_music == OPTION_MUSIC_CHILL)
+       MusicPlay(villainsofhiphop_mod, villainsofhiphop_mod_Data, GBT_LOOP_YES);
     else
         MusicStop();
 }

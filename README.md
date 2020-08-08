@@ -39,7 +39,8 @@ Tools used
  * Game Boy Tile Designer - http://www.devrs.com/gb/hmgd/gbtd.html
  * GIMP TileMap GB - https://github.com/bbbbbr/gimp-tilemap
  * Game Boy Map Builder - http://www.devrs.com/gb/hmgd/gbmb.html
- * GBT Player - https://github.com/AntonioND/gbt-player
+ * GBT Player (modified to work with compression) - https://github.com/AntonioND/gbt-player
  * A little code from ZGB - https://github.com/Zal0/ZGB
- * Some GBDK patches by Toxa - https://github.com/untoxa
-
+ * Some GBDK patches by Toxa  - https://github.com/untoxa
+ * UnaPACK aPack decompression by Toxa  - https://github.com/untoxa
+ * apultra aPack compression - https://github.com/emmanuel-marty/apultra

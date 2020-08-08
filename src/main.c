@@ -162,7 +162,7 @@ void main(void){
             case GAME_INTRO_INIT:
 
                 intro_screen_init();
-                MusicPlay(boss_fight_mod_Data, GBT_LOOP_YES);
+                MusicPlay(boss_fight_mod, boss_fight_mod_Data, GBT_LOOP_YES);
                 game_state = GAME_INTRO;
                 break;
 

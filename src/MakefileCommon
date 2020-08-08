@@ -1,6 +1,6 @@
 # Makefile derived from Zal0/ZGB
 
-# Currently uses GBDK 2.96(?)
+# Currently uses GBDK 2.96
 # SDCC from linux package manager
 # May rely on bug fix patched remove_vbl()
 # Uses patched gbt_player with gbt_pause logic de-inverted and mute fixed
@@ -19,8 +19,8 @@
 #--- Default build will be release. Can be overidden passing BUILD_TYPE = debug as a parameter
 # ex: Release, Debug, ReleaseColor, DebugColor
 
-BUILD_TYPE = ReleaseColor
-# BUILD_TYPE = DebugColor
+# BUILD_TYPE = ReleaseColor
+BUILD_TYPE = DebugColor
 CGB = yes
 
 ifneq (,$(findstring Release,$(BUILD_TYPE)))
@@ -151,8 +151,22 @@ $(OBJDIR_RES)/%.o: $(PATH_PREFIX)res/%.c
 
 $(OBJDIR_RES)/%.mod.o: $(PATH_PREFIX)res/music/%.mod
 	@echo compiling music: $<
-	# $(MOD2GBT) $< $(basename $(basename $(notdir $<)))_mod -c $(subst .b,,$(suffix $(<:%.mod=%))) > /dev/null
-	$(MOD2GBT) $< $(basename $(basename $(notdir $<)))_mod $(subst .b,,$(suffix $(<:%.mod=%))) > /dev/null
+# [song] [label] [bank]
+# non-single array version: (not compatible with compression implementation)
+
+# $(MOD2GBT) $< $(basename $(basename $(notdir $<)))_mod $(subst .b,,$(suffix $(<:%.mod=%))) > /dev/null
+# produces: output.c and associated output.bin
+	$(MOD2GBT_SINGLEARRAY) $< $(basename $(basename $(notdir $<)))_mod $(subst .b,,$(suffix $(<:%.mod=%))) > /dev/null
+
+# compress unified song array (requires modified mod2gbt to produce a single array)
+	$(APULTRA) output.bin output_comp.bin
+	$(BIN2C) output_comp.bin output_comp.c $(basename $(basename $(notdir $<)))_mod
+
+# merge compressed array back to main c file
+	cat output_comp.c >> output.c
+
+# cleanup intermediary files
+	rm output.bin output_comp.bin output_comp.c
 	@mv output.c $(OBJDIR)/music_tmp.c
 	@$(SDCC) $(CFLAGS) -c -o $@ $(OBJDIR)/music_tmp.c
 
