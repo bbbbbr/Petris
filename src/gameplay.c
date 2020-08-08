@@ -25,6 +25,8 @@
 #include "gfx_print.h"
 #include "fade.h"
 
+#include "magic_code.h"
+
 #include "player_piece.h"
 #include "player_hinting.h"
 #include "player_info.h"
@@ -261,6 +263,13 @@ void gameplay_handle_input(void) {
     }
     else if (KEY_TICKED(J_B)) {
         player_piece_rotate_apply(PLAYER_ROT_LEFT);
+    }
+    else if (KEY_TICKED(J_UP)) {
+
+        // Cycle through different pet types if allowed
+        if (magic_code_state == MAGIC_CODE_STATE_ACTIVATED) {
+            player_piece_cycle_pet_types();
+        }
     }
 
 

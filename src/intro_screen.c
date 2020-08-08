@@ -21,6 +21,8 @@
 #include "input.h"
 #include "fade.h"
 
+#include "magic_code.h"
+
 #include "player_gfx.h"
 
 #include "../res/intro_screen_tiles.h"
@@ -141,6 +143,8 @@ void intro_clouds_cleanup(void) {
 
 void intro_screen_init(void) {
 
+    magic_code_reset();
+
     intro_clouds_init();
 
     set_bkg_data(TILES_INTRO_START,     TILE_COUNT_INTRO,     intro_screen_tiles);
@@ -175,6 +179,8 @@ UINT8 counter; // TODO: share main -> frame_counter
 void intro_screen_handle(void) {
 
     intro_clouds_update();
+
+    magic_code_update();
 
     // TODO: convert to global frame counter or sys_time
     // Wait for the player to press start
