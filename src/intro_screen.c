@@ -143,8 +143,6 @@ void intro_clouds_cleanup(void) {
 
 void intro_screen_init(void) {
 
-    magic_code_reset();
-
     intro_clouds_init();
 
     set_bkg_data(TILES_INTRO_START,     TILE_COUNT_INTRO,     intro_screen_tiles);

@@ -37,6 +37,8 @@
 #include "gfx_print.h"
 // #include "game_board_gfx.h"
 
+#include "magic_code.h"
+
 #include "../res/font_tiles.h"
 
 void init (void);
@@ -142,6 +144,8 @@ void init (void) {
 
 void main(void){
     init();
+
+    magic_code_reset();
 
     intro_splash();
 
