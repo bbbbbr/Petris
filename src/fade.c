@@ -186,34 +186,26 @@ void fadergb_init(UINT8 * p_dest_pal_gbr) {
     UINT16 t_color = *p_src_pal;
     UINT8  pal_inc = PAL_INC_RESET;
     UINT8  c;
-    UINT8  bgr_inc = 2;
 
     for (c = 0; c < FADERGB_ARY_SIZE; c++) {
 
         // TODO: inline function code here?
         // Initialze current channel of current palette color
         // Need to decode in order of B -> G -> R
-
-// With bit shifting, the components come out in order of R, G, B
-// So their order
-        fadergb_calc_entry( (UINT8)t_color & 0x1F, // color FROM
+        fadergb_calc_entry( (UINT8)(t_color >> (5 * pal_inc)) & 0x1F, // color FROM
                             *p_dest_pal_gbr,       // color TO
-                            bgr_inc);
-//                            c);                    // color lerp index
+                            c);                    // color lerp index
 
         // Load new palette color every 3rd step
         if (pal_inc) {
             // Load next B/G/R channel
-            t_color >>= 5;
             pal_inc--;
-            bgr_inc--;
         } else {
             // Load new palette color entry
             // and re-load counter
             p_src_pal++;
             t_color = *p_src_pal;
             pal_inc = PAL_INC_RESET;
-            bgr_inc = c+1+2; // +1 to offset to next counter iteration, +2 to offset into B slot of array
         }
 
         // next entry in color array
