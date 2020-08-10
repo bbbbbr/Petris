@@ -145,8 +145,12 @@ void fade_start(INT8 fade_dir) {
 // distance x (dx) = FADERGB_FRAME_COUNT
 // distance y (dy) = color_from - color_to
 
-#define FADERGB_FRAME_COUNT     60                                        // NEVER set less than 32 (32 is max delta per RGB between FROM and TO colors)
-                                                                       //       NOR greater than 64 (8 bit signed wraparound error on small color deltas of 1)
+
+#define FADERGB_FRAME_COUNT     32   // This is best left at 32 since that's max color delta
+                                     // If a slower time scale is needed it can be achieved
+                                     // by calling fadergb_update_entry() less often.
+                                     // Otherwise, NEVER set less than 32 (32 is max delta per RGB between FROM and TO colors)
+                                     //       NOR greater than 64 (8 bit signed wraparound error on small color deltas of 1)
 #define FADERGB_ERR_COLORSTEP_SUB (FADERGB_FRAME_COUNT * 2)
 
 // For background palettes only
