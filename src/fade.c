@@ -146,11 +146,12 @@ void fade_start(INT8 fade_dir) {
 // distance y (dy) = color_from - color_to
 
 
-#define FADERGB_FRAME_COUNT     32   // This is best left at 32 since that's max color delta
+#define FADERGB_FRAME_COUNT     32   // This may be best left at 32 since that's max color delta
                                      // If a slower time scale is needed it can be achieved
                                      // by calling fadergb_update_entry() less often.
-                                     // Otherwise, NEVER set less than 32 (32 is max delta per RGB between FROM and TO colors)
-                                     //       NOR greater than 64 (8 bit signed wraparound error on small color deltas of 1)
+                                     // Although, longer time scales may produce more intermediate colors
+                                     // * NEVER set less than 32 (32 is max delta per RGB between FROM and TO colors)
+                                     // * NOR greater than 64 (8 bit signed wraparound error on small color deltas of 1)
 #define FADERGB_ERR_COLORSTEP_SUB (FADERGB_FRAME_COUNT * 2)
 
 // For background palettes only
@@ -193,7 +194,7 @@ void fadergb_init(UINT8 * p_dest_pal_gbr) {
 
     for (c = 0; c < FADERGB_ARY_SIZE; c++) {
 
-        // TODO: inline function code here?
+// TODO: inline function code here?
         // Initialze current channel of current palette color
         // Need to decode in order of B -> G -> R
         fadergb_calc_entry( (UINT8)(t_color >> (5 * pal_inc)) & 0x1F, // color FROM
@@ -226,25 +227,22 @@ void fadergb_init(UINT8 * p_dest_pal_gbr) {
 void fadergb_calc_entry(UINT8 color_from, UINT8 color_to, UINT8 c) {
 
     // Extract colors from current color palette here
-    INT8 color_delta;
 
-    // Get Y axis color distance
-    // and set starting value
-    color_delta = color_from - color_to;
+    // Set starting value and Y axis direction
+    // Set X axis error step using Y axis color distance x 2
     fadergb_color_val[c] = color_from;
-
-    // Set up Y axis direction and stepping
-    fadergb_err_framestep_add[c] = (color_delta << 1);
     fadergb_color_val_dir[c] = -1;
+    fadergb_err_framestep_add[c] = (color_from - color_to) << 1;
 
-    // Is Y Distance Negative? Invert direction
-    if( color_delta <= 0 ) {
+    // Is Y Distance/Step Negative? Invert direction
+    if( fadergb_err_framestep_add[c] <= 0 ) {
         fadergb_err_framestep_add[c] *= -1;
         fadergb_color_val_dir[c] *= -1;
     }
 
     // X Distance (frame count) is always larger than Y Distance (color delta)
-    // so... Increment on X axis
+    // so the controlling increment is always on the X axis (frame count)
+    // Load initial frame error since the first step (current pal FROM) is already loaded
     fadergb_err_accum[c] = fadergb_err_framestep_add[c] - FADERGB_FRAME_COUNT;
 }
 
