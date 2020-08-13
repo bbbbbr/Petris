@@ -102,8 +102,6 @@ void gameplay_init(void) {
     // Should be called before gameplay_prepare_board() ... -> game_board_fill_random_tails()
     player_info_newgame_reset();
 
-    board_hide_all(BRD_CLR_DELAY_NONE);
-
     // Flash a get ready message to the player
     // TODO: function or struct to select game_start_message[option_game_type]
     if (option_game_type == OPTION_GAME_TYPE_PET_CLEANUP) {

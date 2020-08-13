@@ -180,7 +180,7 @@ void board_flash_message(UINT8 start_x, UINT8 start_y, char * text, char * ctext
     // NOTE: This now gets called by the calling functions instead
     //       so that palette fade timing works better with initial
     //       CTEXT message display.
-    // board_hide_all(BRD_CLR_DELAY_NONE);
+    board_hide_all(BRD_CLR_DELAY_NONE);
 
     for (c = 0; c < repeat; c++) {
         // blank print text using the provided ctext
