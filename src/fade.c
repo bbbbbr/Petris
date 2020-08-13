@@ -28,6 +28,7 @@ const UWORD * p_FadePalSprite[8] = {FADE_LUT, FADE_LUT, FADE_LUT, FADE_LUT, FADE
 UWORD ModPalBg[32];
 UWORD ModPalSprite[32];
 
+
 void fade_set_pal(UINT8 start_pal, UINT8 num_pal, UWORD * p_SrcPal, UINT8 which_pal) {
     int c;
 

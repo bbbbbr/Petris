@@ -106,6 +106,11 @@ UINT8 pet_tiles_hicontrast_ram[ TILE_SIZE_BYTES * (TILE_COUNT_PETTOTAL + TILE_CO
                                           TILE_COUNT_PETBLANK + \
                                          (TILE_COUNT_PET_ANIM__NOTLOADED_ONSTART__ / TILE_COPY_COUNT)
 
+// High contrast pet tiles can be deduplicated
+// because all the different pets have the same
+// body segment shape, and differ only in color.
+// (Unlike the standard full color and shaped pets)
+//
 // Expand deduplicated high contrast
 //   pet tiles from CODE into RAM
 // And select matching color palette from CODE

@@ -18,6 +18,8 @@
 #include "audio_common.h"
 #include "gfx.h"
 #include "gfx_print.h"
+#include "fade2pal.h"
+
 
 #include "game_board.h"
 #include "gameplay.h"
@@ -70,6 +72,14 @@ void game_types_handle_level_transition(void) {
         PLAY_SOUND_LEVEL_UP;
         board_hide_all(BRD_CLR_DELAY_CLEAR_MED);
 
+        // Do a color palette fade every N levels
+        if ((player_level % LEVEL_CHANGE_PAL_NUM) == 0) {
+
+            PRINT(MSG_LEVEL_UP_X, MSG_LEVEL_UP_Y, MSG_LEVEL_UP_CTEXT, 0);
+
+            fade2pal_start_next();
+        }
+
         // Flash a get ready message to the player
         board_flash_message(MSG_LEVEL_UP_X, MSG_LEVEL_UP_Y,
                             MSG_LEVEL_UP_TEXT, MSG_LEVEL_UP_CTEXT,
@@ -80,7 +90,14 @@ void game_types_handle_level_transition(void) {
         SHOW_SPRITES;
     }
     else if (option_game_type == OPTION_GAME_TYPE_MARATHON) {
+
         PLAY_SOUND_LEVEL_UP;
+
+        // Do a color palette fade every N levels
+        if ((player_level % LEVEL_CHANGE_PAL_NUM) == 0) {
+
+            fade2pal_start_next();
+        }
     }
 }
 
