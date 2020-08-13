@@ -19,8 +19,8 @@
 #--- Default build will be release. Can be overidden passing BUILD_TYPE = debug as a parameter
 # ex: Release, Debug, ReleaseColor, DebugColor
 
-# BUILD_TYPE = ReleaseColor
-BUILD_TYPE = DebugColor
+BUILD_TYPE = ReleaseColor
+# BUILD_TYPE = DebugColor
 CGB = yes
 
 ifneq (,$(findstring Release,$(BUILD_TYPE)))
