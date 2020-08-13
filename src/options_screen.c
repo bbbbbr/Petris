@@ -36,6 +36,9 @@
 #include "../res/pet_tiles.h"
 #include "../res/font_tiles.h"
 
+// OPTIONAL: Wraparound for menu selection changes
+// #define OPTION_MENU_WRAPAROUND_ENABLED
+
 
 #define SPR_OPTIONS_CURSOR 0 // Cursor is sprite "0"
 #define PET_DOG_HEAD       ((GP_PET_DOG << GP_PET_UPSHIFT) | (GP_SEG_HEAD << GP_SEG_UPSHIFT))
@@ -136,11 +139,8 @@ void options_screen_cursor_update(INT8 dir) {
         options_menu_index = OPTION_MENU_MIN;
     }
 
-    // Turns off here: Intead, this gets updated in the main options screen handler
-    //
-    // move_sprite(SPR_OPTIONS_CURSOR,
-    //             OPTION_CURSOR_X,
-    //             (options[options_menu_index].menu_y + 2) * 8);
+    // Note: Moving the menu cursor sprite is turned off here.
+    //       Instead it gets updated in the main options screen handler
 }
 
 
@@ -160,12 +160,20 @@ void options_screen_setting_update(INT8 dir) {
         // Update setting
         *(options[options_menu_index].p_curval) += dir;
 
-        // Handle wraparound
+        // Handle Min/Max
         if (*(options[options_menu_index].p_curval) < OPTION_SETTING_MIN) {
-            *(options[options_menu_index].p_curval) = options[options_menu_index].opt_entries - 1; // zero indexed array
+            #ifdef OPTION_MENU_WRAPAROUND_ENABLED
+                *(options[options_menu_index].p_curval) = options[options_menu_index].opt_entries - 1; // zero indexed array
+            #else
+                *(options[options_menu_index].p_curval) = OPTION_SETTING_MIN;
+            #endif
         }
         else if (*(options[options_menu_index].p_curval) >= options[options_menu_index].opt_entries) {
-            *(options[options_menu_index].p_curval) = OPTION_SETTING_MIN;
+            #ifdef OPTION_MENU_WRAPAROUND_ENABLED
+                *(options[options_menu_index].p_curval) = OPTION_SETTING_MIN;
+            #else
+                *(options[options_menu_index].p_curval) = options[options_menu_index].opt_entries - 1; // zero indexed array
+            #endif
         }
 
         options_screen_setting_draw(options_menu_index);
