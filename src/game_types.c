@@ -52,30 +52,44 @@ void game_types_init(void) {
 void game_types_handle_level_transition(void) {
 
     // Handle level transition
-    // TODO: reverse or logic and just test for marathon
-    if ((option_game_type == OPTION_GAME_TYPE_LEVEL_UP) ||
-        (option_game_type == OPTION_GAME_TYPE_PET_CLEANUP) ||
-        (option_game_type == OPTION_GAME_TYPE_LONG_PET)) {
 
-        // TODO: consolidate with gameplay_init() ??
-        // TODO: move this into something like gameplay_level_init()
-        //  level_end() and level_start()
-        HIDE_SPRITES;
+    PLAY_SOUND_LEVEL_UP;
 
-        // PET_LENGTH_PREVIEW_ENABLED_FOR_ALL_MODES
-        //
-        // if (option_game_type == OPTION_GAME_TYPE_LONG_PET) {
-            // Remove player pet length hinting sprites
-            hinting_petlength_reset();
-        // }
+    // Minimal transition for marathon long play mode
+    if (option_game_type == OPTION_GAME_TYPE_MARATHON) {
 
-        PLAY_SOUND_LEVEL_UP;
-        board_hide_all(BRD_CLR_DELAY_CLEAR_MED);
+        // Update level indicator
+        level_show();
 
         // Do a color palette fade every N levels
         if ((player_level % LEVEL_CHANGE_PAL_NUM) == 0) {
 
-            PRINT(MSG_LEVEL_UP_X, MSG_LEVEL_UP_Y, MSG_LEVEL_UP_CTEXT, 0);
+            fade2pal_start_next();
+        }
+
+    } else {
+
+        // Implied:
+        // if ((option_game_type == OPTION_GAME_TYPE_LEVEL_UP) ||
+        //     (option_game_type == OPTION_GAME_TYPE_PET_CLEANUP) ||
+        //     (option_game_type == OPTION_GAME_TYPE_LONG_PET)) {
+
+        // NOTE: The specific sequence in here is important for user experience
+
+        HIDE_SPRITES;
+
+        // Remove player pet length hinting sprites
+        hinting_petlength_reset();
+
+        board_hide_all(BRD_CLR_DELAY_CLEAR_MED);
+
+        PRINT(MSG_LEVEL_UP_X, MSG_LEVEL_UP_Y, MSG_LEVEL_UP_CTEXT,0);
+
+        // Update level indicator before populating the board
+        level_show();
+
+        // Do a color palette fade every N levels
+        if ((player_level % LEVEL_CHANGE_PAL_NUM) == 0) {
 
             fade2pal_start_next();
         }
@@ -85,19 +99,10 @@ void game_types_handle_level_transition(void) {
                             MSG_LEVEL_UP_TEXT, MSG_LEVEL_UP_CTEXT,
                             MSG_LEVEL_UP_REPEAT);
 
+
         gameplay_prepare_board();
 
         SHOW_SPRITES;
-    }
-    else if (option_game_type == OPTION_GAME_TYPE_MARATHON) {
-
-        PLAY_SOUND_LEVEL_UP;
-
-        // Do a color palette fade every N levels
-        if ((player_level % LEVEL_CHANGE_PAL_NUM) == 0) {
-
-            fade2pal_start_next();
-        }
     }
 }
 

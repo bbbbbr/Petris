@@ -57,7 +57,7 @@ void fade2pal_start_next(void) {
 
             wait_vbl_done();
 
-            if (sys_time & 0x01)
+            // if (sys_time & 0x01)
                 fade2pal_update_entry();
         }
     }

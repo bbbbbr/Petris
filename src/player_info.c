@@ -156,27 +156,6 @@ void score_reset(void) {
 }
 
 
-// TODO: remove?
-// // TODO: Optimize: ? convert this to not being a function?
-// void level_check_update(void) {
-
-//     // Trigger a new level either if it's enqueued (by pet cleanup),
-//     // or if the level threshold is crossed and game type *is not* pet cleanup
-//     if ((option_game_type != OPTION_GAME_TYPE_PET_CLEANUP) &&
-//          (player_numpets >= (PLAYER_PETS_PER_LEVEL * (player_level + 1)))) {
-
-//         level_increment_enqueue = TRUE;
-//     }
-
-
-//     if (level_increment_enqueue == TRUE) {
-
-//         level_increment();
-//     }
-
-// }
-
-
 
 void level_increment(void) {
 
@@ -196,8 +175,6 @@ void level_increment(void) {
         // TODO: could this be moved so that it's only called from one place in the code?
         game_type_long_pet_set_pet_size( (UINT8)player_level );
     }
-
-    level_show();
 
     // TODO: Debug: frames per drop (requires extern UINT8 game_speed_frames_per_drop;)
     #ifdef DEBUG_SHOW
