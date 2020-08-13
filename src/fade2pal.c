@@ -13,6 +13,7 @@
 #include <gb/cgb.h>
 
 #include "fade2pal.h"
+#include "gfx_board_fadepals.h"
 
 // Scratch palette array in fade.c
 // Reads from this to extract current palette
@@ -42,6 +43,27 @@ INT8  fade2pal_color_val_dir[FADE2PAL_ARY_SIZE];
 INT8  fade2pal_err_accum[FADE2PAL_ARY_SIZE];
 INT8  fade2pal_err_framestep_add[FADE2PAL_ARY_SIZE];
 
+
+void fade2pal_start_next(void) {
+
+    // Only increment and start a fade if there are palettes left
+    if (fade_sky_pal_idx < FADE_SKY_PALS_MAX) {
+
+        fade2pal_prep_fade(&fade_sky_pals[fade_sky_pal_idx][0]);
+        fade_sky_pal_idx++;
+
+        // Loop through transitions until done
+        while (fade2pal_frame_count) {
+
+            wait_vbl_done();
+
+            if (sys_time & 0x01)
+                fade2pal_update_entry();
+        }
+    }
+}
+
+
 // Color Palette entry bit packing
 // UINT16
 // Component: x BBBBB GGGGG RRRRR
@@ -49,7 +71,7 @@ INT8  fade2pal_err_framestep_add[FADE2PAL_ARY_SIZE];
 
 // NOTE: Background Palettes ONLY
 // NOTE: Assumes palettes (FADE2PAL_NUM_PALS) are contiguous
-void fade2pal_init(UINT8 * p_dest_pal_gbr) {
+void fade2pal_prep_fade(UINT8 * p_dest_pal_gbr) {
 
     // Extract RGB from current palettes
     UINT16 * p_src_pal = &ModPalBg[FADE2PAL_PALNUM_START * COLORS_PER_PAL];
@@ -113,6 +135,7 @@ void fade2pal_calc_entry(UINT8 color_from, UINT8 color_to, UINT8 c) {
 
 
 
+// This can also be called from a vlank/etc ISR
 void fade2pal_update_entry(void) {
 
     UINT8  pal_inc = PAL_INC_RESET;
@@ -141,7 +164,8 @@ void fade2pal_update_entry(void) {
         } else {
             // Move to next palette entry and clear it
             p_src_pal++;
-            *p_src_pal = 0; // BUG: this will alter one after the last modified intended
+// BUG BUG BUG BUG: this will alter one after the last modified intended, or some other byte after the last palette
+            *p_src_pal = 0;
             pal_inc = PAL_INC_RESET;
         }
 

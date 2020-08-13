@@ -50,6 +50,9 @@
 #define PLAYER_NUMPETS_RESET  0
 #define PLAYER_NUMPIECES_RESET 0
 
+// Transition to a new palette every N levels
+#define LEVEL_CHANGE_PAL_NUM 4 // (5 alternate palettes total)
+
 // TODO: move this to a more centralized options/settings area?
 // #define PLAYER_TILES_PER_LEVEL  20 // 25
 #define PLAYER_PETS_PER_LEVEL   20 // 10

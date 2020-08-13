@@ -34,7 +34,8 @@ extern UINT8 fade_sky_pal_idx;
 
 extern INT8 fade2pal_frame_count;
 
-void fade2pal_init(UINT8 * p_dest_pal_gbr);
+void fade2pal_start_next(void);
+void fade2pal_prep_fade(UINT8 * p_dest_pal_gbr);
 void fade2pal_calc_entry(UINT8 color_from, UINT8 color_to, UINT8 c);
 void fade2pal_update_entry(void);
 
