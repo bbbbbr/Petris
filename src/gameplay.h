@@ -30,7 +30,7 @@ typedef enum {
 
 #define GAMEPLAY_GET_READY_FLASHES 2
 
-void game_speed_frames_per_drop_set(UINT8);
+void gameplay_drop_speed_update(void);
 // void gameplay_handle_gameover_screen(void);
 void gameplay_exit_cleanup(void);
 void gameplay_init(void);

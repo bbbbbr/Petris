@@ -167,7 +167,9 @@ void level_increment(void) {
     }
 
     // TODO: ?? change this to options_frames_per_drop_update() call -> game_speed_frames_per_drop_set()
-    game_speed_frames_per_drop_set( options_frames_per_drop_get((UINT8)player_level) );
+
+    // Update game piece speed
+    gameplay_drop_speed_update();
 
     game_types_handle_level_transition();
 
@@ -209,11 +211,9 @@ void player_info_newgame_reset(void) {
     level_counters_reset();
     level_increment_enqueue = FALSE;
 
-    // TODO: ???? change this to options_frames_per_drop_update() call -> game_speed_frames_per_drop_set()
-    // OR, level_update_speed()
-    // OR, gameplay_speed_update() <------ ???
     // Should be called after level_counters_reset()
-    game_speed_frames_per_drop_set( options_frames_per_drop_get( (UINT8)player_level) );
+    // Set initial game piece speed
+    gameplay_drop_speed_update();
 
     if (option_game_type == OPTION_GAME_TYPE_LONG_PET) {
         // TODO: could this be moved so that it's only called from one place in the code?

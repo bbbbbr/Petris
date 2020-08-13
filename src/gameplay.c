@@ -57,9 +57,25 @@ UINT8 piece_state;
 UINT8 new_piece_launch_delay;
 
 
-void game_speed_frames_per_drop_set(UINT8 new_val) {
-    game_speed_frames_per_drop = new_val;
+void gameplay_drop_speed_update(void) {
+
+    UINT8 level = (UINT8)player_level;
+
+    // For Long Pet and Pet Cleanup modes the speed
+    // increases slower (1/4th) since it could otherwise
+    // make higher levels potentially impossible to play
+    if ((option_game_type == OPTION_GAME_TYPE_LONG_PET) ||
+        (option_game_type == OPTION_GAME_TYPE_PET_CLEANUP)) {
+
+        level >>= 2;
+        // Don't go below starting player level
+        if (level < PLAYER_LEVEL_RESET)
+            level = PLAYER_LEVEL_RESET;
+    }
+
+    game_speed_frames_per_drop = options_frames_per_drop_get( level );
 }
+
 
 
 // Turning this off for now since it's just a pass-through
