@@ -320,46 +320,67 @@ void options_screen_handle(void) {
     if (KEY_TICKED(J_UP)) {
 
         options_screen_cursor_update(-1);
-
-    } else if (KEY_TICKED(J_DOWN)) {
+    }
+    else if (KEY_TICKED(J_DOWN)) {
 
         options_screen_cursor_update(1);
-
     }
+
     // Change value of current option
     else if (KEY_TICKED(J_LEFT)) {
 
         options_screen_setting_update(-1);
-
-    } else if (KEY_TICKED(J_RIGHT)) {
+    }
+    else if (KEY_TICKED(J_RIGHT)) {
 
         options_screen_setting_update(1);
-
     }
-    // Start game
-    else if (KEY_TICKED(J_START)) {
 
-        options_screen_exit_cleanup();
-        game_state = GAME_READY_TO_START;
-    }
     // Start game or update value of current setting
+    // NOTE: Left/Right not used for starting game since it's
+    // easier to accidentally toggle them without intention
     else if (KEY_TICKED(J_A)) {
 
         if (options_menu_index == OPTION_MENU_STARTGAME) {
 
             options_screen_exit_cleanup();
             game_state = GAME_READY_TO_START;
-        }
-        else {
+        } else {
+
+            // Change value of current option
             options_screen_setting_update(1);
         }
     }
-    // Go back to Intro Screen
     else if (KEY_TICKED(J_B)) {
 
-        options_screen_exit_cleanup();
-        game_state = GAME_INTRO_INIT;
+        if (options_menu_index == OPTION_MENU_STARTGAME) {
+
+            options_screen_exit_cleanup();
+            game_state = GAME_READY_TO_START;
+        } else {
+
+            // Change value of current option
+            options_screen_setting_update(-1);
+        }
+
     }
+
+    // Start game
+    else if (KEY_TICKED(J_START)) {
+
+        options_screen_exit_cleanup();
+        game_state = GAME_READY_TO_START;
+    }
+
+    // NOTE: For now, A/B are also used to increase/decrease option settings
+    //       so don't use B to return to main intro screen
+    //
+    // // Go back to Intro Screen
+    // else if (KEY_TICKED(J_B)) {
+    //
+    //     options_screen_exit_cleanup();
+    //     game_state = GAME_INTRO_INIT;
+    // }
 
     // Update cursor every N frames
     if ((sys_time & CURSOR_UPDATE_MASK) == CURSOR_UPDATE_MASK) {
