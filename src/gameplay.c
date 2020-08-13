@@ -147,8 +147,13 @@ void gameplay_prepare_board(void) {
     board_reset();
 
     if (option_game_type == OPTION_GAME_TYPE_PET_CLEANUP) {
-            // This will (indirectly) auto-increment game_type_cleanup_tail_count
-            game_board_fill_random_tails( game_type_pet_cleanup_get_tail_count( (UINT8)player_level ));
+        // This will (indirectly) auto-increment game_type_cleanup_tail_count
+        game_board_fill_random_tails( game_type_pet_cleanup_get_tail_count( (UINT8)player_level ));
+
+        // Give the player a brief moment to see the board
+        // before gameplay starts. Helpful on higher levels
+        // and high difficulty settings
+        delay(650);
     }
 
     // Generate the very first piece
