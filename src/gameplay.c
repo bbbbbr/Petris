@@ -153,7 +153,7 @@ void gameplay_prepare_board(void) {
         // Give the player a brief moment to see the board
         // before gameplay starts. Helpful on higher levels
         // and high difficulty settings
-        delay(650);
+        delay(500);
     }
 
     // Generate the very first piece
