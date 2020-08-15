@@ -199,6 +199,21 @@ void board_crunch_up(void) {
         game_board_fill_random_tails(GAME_TYPE_CRUNCH_UP_TAIL_COUNT_ADD,
                                      BRD_MAX_Y,
                                      BRD_TAIL_ADD_DELAY_NO);
+
+// TODO: remove call to fill_random_tails()
+// And replace with simplified version which:
+// - To prevent "unfair" results of adding piece to bottom
+//   (Blocks/ruins pet creation if it's a mismatched piece)
+// * Checks if above connected has down arrow
+//   ? Increments by one if possible to try another
+//   ?? Changes color of piece to match it
+//       - but that would create a loophole that could be exploited
+//         - is that necessarily bad?
+//   ?? Rotates piece on it's side or facing down?
+//   ?? Changes it to a matching-color Torso?
+//   * Checks for pet completion
+
+
     } // end: if (game_state != GAME_ENDED)
 }
 
