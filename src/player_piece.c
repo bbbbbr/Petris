@@ -192,6 +192,7 @@ UINT8 player_piece_move(INT8 dir_x, INT8 dir_y) {
     // TODO: optimize?
     if ((new_x >= BRD_MIN_X) &&
         (new_x <= BRD_MAX_X) &&
+        (new_y >= BRD_MIN_Y) &&
         (new_y <= BRD_MAX_Y) &&
          board_check_open_xy(new_x, new_y)) {
 

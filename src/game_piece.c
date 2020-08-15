@@ -55,13 +55,26 @@ void game_piece_next_generate(void) {
         //                    (GP_SEG_TAIL << GP_SEG_UPSHIFT) |
         //                     GP_ROT_HORZ << GP_ROT_UPSHIFT);// + TILES_PET_START;
 
-        // If this is pet tail cleanup mode then
+        // If in Tail Cleanup mode then
         // suppress tail pieces to make it less frustrating
         if ((option_game_type == OPTION_GAME_TYPE_PET_CLEANUP) &&
             ((game_piece_next & GP_SEG_MASK) == GP_SEG_TAIL_BITS)) {
 
-            // Translate tail pieces to head pieces
+            // Translate Tail pieces to Head pieces
             game_piece_next = (game_piece_next & ~GP_SEG_MASK) | GP_SEG_HEAD_BITS;
+
+        // If in Crunch-up mode then
+        // suppress *some* L-Turn pieces to make it less frustrating
+        } else if ((option_game_type == OPTION_GAME_TYPE_CRUNCH_UP) &&
+            ((game_piece_next & GP_SEG_MASK) == GP_SEG_TURN_BITS)) {
+
+            // Generate a new piece. Leaving about a 1 in 4 chance
+            // that it's a L-Turn pieces
+//            game_piece_next = ((UINT8)(rand() ^ DIV_REG) & 0x1F);
+
+            // Translate L-Turn pieces to Torso
+            game_piece_next = (game_piece_next & ~GP_SEG_MASK) | GP_SEG_TORSO_BITS;
+
         }
     }
 }

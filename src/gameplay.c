@@ -43,6 +43,7 @@
 
 UINT8 game_speed_drop_frame_counter;
 UINT8 game_speed_frames_per_drop;
+UINT16 game_crunchup_counter;
 
 
 #define KEY_REPEAT_START               0
@@ -152,6 +153,8 @@ void gameplay_init(void) {
     gameplay_piece_drop_requested = FALSE;
 
     game_speed_drop_frame_counter = GAME_SPEED_DROP_FRAME_COUNTER_RESET;
+
+    game_crunchup_counter = GAME_CRUNCHUP_FRAME_COUNTER_RESET;
 }
 
 
@@ -164,12 +167,20 @@ void gameplay_prepare_board(void) {
 
     if (option_game_type == OPTION_GAME_TYPE_PET_CLEANUP) {
         // This will (indirectly) auto-increment game_type_cleanup_tail_count
-        game_board_fill_random_tails( game_type_pet_cleanup_get_tail_count( (UINT8)player_level ));
+        game_board_fill_random_tails( game_type_pet_cleanup_get_tail_count(),
+                                      BRD_MIN_Y_RANDOM_FILL,
+                                      BRD_TAIL_ADD_DELAY_YES);
 
         // Give the player a brief moment to see the board
         // before gameplay starts. Helpful on higher levels
         // and high difficulty settings
         delay(550);
+    } else if (option_game_type == OPTION_GAME_TYPE_CRUNCH_UP) {
+
+            // Generate some random pieces on the bottom row
+        game_board_fill_random_tails(GAME_TYPE_CRUNCH_UP_TAIL_COUNT_ADD,
+                                     BRD_MAX_Y,
+                                     BRD_TAIL_ADD_DELAY_YES);
     }
 
     // Generate the very first piece
@@ -350,6 +361,10 @@ void gameplay_update(void) {
         case PLAYER_INPLAY:
             gameplay_handle_input();
             gameplay_gravity_update();
+            // Update any flickering hint sprite elements
+            // NOTE: This should happen after player_piece_move()
+            player_hinting_flicker_update();
+
             break;
 
 
@@ -364,19 +379,27 @@ void gameplay_update(void) {
             break;
     }
 
+    // == Take care of various timer/counter activity here ==
+
     // Handle board animation updates
     board_gfx_tail_animate();
 
+    // TODO: consider moving into a function
     // Handle timeout of Pet Length Overlay if applicable
     if (hinting_petlength_enabled) {
 
         hinting_petlength_enabled--;
 
         if (hinting_petlength_enabled == 0)
-            hinting_petlength_show();
+            hinting_petlength_show(); // TODO: rename to _update or _showhide
+    }
+
+    // Handle crunch up if needed
+    // TODO: LINK VS PLAY: || (crunchups_queued))
+    if (option_game_type == OPTION_GAME_TYPE_CRUNCH_UP) {
+        gameplay_crunchup_update();
     }
 }
-
 
 
 void gameplay_gravity_update(void) {
@@ -401,8 +424,20 @@ void gameplay_gravity_update(void) {
             piece_state = PLAYER_PIECE_LANDED;
         }
     }
+}
 
-    // Update any flickering hint sprite elements
-    // NOTE: This should happen after player_piece_move()
-    player_hinting_flicker_update();
+
+// TODO: find ways to share counter with other timer based actions
+void gameplay_crunchup_update(void) {
+
+    // Crunch up happens ~once every 10 seconds
+    game_crunchup_counter++;
+
+    // This needs to be more like 45 * 13 = 585
+    // could piggy back on tail animation counter
+    if (game_crunchup_counter >= GAME_CRUNCHUP_FRAME_THRESHOLD) {
+
+        game_crunchup_counter = GAME_CRUNCHUP_FRAME_COUNTER_RESET;
+        board_crunch_up();
+    }
 }

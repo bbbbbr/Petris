@@ -130,9 +130,12 @@ void score_update(UINT16 num_tiles) {
     // so they display correctly during potential level changes
 
     // Queue Check for level change in game types based on
-    // number of pets completed
+    // number of pets completed.
+    // Long Pet and Pet Cleanup don't need it since they
+    // get triggered by specific completed tasks
     if ((option_game_type == OPTION_GAME_TYPE_MARATHON) ||
-        (option_game_type == OPTION_GAME_TYPE_LEVEL_UP)) {
+        (option_game_type == OPTION_GAME_TYPE_LEVEL_UP) ||
+        (option_game_type == OPTION_GAME_TYPE_CRUNCH_UP)) {
 
         if (player_numpets >= (PLAYER_PETS_PER_LEVEL * player_level)) {
             level_increment_enqueue = TRUE;

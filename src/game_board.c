@@ -23,6 +23,7 @@
 #include "game_board_special_pieces.h"
 #include "game_piece_data.h"
 #include "game_types.h"
+#include "gameplay.h"
 #include "gfx.h"
 #include "gfx_print.h"
 #include "sound.h"
@@ -128,6 +129,77 @@ void board_redraw_all(void) {
     set_bkg_tiles(BRD_ST_X, BRD_ST_Y,
                   BRD_WIDTH, BRD_HEIGHT,
                   &board_pieces[0]);
+}
+
+
+// Shift the entire board up one row
+// Trigger game over if any of the rows
+// go past the top of the game board
+void board_crunch_up(void) {
+
+    INT8  x, y;
+    UINT8 row_cur;
+    UINT8 row_below;
+
+    // TODO: Make a sound to signal the incoming crunch-up
+    //       Maybe also shake board
+
+    // Check for end of game condition, any pieces
+    // in the copy-up top row trigger game-over
+    for (x=0; x < BRD_WIDTH; x++) {
+        if (board_pieces[x] != (GP_EMPTY + TILES_PET_START)) {
+            game_state = GAME_ENDED;
+        }
+    }
+
+    if (game_state != GAME_ENDED) {
+
+        // Intialize array offsets to start of top row
+        // and row second down from the top
+        row_cur = 0;
+        row_below = BRD_WIDTH;
+
+        // Copy board pieces up starting from
+        // second row from top and skip bottom-most row
+        // since it will have random pieces added
+        for (y = BRD_MIN_Y; y < BRD_MAX_Y; y++) {
+
+            // Copy pieces from below across entire row
+            for (x=0; x < BRD_WIDTH; x++) {
+                board_pieces[row_cur]  = board_pieces[row_below];
+                board_attrib[row_cur]  = board_attrib[row_below];
+                board_connect[row_cur] = board_connect[row_below];
+                row_cur++;
+                row_below++;
+            }
+        }
+
+        // Clear the bottom-most row
+        row_cur = (BRD_WIDTH * BRD_MAX_Y);
+        for (x=0; x < BRD_WIDTH; x++) {
+            // Reset piece info
+            // Set palette based on pet type
+            // Reset board connection bits
+            board_pieces[row_cur]  = GP_EMPTY + TILES_PET_START;
+            board_attrib[row_cur]  = GP_PAL_EMPTY;
+            board_connect[row_cur] = GP_CONNECT_NONE_BITS;
+            row_cur++;
+        }
+
+
+        // TODO: Smooth scroll up via window? May be hard to do
+        board_redraw_all();
+
+        // Shift the player piece up one row to compensate
+        // (will not get shifted if it's top-row)
+        player_piece_move(0, -1);
+
+
+        // Generate some random pieces on the bottom row
+        game_board_fill_random_tails(GAME_TYPE_CRUNCH_UP_TAIL_COUNT_ADD,
+                                     BRD_MAX_Y,
+                                     BRD_TAIL_ADD_DELAY_NO);
+    } // end: if (game_state != GAME_ENDED)
 }
 
 
@@ -347,7 +419,7 @@ void board_handle_new_piece(INT8 x, INT8 y, UINT8 piece, UINT8 connect) {
 }
 
 
-void game_board_fill_random_tails(UINT8 tail_count) {
+void game_board_fill_random_tails(UINT8 tail_count, INT8 board_min_y, UINT8 delay_enabled) {
 
     UINT8 x, y;
     UINT8 piece;
@@ -358,10 +430,12 @@ void game_board_fill_random_tails(UINT8 tail_count) {
 
         // Choose X and Y coordinates randomly
         // and within board bounds
+        //
+        // (Old style used DIV_REG instead of rand())
         // x = (UINT8)DIV_REG % (BRD_WIDTH + 1);
         // y = ((UINT8)DIV_REG % (BRD_HEIGHT - BRD_MIN_Y_RANDOM_FILL + 1)) + BRD_MIN_Y_RANDOM_FILL ;
         x = (UINT8)rand() % (BRD_WIDTH + 1);
-        y = ((UINT8)rand() % (BRD_HEIGHT - BRD_MIN_Y_RANDOM_FILL + 1)) + BRD_MIN_Y_RANDOM_FILL ;
+        y = ((UINT8)rand() % (BRD_HEIGHT - board_min_y + 1)) + board_min_y;
 
         // Loop until the randomly selected spot is free
         if (board_piece_get_xy(x, y, &piece, &connect)) {
@@ -386,43 +460,15 @@ void game_board_fill_random_tails(UINT8 tail_count) {
                                   piece, attrib,
                                   player_piece_connect_get(piece, GP_ROTATE_270));
 
-                PLAY_SOUND_SQUEEK;
-                delay(150);
+                if (delay_enabled) {
+                    PLAY_SOUND_SQUEEK;
+                    delay(150);
+                }
             }
         }
     }
 
 }
-
-// TODO: remove debug function
-/* void board_fill_random(void) {
-
-    INT8 x, y;
-    UINT8 piece;
-
-    // piece = ((GP_PET_DOG  << GP_PET_UPSHIFT) |
-    //         (GP_SEG_TAIL << GP_SEG_UPSHIFT) |
-    //          GP_ROT_HORZ)
-    //         + TILES_PET_START;
-
-    // TODO: OPTIMIZE: convert to single loop counter
-
-    for (x=0; x < BRD_WIDTH; x++) {
-        for (y=0; y < BRD_HEIGHT; y++) {
-            // weak random, limit to 32 entries
-            piece = ((UINT8)DIV_REG & 0x1F) + TILES_PET_START;
-            //piece = (x  & 0x1F) + TILES_PET_START;
-
-            // Set pet piece
-            board_pieces[x + (y * BRD_WIDTH)] = piece;
-            // Set palette based on pet type (CGB Pal bits are 0x07)
-            board_attrib[x + (y * BRD_WIDTH)] = ((piece & GP_PET_MASK) >> GP_PET_UPSHIFT);
-        }
-    }
-
-    board_redraw_all();
-}
-*/
 
 
 UINT8 board_piece_get_xy(INT8 x, INT8 y, UINT8 * p_piece, UINT8 * p_connect) {
