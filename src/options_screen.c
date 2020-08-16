@@ -19,6 +19,7 @@
 #include "gfx.h"
 #include "gfx_print.h"
 #include "input.h"
+#include "serial_link.h"
 
 #include "sound.h"
 #include "gbt_player.h"
@@ -369,8 +370,12 @@ void options_screen_handle(void) {
     // Start game
     else if (KEY_TICKED(J_START)) {
 
-        options_screen_exit_cleanup();
-        game_state = GAME_READY_TO_START;
+        link_try_connect();
+
+        if (link_status == LINK_STATUS_CONNECTED) {
+            options_screen_exit_cleanup();
+            game_state = GAME_READY_TO_START;
+        }
     }
 
     // NOTE: For now, A/B are also used to increase/decrease option settings

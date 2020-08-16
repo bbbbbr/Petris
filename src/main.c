@@ -35,6 +35,7 @@
 #include "input.h"
 #include "gfx.h"
 #include "gfx_print.h"
+#include "serial_link.h"
 // #include "game_board_gfx.h"
 
 #include "magic_code.h"
@@ -131,6 +132,8 @@ void init (void) {
         // Switch CGB to fast speed mode
         cpu_fast();
     #endif
+
+    init_link();
 
     init_sound();
 

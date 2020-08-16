@@ -33,6 +33,7 @@ typedef enum {
 #define GAME_CRUNCHUP_FRAME_THRESHOLD     (60 * 12) // N seconds between crunch-ups
 #define GAME_CRUNCHUP_FRAME_COUNTER_RESET 0
 
+extern UINT8 volatile game_crunchups_enqueued;
 
 void gameplay_drop_speed_update(void);
 // void gameplay_handle_gameover_screen(void);

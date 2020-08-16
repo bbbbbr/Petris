@@ -18,6 +18,7 @@
 
 #include "audio_common.h"
 #include "common.h"
+#include "serial_link.h"
 
 #include "game_board.h"
 #include "game_board_special_pieces.h"
@@ -546,12 +547,15 @@ void board_handle_pet_completed(UINT8 flags) {
 
         // Play special sound (per tile) when more than N tiles have been cleared for a pet
         // Suppress bonus threshold on special pieces
-        if (flags & BRD_CHECK_FLAGS_IGNORE_PET_TYPE)
+        if (flags & BRD_CHECK_FLAGS_IGNORE_PET_TYPE) {
             PLAY_SOUND_TILE_CLEAR_SPECIAL; // Special piece no points sound (bomb)
-        else if (c >= BRD_TILE_COUNT_BONUS_SOUND_THRESHOLD)
+        }
+        else if (c >= BRD_TILE_COUNT_BONUS_SOUND_THRESHOLD) {
             PLAY_SOUND_TILE_CLEAR_BONUS; // Bonus sound
-        else
+        }
+        else {
             PLAY_SOUND_TILE_CLEAR_NORMAL; // Normal sound
+        }
 
         board_clear_tile_xy(board_tile_clear_cache_x[c],
                             board_tile_clear_cache_y[c]);
@@ -562,6 +566,8 @@ void board_handle_pet_completed(UINT8 flags) {
     if (flags & BRD_CHECK_FLAGS_DONT_ADD_POINTS) {
         score_update(BRD_PIECE_CLEAR_COUNT_NONE);
     } else {
+
+        LINK_SEND(LINK_COM_CHK_XFER | LINK_COM_CRUNCHUP);
         // Check completed pet size against level-up size requirement if it's Long pet game type
         if (option_game_type == OPTION_GAME_TYPE_LONG_PET) {
             game_type_long_pet_check_size(board_tile_clear_count);
