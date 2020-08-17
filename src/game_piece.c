@@ -34,6 +34,17 @@ void  game_piece_next_reset(void) {
 }
 
 
+// Generates a new game piece, either randomly or from enqueued.
+//
+// Game pieces are a collection of bit-packed
+// values which map to pet/segment/rotation attributes.
+//
+// For example:
+// game_piece_next = ((GP_PET_DOG  << GP_PET_UPSHIFT) |
+//                    (GP_SEG_TAIL << GP_SEG_UPSHIFT) |
+//                     GP_ROT_HORZ << GP_ROT_UPSHIFT);// + TILES_PET_START;
+//
+// OPTIONAL: IMPROVE NEW PIECE SELECTION
 void game_piece_next_generate(void) {
 
     // Retrieve stashed next game piece if present
@@ -44,11 +55,7 @@ void game_piece_next_generate(void) {
         game_piece_next_stash = GAME_PIECE_STASH_NONE;
 
     } else {
-        // Otherwise generate a new piece
-
-        // OPTIONAL: IMPROVE NEW PIECE SELECTION
-        // For now, choose single random pet tile
-        // game_piece_next = ((UINT8)DIV_REG & 0x1F);
+        // Otherwise generate a single random new pet tile piece
 
         // If connected by link then only use rand() so that the
         // games start with the same random number sequence
@@ -57,14 +64,11 @@ void game_piece_next_generate(void) {
         } else {
             // In 1-player mode
             // Use rand() ^ DIV_REG to add more variety to the random number sequence
+            // game_piece_next = ((UINT8)DIV_REG & 0x1F);
             game_piece_next = ((UINT8)(rand() ^ DIV_REG) & 0x1F);
         }
 
-        // game_piece_next = ((GP_PET_DOG  << GP_PET_UPSHIFT) |
-        //                    (GP_SEG_TAIL << GP_SEG_UPSHIFT) |
-        //                     GP_ROT_HORZ << GP_ROT_UPSHIFT);// + TILES_PET_START;
-
-        // If in Tail Cleanup mode then
+        // In Tail Cleanup mode
         // suppress tail pieces to make it less frustrating
         if ((option_game_type == OPTION_GAME_TYPE_PET_CLEANUP) &&
             ((game_piece_next & GP_SEG_MASK) == GP_SEG_TAIL_BITS)) {
@@ -72,14 +76,10 @@ void game_piece_next_generate(void) {
             // Translate Tail pieces to Head pieces
             game_piece_next = (game_piece_next & ~GP_SEG_MASK) | GP_SEG_HEAD_BITS;
 
-        // If in Crunch-up mode then
-        // suppress *some* L-Turn pieces to make it less frustrating
+        // In Crunch-up mode
+        // suppress all L-Turn pieces to make it less frustrating
         } else if ((option_game_type == OPTION_GAME_TYPE_CRUNCH_UP) &&
             ((game_piece_next & GP_SEG_MASK) == GP_SEG_TURN_BITS)) {
-
-            // Generate a new piece. Leaving about a 1 in 4 chance
-            // that it's a L-Turn pieces
-//            game_piece_next = ((UINT8)(rand() ^ DIV_REG) & 0x1F);
 
             // Translate L-Turn pieces to Torso
             game_piece_next = (game_piece_next & ~GP_SEG_MASK) | GP_SEG_TORSO_BITS;
