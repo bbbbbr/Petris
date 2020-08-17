@@ -144,6 +144,7 @@ void board_crunch_up(void) {
 
     // TODO: Make a sound to signal the incoming crunch-up
     //       Maybe also shake board
+    // TODO: Shake the board?
 
     // Check for end of game condition, any pieces
     // in the copy-up top row trigger game-over
@@ -153,6 +154,7 @@ void board_crunch_up(void) {
         }
     }
 
+    // Make sure the game hasn't ended (per test above)
     if (game_state != GAME_ENDED) {
 
         // Intialize array offsets to start of top row
@@ -206,13 +208,8 @@ void board_crunch_up(void) {
 // - To prevent "unfair" results of adding piece to bottom
 //   (Blocks/ruins pet creation if it's a mismatched piece)
 // * Checks if above connected has down arrow
-//   ? Increments by one if possible to try another
 //   ?? Changes color of piece to match it
-//       - but that would create a loophole that could be exploited
-//         - is that necessarily bad?
-//   ?? Rotates piece on it's side or facing down?
 //   ?? Changes it to a matching-color Torso?
-//   * Checks for pet completion
 
 
     } // end: if (game_state != GAME_ENDED)
