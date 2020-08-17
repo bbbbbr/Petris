@@ -396,15 +396,10 @@ void gameplay_update(void) {
             hinting_petlength_show(); // TODO: rename to _update or _showhide
     }
 
-    // TODO: cleanup
-    // // Handle crunch up if needed
-    // // TODO: LINK VS PLAY: || (crunchups_queued))
-    // if (option_game_type == OPTION_GAME_TYPE_CRUNCH_UP) {
-    //     // TODO: while (game_crunchups_enqueued)
-    //     // CRITICAL SECTION )crunchups_enqueued--;)
-        gameplay_crunchup_update();
-    // }
+    // This should be called after gameplay_gravity_update
+    gameplay_crunchup_update();
 }
+
 
 
 void gameplay_gravity_update(void) {
@@ -435,17 +430,18 @@ void gameplay_gravity_update(void) {
 // TODO: find ways to share counter with other timer based actions
 void gameplay_crunchup_update(void) {
 
+    // Update crunch-up counter if needed
     if (option_game_type == OPTION_GAME_TYPE_CRUNCH_UP) {
+
         // Crunch up happens ~once every 10 seconds
         game_crunchup_counter++;
 
-        // This needs to be more like 45 * 13 = 585
-        // could piggy back on tail animation counter
+        // Once the threshold is crossed, queue a crunch-up and reset the counter
         if (game_crunchup_counter >= GAME_CRUNCHUP_FRAME_THRESHOLD) {
-
             game_crunchup_counter = GAME_CRUNCHUP_FRAME_COUNTER_RESET;
 
-            // This var may also be modified in the SIO isr, so protect it when making changes
+            // This var may also be modified in the SIO isr,
+            // so protect it when making changes
             __critical {
                 game_crunchups_enqueued++;
             }
@@ -454,13 +450,15 @@ void gameplay_crunchup_update(void) {
 
     // Crunch-ups can be triggered by
     // * Elapsed time in game type: OPTION_GAME_TYPE_CRUNCH_UP
-    // * 2 Player vs serial link
+    // * 2 Player vs serial link, sent by the other versus player
     while (game_crunchups_enqueued) {
-    // TODO: pass the var as an argument and loop inside the function instead?
-        board_crunch_up();
-        // This var may also be modified in the SIO isr, so protect it when making changes
+        // This var may also be modified in the SIO isr,
+        // so protect it when making changes
         __critical {
             game_crunchups_enqueued--;
         }
+
+        // TODO: pass the var as an argument and loop inside the function instead?
+        board_crunch_up();
     }
 }

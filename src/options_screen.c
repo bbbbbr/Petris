@@ -68,11 +68,14 @@ enum {
     OPTION_MENU_TYPE = OPTION_MENU_MIN,
     OPTION_MENU_LEVEL,
     OPTION_MENU_MUSIC,
-    OPTION_MENU_STARTGAME,
-    OPTION_MENU_VISUAL_HINTS,
-    OPTION_MENU_HIGH_CONTRAST,
 
-    OPTION_MENU_MAX = OPTION_MENU_HIGH_CONTRAST
+    OPTION_MENU_STARTGAME,
+
+    OPTION_MENU_LINK2P,
+    OPTION_MENU_HIGH_CONTRAST,
+    OPTION_MENU_VISUAL_HINTS,
+
+    OPTION_MENU_MAX = OPTION_MENU_VISUAL_HINTS
 } option_menu_entries;
 
 
@@ -87,7 +90,8 @@ const char * options_difficulty[]   = {"EASY  ",
                                        "HARD  ",
                                        "EXPERT ",
                                        "BEAST "}; // Must match : option_difficulty_entries
-const char * options_visual_hints[] = {"ON ", "OFF"}; // Must match : option_visual_hints_entries
+const char * options_link2p[]        = {"OFF", "ON "}; // Must match : option_link2p_entries
+const char * options_visual_hints[]  = {"ON ", "OFF"}; // Must match : option_visual_hints_entries
 const char * options_high_contrast[] = {"OFF", "MED", "HI "}; // Must match : option_visual_hints_entries
 
 const char * options_music[] = {"TWILIGHT",
@@ -109,12 +113,13 @@ typedef struct opt_item {
 
 // See above for meaning of each element
 const option_item options[] = {
-        {  5,"TYPE :",         (INT8)ARRAY_LEN(options_type),         &options_type[0]        , &option_game_type},
-        {  7,"LEVEL:",        (INT8)ARRAY_LEN(options_difficulty),   &options_difficulty[0]  , &option_game_difficulty},
-        {  9,"MUSIC:",        (INT8)ARRAY_LEN(options_music),        &options_music[0],        &option_game_music},
-        { 12,"   START GAME ", (INT8)ARRAY_LEN(options_visual_hints), NULL, NULL},
-        { 15,"VISUAL HINTS: ", (INT8)ARRAY_LEN(options_visual_hints), &options_visual_hints[0], &option_game_visual_hints},
-        { 16,"HI CONTRAST : ", (INT8)ARRAY_LEN(options_high_contrast), &options_high_contrast[0], &option_game_high_contrast},
+        {  5,"TYPE :",         (INT8)ARRAY_LEN(options_type),          &options_type[0],          &option_game_type},
+        {  7,"LEVEL:",         (INT8)ARRAY_LEN(options_difficulty),    &options_difficulty[0],    &option_game_difficulty},
+        {  9,"MUSIC:",         (INT8)ARRAY_LEN(options_music),         &options_music[0],         &option_game_music},
+        { 12,"   START GAME ", (INT8)ARRAY_LEN(options_visual_hints),  NULL, NULL},
+        { 14,"2 PLAYER VS.: ", (INT8)ARRAY_LEN(options_link2p),        &options_link2p[0],        &option_game_link2p},
+        { 15,"HI CONTRAST : ", (INT8)ARRAY_LEN(options_high_contrast), &options_high_contrast[0], &option_game_high_contrast},
+        { 16,"VISUAL HINTS: ", (INT8)ARRAY_LEN(options_visual_hints),  &options_visual_hints[0],  &option_game_visual_hints},
     };
 
 
@@ -370,9 +375,23 @@ void options_screen_handle(void) {
     // Start game
     else if (KEY_TICKED(J_START)) {
 
-        link_try_connect();
+        // If serial link 2-Player versus is enabled
+        // then try to link up with the other player
+        // before starting the game.
+        // If times out then drop back
+        if (option_game_link2p == OPTION_LINK2P_ON) {
 
-        if (link_status == LINK_STATUS_CONNECTED) {
+            link_try_connect();
+
+            if (link_status == LINK_STATUS_CONNECTED) {
+
+                // Success, start game in tandem with other player
+                options_screen_exit_cleanup();
+                game_state = GAME_READY_TO_START;
+            }
+        } else {
+
+            // If 2P versus is not enabled start immediately
             options_screen_exit_cleanup();
             game_state = GAME_READY_TO_START;
         }

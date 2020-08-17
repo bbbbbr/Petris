@@ -88,6 +88,14 @@ OPTION_MUSIC_DEFAULT = OPTION_MUSIC_OFF
     // OPTION_MUSIC_DEFAULT = OPTION_MUSIC_TWILIGHT
 } option_music_entries;
 
+// Music Status
+enum {
+    OPTION_LINK2P_OFF,
+    OPTION_LINK2P_ON,
+
+    OPTION_LINK2P_DEFAULT = OPTION_LINK2P_OFF
+} option_link2p_entries;
+
 
 #define NEXT_PREV_OFF  0
 #define NEXT_PREV_ON  1
@@ -146,6 +154,7 @@ extern INT8 option_game_high_contrast;
 extern INT8 option_game_type;
 extern INT8 option_game_music;
 extern INT8 option_game_preview_next;
+extern INT8 option_game_link2p;
 
 const char * options_difficulty_abbrev_text_get(void);
 UINT8 options_frames_per_drop_get(UINT8);
