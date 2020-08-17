@@ -19,8 +19,8 @@
 #--- Default build will be release. Can be overidden passing BUILD_TYPE = debug as a parameter
 # ex: Release, Debug, ReleaseColor, DebugColor
 
-BUILD_TYPE = ReleaseColor
-# BUILD_TYPE = DebugColor
+# BUILD_TYPE = ReleaseColor
+BUILD_TYPE = DebugColor
 CGB = yes
 
 ifneq (,$(findstring Release,$(BUILD_TYPE)))
@@ -207,4 +207,14 @@ run: all
 	@if test -f $(RUNTARGET); then \
 		echo Running $(RUNTARGET); \
 		$(BGB) $(RUNTARGET); \
+	fi
+
+runlink: all
+	$(info $$BGB is [${BGB}])
+	@if test -f $(RUNTARGET); then \
+		echo Running $(RUNTARGET); \
+		($(BGB) $(RUNTARGET) &); \
+		($(BGB) $(RUNTARGET) --listen 8765 &); \
+# connect initiated by console arg doesn't seem to work (though --listen does) \
+#		($(BGB) $(RUNTARGET) --connect 8765 &); \
 	fi
