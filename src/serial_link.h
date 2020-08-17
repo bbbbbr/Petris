@@ -31,10 +31,11 @@
 
 // Game serial link commands
 #define LINK_COM_INITIATE       0x01  // Signal that player is ready to start
-#define LINK_COM_READY          0x02  // Signal that player is ready to start
-#define LINK_COM_OPPONENT_LOST  0x03  // Signal that player lost, so opponent won
-#define LINK_COM_EXIT_GAME      0x04
-#define LINK_COM_CRUNCHUP      0x05  // Send a crunch-up to the othe player
+#define LINK_COM_SYNCRAND       0x02
+#define LINK_COM_READY          0x03  // Signal that player is ready to start
+#define LINK_COM_OPPONENT_LOST  0x04  // Signal that player lost, so opponent won
+#define LINK_COM_EXIT_GAME      0x05
+#define LINK_COM_CRUNCHUP       0x06  // Send a crunch-up to the othe player
 
 // Game serial link status
 #define LINK_STATUS_RESET      0x00
@@ -47,13 +48,32 @@
 
 extern UINT8 link_role;
 extern UINT8 link_status;
+extern UINT8 link_rand_init;
 
 
 void init_link(void);
 void link_reset(void);
 void link_enable(void);
 void link_disable(void);
-#define LINK_SEND(command) SC_REG = LINK_CLOCK_INT; SB_REG = command; SC_REG = (LINK_XFER_START | LINK_CLOCK_INT);
+
+// For transmiting, the sequence is important:
+// 1. SC_REG -> Set Clock to internal (transfer bit cleared) to be the sender
+// 2. SB_REG -> Load data
+// 3. SC_REG -> Enable transfer bit (leave clock set to internal)
+#define LINK_SEND(command) \
+    SC_REG = LINK_CLOCK_INT; \
+    SB_REG = command; \
+    SC_REG = (LINK_XFER_START | LINK_CLOCK_INT);
+
+// For receiving, the sequence is important:
+// 1. SC_REG -> Set Clock to external (transfer bit cleared) to be waiting for external sender
+// 2. SB_REG -> Load placeholder data
+// 3. SC_REG -> Enable transfer bit (leave clock set to external)
+#define LINK_WAIT_RECEIVE \
+    SC_REG = LINK_CLOCK_EXT; \
+    SB_REG = LINK_COM_CHK_IGNORE; \
+    SC_REG = (LINK_XFER_START | LINK_CLOCK_EXT);
+
 //void link_send(UINT8 command);
 void link_isr(void);
 void link_try_connect(void);

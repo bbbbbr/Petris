@@ -46,10 +46,9 @@
 #include "gfx_print.h"
 
 
-UINT8 printat_y;
-
 UINT8 link_status;
 UINT8 link_role;
+UINT8 link_rand_init;
 
 // #define LINK_ROLE_NONE       0x00
 // #define LINK_ROLE_CONTROLLER 0x01
@@ -58,26 +57,12 @@ UINT8 link_role;
 // Initialize ISR
 void init_link(void) {
 
-    // NOTE: IE flag doesn't get set here, do that in link_enable instead
+    // IE flag doesn't get set here
+    // it's done in link_enable() instead
 
     // Add interrupt handler for serial link rx and enable it
     disable_interrupts();
-
-    // remove default GBDK serial ISR
-    // remove_SIO(serial_IO);
-// TODO FIXME
-// crt.s
-
-//         ;; Install interrupt routines
-//         LD      BC,#.vbl
-//         CALL    .add_VBL
-//         LD      BC,#.serial_IO
-//         CALL    .add_SIO
-
-
-
     add_SIO(link_isr);
-
     enable_interrupts();
 }
 
@@ -97,36 +82,23 @@ void link_enable(void) {
 
     // Enable link ISR
     disable_interrupts();
-    set_interrupts(VBL_IFLAG | SIO_IFLAG);
+    set_interrupts(IE_REG |= SIO_IFLAG);
     enable_interrupts();
 }
 
 
 void link_disable(void) {
 
+    // Disable link ISR
     disable_interrupts();
-
-    set_interrupts(VBL_IFLAG); // remove SIO flag
-    link_reset();
-
+    set_interrupts(IE_REG &= ~SIO_IFLAG);
     enable_interrupts();
+    link_reset();
 }
 
 
-// TODO: Test for failed sending? Ref GBDK IO_FAILED
-
-//#define LINK_SEND(command) SC_REG = LINK_CLOCK_INT; SB_REG = command; SC_REG = (LINK_XFER_START | LINK_CLOCK_INT);
-// void link_send(UINT8 command) {
-
-//     // Load command and send it
-//     SB_REG = command;
-//     SC_REG = (LINK_XFER_START | LINK_CLOCK_INT);
-// }
-
-
-
-// LINK does not "receive" a byte until TX is enabled?
-
+// Gets called after a successful RX **or* TX
+// This allows the sender to return to passive receiver waiting state
 void link_isr(void) {
 
     UINT8 link_data;
@@ -136,32 +108,68 @@ void link_isr(void) {
     // Make sure it's a command packet (upper nybble)
     if ((link_data & LINK_COM_CHK_MASK) == LINK_COM_CHK_XFER) {
 
+// THIS seems to work
+// but it could probably be implemented more simply
+// Rand Low/Rand Hi commands instead?
+// #define LINK_COM_CHK_RANDLO  0xB0 // Ignore transfer bits
+// #define LINK_COM_CHK_RANDHI  0xB0 // Ignore transfer bits
+// TODO: reduce number of control mask bits???
+// Create built-in payload bits?
+
         // Select command (lower nybble)
         switch (link_data & LINK_COM_CTRL_MASK) {
 
             case LINK_COM_INITIATE:
 
-// Lock out initiating a connection if already connected
-if (link_status == LINK_STATUS_RESET) {
-                // Acknowledge ready to connect
-                LINK_SEND(LINK_COM_CHK_XFER | LINK_COM_READY);
+                // Lock out initiating a connection if already connected
+                if (link_status == LINK_STATUS_RESET) {
 
-                // Wait until the transmit is complete
-                // then set link status to connected.
-                // That should roughly line up with the
-                // other player processing LINK_COM_READY
-                while (SC_REG & LINK_XFER_START);
-                link_status = LINK_STATUS_CONNECTED;
-                PRINT(2,printat_y++,"IN",0);
-} else {
-                PRINT(2,printat_y++,"NAK",0);
-}
+                    // Send Ready to send random number seed
+                    // Then wait for transfer to complete
+                    LINK_SEND(LINK_COM_CHK_XFER | LINK_COM_SYNCRAND);
+                    while (SC_REG & LINK_XFER_START);
+
+                    // Generate a seed for the random number generator
+                    // and send it to the other player
+                    link_rand_init = DIV_REG >> 1;
+                    LINK_SEND(link_rand_init);
+                }
+                break;
+
+
+            case LINK_COM_SYNCRAND:
+
+                if (link_status == LINK_STATUS_RESET) {
+
+                    // Wait to receive the second byte which
+                    // is the seed for the random number generator
+                    //
+                    // ? Apparently it's not necessary to re-enable
+                    // LINK_XFER_START for the second transfer
+                    // to start?
+// TODO: Does this need a timeout? possible infinite loop?
+// Splitting into RAND_LO/HI commands could avoid this
+// But maybe it's not realy an issue if the first byte comes through ok
+                    while (SC_REG & LINK_XFER_START);
+
+                    // Save seed from Serial Link Reg
+                    link_rand_init = SB_REG;
+
+                    // Send ready to start
+                    // Wait until the transmit is complete
+                    // then set link status to connected.
+                    // That should happen at a similar-ish time
+                    // as the other player processing LINK_COM_READY
+                    LINK_SEND(LINK_COM_CHK_XFER | LINK_COM_READY);
+                    while (SC_REG & LINK_XFER_START);
+
+                    link_status = LINK_STATUS_CONNECTED;
+                }
                 break;
 
             case LINK_COM_READY:
                 // Send immediate reply of
                 link_status = LINK_STATUS_CONNECTED;
-                PRINT(2,printat_y++,"RD",0);
                 break;
 
             case LINK_COM_OPPONENT_LOST:
@@ -175,27 +183,15 @@ if (link_status == LINK_STATUS_RESET) {
                 break;
         }
     }
-//    else {
-        // enabling this seems to break the code
-        // print_num_u16(2,printat_y++,(UINT16)link_status,3);
-//    }
 
-// TODO: should the controller end with clock control after Link?
+// ***** POSSIBLE BUG? ****
+// TODO: is there a problem where performing a TX
+//       in the ISR and calling LINK_WAIT_RECEIVE
+//       TOO SOON SUCH that it dumps or interferes with
+//       the transfer in progress?
 
-    // Return to waiting on an external clock
-    // Load a placeholder byte into the transfer register to avoid
-// TODO Does this need a LINK_XFER_START?
-//      to queue a read?
-//      can reads even be queued, or do they have
-//      to be polled?
-    // Select external clock
-    // Load placeholder data
-    // Set ready for transfer
-    SC_REG = LINK_CLOCK_EXT;
-    SB_REG = LINK_COM_CHK_IGNORE;  // Should be set before XFER_START
-    SC_REG = LINK_XFER_START | LINK_CLOCK_EXT;
-//    SC_REG = LINK_CLOCK_EXT;
-// }
+    // Return to waiting on an external clock (transfer bit not set) to wait for a sender
+    LINK_WAIT_RECEIVE;
 }
 
 
@@ -205,39 +201,30 @@ void link_try_connect(void) {
     // UINT8 timeout = 0;
     UINT16 timeout = 0;
 
-printat_y = 2;
-
     link_reset();
 
     link_enable();
 
-    PRINT(1,1, "WAITING TO CONNECT\n--\n--\n--\n--", 0);
+    PRINT(1,1, "WAITING TO CONNECT", 0);
 
-// TODO: why does it work perfectly the first time, but fail every time after, despite reset?
-// Disabling below seems to fix the behavior
-//  -- WHY
-// (SENDER correctly shows RD, not just RECEIVER showing IN)
-// ---->< ANSWER - it does work, it's just INSTANT :)
     LINK_SEND(LINK_COM_CHK_XFER | LINK_COM_INITIATE);
 
     while (link_status != LINK_STATUS_CONNECTED) {
 
-        // This could be tightened up to improve sync of timing
         timeout++;
-        // if (timeout == 255) {
-         if (timeout == (60 * 15)) {
+        if (timeout == (60 * 15)) {
             link_status = LINK_STATUS_FAILED;
             break;
         //} else if ((timeout & 0x3F) == 0x20) { // every 32 frames
         } else if ((timeout & 0x7F) == 0x00) { // every 64 frames
 
-        // UPDATE_KEYS();
-        // if (KEY_TICKED(J_START)) {
             // Send a periodic request
             LINK_SEND(LINK_COM_CHK_XFER | LINK_COM_INITIATE);
         }
 
         // TODO: allow user to break out?
+        // UPDATE_KEYS();
+        // if (KEY_TICKED(J_START)) {
 
         // mostly yield CPU while waiting
         wait_vbl_done();

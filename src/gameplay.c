@@ -16,6 +16,7 @@
 #include <rand.h>
 
 #include "common.h"
+#include "serial_link.h"
 
 #include "audio_common.h"
 #include "gbt_player.h"
@@ -107,7 +108,12 @@ void gameplay_exit_cleanup(void) {
 void gameplay_init(void) {
 
     // Initialize the random number generator
-    initarand(DIV_REG);
+    // Use shared seed value if connected by link
+    if (link_status == LINK_STATUS_CONNECTED) {
+        initarand(link_rand_init);
+    } else {
+        initarand(DIV_REG);
+    }
 
     game_types_init(); // Call before board_gfx_init()
 
