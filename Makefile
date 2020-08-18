@@ -7,6 +7,7 @@ export MOD2GBT="tools/mod2gbt_withunbanked"
 export MOD2GBT_SINGLEARRAY="tools/mod2gbt_singlearray_withunbanked"
 export APULTRA="tools/apultra"
 export BIN2C="tools/bin2c"
+export GBXFLASHER="tools/gbxcart_rw_flasher_v1.34"
 
 all: build_gb
 
