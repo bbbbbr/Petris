@@ -31,6 +31,7 @@ typedef enum {
 #define GAMEPLAY_GET_READY_FLASHES 2
 
 #define GAME_CRUNCHUP_FRAME_THRESHOLD     (60 * 12) // N seconds between crunch-ups
+#define GAME_CRUNCHUP_SHAKE_THRESHOLD     GAME_CRUNCHUP_FRAME_THRESHOLD - 10 // Shake 1/6 second before crunch-up
 #define GAME_CRUNCHUP_FRAME_COUNTER_RESET 0
 
 extern UINT8 volatile game_crunchups_enqueued;

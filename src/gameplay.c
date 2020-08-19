@@ -425,7 +425,7 @@ void gameplay_gravity_update(void) {
 }
 
 
-// TODO: find ways to share counter with other timer based actions
+// TODO: find ways to share counter with other timer based actions so a u16 isn't required
 void gameplay_crunchup_update(void) {
 
     // Update crunch-up counter if needed
@@ -438,17 +438,22 @@ void gameplay_crunchup_update(void) {
         if (game_crunchup_counter >= GAME_CRUNCHUP_FRAME_THRESHOLD) {
             game_crunchup_counter = GAME_CRUNCHUP_FRAME_COUNTER_RESET;
 
+            SCX_REG = 0;
             // This var may also be modified in the SIO isr,
             // so protect it when making changes
             __critical {
                 game_crunchups_enqueued++;
             }
         }
+        else if (game_crunchup_counter > (GAME_CRUNCHUP_FRAME_THRESHOLD - 15)) {
+            // Shake the board for 1/4 of a second before the crunch up happens
+            SCX_REG = sys_time & 0x03;
+        }
     }
 
     // Crunch-ups can be triggered by
     // * Elapsed time in game type: OPTION_GAME_TYPE_CRUNCH_UP
-    // * 2 Player vs serial link, sent by the other versus player
+    // * 2 Player vs serial link in *ANY GAME TYPE*, sent by the other versus player
     while (game_crunchups_enqueued) {
         // This var may also be modified in the SIO isr,
         // so protect it when making changes
@@ -456,6 +461,7 @@ void gameplay_crunchup_update(void) {
             game_crunchups_enqueued--;
         }
 
+        PLAY_SOUND_CRUNCH_UP;
         // TODO: pass the var as an argument and loop inside the function instead?
         board_crunch_up();
     }

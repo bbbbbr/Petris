@@ -142,10 +142,6 @@ void board_crunch_up(void) {
     UINT8 row_cur;
     UINT8 row_below;
 
-    // TODO: Make a sound to signal the incoming crunch-up
-    //       Maybe also shake board
-    // TODO: Shake the board?
-
     // Check for end of game condition, any pieces
     // in the copy-up top row trigger game-over
     for (x=0; x < BRD_WIDTH; x++) {
