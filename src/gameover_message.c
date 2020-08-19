@@ -20,9 +20,9 @@
 
 #include "gameover_message.h"
 
-#define CHR2SPR(chr) (chr -'A' + TILES_FONT_CHARS_START)
+#define CHR2SPR(chr) ((UINT8)(chr -'A') + TILES_FONT_CHARS_START)
 
-const INT8 SPR_GAMEOVER_CHARS[SPR_GAMEOVER_COUNT] = {
+const UINT8 SPR_GAMEOVER_CHARS[SPR_GAMEOVER_COUNT] = {
             CHR2SPR('G'),
             CHR2SPR('A'),
             CHR2SPR('M'),
@@ -32,7 +32,7 @@ const INT8 SPR_GAMEOVER_CHARS[SPR_GAMEOVER_COUNT] = {
             CHR2SPR('E'),
             CHR2SPR('R')};
 
-const INT8 SPR_YOU_LOST_CHARS[SPR_GAMEOVER_COUNT] = {
+const UINT8 SPR_YOU_LOST_CHARS[SPR_GAMEOVER_COUNT] = {
             CHR2SPR('Y'),
             CHR2SPR('O'),
             CHR2SPR('U'),
@@ -42,7 +42,7 @@ const INT8 SPR_YOU_LOST_CHARS[SPR_GAMEOVER_COUNT] = {
             CHR2SPR('S'),
             CHR2SPR('T')};
 
-const INT8 SPR_YOU_WON_CHARS[SPR_GAMEOVER_COUNT] = {
+const UINT8 SPR_YOU_WON_CHARS[SPR_GAMEOVER_COUNT] = {
             CHR2SPR('Y'),
             CHR2SPR('O'),
             CHR2SPR('U'),
@@ -89,7 +89,7 @@ UINT8 spr_gameover_y_idx[SPR_GAMEOVER_COUNT];
 
 // Drop "G A M E   O V E R" letters with a bounce, starting from left to right
 // Expects font data to already be loaded (see PRINT/etc)
-void gameover_message_animate(const INT8 spr_text_chars[]) {
+void gameover_message_animate(const UINT8 spr_text_chars[]) {
 
     UINT8 c;
     UINT8 min_spr = 0; // Used to slowly exit the loop as pieces land
