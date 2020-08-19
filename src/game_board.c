@@ -557,6 +557,11 @@ void board_handle_pet_completed(UINT8 flags) {
         }
         else if (c >= BRD_TILE_COUNT_BONUS_SOUND_THRESHOLD) {
             PLAY_SOUND_TILE_CLEAR_BONUS; // Bonus sound
+
+            // If in 2 player versus mode, send a crunch-up to the other player
+            if (link_status == LINK_STATUS_CONNECTED) {
+                LINK_SEND(LINK_COM_CHK_XFER | LINK_COM_CRUNCHUP);
+            }
         }
         else {
             PLAY_SOUND_TILE_CLEAR_NORMAL; // Normal sound
@@ -571,8 +576,6 @@ void board_handle_pet_completed(UINT8 flags) {
     if (flags & BRD_CHECK_FLAGS_DONT_ADD_POINTS) {
         score_update(BRD_PIECE_CLEAR_COUNT_NONE);
     } else {
-
-        LINK_SEND(LINK_COM_CHK_XFER | LINK_COM_CRUNCHUP);
         // Check completed pet size against level-up size requirement if it's Long pet game type
         if (option_game_type == OPTION_GAME_TYPE_LONG_PET) {
             game_type_long_pet_check_size(board_tile_clear_count);
