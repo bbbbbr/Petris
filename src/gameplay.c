@@ -177,7 +177,7 @@ void gameplay_prepare_board(void) {
         // This will (indirectly) auto-increment game_type_cleanup_tail_count
         game_board_fill_random_tails( game_type_pet_cleanup_get_tail_count(),
                                       BRD_MIN_Y_RANDOM_FILL,
-                                      BRD_TAIL_ADD_DELAY_YES);
+                                      BRD_TAIL_ADD_NORMAL);
 
         // Give the player a brief moment to see the board
         // before gameplay starts. Helpful on higher levels
@@ -188,7 +188,7 @@ void gameplay_prepare_board(void) {
             // Generate some random pieces on the bottom row
         game_board_fill_random_tails(GAME_TYPE_CRUNCH_UP_TAIL_COUNT_ADD,
                                      BRD_MAX_Y,
-                                     BRD_TAIL_ADD_DELAY_YES);
+                                     BRD_TAIL_ADD_NORMAL);
     }
 
     // Generate the very first piece

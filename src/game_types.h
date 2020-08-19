@@ -8,8 +8,11 @@
 extern UINT8 game_type_cleanup_tail_count;
 extern UINT8 game_type_long_pet_required_size;
 
+// Max should never be larger than:
+//   BRD_WIDTH * (BRD_HEIGHT - BRD_MIN_Y_RANDOM_FILL)
 #define GAME_TYPE_PET_CLEANUP_TAIL_COUNT_MIN 3
 #define GAME_TYPE_PET_CLEANUP_TAIL_COUNT_MAX 20
+
 
 #define GAME_TYPE_PET_LONG_PET_SIZE_MIN 3
 #define GAME_TYPE_PET_LONG_PET_SIZE_MAX 40
