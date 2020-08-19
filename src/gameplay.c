@@ -425,7 +425,6 @@ void gameplay_gravity_update(void) {
 }
 
 
-// TODO: find ways to share counter with other timer based actions so a u16 isn't required
 void gameplay_crunchup_update(void) {
 
     // Update crunch-up counter if needed
