@@ -19,6 +19,7 @@ typedef enum {
     GAME_PLAYING,
     GAME_PAUSED,
     GAME_ENDED,
+    GAME_WON_LINK_VERSUS,
     GAME_OVER_SCREEN,
 } GAME_STATES;
 

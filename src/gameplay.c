@@ -39,6 +39,7 @@
 #include "game_board.h"
 #include "game_board_gfx.h"
 #include "game_types.h"
+#include "gameover_message.h"
 
 #include "gameplay.h"
 
@@ -81,15 +82,6 @@ void gameplay_drop_speed_update(void) {
 
 
 
-// Turning this off for now since it's just a pass-through
-// void gameplay_handle_gameover_screen(void) {
-//
-//     // OPTIONAL:
-//     board_gameover_animate();
-// }
-
-
-
 void gameplay_exit_cleanup(void) {
 
     fade_start(FADE_OUT);
@@ -100,7 +92,7 @@ void gameplay_exit_cleanup(void) {
     player_hinting_special_show(FALSE);
     player_hinting_drop_show(FALSE);
     hinting_petlength_reset();
-    board_gameover_animate_reset();
+    gameover_message_reset();
 }
 
 

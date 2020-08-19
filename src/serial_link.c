@@ -39,6 +39,7 @@
 #include <gb/cgb.h> // Include cgb functions
 #include <stdlib.h>
 
+#include "common.h"
 #include "serial_link.h"
 
 #include "input.h"
@@ -120,7 +121,6 @@ void link_isr(void) {
         switch (link_data & LINK_COM_CTRL_MASK) {
 
             case LINK_COM_INITIATE:
-
                 // Lock out initiating a connection if already connected
                 if (link_status == LINK_STATUS_RESET) {
 
@@ -133,6 +133,7 @@ void link_isr(void) {
                     // and send it to the other player
                     link_rand_init = DIV_REG >> 1;
                     LINK_SEND(link_rand_init);
+
                 }
                 break;
 
@@ -140,7 +141,6 @@ void link_isr(void) {
             case LINK_COM_SYNCRAND:
 
                 if (link_status == LINK_STATUS_RESET) {
-
                     // Wait to receive the second byte which
                     // is the seed for the random number generator
                     //
@@ -162,7 +162,6 @@ void link_isr(void) {
                     // as the other player processing LINK_COM_READY
                     LINK_SEND(LINK_COM_CHK_XFER | LINK_COM_READY);
                     while (SC_REG & LINK_XFER_START);
-
                     link_status = LINK_STATUS_CONNECTED;
                 }
                 break;
@@ -173,6 +172,7 @@ void link_isr(void) {
                 break;
 
             case LINK_COM_OPPONENT_LOST:
+                game_state = GAME_WON_LINK_VERSUS;
                 break;
 
             case LINK_COM_EXIT_GAME:

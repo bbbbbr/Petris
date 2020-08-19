@@ -9,10 +9,6 @@ void board_gfx_init_background(void);
 
 void board_gfx_tail_animate(void);
 
-
-void board_gameover_animate(void);
-void board_gameover_animate_reset(void);
-
 #endif // GAME_BOARD_GFX_H
 
 

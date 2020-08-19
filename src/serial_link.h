@@ -51,11 +51,6 @@ extern UINT8 link_status;
 extern UINT8 link_rand_init;
 
 
-void init_link(void);
-void link_reset(void);
-void link_enable(void);
-void link_disable(void);
-
 // For transmiting, the sequence is important:
 // 1. SC_REG -> Set Clock to internal (transfer bit cleared) to be the sender
 // 2. SB_REG -> Load data
@@ -73,6 +68,11 @@ void link_disable(void);
     SC_REG = LINK_CLOCK_EXT; \
     SB_REG = LINK_COM_CHK_IGNORE; \
     SC_REG = (LINK_XFER_START | LINK_CLOCK_EXT);
+
+void init_link(void);
+void link_reset(void);
+void link_enable(void);
+void link_disable(void);
 
 //void link_send(UINT8 command);
 void link_isr(void);
