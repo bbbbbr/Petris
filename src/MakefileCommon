@@ -90,6 +90,12 @@ ifneq (,$(findstring Color,$(BUILD_TYPE)))
 	EXTENSION = gbc
 endif
 
+# Only turn on intro temporal faded clouds if this isn't a web build
+# make BUILDWEB=ON run
+ifndef BUILDWEB
+	CFLAGS += -DTRANSLUCENT_CLOUDS_ON
+endif
+
 LFLAGS = $(LFLAGS_NBANKS)
 
 # enable linker map file output

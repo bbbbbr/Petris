@@ -34,7 +34,11 @@
 // Turn this effect off when running in the JS emu to
 // avoid flicker since it doesn't have multi-frame
 // blending to compensate for inexact display refresh rates
-#define TRANSLUCENT_CLOUDS_ON
+//
+// For normal use, control this via the makefile with: "make BUILDWEB=ON run"
+// In the makefile it defaults to being #defined
+//
+// #define TRANSLUCENT_CLOUDS_ON
 
 
 #define SPR_PAL_CLOUDS         BG_PAL_4
