@@ -322,6 +322,29 @@ void options_screen_init(void) {
 
 
 
+void options_screen_try_gamestart(void) {
+
+    // If serial link 2-Player versus is enabled
+    // then try to link up with the other player
+    // before starting the game.
+    //
+    // If times out then drop back to the option screen
+    if (option_game_link2p == OPTION_LINK2P_ON) {
+
+        link_try_connect();
+
+        // If link failed then exit without starting game
+        if (link_status != LINK_STATUS_CONNECTED)
+            return;
+    }
+
+    // If 2P versus is not enabled start immediately
+    options_screen_exit_cleanup();
+    game_state = GAME_READY_TO_START;
+}
+
+
+
 void options_screen_handle(void) {
 
     // Cursor Updates
@@ -351,8 +374,7 @@ void options_screen_handle(void) {
 
         if (options_menu_index == OPTION_MENU_STARTGAME) {
 
-            options_screen_exit_cleanup();
-            game_state = GAME_READY_TO_START;
+            options_screen_try_gamestart();
         } else {
 
             // Change value of current option
@@ -363,8 +385,7 @@ void options_screen_handle(void) {
 
         if (options_menu_index == OPTION_MENU_STARTGAME) {
 
-            options_screen_exit_cleanup();
-            game_state = GAME_READY_TO_START;
+            options_screen_try_gamestart();
         } else {
 
             // Change value of current option
@@ -376,26 +397,7 @@ void options_screen_handle(void) {
     // Start game
     else if (KEY_TICKED(J_START)) {
 
-        // If serial link 2-Player versus is enabled
-        // then try to link up with the other player
-        // before starting the game.
-        // If times out then drop back
-        if (option_game_link2p == OPTION_LINK2P_ON) {
-
-            link_try_connect();
-
-            if (link_status == LINK_STATUS_CONNECTED) {
-
-                // Success, start game in tandem with other player
-                options_screen_exit_cleanup();
-                game_state = GAME_READY_TO_START;
-            }
-        } else {
-
-            // If 2P versus is not enabled start immediately
-            options_screen_exit_cleanup();
-            game_state = GAME_READY_TO_START;
-        }
+        options_screen_try_gamestart();
     }
 
     // NOTE: For now, A/B are also used to increase/decrease option settings

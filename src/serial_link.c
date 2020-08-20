@@ -69,7 +69,9 @@ void init_link(void) {
 
 void link_reset(void) {
 
-    link_status = LINK_STATUS_RESET;
+    __critical {
+        link_status = LINK_STATUS_RESET;
+    }
 
     // Set to external clock as default
     // Load a placeholder byte into the transfer register
@@ -199,7 +201,8 @@ void link_try_connect(void) {
     status_win_popup_init();
     status_win_popup_show(WIN_Y_LINKPOPUP);
     SET_PRINT_TARGET(PRINT_WIN);
-    PRINT(2,2, "WAITING FOR\nOTHER PLAYER...", 0);
+    PRINT(2,2, "WAITING FOR\nOTHER PLAYER..."
+               "\n\nPRESS B TO CANCEL", 0);
 
     // Reset the link and sent a connection request
     link_reset();
@@ -211,7 +214,9 @@ void link_try_connect(void) {
 
         timeout++;
         if (timeout == LINK_CONNECT_TIMEOUT_LEN) {
-            link_status = LINK_STATUS_FAILED;
+            __critical {
+                link_status = LINK_STATUS_FAILED;
+            }
             break;
         } else if ((timeout & LINK_CONNECT_RESEND_MASK) == 0x00) {
 
@@ -219,17 +224,21 @@ void link_try_connect(void) {
             LINK_SEND(LINK_COM_CHK_XFER | LINK_COM_INITIATE);
         }
 
-        // TODO: allow user to break out?
-        // UPDATE_KEYS();
-        // if (KEY_TICKED(J_B)) {
+        UPDATE_KEYS();
+        if (KEY_TICKED(J_B)) {
+            __critical {
+                link_status = LINK_STATUS_ABORTED;
+            }
+            break;
+        }
 
         // yield CPU while waiting
         wait_vbl_done();
     }
 
     // Connection failed, notify user
-    if (link_status != LINK_STATUS_CONNECTED) {
-        PRINT(2,5, "CONNECT FAILED!\n\nPRESS B TO RETURN", 0);
+    if (link_status == LINK_STATUS_FAILED) {
+        PRINT(2,5, "CONNECT FAILED!  \n\nPRESS B TO RETURN", 0);
         waitpad_lowcpu(J_B, J_WAIT_ANY_PRESSED);
         waitpad_lowcpu(J_B, J_WAIT_ALL_RELEASED);
     }
