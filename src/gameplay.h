@@ -35,6 +35,7 @@ typedef enum {
 #define GAME_CRUNCHUP_FRAME_COUNTER_RESET 0
 
 extern UINT8 volatile game_crunchups_enqueued;
+extern UINT8 volatile game_is_paused;
 
 void gameplay_drop_speed_update(void);
 // void gameplay_handle_gameover_screen(void);

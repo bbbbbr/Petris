@@ -47,6 +47,7 @@ UINT8 game_speed_drop_frame_counter;
 UINT8 game_speed_frames_per_drop;
 UINT16 game_crunchup_counter;
 UINT8 volatile game_crunchups_enqueued;
+UINT8 volatile game_is_paused;
 
 
 #define KEY_REPEAT_START               0
@@ -221,13 +222,23 @@ void gameplay_handle_pause(void) {
           "PAUSED",0);
 
 
+    // Wait until unpaused by player
+    // or unpause send over serial link
+    waitpadticked_lowcpu(J_START, &game_is_paused);
 
-    waitpad_lowcpu(J_START, J_WAIT_ALL_RELEASED); // Wait until Start is released
+    // If unpause was triggered by button
+    // then state will still be paused, so clear it
+    if (game_is_paused == TRUE) {
 
-    waitpad_lowcpu(J_START, J_WAIT_ANY_PRESSED);  // Wait for start and then wait again until it's released
-    waitpad_lowcpu(J_START, J_WAIT_ALL_RELEASED);
+            __critical {
+                game_is_paused = FALSE;
+            }
 
-    UPDATE_KEYS(); // refresh key state to make sure it's in sync
+            // If 2 Player then send unpause
+            if (link_status == LINK_STATUS_CONNECTED) {
+                 LINK_SEND(LINK_COM_CHK_XFER | LINK_COM_UNPAUSE);
+            }
+    }
 
     // Redraw the board and player piece
     board_redraw_all();
@@ -305,8 +316,24 @@ void gameplay_handle_input(void) {
     }
 
 
-    // Pause
-    if (KEY_TICKED(J_START)) {
+    // Pause when Start is pressed
+    // or if triggered over serial link
+    if (KEY_TICKED(J_START) || game_is_paused) {
+
+        // Update paused state. It will be:
+        // * FALSE if triggered locally
+        // * TRUE if triggered over serial link
+        if (game_is_paused == FALSE) {
+            __critical {
+
+                game_is_paused = TRUE;
+
+                // If 2 Player then send pause
+                if (link_status == LINK_STATUS_CONNECTED) {
+                     LINK_SEND(LINK_COM_CHK_XFER | LINK_COM_PAUSE);
+                }
+            }
+        }
 
         gameplay_handle_pause();
     }

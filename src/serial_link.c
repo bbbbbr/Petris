@@ -47,12 +47,7 @@
 
 
 UINT8 volatile link_status;
-// UINT8 link_role;
 UINT8 link_rand_init;
-
-// #define LINK_ROLE_NONE       0x00
-// #define LINK_ROLE_CONTROLLER 0x01
-// #define LINK_ROLE_FOLLOWER   0x02
 
 // Initialize ISR
 void init_link(void) {
@@ -167,11 +162,23 @@ void link_isr(void) {
                 break;
 
             case LINK_COM_OPPONENT_LOST:
-                game_state = GAME_WON_LINK_VERSUS;
+                if (link_status == LINK_STATUS_CONNECTED)
+                    game_state = GAME_WON_LINK_VERSUS;
                 break;
 
             case LINK_COM_CRUNCHUP:
-                game_crunchups_enqueued++; // enqueue a(nother) crunch-up
+                if (link_status == LINK_STATUS_CONNECTED)
+                    game_crunchups_enqueued++; // enqueue a(nother) crunch-up
+                break;
+
+            case LINK_COM_PAUSE:
+                if (link_status == LINK_STATUS_CONNECTED)
+                    game_is_paused = TRUE;
+                break;
+
+            case LINK_COM_UNPAUSE:
+                if (link_status == LINK_STATUS_CONNECTED)
+                    game_is_paused = FALSE;
                 break;
         }
     }
@@ -206,6 +213,9 @@ void link_try_connect(void) {
     // Wait a couple seconds to see if connection succeeds
     while (link_status != LINK_STATUS_CONNECTED) {
 
+        // yield CPU while waiting
+        wait_vbl_done();
+
         timeout++;
         if (timeout == LINK_CONNECT_TIMEOUT_LEN) {
             __critical {
@@ -225,16 +235,12 @@ void link_try_connect(void) {
             }
             break;
         }
-
-        // yield CPU while waiting
-        wait_vbl_done();
     }
 
     // Connection failed, notify user
     if (link_status == LINK_STATUS_FAILED) {
         PRINT(2,5, "CONNECT FAILED!  \n\nPRESS B TO RETURN", 0);
-        waitpad_lowcpu(J_B, J_WAIT_ANY_PRESSED);
-        waitpad_lowcpu(J_B, J_WAIT_ALL_RELEASED);
+        waitpadticked_lowcpu(J_B, NULL);
     }
 
     // Close the popup window
