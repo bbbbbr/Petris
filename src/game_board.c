@@ -555,7 +555,9 @@ void board_handle_pet_completed(UINT8 flags) {
             PLAY_SOUND_TILE_CLEAR_BONUS; // Bonus sound
 
             // If in 2 player versus mode, send a crunch-up to the other player
-            if (link_status == LINK_STATUS_CONNECTED) {
+            // Only send once, right as the threshold is met
+            if ((c == BRD_TILE_COUNT_BONUS_SOUND_THRESHOLD) &&
+                (link_status == LINK_STATUS_CONNECTED)) {
                 LINK_SEND(LINK_COM_CHK_XFER | LINK_COM_CRUNCHUP);
             }
         }
