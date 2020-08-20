@@ -35,9 +35,12 @@
 #define LINK_COM_CRUNCHUP       0x05  // Send a crunch-up to the othe player
 
 // Game serial link status
-#define LINK_STATUS_RESET      0x00
-#define LINK_STATUS_CONNECTED  0x04
-#define LINK_STATUS_FAILED     0x05
+typedef enum {
+    LINK_STATUS_RESET = 0x00,
+    LINK_STATUS_ABORTED,
+    LINK_STATUS_CONNECTED,
+    LINK_STATUS_FAILED
+} LINK_STATUSES;
 
 #define LINK_ROLE_NONE       0x00
 #define LINK_ROLE_CONTROLLER 0x01
@@ -48,7 +51,7 @@
 //#define LINK_CONNECT_TIMEOUT_RESEND_MASK 0x1F // every 32 frames
 #define LINK_CONNECT_RESEND_MASK 0x3F //every 64 frames
 
-#define WIN_Y_LINKPOPUP  (144 - 72)
+#define WIN_Y_LINKPOPUP  (144 - (8*9)) // 9 tile/font rows tall
 
 
 extern UINT8 volatile link_status;
