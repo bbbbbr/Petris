@@ -252,8 +252,9 @@
 	;; Install interrupt routines
 	LD	BC,#.vbl
 	CALL	.add_VBL
-	LD	BC,#.serial_IO
-	CALL	.add_SIO
+	;; Note! Removed default serial ISR since a custom one is used instead
+;	LD	BC,#.serial_IO
+;	CALL	.add_SIO
 
 	;; Standard color palettes
 	LD	A,#0b11100100	; Grey 3 = 11 (Black)
