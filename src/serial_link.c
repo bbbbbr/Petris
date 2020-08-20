@@ -27,10 +27,6 @@
 // State B: RESET                   \------> CONNECTED (controller)
 
 
-// TODO: what if link is lost?
-// TODO: icon to indicate link status? "-vs-" or "]--["
-
-
 // If a serial transfer with internal clock is performed and no external GameBoy
 // is present, a value of $FF will be received in the transfer.
 
@@ -40,15 +36,18 @@
 #include <stdlib.h>
 
 #include "common.h"
-#include "serial_link.h"
 
 #include "input.h"
 #include "gameplay.h"
 #include "gfx_print.h"
 
+#include "status_win.h"
 
-UINT8 link_status;
-UINT8 link_role;
+#include "serial_link.h"
+
+
+UINT8 volatile link_status;
+// UINT8 link_role;
 UINT8 link_rand_init;
 
 // #define LINK_ROLE_NONE       0x00
@@ -175,9 +174,6 @@ void link_isr(void) {
                 game_state = GAME_WON_LINK_VERSUS;
                 break;
 
-            case LINK_COM_EXIT_GAME:
-                break;
-
             case LINK_COM_CRUNCHUP:
                 game_crunchups_enqueued++; // enqueue a(nother) crunch-up
                 break;
@@ -195,38 +191,50 @@ void link_isr(void) {
 }
 
 
-
 void link_try_connect(void) {
 
-    // UINT8 timeout = 0;
     UINT16 timeout = 0;
 
+    // Show a popup window while waiting to connect
+    status_win_popup_init();
+    status_win_popup_show(WIN_Y_LINKPOPUP);
+    SET_PRINT_TARGET(PRINT_WIN);
+    PRINT(2,2, "WAITING FOR\nOTHER PLAYER...", 0);
+
+    // Reset the link and sent a connection request
     link_reset();
-
     link_enable();
-
-    PRINT(1,1, "WAITING TO CONNECT", 0);
-
     LINK_SEND(LINK_COM_CHK_XFER | LINK_COM_INITIATE);
 
+    // Wait a couple seconds to see if connection succeeds
     while (link_status != LINK_STATUS_CONNECTED) {
 
         timeout++;
-        if (timeout == (60 * 15)) {
+        if (timeout == LINK_CONNECT_TIMEOUT_LEN) {
             link_status = LINK_STATUS_FAILED;
             break;
-        //} else if ((timeout & 0x3F) == 0x20) { // every 32 frames
-        } else if ((timeout & 0x7F) == 0x00) { // every 64 frames
+        } else if ((timeout & LINK_CONNECT_RESEND_MASK) == 0x00) {
 
-            // Send a periodic request
+            // Re-send the connection request every N frames
             LINK_SEND(LINK_COM_CHK_XFER | LINK_COM_INITIATE);
         }
 
         // TODO: allow user to break out?
         // UPDATE_KEYS();
-        // if (KEY_TICKED(J_START)) {
+        // if (KEY_TICKED(J_B)) {
 
-        // mostly yield CPU while waiting
+        // yield CPU while waiting
         wait_vbl_done();
     }
+
+    // Connection failed, notify user
+    if (link_status != LINK_STATUS_CONNECTED) {
+        PRINT(2,5, "CONNECT FAILED!\n\nPRESS B TO RETURN", 0);
+        waitpad_lowcpu(J_B, J_WAIT_ANY_PRESSED);
+        waitpad_lowcpu(J_B, J_WAIT_ALL_RELEASED);
+    }
+
+    // Close the popup window
+    SET_PRINT_TARGET(PRINT_BKG);
+    status_win_popup_hide();
 }

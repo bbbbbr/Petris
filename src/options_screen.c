@@ -289,13 +289,14 @@ void options_screen_init(void) {
 
     INT8 c;
 
+    // Note: The popup status window is relying on the gfx initialization here
+    //       See: status_win_popup_init()
+
     // Add a lighter font for options
     fade_set_pal(OPTION_TITLE_PRINT_PAL, 1, option_title_palette, FADE_PAL_BKG);
     // Upper 4 palettes from intro screen
     fade_set_pal(BG_PAL_4, 4, intro_screen_palette, FADE_PAL_BKG);
 
-
-    // TODO: OPTIMIZE: consolidate this? the same tiles are used in all screens so far
     set_bkg_data(TILES_INTRO_START,     TILE_COUNT_INTRO,     intro_screen_tiles);
     set_bkg_data(TILES_FONT_START,      TILE_COUNT_FONT,      font_tiles);
     set_bkg_data(TILES_PET_START,       TILE_COUNT_PETTOTAL,  pet_tiles);

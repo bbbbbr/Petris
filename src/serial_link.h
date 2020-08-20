@@ -9,8 +9,6 @@
 // Attribution-NonCommercial-ShareAlike 4.0 International License
 // See: http://creativecommons.org/licenses/by-nc-sa/4.0/
 
-// magic_code.h
-
 #ifndef SERIAL_LINK_H
 #define SERIAL_LINK_H
 
@@ -34,8 +32,7 @@
 #define LINK_COM_SYNCRAND       0x02
 #define LINK_COM_READY          0x03  // Signal that player is ready to start
 #define LINK_COM_OPPONENT_LOST  0x04  // Signal that player lost, so opponent won
-#define LINK_COM_EXIT_GAME      0x05
-#define LINK_COM_CRUNCHUP       0x06  // Send a crunch-up to the othe player
+#define LINK_COM_CRUNCHUP       0x05  // Send a crunch-up to the othe player
 
 // Game serial link status
 #define LINK_STATUS_RESET      0x00
@@ -46,8 +43,16 @@
 #define LINK_ROLE_CONTROLLER 0x01
 #define LINK_ROLE_FOLLOWER   0x02
 
-extern UINT8 link_role;
-extern UINT8 link_status;
+
+#define LINK_CONNECT_TIMEOUT_LEN (60 * 5) // 5 seconds
+//#define LINK_CONNECT_TIMEOUT_RESEND_MASK 0x1F // every 32 frames
+#define LINK_CONNECT_RESEND_MASK 0x3F //every 64 frames
+
+#define WIN_Y_LINKPOPUP  (144 - 72)
+
+
+extern UINT8 volatile link_status;
+// extern UINT8 link_role;
 extern UINT8 link_rand_init;
 
 
