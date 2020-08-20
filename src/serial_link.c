@@ -144,13 +144,7 @@ void link_isr(void) {
                 if (link_status == LINK_STATUS_RESET) {
                     // Wait to receive the second byte which
                     // is the seed for the random number generator
-                    //
-                    // ? Apparently it's not necessary to re-enable
-                    // LINK_XFER_START for the second transfer
-                    // to start?
-// TODO: Does this need a timeout? possible infinite loop?
-// Splitting into RAND_LO/HI commands could avoid this
-// But maybe it's not realy an issue if the first byte comes through ok
+                    LINK_WAIT_RECEIVE;
                     while (SC_REG & LINK_XFER_START);
 
                     // Save seed from Serial Link Reg
