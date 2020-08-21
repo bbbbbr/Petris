@@ -74,8 +74,13 @@ void player_info_display(void) {
         // Display required Pet Size
         print_num_u16(DISPLAY_NUMPETS_X, DISPLAY_NUMPETS_Y, (UINT16)game_type_long_pet_required_size, DIGITS_3);
 
+    } else if ((option_game_type == OPTION_GAME_TYPE_LEVEL_UP)||
+               (option_game_type == OPTION_GAME_TYPE_CRUNCH_UP)) {
+        // Display pets remaining to complete level
+        print_num_u16(DISPLAY_NUMPETS_X + 2, DISPLAY_NUMPETS_Y,
+            (PLAYER_PETS_PER_LEVEL * player_level) - player_numpets, DIGITS_3);
     } else {
-        // Display Pet compelted count
+        // Display total Pet completed count
         print_num_u16(DISPLAY_NUMPETS_X, DISPLAY_NUMPETS_Y, player_numpets, DIGITS_5);
     }
 
