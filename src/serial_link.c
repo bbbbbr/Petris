@@ -148,13 +148,15 @@ void link_isr(void) {
             break;
 
         case LINK_CMD_READY:
-            // Save/apply incoming game type
-            option_game_type = link_data & LINK_DATA_MASK;
+            if (link_status == LINK_STATUS_RESET) {
+                // Save/apply incoming game type
+                option_game_type = link_data & LINK_DATA_MASK;
 
-            // This will complete the connection
-            // should cause both players to start
-            // at a similar-ish time
-            link_status = LINK_STATUS_CONNECTED;
+                // This will complete the connection
+                // should cause both players to start
+                // at a similar-ish time
+                link_status = LINK_STATUS_CONNECTED;
+            }
             break;
 
 
