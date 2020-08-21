@@ -13,6 +13,8 @@
 #define GAME_SPEED_DROP_FRAME_COUNTER_RESET    0
 // #define GAME_SPEED_FRAMES_PER_DROP_DEFAULT  6 // 12 //30 // 15 // 60 frames per second default speed
 
+#define LINK_STATUS_X 1
+#define LINK_STATUS_Y 0
 
 #define DISPLAY_NEXT_PIECE_TEXT_X 1
 #define DISPLAY_NEXT_PIECE_TEXT_Y 10

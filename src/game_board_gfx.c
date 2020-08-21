@@ -29,6 +29,7 @@
 #include "player_gfx.h"
 #include "player_info.h"
 #include "options.h"
+#include "serial_link.h"
 
 #include "../res/intro_screen_tiles.h"
 #include "../res/game_board_map.h"
@@ -44,6 +45,10 @@
 
 const UINT8 NEXT_PIECE_BG_TILE = TILE_ID_BOARD_NEXT_PIECE_PREVIEW_BG;
 const UINT8 NEXT_PIECE_BG_PAL  = BG_PAL_BOARD_NEXT_PIECE_PREVIEW;
+
+const UINT8 LINK_ICONS[3] = {TILE_ID_2P_LINK_START,     // GB Icon
+                             TILE_ID_2P_LINK_START + 1, // Text
+                             TILE_ID_2P_LINK_START};    // GB Icon
 
 
 // TODO: this could be collapsed into a single set of 4
@@ -176,6 +181,12 @@ void board_gfx_init_background(void) {
             PRINT(DISPLAY_NUMPETS_X,  DISPLAY_NUMPETS_Y - 1,  "PETS", 0);
         }
 
+        // Show a status icon if link connected
+        if (link_status == LINK_STATUS_CONNECTED) {
+            set_bkg_tiles(LINK_STATUS_X, LINK_STATUS_Y,
+                          ARRAY_LEN(LINK_ICONS),1,
+                          LINK_ICONS);
+        }
 
         SHOW_BKG;
 }
