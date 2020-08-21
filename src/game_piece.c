@@ -19,6 +19,7 @@
 #include "serial_link.h"
 
 #include "options.h"
+#include "gfx.h"
 #include "game_piece.h"
 #include "game_piece_data.h"
 #include "player_info.h"
@@ -58,32 +59,39 @@ void game_piece_next_generate(void) {
         // Otherwise generate a single random new pet tile piece
 
         // If connected by link then only use rand() so that the
-        // games start with the same random number sequence
+        // games follow the same random number sequence
         if (link_status == LINK_STATUS_CONNECTED) {
+            // 2-Player mode
             game_piece_next = ((UINT8)rand() & 0x1F);
         } else {
-            // In 1-player mode
-            // Use rand() ^ DIV_REG to add more variety to the random number sequence
-            // game_piece_next = ((UINT8)DIV_REG & 0x1F);
+            // In 1-player mode mix in DIV_REG for a little more variety to the random number sequence
             game_piece_next = ((UINT8)(rand() ^ DIV_REG) & 0x1F);
         }
 
-        // In Tail Cleanup mode
-        // suppress tail pieces to make it less frustrating
+        // Increase the count of total pieces used in the game
+        // if (player_numpieces < 0xFFFE) // Probably not necessary to prevent wraparound
+        player_numpieces++;
+
+        // Check to see whether a special piece (merge) should be delivered
+        if ((player_numpieces & p_game_settings->spec_merge_threshold_pieces) == p_game_settings->spec_merge_threshold_pieces)
+            game_piece_next_set(GP_SPECIAL_LIGHTENING);
+
+
+        // == New piece adjusments to improve player experience in various modes ==
+
+        // Tail Cleanup : suppress adding tail pieces to make it less frustrating
         if ((option_game_type == OPTION_GAME_TYPE_PET_CLEANUP) &&
             ((game_piece_next & GP_SEG_MASK) == GP_SEG_TAIL_BITS)) {
 
             // Translate Tail pieces to Head pieces
             game_piece_next = (game_piece_next & ~GP_SEG_MASK) | GP_SEG_HEAD_BITS;
 
-        // In Crunch-up mode
-        // suppress all L-Turn pieces to make it less frustrating
+        // Crunch-up mode: suppress all L-Turn pieces to make it less frustrating
         } else if ((option_game_type == OPTION_GAME_TYPE_CRUNCH_UP) &&
             ((game_piece_next & GP_SEG_MASK) == GP_SEG_TURN_BITS)) {
 
             // Translate L-Turn pieces to Torso
             game_piece_next = (game_piece_next & ~GP_SEG_MASK) | GP_SEG_TORSO_BITS;
-
         }
     }
 }

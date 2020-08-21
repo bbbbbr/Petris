@@ -80,13 +80,7 @@ UINT8 player_piece_try_reload(void) {
     player_piece = game_piece_next_get();
 
     // Generate the next upcoming piece and display it
-    // TODO: to simplify, move this into game_piece_next_get()?
     game_piece_next_generate();
-
-    // Count the new piece
-    // --> this should be called after game_piece_next_generate()
-    // TODO: move this into game_piece_next_generate?
-    new_piece_count_increment();
 
     // Show a preview of the next piece, if applicable
     game_piece_next_show(TRUE);

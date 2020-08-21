@@ -41,16 +41,6 @@ UINT16 player_numpieces;
 
 UINT8 level_increment_enqueue;
 
-void new_piece_count_increment(void) {
-    player_numpieces++;
-
-    // Check to see whether a special piece (merge) should be delivered
-    if ((player_numpieces & p_game_settings->spec_merge_threshold_pieces) == p_game_settings->spec_merge_threshold_pieces)
-        game_piece_next_set(GP_SPECIAL_LIGHTENING);
-
-}
-
-// extern game_speed_frames_per_drop; // TODO: DEBUG: REMOVE
 
 
 void player_info_display(void) {
