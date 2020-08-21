@@ -37,8 +37,6 @@
 #include "../res/pet_tiles.h"
 #include "../res/font_tiles.h"
 
-// OPTIONAL: Wraparound for menu selection changes
-// #define OPTION_MENU_WRAPAROUND_ENABLED
 
 
 #define SPR_OPTIONS_CURSOR 0 // Cursor is sprite "0"
@@ -159,29 +157,23 @@ void options_screen_setting_update(INT8 dir) {
     // "Start Game" menu entry has no settings
     if (options_menu_index != OPTION_MENU_STARTGAME) {
 
-        // Play a sound when moving the cursor
-        if (dir != 0) {
-            PLAY_SOUND_OPTION_CURSOR_MOVE;
-        }
-
         // Update setting
         *(options[options_menu_index].p_curval) += dir;
 
         // Handle Min/Max
         if (*(options[options_menu_index].p_curval) < OPTION_SETTING_MIN) {
-            #ifdef OPTION_MENU_WRAPAROUND_ENABLED
-                *(options[options_menu_index].p_curval) = options[options_menu_index].opt_entries - 1; // zero indexed array
-            #else
                 *(options[options_menu_index].p_curval) = OPTION_SETTING_MIN;
-            #endif
         }
         else if (*(options[options_menu_index].p_curval) >= options[options_menu_index].opt_entries) {
-            #ifdef OPTION_MENU_WRAPAROUND_ENABLED
-                *(options[options_menu_index].p_curval) = OPTION_SETTING_MIN;
-            #else
                 *(options[options_menu_index].p_curval) = options[options_menu_index].opt_entries - 1; // zero indexed array
-            #endif
+        } else {
+            // Only play a sound if the cursor moved and wasn't clamped to min/max
+            if (dir != 0) {
+                PLAY_SOUND_OPTION_CURSOR_MOVE;
+            }
+
         }
+
 
         options_screen_setting_draw(options_menu_index);
 
