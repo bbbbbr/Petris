@@ -103,52 +103,42 @@ void link_isr(void) {
 
     link_data = SB_REG;
 
-
-    // Select command (lower nybble)
-    switch (link_data & LINK_CMD_MASK) {
+    if (link_status == LINK_STATUS_RESET) {
 
         // === LINK-CONNECTION commands
 
-        case LINK_CMD_INITIATE:
-            if (link_status == LINK_STATUS_RESET) {
+        switch (link_data & LINK_CMD_MASK) {
 
+            case LINK_CMD_INITIATE:
                 // Send Ready to send random number seed
                 // Then wait for transfer to complete
                 link_rand_init = DIV_REG & LINK_DATA_MASK;
                 LINK_SEND(LINK_CMD_RANDLO | (link_rand_init & LINK_DATA_MASK));
-            }
-            break;
+                break;
 
-
-        case LINK_CMD_RANDLO:
-            if (link_status == LINK_STATUS_RESET) {
-                // Save incoming low nybble
+            case LINK_CMD_RANDLO:
+                // Save incoming low nybble of shared random number seed
                 // Then generate the high nybble and send it
                 link_rand_init = (link_data & LINK_DATA_MASK) | (DIV_REG & 0xF0);
                 LINK_SEND(LINK_CMD_RANDHI | (link_rand_init >> 4) & LINK_DATA_MASK);
-            }
-            break;
+                break;
 
-        case LINK_CMD_RANDHI:
-            if (link_status == LINK_STATUS_RESET) {
-                // Save incoming hi nybble
+            case LINK_CMD_RANDHI:
+                // Save incoming hi nybble of shared random number seed
                 link_rand_init |= (link_data & LINK_DATA_MASK) << 4;
 
                 // Send ready to start & Game Type
                 //
-                // Wait until the transfer is complete
-                // then set link status to connected.
+                // Wait until the transfer is complete then set link status to connected.
                 // That should happen at a similar-ish time
                 // as the other player processing LINK_CMD_READY
                 LINK_SEND(LINK_CMD_READY | (option_game_type & LINK_DATA_MASK));
                 while (SC_REG & LINK_XFER_START);
 
                 link_status = LINK_STATUS_CONNECTED;
-            }
-            break;
+                break;
 
-        case LINK_CMD_READY:
-            if (link_status == LINK_STATUS_RESET) {
+            case LINK_CMD_READY:
                 // Save/apply incoming game type
                 option_game_type = link_data & LINK_DATA_MASK;
 
@@ -156,31 +146,30 @@ void link_isr(void) {
                 // should cause both players to start
                 // at a similar-ish time
                 link_status = LINK_STATUS_CONNECTED;
-            }
-            break;
-
+                break;
+        }
+    } else if (link_status == LINK_STATUS_CONNECTED) {
 
         // === IN-GAME commands
 
-        case LINK_CMD_OPPONENT_LOST:
-            if (link_status == LINK_STATUS_CONNECTED)
-                game_state = GAME_WON_LINK_VERSUS;
-            break;
+        switch (link_data & LINK_CMD_MASK) {
 
-        case LINK_CMD_CRUNCHUP:
-            if (link_status == LINK_STATUS_CONNECTED)
-                game_crunchups_enqueued++; // enqueue a(nother) crunch-up
-            break;
+            case LINK_CMD_OPPONENT_LOST:
+                    game_state = GAME_WON_LINK_VERSUS;
+                break;
 
-        case LINK_CMD_PAUSE:
-            if (link_status == LINK_STATUS_CONNECTED)
-                game_is_paused = TRUE;
-            break;
+            case LINK_CMD_CRUNCHUP:
+                    game_crunchups_enqueued++; // enqueue a(nother) crunch-up
+                break;
 
-        case LINK_CMD_UNPAUSE:
-            if (link_status == LINK_STATUS_CONNECTED)
-                game_is_paused = FALSE;
-            break;
+            case LINK_CMD_PAUSE:
+                    game_is_paused = TRUE;
+                break;
+
+            case LINK_CMD_UNPAUSE:
+                    game_is_paused = FALSE;
+                break;
+        }
     }
 
 // ***** POSSIBLE BUG? ****
