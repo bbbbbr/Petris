@@ -20,21 +20,26 @@
 #define LINK_XFER_MASK  0x80U
 
 // Game serial link command structure
-#define LINK_COM_NOCONNECT   0xFFU
-#define LINK_COM_CHK_MASK    0xF0U // Mask for command check bits
-#define LINK_COM_CHK_XFER    0xA0U // Command transfer bits
-#define LINK_COM_CHK_IGNORE  0x50U // Ignore transfer bits
-#define LINK_COM_CTRL_MASK   0x0FU // Mask for incoming command bits
+#define LINK_CMD_NOCONNECT   0xFFU
+#define LINK_CMD_MASK        0xF0U // Mask for command check bits
+#define LINK_DATA_MASK       0x0FU // Mask for incoming command bits
 
 
 // Game serial link commands
-#define LINK_COM_INITIATE       0x01U  // Signal that player is ready to start
-#define LINK_COM_SYNCRAND       0x02U
-#define LINK_COM_READY          0x03U  // Signal that player is ready to start
-#define LINK_COM_OPPONENT_LOST  0x04U  // Signal that player lost, so opponent won
-#define LINK_COM_CRUNCHUP       0x05U  // Send a crunch-up to the othe player
-#define LINK_COM_PAUSE          0x06U
-#define LINK_COM_UNPAUSE        0x07U
+// Should only use bits within LINK_CMD_MASK
+// LINK-CONNECTION commands
+#define LINK_CMD_INITIATE       0x10U  // Signal that player is ready to start
+#define LINK_CMD_RANDLO         0x20U  // Random Number low bits
+#define LINK_CMD_RANDHI         0x30U  // Random Number high bits
+#define LINK_CMD_READY          0x40U  // Signal that player is ready to start
+// IN-GAME commands
+#define LINK_CMD_OPPONENT_LOST  0x50U  // Signal that player lost, so opponent won
+#define LINK_CMD_CRUNCHUP       0x60U  // Send a crunch-up to the othe player
+#define LINK_CMD_PAUSE          0x70U  // Send Pause
+#define LINK_CMD_UNPAUSE        0x80U  // Send Un-Pause
+//
+#define LINK_CMD_IGNORE         0xF0U  // Keep as 0xF0 since Link with No external GB may return 0xFF
+
 
 // Game serial link status
 typedef enum {
@@ -71,7 +76,7 @@ extern UINT8 link_rand_init;
 // 3. SC_REG -> Enable transfer bit (leave clock set to external)
 #define LINK_WAIT_RECEIVE \
     SC_REG = LINK_CLOCK_EXT; \
-    SB_REG = LINK_COM_CHK_IGNORE; \
+    SB_REG = LINK_CMD_IGNORE; \
     SC_REG = (LINK_XFER_START | LINK_CLOCK_EXT);
 
 void init_link(void);

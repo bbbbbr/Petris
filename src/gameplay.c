@@ -236,7 +236,7 @@ void gameplay_handle_pause(void) {
 
             // If 2 Player then send unpause
             if (link_status == LINK_STATUS_CONNECTED) {
-                 LINK_SEND(LINK_COM_CHK_XFER | LINK_COM_UNPAUSE);
+                 LINK_SEND( LINK_CMD_UNPAUSE);
             }
     }
 
@@ -330,7 +330,7 @@ void gameplay_handle_input(void) {
 
                 // If 2 Player then send pause
                 if (link_status == LINK_STATUS_CONNECTED) {
-                     LINK_SEND(LINK_COM_CHK_XFER | LINK_COM_PAUSE);
+                     LINK_SEND(LINK_CMD_PAUSE);
                 }
             }
         }

@@ -558,7 +558,7 @@ void board_handle_pet_completed(UINT8 flags) {
             // Only send once, right as the threshold is met
             if ((c == BRD_TILE_COUNT_BONUS_SOUND_THRESHOLD) &&
                 (link_status == LINK_STATUS_CONNECTED)) {
-                LINK_SEND(LINK_COM_CHK_XFER | LINK_COM_CRUNCHUP);
+                LINK_SEND(LINK_CMD_CRUNCHUP);
             }
         }
         else {

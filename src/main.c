@@ -40,11 +40,13 @@
 #include "gfx.h"
 #include "gfx_print.h"
 #include "serial_link.h"
-// #include "game_board_gfx.h"
 
 #include "magic_code.h"
 
 #include "../res/font_tiles.h"
+
+
+#define DEBUG_SKIP_INTRO
 
 void init (void);
 void init_interrupts(void);
@@ -154,7 +156,12 @@ void main(void){
 
     magic_code_reset();
 
-    intro_splash();
+    #ifdef DEBUG_SKIP_INTRO
+        game_state = GAME_OPTIONS_INIT;
+    #else
+        intro_splash();
+    #endif
+
 
     while(1) {
         // Wait for vertical blank (end of the frame)
@@ -232,8 +239,11 @@ void main(void){
 
             case GAME_ENDED:
                 // If in 2 player versus mode, notify other player they won
+                //
+                // The command is sent from here since GAME_ENDED can be
+                // triggered in multiple locations based on game type
                 if (link_status == LINK_STATUS_CONNECTED) {
-                    LINK_SEND(LINK_COM_CHK_XFER | LINK_COM_OPPONENT_LOST);
+                    LINK_SEND(LINK_CMD_OPPONENT_LOST);
                 }
 
                 MusicStop();

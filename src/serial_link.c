@@ -36,6 +36,7 @@
 #include <stdlib.h>
 
 #include "common.h"
+#include "options.h"
 
 #include "input.h"
 #include "gameplay.h"
@@ -71,7 +72,7 @@ void link_reset(void) {
     // Set to external clock as default
     // Load a placeholder byte into the transfer register
     SC_REG = LINK_CLOCK_EXT;
-    SB_REG = LINK_COM_CHK_IGNORE;
+    SB_REG = LINK_CMD_IGNORE;
 }
 
 
@@ -102,85 +103,82 @@ void link_isr(void) {
 
     link_data = SB_REG;
 
-    // Make sure it's a command packet (upper nybble)
-    if ((link_data & LINK_COM_CHK_MASK) == LINK_COM_CHK_XFER) {
 
-// THIS seems to work
-// but it could probably be implemented more simply
-// Rand Low/Rand Hi commands instead?
-// #define LINK_COM_CHK_RANDLO  0xB0 // Ignore transfer bits
-// #define LINK_COM_CHK_RANDHI  0xB0 // Ignore transfer bits
-// TODO: reduce number of control mask bits???
-// Create built-in payload bits?
+    // Select command (lower nybble)
+    switch (link_data & LINK_CMD_MASK) {
 
-        // Select command (lower nybble)
-        switch (link_data & LINK_COM_CTRL_MASK) {
+        // === LINK-CONNECTION commands
 
-            case LINK_COM_INITIATE:
-                // Lock out initiating a connection if already connected
-                if (link_status == LINK_STATUS_RESET) {
+        case LINK_CMD_INITIATE:
+            if (link_status == LINK_STATUS_RESET) {
 
-                    // Send Ready to send random number seed
-                    // Then wait for transfer to complete
-                    LINK_SEND(LINK_COM_CHK_XFER | LINK_COM_SYNCRAND);
-                    while (SC_REG & LINK_XFER_START);
-
-                    // Generate a seed for the random number generator
-                    // and send it to the other player
-                    link_rand_init = DIV_REG >> 1;
-                    LINK_SEND(link_rand_init);
-
-                }
-                break;
+                // Send Ready to send random number seed
+                // Then wait for transfer to complete
+                link_rand_init = DIV_REG & LINK_DATA_MASK;
+                LINK_SEND(LINK_CMD_RANDLO | (link_rand_init & LINK_DATA_MASK));
+            }
+            break;
 
 
-            case LINK_COM_SYNCRAND:
+        case LINK_CMD_RANDLO:
+            if (link_status == LINK_STATUS_RESET) {
+                // Save incoming low nybble
+                // Then generate the high nybble and send it
+                link_rand_init = (link_data & LINK_DATA_MASK) | (DIV_REG & 0xF0);
+                LINK_SEND(LINK_CMD_RANDHI | (link_rand_init >> 4) & LINK_DATA_MASK);
+            }
+            break;
 
-                if (link_status == LINK_STATUS_RESET) {
-                    // Wait to receive the second byte which
-                    // is the seed for the random number generator
-                    LINK_WAIT_RECEIVE;
-                    while (SC_REG & LINK_XFER_START);
+        case LINK_CMD_RANDHI:
+            if (link_status == LINK_STATUS_RESET) {
+                // Save incoming hi nybble
+                link_rand_init |= (link_data & LINK_DATA_MASK) << 4;
 
-                    // Save seed from Serial Link Reg
-                    link_rand_init = SB_REG;
+                // Send ready to start & Game Type
+                //
+                // Wait until the transfer is complete
+                // then set link status to connected.
+                // That should happen at a similar-ish time
+                // as the other player processing LINK_CMD_READY
+                LINK_SEND(LINK_CMD_READY | (option_game_type & LINK_DATA_MASK));
+                while (SC_REG & LINK_XFER_START);
 
-                    // Send ready to start
-                    // Wait until the transmit is complete
-                    // then set link status to connected.
-                    // That should happen at a similar-ish time
-                    // as the other player processing LINK_COM_READY
-                    LINK_SEND(LINK_COM_CHK_XFER | LINK_COM_READY);
-                    while (SC_REG & LINK_XFER_START);
-                    link_status = LINK_STATUS_CONNECTED;
-                }
-                break;
-
-            case LINK_COM_READY:
-                // Send immediate reply of
                 link_status = LINK_STATUS_CONNECTED;
-                break;
+            }
+            break;
 
-            case LINK_COM_OPPONENT_LOST:
-                if (link_status == LINK_STATUS_CONNECTED)
-                    game_state = GAME_WON_LINK_VERSUS;
-                break;
+        case LINK_CMD_READY:
+            // Save/apply incoming game type
+            option_game_type = link_data & LINK_DATA_MASK;
 
-            case LINK_COM_CRUNCHUP:
-                if (link_status == LINK_STATUS_CONNECTED)
-                    game_crunchups_enqueued++; // enqueue a(nother) crunch-up
-                break;
+            // This will complete the connection
+            // should cause both players to start
+            // at a similar-ish time
+            link_status = LINK_STATUS_CONNECTED;
+            break;
 
-            case LINK_COM_PAUSE:
-                if (link_status == LINK_STATUS_CONNECTED)
-                    game_is_paused = TRUE;
-                break;
 
-            case LINK_COM_UNPAUSE:
-                if (link_status == LINK_STATUS_CONNECTED)
-                    game_is_paused = FALSE;
-                break;
-        }
+        // === IN-GAME commands
+
+        case LINK_CMD_OPPONENT_LOST:
+            if (link_status == LINK_STATUS_CONNECTED)
+                game_state = GAME_WON_LINK_VERSUS;
+            break;
+
+        case LINK_CMD_CRUNCHUP:
+            if (link_status == LINK_STATUS_CONNECTED)
+                game_crunchups_enqueued++; // enqueue a(nother) crunch-up
+            break;
+
+        case LINK_CMD_PAUSE:
+            if (link_status == LINK_STATUS_CONNECTED)
+                game_is_paused = TRUE;
+            break;
+
+        case LINK_CMD_UNPAUSE:
+            if (link_status == LINK_STATUS_CONNECTED)
+                game_is_paused = FALSE;
+            break;
     }
 
 // ***** POSSIBLE BUG? ****
@@ -192,6 +190,7 @@ void link_isr(void) {
     // Return to waiting on an external clock (transfer bit not set) to wait for a sender
     LINK_WAIT_RECEIVE;
 }
+
 
 
 void link_try_connect(void) {
@@ -208,7 +207,7 @@ void link_try_connect(void) {
     // Reset the link and sent a connection request
     link_reset();
     link_enable();
-    LINK_SEND(LINK_COM_CHK_XFER | LINK_COM_INITIATE);
+    LINK_SEND(LINK_CMD_INITIATE);
 
     // Wait a couple seconds to see if connection succeeds
     while (link_status != LINK_STATUS_CONNECTED) {
@@ -225,7 +224,7 @@ void link_try_connect(void) {
         } else if ((timeout & LINK_CONNECT_RESEND_MASK) == 0x00) {
 
             // Re-send the connection request every N frames
-            LINK_SEND(LINK_COM_CHK_XFER | LINK_COM_INITIATE);
+            LINK_SEND(LINK_CMD_INITIATE);
         }
 
         UPDATE_KEYS();
