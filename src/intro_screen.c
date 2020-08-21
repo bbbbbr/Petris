@@ -31,6 +31,15 @@
 #include "../res/font_tiles.h"
 
 
+// Turn this effect off when running in the JS emu to
+// avoid flicker since it doesn't have multi-frame
+// blending to compensate for inexact display refresh rates
+//
+// For normal use, control this via the makefile with: "make BUILDWEB=ON run"
+// In the makefile it defaults to being #defined
+//
+// #define TRANSLUCENT_CLOUDS_ON
+
 
 #define SPR_PAL_CLOUDS         BG_PAL_4
 #define SPR_TILE_COUNT_CLOUDS  TILE_COUNT_CLOUDS
@@ -104,11 +113,14 @@ void intro_clouds_update(void) {
 
     UINT8 c;
 
-    // // Flicker clouds off/on every other frame
-    // if (sys_time & 0x01)
-    //     HIDE_SPRITES;
-    // else
-    //     SHOW_SPRITES;
+    // Semi-transparent effect by Flickering clouds
+    // off/on every other frame
+    #ifdef TRANSLUCENT_CLOUDS_ON
+        if (sys_time & 0x01)
+            HIDE_SPRITES;
+        else
+            SHOW_SPRITES;
+    #endif
 
     // Loop through all cloud sprites
     for(c = 0; c <= SPR_CLOUD_MAX; c++) {

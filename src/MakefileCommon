@@ -22,6 +22,8 @@
 BUILD_TYPE = ReleaseColor
 # BUILD_TYPE = DebugColor
 CGB = yes
+# To get cart type, see source for gbxcart_rw_flasher_v1.34.c
+CARTTYPE = 103
 
 ifneq (,$(findstring Release,$(BUILD_TYPE)))
 	BUILD_DEFS += -DNDEBUG
@@ -86,6 +88,12 @@ ifneq (,$(findstring Color,$(BUILD_TYPE)))
 	LFLAGS_NBANKS += -Wl-yp0x143=0xC0
 	CFLAGS += -DCGB
 	EXTENSION = gbc
+endif
+
+# Only turn on intro temporal faded clouds if this isn't a web build
+# make BUILDWEB=ON run
+ifndef BUILDWEB
+	CFLAGS += -DTRANSLUCENT_CLOUDS_ON
 endif
 
 LFLAGS = $(LFLAGS_NBANKS)
@@ -207,4 +215,19 @@ run: all
 	@if test -f $(RUNTARGET); then \
 		echo Running $(RUNTARGET); \
 		$(BGB) $(RUNTARGET); \
+	fi
+
+runlink: all
+	$(info $$BGB is [${BGB}])
+	@if test -f $(RUNTARGET); then \
+		echo Running $(RUNTARGET); \
+		($(BGB) $(RUNTARGET) --listen 127.0.0.1:8765 &); \
+		($(BGB) $(RUNTARGET) --connect 127.0.0.1:8765 &); \
+	fi
+
+flashcart: all
+	$(info $$GBXFLASHER is [${GBXFLASHER}])
+	@if test -f $(RUNTARGET); then \
+		echo Flashing $(RUNTARGET); \
+		$(GBXFLASHER) $(RUNTARGET) $(CARTTYPE); \
 	fi

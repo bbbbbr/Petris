@@ -36,12 +36,6 @@ UINT8 game_type_cleanup_tail_count;
 UINT8 game_type_long_pet_required_size;
 
 
-#define GAME_TYPE_PET_CLEANUP_TAIL_COUNT_MIN 3
-#define GAME_TYPE_PET_CLEANUP_TAIL_COUNT_MAX 20
-
-#define GAME_TYPE_PET_LONG_PET_SIZE_MIN 3
-#define GAME_TYPE_PET_LONG_PET_SIZE_MAX 40
-
 void game_types_init(void) {
 
     game_type_cleanup_tail_count = 0;
@@ -71,6 +65,7 @@ void game_types_handle_level_transition(void) {
 
         // Implied:
         // if ((option_game_type == OPTION_GAME_TYPE_LEVEL_UP) ||
+        //     (option_game_type == OPTION_GAME_TYPE_CRUNCH_UP) ||
         //     (option_game_type == OPTION_GAME_TYPE_PET_CLEANUP) ||
         //     (option_game_type == OPTION_GAME_TYPE_LONG_PET)) {
 
@@ -107,7 +102,7 @@ void game_types_handle_level_transition(void) {
 }
 
 
-UINT8 game_type_pet_cleanup_get_tail_count(UINT8 player_level) {
+UINT8 game_type_pet_cleanup_get_tail_count(void) {
 
     UINT8 num_pets;
 

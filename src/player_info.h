@@ -13,6 +13,8 @@
 #define GAME_SPEED_DROP_FRAME_COUNTER_RESET    0
 // #define GAME_SPEED_FRAMES_PER_DROP_DEFAULT  6 // 12 //30 // 15 // 60 frames per second default speed
 
+#define LINK_STATUS_X 1
+#define LINK_STATUS_Y 0
 
 #define DISPLAY_NEXT_PIECE_TEXT_X 1
 #define DISPLAY_NEXT_PIECE_TEXT_Y 10
@@ -53,11 +55,11 @@
 // Transition to a new palette every N levels
 #define LEVEL_CHANGE_PAL_NUM 5 // (5 alternate palettes total)
 
-// TODO: move this to a more centralized options/settings area?
 // #define PLAYER_TILES_PER_LEVEL  20 // 25
 #define PLAYER_PETS_PER_LEVEL   20 // 10
 
 extern UINT16 player_level;
+extern UINT16 player_numpieces;
 extern UINT8 level_increment_enqueue;
 
 void score_update(UINT16 num_tiles);
@@ -70,8 +72,6 @@ void level_show(void);
 
 void player_info_display(void);
 void player_info_newgame_reset(void);
-
-void new_piece_count_increment(void);
 
 #endif // PLAYER_INFO_H
 

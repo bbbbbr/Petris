@@ -80,13 +80,7 @@ UINT8 player_piece_try_reload(void) {
     player_piece = game_piece_next_get();
 
     // Generate the next upcoming piece and display it
-    // TODO: to simplify, move this into game_piece_next_get()?
     game_piece_next_generate();
-
-    // Count the new piece
-    // --> this should be called after game_piece_next_generate()
-    // TODO: move this into game_piece_next_generate?
-    new_piece_count_increment();
 
     // Show a preview of the next piece, if applicable
     game_piece_next_show(TRUE);
@@ -192,6 +186,7 @@ UINT8 player_piece_move(INT8 dir_x, INT8 dir_y) {
     // TODO: optimize?
     if ((new_x >= BRD_MIN_X) &&
         (new_x <= BRD_MAX_X) &&
+        (new_y >= BRD_MIN_Y) &&
         (new_y <= BRD_MAX_Y) &&
          board_check_open_xy(new_x, new_y)) {
 

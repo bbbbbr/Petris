@@ -10,19 +10,24 @@ UINT8 previous_keys = 0x00;
 UINT8 key_repeat_count = 0x00;
 
 // Reduce CPU usage by only checking once per frame
-void waitpad_lowcpu(UINT8 button_mask, UINT8 wait_type) {
+// Allows a loop control to be passed in
+void waitpadticked_lowcpu(UINT8 button_mask, volatile UINT8 * loop_control) {
 
-    UINT8 test_result;
+    UINT8 always_loop = 1;
 
-    // J_WAIT_ANY_PRESSED  waits until ANY masked button is pressed
-    // J_WAIT_ALL_RELEASED waits until ALL masked buttons are released
-    do {
-        wait_vbl_done();
+    // If no loop control var specified, use a placeholder
+    if (loop_control == NULL)
+        loop_control = &always_loop;
 
-        test_result = (joypad() & button_mask);
+    while (*loop_control) {
 
-        if (wait_type == J_WAIT_ANY_PRESSED)
-            test_result = !test_result;
+        wait_vbl_done(); // yield CPU
+        UPDATE_KEYS();
+        if (KEY_TICKED(button_mask))
+            break;
+    };
 
-    }  while (test_result);
+    // Prevent passing through any key ticked
+    // event that may have just happened
+    UPDATE_KEYS();
 }

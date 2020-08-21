@@ -16,7 +16,7 @@
 
 #define ANY_KEY_PRESSED (keys)
 
-void waitpad_lowcpu(UINT8, UINT8);
+void waitpadticked_lowcpu(UINT8 button_mask, volatile UINT8 * loop_control);
 
 extern UINT8 keys;
 extern UINT8 previous_keys;

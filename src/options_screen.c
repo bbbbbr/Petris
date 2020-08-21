@@ -19,6 +19,7 @@
 #include "gfx.h"
 #include "gfx_print.h"
 #include "input.h"
+#include "serial_link.h"
 
 #include "sound.h"
 #include "gbt_player.h"
@@ -36,8 +37,6 @@
 #include "../res/pet_tiles.h"
 #include "../res/font_tiles.h"
 
-// OPTIONAL: Wraparound for menu selection changes
-// #define OPTION_MENU_WRAPAROUND_ENABLED
 
 
 #define SPR_OPTIONS_CURSOR 0 // Cursor is sprite "0"
@@ -67,17 +66,21 @@ enum {
     OPTION_MENU_TYPE = OPTION_MENU_MIN,
     OPTION_MENU_LEVEL,
     OPTION_MENU_MUSIC,
-    OPTION_MENU_STARTGAME,
-    OPTION_MENU_VISUAL_HINTS,
-    OPTION_MENU_HIGH_CONTRAST,
 
-    OPTION_MENU_MAX = OPTION_MENU_HIGH_CONTRAST
+    OPTION_MENU_STARTGAME,
+
+    OPTION_MENU_LINK2P,
+    OPTION_MENU_HIGH_CONTRAST,
+    OPTION_MENU_VISUAL_HINTS,
+
+    OPTION_MENU_MAX = OPTION_MENU_VISUAL_HINTS
 } option_menu_entries;
 
 
 // Trailing spaces are to clear out previous option value text
 const char * options_type[]         = {"LONG PET    ",
                                        "TAIL CLEANUP",
+                                       "CRUNCH UP   ",
                                        "LEVEL UP    ",
                                        "MARATHON    "}; // Must match : option_game_type_entries
 const char * options_difficulty[]   = {"EASY  ",
@@ -85,7 +88,8 @@ const char * options_difficulty[]   = {"EASY  ",
                                        "HARD  ",
                                        "EXPERT ",
                                        "BEAST "}; // Must match : option_difficulty_entries
-const char * options_visual_hints[] = {"ON ", "OFF"}; // Must match : option_visual_hints_entries
+const char * options_link2p[]        = {"OFF", "ON "}; // Must match : option_link2p_entries
+const char * options_visual_hints[]  = {"ON ", "OFF"}; // Must match : option_visual_hints_entries
 const char * options_high_contrast[] = {"OFF", "MED", "HI "}; // Must match : option_visual_hints_entries
 
 const char * options_music[] = {"TWILIGHT",
@@ -107,12 +111,13 @@ typedef struct opt_item {
 
 // See above for meaning of each element
 const option_item options[] = {
-        {  5,"TYPE :",         (INT8)ARRAY_LEN(options_type),         &options_type[0]        , &option_game_type},
-        {  7,"LEVEL:",        (INT8)ARRAY_LEN(options_difficulty),   &options_difficulty[0]  , &option_game_difficulty},
-        {  9,"MUSIC:",        (INT8)ARRAY_LEN(options_music),        &options_music[0],        &option_game_music},
-        { 12,"   START GAME ", (INT8)ARRAY_LEN(options_visual_hints), NULL, NULL},
-        { 15,"VISUAL HINTS: ", (INT8)ARRAY_LEN(options_visual_hints), &options_visual_hints[0], &option_game_visual_hints},
-        { 16,"HI CONTRAST : ", (INT8)ARRAY_LEN(options_high_contrast), &options_high_contrast[0], &option_game_high_contrast},
+        {  5,"TYPE :",         (INT8)ARRAY_LEN(options_type),          &options_type[0],          &option_game_type},
+        {  7,"LEVEL:",         (INT8)ARRAY_LEN(options_difficulty),    &options_difficulty[0],    &option_game_difficulty},
+        {  9,"MUSIC:",         (INT8)ARRAY_LEN(options_music),         &options_music[0],         &option_game_music},
+        { 12,"   START GAME ", (INT8)ARRAY_LEN(options_visual_hints),  NULL, NULL},
+        { 14,"2 PLAYER VS.: ", (INT8)ARRAY_LEN(options_link2p),        &options_link2p[0],        &option_game_link2p},
+        { 15,"HI CONTRAST : ", (INT8)ARRAY_LEN(options_high_contrast), &options_high_contrast[0], &option_game_high_contrast},
+        { 16,"VISUAL HINTS: ", (INT8)ARRAY_LEN(options_visual_hints),  &options_visual_hints[0],  &option_game_visual_hints},
     };
 
 
@@ -152,29 +157,23 @@ void options_screen_setting_update(INT8 dir) {
     // "Start Game" menu entry has no settings
     if (options_menu_index != OPTION_MENU_STARTGAME) {
 
-        // Play a sound when moving the cursor
-        if (dir != 0) {
-            PLAY_SOUND_OPTION_CURSOR_MOVE;
-        }
-
         // Update setting
         *(options[options_menu_index].p_curval) += dir;
 
         // Handle Min/Max
         if (*(options[options_menu_index].p_curval) < OPTION_SETTING_MIN) {
-            #ifdef OPTION_MENU_WRAPAROUND_ENABLED
-                *(options[options_menu_index].p_curval) = options[options_menu_index].opt_entries - 1; // zero indexed array
-            #else
                 *(options[options_menu_index].p_curval) = OPTION_SETTING_MIN;
-            #endif
         }
         else if (*(options[options_menu_index].p_curval) >= options[options_menu_index].opt_entries) {
-            #ifdef OPTION_MENU_WRAPAROUND_ENABLED
-                *(options[options_menu_index].p_curval) = OPTION_SETTING_MIN;
-            #else
                 *(options[options_menu_index].p_curval) = options[options_menu_index].opt_entries - 1; // zero indexed array
-            #endif
+        } else {
+            // Only play a sound if the cursor moved and wasn't clamped to min/max
+            if (dir != 0) {
+                PLAY_SOUND_OPTION_CURSOR_MOVE;
+            }
+
         }
+
 
         options_screen_setting_draw(options_menu_index);
 
@@ -282,13 +281,14 @@ void options_screen_init(void) {
 
     INT8 c;
 
+    // Note: The popup status window is relying on the gfx initialization here
+    //       See: status_win_popup_init()
+
     // Add a lighter font for options
     fade_set_pal(OPTION_TITLE_PRINT_PAL, 1, option_title_palette, FADE_PAL_BKG);
     // Upper 4 palettes from intro screen
     fade_set_pal(BG_PAL_4, 4, intro_screen_palette, FADE_PAL_BKG);
 
-
-    // TODO: OPTIMIZE: consolidate this? the same tiles are used in all screens so far
     set_bkg_data(TILES_INTRO_START,     TILE_COUNT_INTRO,     intro_screen_tiles);
     set_bkg_data(TILES_FONT_START,      TILE_COUNT_FONT,      font_tiles);
     set_bkg_data(TILES_PET_START,       TILE_COUNT_PETTOTAL,  pet_tiles);
@@ -310,6 +310,29 @@ void options_screen_init(void) {
 
     // Update music status to match option menu setting
     MusicUpdateStatus();
+}
+
+
+
+void options_screen_try_gamestart(void) {
+
+    // If serial link 2-Player versus is enabled
+    // then try to link up with the other player
+    // before starting the game.
+    //
+    // If times out then drop back to the option screen
+    if (option_game_link2p == OPTION_LINK2P_ON) {
+
+        link_try_connect();
+
+        // If link failed then exit without starting game
+        if (link_status != LINK_STATUS_CONNECTED)
+            return;
+    }
+
+    // If 2P versus is not enabled start immediately
+    options_screen_exit_cleanup();
+    game_state = GAME_READY_TO_START;
 }
 
 
@@ -343,8 +366,7 @@ void options_screen_handle(void) {
 
         if (options_menu_index == OPTION_MENU_STARTGAME) {
 
-            options_screen_exit_cleanup();
-            game_state = GAME_READY_TO_START;
+            options_screen_try_gamestart();
         } else {
 
             // Change value of current option
@@ -355,8 +377,7 @@ void options_screen_handle(void) {
 
         if (options_menu_index == OPTION_MENU_STARTGAME) {
 
-            options_screen_exit_cleanup();
-            game_state = GAME_READY_TO_START;
+            options_screen_try_gamestart();
         } else {
 
             // Change value of current option
@@ -368,8 +389,7 @@ void options_screen_handle(void) {
     // Start game
     else if (KEY_TICKED(J_START)) {
 
-        options_screen_exit_cleanup();
-        game_state = GAME_READY_TO_START;
+        options_screen_try_gamestart();
     }
 
     // NOTE: For now, A/B are also used to increase/decrease option settings

@@ -41,16 +41,6 @@ UINT16 player_numpieces;
 
 UINT8 level_increment_enqueue;
 
-void new_piece_count_increment(void) {
-    player_numpieces++;
-
-    // Check to see whether a special piece (merge) should be delivered
-    if ((player_numpieces & p_game_settings->spec_merge_threshold_pieces) == p_game_settings->spec_merge_threshold_pieces)
-        game_piece_next_set(GP_SPECIAL_LIGHTENING);
-
-}
-
-// extern game_speed_frames_per_drop; // TODO: DEBUG: REMOVE
 
 
 void player_info_display(void) {
@@ -74,8 +64,13 @@ void player_info_display(void) {
         // Display required Pet Size
         print_num_u16(DISPLAY_NUMPETS_X, DISPLAY_NUMPETS_Y, (UINT16)game_type_long_pet_required_size, DIGITS_3);
 
+    } else if ((option_game_type == OPTION_GAME_TYPE_LEVEL_UP)||
+               (option_game_type == OPTION_GAME_TYPE_CRUNCH_UP)) {
+        // Display pets remaining to complete level
+        print_num_u16(DISPLAY_NUMPETS_X + 2, DISPLAY_NUMPETS_Y,
+            (PLAYER_PETS_PER_LEVEL * player_level) - player_numpets, DIGITS_3);
     } else {
-        // Display Pet compelted count
+        // Display total Pet completed count
         print_num_u16(DISPLAY_NUMPETS_X, DISPLAY_NUMPETS_Y, player_numpets, DIGITS_5);
     }
 
@@ -130,9 +125,12 @@ void score_update(UINT16 num_tiles) {
     // so they display correctly during potential level changes
 
     // Queue Check for level change in game types based on
-    // number of pets completed
+    // number of pets completed.
+    // Long Pet and Pet Cleanup don't need it since they
+    // get triggered by specific completed tasks
     if ((option_game_type == OPTION_GAME_TYPE_MARATHON) ||
-        (option_game_type == OPTION_GAME_TYPE_LEVEL_UP)) {
+        (option_game_type == OPTION_GAME_TYPE_LEVEL_UP) ||
+        (option_game_type == OPTION_GAME_TYPE_CRUNCH_UP)) {
 
         if (player_numpets >= (PLAYER_PETS_PER_LEVEL * player_level)) {
             level_increment_enqueue = TRUE;

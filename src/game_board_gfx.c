@@ -18,6 +18,7 @@
 #include "game_piece_data.h"
 #include "game_board.h"
 #include "game_board_gfx.h"
+#include "gameover_message.h"
 
 #include "common.h"
 
@@ -28,6 +29,7 @@
 #include "player_gfx.h"
 #include "player_info.h"
 #include "options.h"
+#include "serial_link.h"
 
 #include "../res/intro_screen_tiles.h"
 #include "../res/game_board_map.h"
@@ -43,6 +45,10 @@
 
 const UINT8 NEXT_PIECE_BG_TILE = TILE_ID_BOARD_NEXT_PIECE_PREVIEW_BG;
 const UINT8 NEXT_PIECE_BG_PAL  = BG_PAL_BOARD_NEXT_PIECE_PREVIEW;
+
+const UINT8 LINK_ICONS[3] = {TILE_ID_2P_LINK_START,     // GB Icon
+                             TILE_ID_2P_LINK_START + 1, // Text
+                             TILE_ID_2P_LINK_START};    // GB Icon
 
 
 // TODO: this could be collapsed into a single set of 4
@@ -90,7 +96,7 @@ void board_gfx_init(void) {
     board_gfx_init_background();
     board_gfx_init_sprites();
 
-    board_gameover_animate_reset();
+    gameover_message_reset();
 
     fade_start(FADE_IN);
 }
@@ -175,6 +181,12 @@ void board_gfx_init_background(void) {
             PRINT(DISPLAY_NUMPETS_X,  DISPLAY_NUMPETS_Y - 1,  "PETS", 0);
         }
 
+        // Show a status icon if link connected
+        if (link_status == LINK_STATUS_CONNECTED) {
+            set_bkg_tiles(LINK_STATUS_X, LINK_STATUS_Y,
+                          ARRAY_LEN(LINK_ICONS),1,
+                          LINK_ICONS);
+        }
 
         SHOW_BKG;
 }
@@ -209,178 +221,3 @@ void board_gfx_tail_animate(void) {
                      p_pet_tiles + pet_tail_anim_srcoffset[tail_anim_count | tail_anim_alternate]);
     }
 }
-
-
-// #define GAMEOVER_ANIMATE_RAINBOW_PALS
-#define SPR_PAL_PRINT BG_PAL_5
-
-const INT8 SPR_GAMEOVER_CHARS[] = {'G' - 'A' + TILES_FONT_CHARS_START,
-                                    'A' - 'A' + TILES_FONT_CHARS_START,
-                                    'M' - 'A' + TILES_FONT_CHARS_START,
-                                    'E' - 'A' + TILES_FONT_CHARS_START,
-                                    'O' - 'A' + TILES_FONT_CHARS_START,
-                                    'V' - 'A' + TILES_FONT_CHARS_START,
-                                    'E' - 'A' + TILES_FONT_CHARS_START,
-                                    'R' - 'A' + TILES_FONT_CHARS_START};
-
-#define SPR_GAMEOVER_MAX_Y ((BRD_ST_Y + 8) * 8)
-#define SPR_GAMEOVER_START_X (((BRD_ST_X + 1) * 8) + 2) // 2 Pixels right of left board edge
-
-const UINT8 SPR_GAMEOVER_LUT_X[] = {SPR_GAMEOVER_START_X,
-                                    SPR_GAMEOVER_START_X + (8 * 1) + 1, // 1 pixel between each letter
-                                    SPR_GAMEOVER_START_X + (8 * 2) + 2,
-                                    SPR_GAMEOVER_START_X + (8 * 3) + 3,
-                                    // Gap between GANE -- and -- OVER
-                                    SPR_GAMEOVER_START_X + (8 * 4) + 9,
-                                    SPR_GAMEOVER_START_X + (8 * 5) + 10,
-                                    SPR_GAMEOVER_START_X + (8 * 6) + 11,
-                                    SPR_GAMEOVER_START_X + (8 * 7) + 12};
-
-
-// Pre-calculated bounce LUT
-// For calculation ref commented out version of board_gameover_animate() below
-const INT8 SPR_GAMEOVER_LUT_Y[] = {
-    0x01, 0x03, 0x06, 0x0A, 0x0F, 0x15, 0x1C, 0x24,
-    0x2D, 0x37, 0x38, 0x31, 0x2B, 0x26, 0x22, 0x1F,
-    0x1D, 0x1C, 0x1C, 0x1D, 0x1F, 0x22, 0x26, 0x2B,
-    0x31, 0x38, 0x40, 0x3B, 0x37, 0x34, 0x32, 0x31,
-    0x31, 0x32, 0x34, 0x37, 0x3B, 0x40, 0x3E, 0x3D,
-    0x3D, 0x3E, 0x40, 0x3F, 0x3F, 0x40, 0x40};
-
-#define SPR_GAMEOVER_LUT_Y_MAX (ARRAY_LEN(SPR_GAMEOVER_LUT_Y) - 1)
-
-#define GAMEOVER_UPDATE_MASK 0x03 // Only update cursor once every 8 frames
-#define SPR_GAMEOVER_GRAVITY 1
-#define SPR_GAMEOVER_LANDED  127
-
-UINT8 spr_gameover_y_idx[SPR_GAMEOVER_COUNT];
-
-
-// Drop "G A M E   O V E R" letters with a bounce, starting from left to right
-void board_gameover_animate(void) {
-
-    UINT8 c;
-    UINT8 min_spr = 0; // Used to slowly exit the loop as pieces land
-    UINT8 max_spr = 0; // Used for delay launch left to right
-
-    // Loop exits when all sprites have landed
-    while (min_spr != SPR_GAMEOVER_COUNT) {
-
-        // Add some delay and go easy on the processor
-        wait_vbl_done();
-
-        // Periodic Update
-        if ((sys_time & GAMEOVER_UPDATE_MASK) == GAMEOVER_UPDATE_MASK) {
-
-            // Delay launch from left to right
-            // by adding one more sprite during each animation pass
-            if (max_spr < SPR_GAMEOVER_COUNT)
-                max_spr++;
-
-            for (c = min_spr; c < max_spr; c++) {
-
-                // Move sprite to next Y LUT position
-                spr_gameover_y_idx[c]++;
-
-                // If it's at the end of the LUT then it's landing
-                // is complete. Increment the starting sprite past it
-                // so that on the next iteration it's excluded
-                if (spr_gameover_y_idx[c] >= SPR_GAMEOVER_LUT_Y_MAX) {
-                    min_spr++;
-                }
-
-                move_sprite(SPR_GAMEOVER_START + c,
-                            SPR_GAMEOVER_LUT_X[c],
-                            SPR_GAMEOVER_LUT_Y[ spr_gameover_y_idx[c] ]);
-
-            } // for (c = min_spr; c < max_spr; c++) {
-        } // if ((sys_time & 0x03) == 0x03)
-    } // while (min_spr != SPR_GAMEOVER_COUNT)
-}
-
-
-void board_gameover_animate_reset(void) {
-
-    UINT8 c;
-
-    for (c = 0; c< SPR_GAMEOVER_COUNT; c++) {
-        spr_gameover_y_idx[c] = 0; // Reset Y LUT position
-
-        move_sprite(SPR_GAMEOVER_START + c, 0,0);
-        set_sprite_tile(SPR_GAMEOVER_START + c, SPR_GAMEOVER_CHARS[c]);
-
-        #ifdef GAMEOVER_ANIMATE_RAINBOW_PALS
-            // Use rainbow of pet tile palettes for different letters
-            set_sprite_prop(SPR_GAMEOVER_START + c, c & 0x03);
-        #else
-            // Use solid color palette for all letter
-            set_sprite_prop(SPR_GAMEOVER_START + c, SPR_PAL_PRINT);
-        #endif
-
-    }
-}
-
-
-
-// Non-LUT version for reference
-/*
-// Drop "G A M E   O V E R" letters with a bounce, starting from left to right
-void board_gameover_animate(void) {
-
-    UINT8 c;
-    UINT8 min_spr = 0; // Used to slowly exit the loop as pieces land
-    UINT8 max_spr = 0; // Used for delay launch left to right
-
-    // Loop exits when all sprites have landed
-    while (min_spr != SPR_GAMEOVER_COUNT) {
-
-
-        // Periodic Update
-        if ((sys_time & GAMEOVER_UPDATE_MASK) == GAMEOVER_UPDATE_MASK) {
-
-            wait_vbl_done();
-
-            // Delay launch from left to right
-            // by adding one more sprite during each animation pass
-            if (max_spr < SPR_GAMEOVER_COUNT)
-                max_spr++;
-
-            for (c = min_spr; c < max_spr; c++) {
-
-                // Apply gravity to velocity
-                // and then velocity to position
-                spr_gameover_vel[c] += SPR_GAMEOVER_GRAVITY;
-                spr_gameover_y[c] += spr_gameover_vel[c];
-
-                // Bounce back if ground was reached
-                if (spr_gameover_y[c] >= SPR_GAMEOVER_MAX_Y) {
-
-                    // Decrease max speed a little on first big bounce
-                    if (spr_gameover_vel[c] > 4)
-                        spr_gameover_vel[c] -= 2;
-
-                    // Reverse direction
-                    // spr_gameover_vel[c] *= -1;
-                    spr_gameover_vel[c] = ~spr_gameover_vel[c] + 1; // i.e. *= -1
-
-                    spr_gameover_y[c] = SPR_GAMEOVER_MAX_Y; // Cap max Y
-
-                    // If sprite landed and stopped moving then de-activate it
-                    if (spr_gameover_vel[c] == 0) {
-                        // Sprites launch one after another from left to right
-                        // and land in the same order. So the landed sprite is
-                        // always the current left-most (min_spr).
-                        // De-activate by excluding it from the loop start
-                        min_spr++;
-                    }
-                }
-
-                move_sprite(SPR_GAMEOVER_START + c,
-                            SPR_GAMEOVER_LUT_X[c],
-                            spr_gameover_y[c]);
-
-            } // for (c = min_spr; c < max_spr; c++) {
-        } // if ((sys_time & 0x03) == 0x03)
-    } // while (min_spr != SPR_GAMEOVER_COUNT)
-}
-*/

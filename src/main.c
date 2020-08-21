@@ -15,6 +15,7 @@
 // #include "bgb_emu.h" // Used for debugging only, see BGB_MESSAGE
 
 #include "common.h"
+#include "serial_link.h"
 
 #include "sound.h"
 #include "gbt_player.h"
@@ -24,7 +25,10 @@
 
 // #include "game_board.h"
 #include "game_board_gfx.h"
+#include "gameover_message.h"
+
 #include "gameplay.h"
+
 #include "intro_splash.h"
 #include "intro_screen.h"
 #include "options_screen.h"
@@ -35,11 +39,14 @@
 #include "input.h"
 #include "gfx.h"
 #include "gfx_print.h"
-// #include "game_board_gfx.h"
+#include "serial_link.h"
 
 #include "magic_code.h"
 
 #include "../res/font_tiles.h"
+
+
+#define DEBUG_SKIP_INTRO
 
 void init (void);
 void init_interrupts(void);
@@ -132,6 +139,8 @@ void init (void) {
         cpu_fast();
     #endif
 
+    init_link();
+
     init_sound();
 
     // fade_start(FADE_OUT); // TODO: this can probably be skipped
@@ -147,7 +156,12 @@ void main(void){
 
     magic_code_reset();
 
-    intro_splash();
+    #ifdef DEBUG_SKIP_INTRO
+        game_state = GAME_OPTIONS_INIT;
+    #else
+        intro_splash();
+    #endif
+
 
     while(1) {
         // Wait for vertical blank (end of the frame)
@@ -208,11 +222,40 @@ void main(void){
                 break;
 
 
+            case GAME_WON_LINK_VERSUS:
+                MusicStop();
+                // TODO: Better sound for 2 Player link versus won
+                PLAY_SOUND_LEVEL_UP;
+                gameover_message_animate(SPR_YOU_WON_CHARS);
+
+                // Disconnect link (should be try if we're here)
+                if (link_status == LINK_STATUS_CONNECTED) {
+                    link_reset();
+                }
+
+                game_state = GAME_OVER_SCREEN;
+                break;
+
+
             case GAME_ENDED:
+                // If in 2 player versus mode, notify other player they won
+                //
+                // The command is sent from here since GAME_ENDED can be
+                // triggered in multiple locations based on game type
+                if (link_status == LINK_STATUS_CONNECTED) {
+                    LINK_SEND(LINK_CMD_OPPONENT_LOST);
+                }
+
                 MusicStop();
                 PLAY_SOUND_GAME_OVER;
-                // gameplay_handle_gameover_screen();
-                board_gameover_animate();
+
+                // Disconnect link
+                if (link_status == LINK_STATUS_CONNECTED) {
+                    link_reset();
+                    gameover_message_animate(SPR_YOU_LOST_CHARS);
+                } else {
+                    gameover_message_animate(SPR_GAMEOVER_CHARS);
+                }
 
                 game_state = GAME_OVER_SCREEN;
                 break;

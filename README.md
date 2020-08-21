@@ -3,31 +3,36 @@ Petris - A puzzle game of shapely pets for the Game Boy Color (CGB)
 
 (CURRENTLY A WORK IN PROGRESS, NOT YET RELEASED)
 
-Build your favorite pets in all shapes and sizes, keep ahead of dropping pieces and make it to the next level.
+* Cartridges available for purchase at ___LINK___
 
-Petris is a new home-brew 2D puzzle game built for the Game Boy Color (CGB) and will run on original hardware.
+Build your favorite pets in all shapes and sizes, keep ahead of dropping pieces and make it to the next level!
+
+Petris is a new home-brew 2D puzzle game built for the Game Boy Color (CGB) and will run on original hardware (CGB and GBA).
 
 You can [download the game here](/rom/Petris.gbc) or visit the [itch.io page](https://bbbbbr.itch.io/petris).
 
-Run it either in an emulator such as [BGB](http://bgb.bircd.org/) or on a Game Boy Color if you have a flashable cartridge.
-
+Run it either in an emulator such as [BGB](http://bgb.bircd.org/) or on a real Game Boy if you have a flashable cartridge or want to buy a cartridge from ___LINK___.
 
 ![Petris game in Long Pet game type](/info/Petris_LongPet.png)
 ![Petris game in Tail Cleanup game type](/info/petris_tail_cleanup.gif)
 
-Several game play types to choose from:
-* Marathon
-* Level Up
-* Tails Cleanup
-* Long Pet
+Several game types with different incentives and strategies:
+* *Long Pet* - Complete progressively longer pets to reach the next level
+* *Tails Cleanup* - Clear all tails off the screen per level
+* *Crunch-up* - Keep ahead as the screen crunches upward and new pets appear
+* *Level Up* - Classic level-up style
+* *Marathon* - For the long distance player
 
-Difficulty levels for all players, from relaxing to breakneck fast:
+Head-to-Head 2 Player mode over Game Boy Link Cable (CGB and GBA) for *all game types*.
+
+Difficulty levels for all players, from relaxing to breakneck speed:
 * Easy / Normal / Hard / Expert / Beast
 
-Other Options:
-* Choose from multiple sound tracks (or none)
-* Piece drop and other visual hinting can be turned on/off
+Other Options and features:
+* Choose from multiple sound tracks
+* Visual hinting for drop location/etc can be turned on/off
 * High Contrast mode for small and non-backlit screens
+
 
 ===========
 Music Credits:
@@ -43,4 +48,4 @@ Tools used
  * A little code from ZGB - https://github.com/Zal0/ZGB
  * Some GBDK patches by Toxa  - https://github.com/untoxa
  * UnaPACK aPack decompression by Toxa  - https://github.com/untoxa
- * apultra aPack compression - https://github.com/emmanuel-marty/apultra
+ * apultra aPack compression - https://github.com/emmanuel-marty/apultra]

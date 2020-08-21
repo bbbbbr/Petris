@@ -34,13 +34,18 @@
 // 3   0   50      V-V HARD    100                     40
 
 // Game Type Level
+//
+// Note: Make sure all values fit bitwise in LINK_DATA_MASK
 enum {
     OPTION_GAME_TYPE_LONG_PET,
     OPTION_GAME_TYPE_PET_CLEANUP,
+    OPTION_GAME_TYPE_CRUNCH_UP,
     OPTION_GAME_TYPE_LEVEL_UP,
     OPTION_GAME_TYPE_MARATHON,
 
     OPTION_GAME_TYPE_DEFAULT = OPTION_GAME_TYPE_LONG_PET
+    // OPTION_GAME_TYPE_DEFAULT = OPTION_GAME_TYPE_CRUNCH_UP
+    // OPTION_GAME_TYPE_DEFAULT = OPTION_GAME_TYPE_PET_CLEANUP
 } option_game_type_entries;
 
 
@@ -53,8 +58,6 @@ enum {
     OPTION_DIFFICULTY_BEAST,
 
     OPTION_DIFFICULTY_DEFAULT = OPTION_DIFFICULTY_NORMAL
-    // OPTION_DIFFICULTY_DEFAULT = OPTION_DIFFICULTY_EASY
-    // OPTION_DIFFICULTY_DEFAULT = OPTION_DIFFICULTY_HARD
 } option_difficulty_entries;
 
 
@@ -84,8 +87,18 @@ enum {
     OPTION_MUSIC_UPBEAT,
     OPTION_MUSIC_OFF,
 
+    // OPTION_MUSIC_DEFAULT = OPTION_MUSIC_OFF
     OPTION_MUSIC_DEFAULT = OPTION_MUSIC_TWILIGHT
 } option_music_entries;
+
+// Music Status
+enum {
+    OPTION_LINK2P_OFF,
+    OPTION_LINK2P_ON,
+
+//  OPTION_LINK2P_DEFAULT = OPTION_LINK2P_ON
+    OPTION_LINK2P_DEFAULT = OPTION_LINK2P_OFF
+} option_link2p_entries;
 
 
 #define NEXT_PREV_OFF  0
@@ -145,6 +158,7 @@ extern INT8 option_game_high_contrast;
 extern INT8 option_game_type;
 extern INT8 option_game_music;
 extern INT8 option_game_preview_next;
+extern INT8 option_game_link2p;
 
 const char * options_difficulty_abbrev_text_get(void);
 UINT8 options_frames_per_drop_get(UINT8);

@@ -34,6 +34,9 @@
 #define BRD_PIECE_X_OFFSET (OAM_SPRITE_X_OFFSET + (BRD_ST_X * BRD_UNIT_SIZE))
 #define BRD_PIECE_Y_OFFSET (OAM_SPRITE_Y_OFFSET + (BRD_ST_Y * BRD_UNIT_SIZE))
 
+#define BRD_TAIL_ADD_NORMAL   0
+#define BRD_TAIL_ADD_CRUNCHUP 1
+
 #define CGB_BG_ATTRIB_PAL_MASK 0x03
 
 #define BRD_CONNECT_NO  0
@@ -79,6 +82,7 @@ void board_init(void);
 
 void board_hide_all(UINT16);
 void board_redraw_all(void);
+void board_crunch_up(void);
 void board_draw_tile_xy(INT8, INT8, UINT8);
 
 void board_reset(void);
@@ -91,8 +95,7 @@ UINT8 board_check_open_xy(INT8, INT8);
 void board_set_tile_xy(INT8, INT8, UINT8, UINT8, UINT8);
 void board_handle_new_piece(INT8, INT8, UINT8, UINT8);
 
-void game_board_fill_random_tails(UINT8 tail_count);
-// void board_fill_random(void);
+void game_board_fill_random_tails(UINT8, INT8, UINT8);
 
 UINT8 board_piece_get_xy(INT8, INT8, UINT8 * , UINT8 * );
 UINT8 board_check_connected_xy(INT8, INT8, UINT8, UINT8 *, UINT8);
