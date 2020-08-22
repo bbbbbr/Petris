@@ -141,19 +141,23 @@ void fade2pal_update_entry(void) {
     UINT8  pal_inc = PAL_INC_RESET;
     UINT8  c;
     UINT16 * p_src_pal = &ModPalBg[FADE2PAL_PALNUM_START * COLORS_PER_PAL];
-    *p_src_pal = 0; // Prepare for first color entry
+    *p_src_pal = 0; // Clear the first palette entry
 
-    // Update all colors within this loop
+    // Update all the separated B,G,R color components
     for (c = 0; c < FADE2PAL_ARY_SIZE; c++) {
+
+        // If there is enough accumulated error then update the color component
         if (fade2pal_err_accum[c] >= 0 )
         {
-            // Update color
+            // Roll back the error accumulator by one Color step
             fade2pal_err_accum[c] -= FADE2PAL_ERR_COLORSTEP_SUB;
+            // Update the color component (R,G or B) by it's step dir/amount
             fade2pal_color_val[c] += fade2pal_color_val_dir[c];
         }
+        // Increment error accumulator by one Frame step
         fade2pal_err_accum[c] += fade2pal_err_framestep_add[c];
 
-        // Update colors
+        // Merge color component into BGRu16 palette entry
         *p_src_pal |= (UINT16)fade2pal_color_val[c];
 
         // Upshift color component if needed
@@ -162,17 +166,16 @@ void fade2pal_update_entry(void) {
             (*p_src_pal) <<= 5;
             pal_inc--;
         } else {
-            // Move to next palette entry and clear it
+            // Move to next palette entry
             p_src_pal++;
-// BUG BUG BUG BUG: this will alter one after the last modified intended, or some other byte after the last palette
-            *p_src_pal = 0;
+            // Only clear if this is NOT the last pass
+            // (i.e. don't write beyond palette array bounds)
+            if (c != (FADE2PAL_ARY_SIZE - 1))
+                *p_src_pal = 0;
+            // Reset color component counter
             pal_inc = PAL_INC_RESET;
         }
-
     }
-
-
-
 
     // Decrement number of remaining frame updates
     fade2pal_frame_count--;
@@ -185,7 +188,6 @@ void fade2pal_update_entry(void) {
     set_bkg_palette(FADE2PAL_PALNUM_START,
                     FADE2PAL_NUM_PALS,
                     &ModPalBg[FADE2PAL_PALNUM_START * COLORS_PER_PAL]);
-
 }
 
 
