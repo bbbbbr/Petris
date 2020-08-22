@@ -58,7 +58,6 @@ typedef enum {
 
 
 extern UINT8 volatile link_status;
-extern UINT8 link_rand_init;
 
 
 // For transmiting, the sequence is important:

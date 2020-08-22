@@ -48,7 +48,6 @@
 
 
 UINT8 volatile link_status;
-UINT8 link_rand_init;
 
 // Initialize ISR
 void init_link(void) {
@@ -112,20 +111,20 @@ void link_isr(void) {
             case LINK_CMD_INITIATE:
                 // Send Ready to send random number seed
                 // Then wait for transfer to complete
-                link_rand_init = DIV_REG & LINK_DATA_MASK;
-                LINK_SEND(LINK_CMD_RANDLO | (link_rand_init & LINK_DATA_MASK));
+                game_rand_init = DIV_REG & LINK_DATA_MASK;
+                LINK_SEND(LINK_CMD_RANDLO | (game_rand_init & LINK_DATA_MASK));
                 break;
 
             case LINK_CMD_RANDLO:
                 // Save incoming low nybble of shared random number seed
                 // Then generate the high nybble and send it
-                link_rand_init = (link_data & LINK_DATA_MASK) | (DIV_REG & 0xF0);
-                LINK_SEND(LINK_CMD_RANDHI | (link_rand_init >> 4) & LINK_DATA_MASK);
+                game_rand_init = (link_data & LINK_DATA_MASK) | (DIV_REG & 0xF0);
+                LINK_SEND(LINK_CMD_RANDHI | (game_rand_init >> 4) & LINK_DATA_MASK);
                 break;
 
             case LINK_CMD_RANDHI:
                 // Save incoming hi nybble of shared random number seed
-                link_rand_init |= (link_data & LINK_DATA_MASK) << 4;
+                game_rand_init |= (link_data & LINK_DATA_MASK) << 4;
 
                 // Send ready to start & Game Type
                 //

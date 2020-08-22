@@ -10,3 +10,9 @@ cd /opt/gbdk/libc/gb
 /opt/gbdk/bin/lcc -c crt0.s
 cp ../../lib/small/asxxxx/gb/crt0.o ../../lib/small/asxxxx/gb/crt0.o.dist
 mv crt0.o ../../lib/small/asxxxx/gb
+
+
+cd /opt/gbdk/libc/gb
+/opt/gbdk/bin/lcc -c rand.s
+cp ../../lib/small/asxxxx/gb/rand.o ../../lib/small/asxxxx/gb/rand.o.dist
+mv rand.o ../../lib/small/asxxxx/gb

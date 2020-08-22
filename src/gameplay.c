@@ -45,6 +45,7 @@
 
 UINT8 game_speed_drop_frame_counter;
 UINT8 game_speed_frames_per_drop;
+UINT8 game_rand_init;
 UINT16 game_crunchup_counter;
 UINT8 volatile game_crunchups_enqueued;
 UINT8 volatile game_is_paused;
@@ -97,16 +98,33 @@ void gameplay_exit_cleanup(void) {
 }
 
 
+// Initialize the random number generator
+void random_init(void) {
+
+    // If not connected in 2 Player Link then
+    // use DIV_REG to seed the generator.
+    //
+    // In 2 Player Link mode, the seed value will
+    // have *already* been negotiated over the link
+    // (and ultimately sourced from DIV_REG as well)
+    if (link_status != LINK_STATUS_CONNECTED) {
+        game_rand_init = DIV_REG;
+    }
+
+    initrand(game_rand_init);
+
+    // Switch to the alternate random number sequence for tail generation
+    // Keeps random tail genetatoin from altering game piece sequence
+    // Use a slightly different seed for the alternate state
+    swaprand();
+    initrand(game_rand_init + 1);
+    swaprand();  // Restore normal rand state
+}
+
 
 void gameplay_init(void) {
 
-    // Initialize the random number generator
-    // Use shared seed value if connected by link
-    if (link_status == LINK_STATUS_CONNECTED) {
-        initarand(link_rand_init);
-    } else {
-        initarand(DIV_REG);
-    }
+    random_init();
 
     game_types_init(); // Call before board_gfx_init()
 
@@ -166,6 +184,9 @@ void gameplay_prepare_board(void) {
 
     board_reset();
 
+    // Switch to the alternate random number sequence for tail generation
+    // Keeps random tail genetatoin from altering game piece sequence
+    swaprand();
     if (option_game_type == OPTION_GAME_TYPE_PET_CLEANUP) {
         // This will (indirectly) auto-increment game_type_cleanup_tail_count
         game_board_fill_random_tails( game_type_pet_cleanup_get_tail_count(),
@@ -183,6 +204,9 @@ void gameplay_prepare_board(void) {
                                      BRD_MAX_Y,
                                      BRD_TAIL_ADD_NORMAL);
     }
+    // Switch back to main random number sequence
+    swaprand();
+
 
     // Generate the very first piece
     game_piece_next_reset();
@@ -489,6 +513,14 @@ void gameplay_crunchup_update(void) {
 
         PLAY_SOUND_CRUNCH_UP;
         // TODO: pass the var as an argument and loop inside the function instead?
+
+        // Switch to the alternate random number sequence for tail generation
+        // Keeps random tail genetatoin from altering game piece sequence
+        swaprand();
+
         board_crunch_up();
+
+        // Switch back to main random number sequence
+        swaprand();
     }
 }
