@@ -69,8 +69,15 @@ void game_piece_next_generate(void) {
         }
 
         // Increase the count of total pieces used in the game
-        // if (player_numpieces < 0xFFFE) // Probably not necessary to prevent wraparound
-        player_numpieces++;
+        //
+        // Note: could prevent wraparound here, but if the player
+        // ever did reach this lofty amount it is probably better
+        // to let it wrap so they can continue to receive
+        // special pieces based on continued changes to this var
+        // (They are bitmask based so should still work)
+        //
+        // if (player_numpieces < PLAYER_NUMPIECES_MAX)
+            player_numpieces++;
 
         // Check to see whether a special piece (merge) should be delivered
         if ((player_numpieces & p_game_settings->spec_merge_threshold_pieces) == p_game_settings->spec_merge_threshold_pieces)

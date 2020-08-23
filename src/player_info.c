@@ -89,7 +89,7 @@ void score_update(UINT16 num_tiles) {
         game_piece_next_set(GP_SPECIAL_BOMB);
 
     // Increase number of pets if this is called with sufficient tiles
-    if (num_tiles > 1)
+    if ((num_tiles > 1) && (player_numpets < PLAYER_NUMPETS_MAX))
         player_numpets++;
 
     // Increment the total tile count

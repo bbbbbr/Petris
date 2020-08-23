@@ -50,7 +50,9 @@
 #define PLAYER_LEVEL_MAX      999
 #define PLAYER_NUMTILES_RESET 0
 #define PLAYER_NUMPETS_RESET  0
+#define PLAYER_NUMPETS_MAX    0xFFFF
 #define PLAYER_NUMPIECES_RESET 0
+#define PLAYER_NUMPIECES_MAX   0xFFFF
 
 // Transition to a new palette every N levels
 #define LEVEL_CHANGE_PAL_NUM 5 // (5 alternate palettes total)
