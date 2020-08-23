@@ -89,7 +89,7 @@ void player_hinting_special_show(UINT8 do_show) {
         // move_sprite(SPR_SPECIAL_HINT_3, 0,0);
         // move_sprite(SPR_SPECIAL_HINT_4, 0,0);
         //
-        // Hide using a clear tile, maybe it's a little faster? // TODO
+        // Hide using a clear tile, maybe it's a little faster
         set_sprite_tile(SPR_SPECIAL_HINT_1, GP_EMPTY);
         set_sprite_tile(SPR_SPECIAL_HINT_2, GP_EMPTY);
         set_sprite_tile(SPR_SPECIAL_HINT_3, GP_EMPTY);
@@ -101,7 +101,6 @@ void player_hinting_special_show(UINT8 do_show) {
 // NOTE: expects to only be called if (player_piece & GP_SPECIAL_MASK)
 //
 //
-// TODO: OPTIMIZE: if there is CPU time left, roll this into a loop?
 void player_hinting_special_move(void) {
 
         // TODO : OPTIMIZE : Better to avoid re-multiplying and adding all of these each time
@@ -124,9 +123,6 @@ void player_hinting_special_move(void) {
 
 
 // NOTE: expects to only be called if (player_piece & GP_SPECIAL_MASK)
-//
-//
-// TODO: OPTIMIZE: if there is CPU time left, roll this into a loop?
 void player_hinting_special_update_gfx() {
 
         // Load the corresponding special tile (for 4-direction preview)
@@ -157,7 +153,7 @@ void player_hinting_drop_show(UINT8 do_show) {
     } else {
         // Hide sprite
         // move_sprite(SPR_DROP_HINT, 0,0);
-        // Hide using a clear tile, maybe it's a little faster? // TODO
+        // Hide using a clear tile, maybe it's a little faster
         set_sprite_tile(SPR_DROP_HINT, GP_EMPTY);
     }
 }
@@ -230,7 +226,8 @@ void hinting_petlength_reset(void) {
 
         // Hide and set tile for size hint sprite
         move_sprite(sprite_idx, 0,0);
-        // TODO: These two could just be called once at the start of a game instead of every level
+        // These two could probably just be called once at the
+        // start of a game instead of every level
         set_sprite_tile(sprite_idx, GP_CROSS);
         set_sprite_prop(sprite_idx, GP_PAL_CROSS);
         sprite_idx++;
@@ -247,7 +244,7 @@ void hinting_petlength_turn_on(void) {
     hinting_petlength_enabled = HINT_PET_LENGTH_TIMEOUT;
 
     // Update display
-    hinting_petlength_show();
+    hinting_petlength_showhide();
 }
 
 
@@ -305,7 +302,7 @@ void hinting_petlength_add(INT8 board_x, INT8 board_y, UINT8 length, UINT8 piece
 
     // Render sprite visible if enabled (via setting tile)
     if (hinting_petlength_enabled) {
-        // hinting_petlength_show(); // TODO: change to a define NO_INCREMENT
+        // hinting_petlength_showhide();
         set_sprite_tile(sprite_idx    , hinting_petlength_num_1[slot]);
         set_sprite_tile(sprite_idx + 1, hinting_petlength_num_2[slot]);
     }
@@ -325,21 +322,12 @@ void hinting_petlength_add(INT8 board_x, INT8 board_y, UINT8 length, UINT8 piece
 
 
 
-void hinting_petlength_hide(void) {
-
-    hinting_petlength_enabled = FALSE;
-
-    // Update display
-    hinting_petlength_show();
-}
-
-
-
-// TODO Convert this to just show ALL numbers and not loop through them
-void hinting_petlength_show(void) {
+// Used to also move sprites on/off screen to show/hide them
+// but now only relies on transparent vs opaque tiles to do that
+void hinting_petlength_showhide(void) {
 
     UINT8 c;
-    UINT8 sprite_idx; // TODO use a pointer instead?
+    UINT8 sprite_idx;
 
     // Set initial offset for hint sprites
     sprite_idx = SPR_LONG_PET_HINT_NUM_START;

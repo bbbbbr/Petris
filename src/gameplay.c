@@ -271,8 +271,6 @@ void gameplay_handle_pause(void) {
 void gameplay_handle_input(void) {
 
     // Move piece left/right
-    //
-    // TODO: OPTIMIZE: consolidate this into a single left/right test function
     if (KEY_PRESSED(J_LEFT)) {
         if (key_repeat_count == KEY_REPEAT_START)
             player_piece_move( -1, 0);
@@ -294,12 +292,12 @@ void gameplay_handle_input(void) {
     // Pressing Down Accelerate dropping the current piece
     if (KEY_PRESSED(J_DOWN)) {
 
-        // TODO: could this be handled more gracefully by setting
-        //       key_repeat_count = 0 on a new piece instead?
         // * Requires down key to be released on a new piece
         //   before key repeat can take effect again.
         //   That protects against accidental down
         //   repeat on a new piece
+        // *  Might be handled more gracefully by setting
+        //    key_repeat_count = 0 on a new piece instead?
         if (!key_down_repeat_needs_release) {
 
             if (key_repeat_count == KEY_REPEAT_START) {
@@ -426,15 +424,15 @@ void gameplay_update(void) {
     // Handle board animation updates
     board_gfx_tail_animate();
 
-    // TODO: consider moving into a function
+
     // Handle timeout of Pet Length Overlay if applicable
     if (hinting_petlength_enabled) {
-
         hinting_petlength_enabled--;
 
         if (hinting_petlength_enabled == 0)
-            hinting_petlength_show(); // TODO: rename to _update or _showhide
+            hinting_petlength_showhide(); // TODO: rename to _update or _showhide
     }
+
 
     // This should be called after gameplay_gravity_update
     gameplay_crunchup_update();
