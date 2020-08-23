@@ -223,21 +223,15 @@ void board_draw_tile_xy(INT8 x, INT8 y, UINT8 tile_index) {
 
 void board_reset(void) {
 
-    INT8 x, y;
-    // TODO: OPTIMIZE: convert to single loop counter
+    UINT8 c;
 
-    for (x=0; x < BRD_WIDTH; x++) {
-        for (y=0; y < BRD_HEIGHT; y++) {
-            // Set pet piece
-            board_pieces[x + (y * BRD_WIDTH)] = GP_EMPTY + TILES_PET_START;
-
-            // TODO: USE EMPTY PIECE PALETTE INSTEAD?
-            // Set palette based on pet type
-            board_attrib[x + (y * BRD_WIDTH)] = GP_PAL_EMPTY;
-
-            // Reset board connection bits
-            board_connect[x + (y * BRD_WIDTH)] = GP_CONNECT_NONE_BITS;
-        }
+    for (c=0; c < (BRD_WIDTH * BRD_HEIGHT); c++) {
+        // Set pet piece
+        // Set palette based on pet type
+        // Reset board connection bits
+        board_pieces[c] = GP_EMPTY + TILES_PET_START;
+        board_attrib[c] = GP_PAL_EMPTY;
+        board_connect[c] = GP_CONNECT_NONE_BITS;
     }
 
     board_redraw_all();
