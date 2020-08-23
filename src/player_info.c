@@ -46,8 +46,9 @@ UINT8 level_increment_enqueue;
 void player_info_display(void) {
 
     // Display the score
-    // TODO: split score out of this
-    // There is a static trailing zero after the actual score
+    //
+    // There is a static trailing zero after the actual score to
+    // reduce size of var needed to show 10x actual score
     if (player_score == SCORE_MAX) {
         PRINT(DISPLAY_SCORE_X -1, DISPLAY_SCORE_Y,"max!:)", 0);
     }
@@ -74,7 +75,7 @@ void player_info_display(void) {
         print_num_u16(DISPLAY_NUMPETS_X, DISPLAY_NUMPETS_Y, player_numpets, DIGITS_5);
     }
 
-    // TODO: remove?
+    // DISABLED:
     // // Display number of pet segments completed
     // print_num_u16(DISPLAY_NUMTILES_X, DISPLAY_NUMTILES__Y, player_numtiles);
 }
@@ -92,12 +93,14 @@ void score_update(UINT16 num_tiles) {
         player_numpets++;
 
     // Increment the total tile count
-    // TODO: player_numtiles_this_level
     player_numtiles += num_tiles;
 
     // == UPDATE DISPLAY INFO AREA ==
 
-    // TODO: support x 10 scoring? Need to use a 24 bit Num
+    // Note: Displayed score has an artificial "0" added to the
+    // end so that it shows a larger 10x score without having
+    // to use a larger variable.
+    //
     // Scoring:
     // * Increases semi-exponentially per number of tiles in the pet
     // * Multiplied by (player_level >> N) + 1
@@ -138,13 +141,14 @@ void score_update(UINT16 num_tiles) {
     }
 
     // Check for level updates
+    // (either triggered directly above OR elsewhere)
     if (level_increment_enqueue == TRUE) {
         level_increment();
-    }
 
-    // TODO: it's a hack to call this before and after level_increment
-    //       but it requires an update at the end of a level and when starting the next
-    player_info_display();
+        // After the new level transition is complete
+        // update the player info again to show the new level
+        player_info_display();
+    }
 }
 
 
@@ -164,19 +168,16 @@ void level_increment(void) {
         player_level++;
     }
 
-    // TODO: ?? change this to options_frames_per_drop_update() call -> game_speed_frames_per_drop_set()
-
     // Update game piece speed
     gameplay_drop_speed_update();
 
     game_types_handle_level_transition();
 
     if (option_game_type == OPTION_GAME_TYPE_LONG_PET) {
-        // TODO: could this be moved so that it's only called from one place in the code?
         game_type_long_pet_set_pet_size( (UINT8)player_level );
     }
 
-    // TODO: Debug: frames per drop (requires extern UINT8 game_speed_frames_per_drop;)
+    // DEBUG: frames per drop (requires extern UINT8 game_speed_frames_per_drop;)
     #ifdef DEBUG_SHOW
         print_num_u16(DISPLAY_NUMPETS_X, DISPLAY_NUMPETS_Y + 1, (UINT16)game_speed_frames_per_drop, DIGITS_5);
     #endif
@@ -198,8 +199,6 @@ void level_counters_reset(void) {
     player_numpets   = PLAYER_NUMPETS_RESET;
     player_numtiles  = PLAYER_NUMTILES_RESET;
     player_numpieces = PLAYER_NUMPIECES_RESET;
-
-    level_show();   // TODO: move this out of here?
 }
 
 
@@ -214,9 +213,9 @@ void player_info_newgame_reset(void) {
     gameplay_drop_speed_update();
 
     if (option_game_type == OPTION_GAME_TYPE_LONG_PET) {
-        // TODO: could this be moved so that it's only called from one place in the code?
         game_type_long_pet_set_pet_size( (UINT8)player_level );
     }
 
+    level_show();
     player_info_display();
 }
