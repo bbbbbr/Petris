@@ -98,27 +98,26 @@ void player_hinting_special_show(UINT8 do_show) {
 }
 
 
+// Move the hinting sprites that surround the player (Special) piece
 // NOTE: expects to only be called if (player_piece & GP_SPECIAL_MASK)
-//
-//
 void player_hinting_special_move(void) {
 
-        // TODO : OPTIMIZE : Better to avoid re-multiplying and adding all of these each time
-        move_sprite(SPR_SPECIAL_HINT_1,
-                    (player_x * BRD_UNIT_SIZE) + SPR_HINT_OFFSET_LUT_X[0] + BRD_PIECE_X_OFFSET,
-                    (player_y * BRD_UNIT_SIZE) + SPR_HINT_OFFSET_LUT_Y[0] + BRD_PIECE_Y_OFFSET);
+        INT8 spr_x, spr_y;
 
-        move_sprite(SPR_SPECIAL_HINT_2,
-                    (player_x * BRD_UNIT_SIZE) + SPR_HINT_OFFSET_LUT_X[1] + BRD_PIECE_X_OFFSET,
-                    (player_y * BRD_UNIT_SIZE) + SPR_HINT_OFFSET_LUT_Y[1] + BRD_PIECE_Y_OFFSET);
+        spr_x = (player_x * BRD_UNIT_SIZE) + BRD_PIECE_X_OFFSET;
+        spr_y = (player_y * BRD_UNIT_SIZE) + BRD_PIECE_Y_OFFSET;
 
-        move_sprite(SPR_SPECIAL_HINT_3,
-                    (player_x * BRD_UNIT_SIZE) + SPR_HINT_OFFSET_LUT_X[2] + BRD_PIECE_X_OFFSET,
-                    (player_y * BRD_UNIT_SIZE) + SPR_HINT_OFFSET_LUT_Y[2] + BRD_PIECE_Y_OFFSET);
+        move_sprite(SPR_SPECIAL_HINT_1, spr_x + SPR_HINT_OFFSET_LUT_X[0],
+                                        spr_y + SPR_HINT_OFFSET_LUT_Y[0]);
 
-        move_sprite(SPR_SPECIAL_HINT_4,
-                    (player_x * BRD_UNIT_SIZE) + SPR_HINT_OFFSET_LUT_X[3] + BRD_PIECE_X_OFFSET,
-                    (player_y * BRD_UNIT_SIZE) + SPR_HINT_OFFSET_LUT_Y[3] + BRD_PIECE_Y_OFFSET);
+        move_sprite(SPR_SPECIAL_HINT_2, spr_x + SPR_HINT_OFFSET_LUT_X[1],
+                                        spr_y + SPR_HINT_OFFSET_LUT_Y[1]);
+
+        move_sprite(SPR_SPECIAL_HINT_3, spr_x + SPR_HINT_OFFSET_LUT_X[2],
+                                        spr_y + SPR_HINT_OFFSET_LUT_Y[2]);
+
+        move_sprite(SPR_SPECIAL_HINT_4, spr_x + SPR_HINT_OFFSET_LUT_X[3],
+                                        spr_y + SPR_HINT_OFFSET_LUT_Y[3]);
 }
 
 
