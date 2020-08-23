@@ -190,7 +190,6 @@ void intro_screen_handle(void) {
 
     magic_code_update();
 
-    // TODO: convert to global frame counter or sys_time
     // Wait for the player to press start
     intro_counter++;
 

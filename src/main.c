@@ -46,7 +46,7 @@
 #include "../res/font_tiles.h"
 
 
-#define DEBUG_SKIP_INTRO
+// #define DEBUG_SKIP_INTRO
 
 void init (void);
 void init_interrupts(void);
@@ -61,7 +61,8 @@ __asm \
 __endasm
 
 void handle_non_cgb() {
-    // TODO: what happens here on a GBA?
+
+    // _cpu will return CGB_TYPE for both CGB and GBA
     if (_cpu != CGB_TYPE) {
         // BGB_MESSAGE("DMG DETECTED");
         enable_interrupts(); // Make sure interrupts are enabled before calling HALT
@@ -81,12 +82,14 @@ void handle_non_cgb() {
 void vbl_update() {
     vbl_count ++;
 
-    // TODO: animate can be called from here instead to make it independent of game pause/etc
+    // Optional: Animate can also be called from here instead
+    //           to make it independent of game pause/etc
     // if (game_state == GAME_PLAYING)
     //     board_gfx_tail_animate();
 
     // OPTIONAL: Now that crt0.s is patched for ISR related VRAM exceptions,
-    // this could be moved back to the TIM interrupt
+    //           this could be moved back to the TIM interrupt since it won't
+    //           cause gfx glitching during redraws
     update_gbt_music();
 
     if(music_mute_frames != 0) {
@@ -143,7 +146,7 @@ void init (void) {
 
     init_sound();
 
-    // fade_start(FADE_OUT); // TODO: this can probably be skipped
+    // Optional: fade_start(FADE_OUT);
 
     init_interrupts();
 
@@ -224,7 +227,6 @@ void main(void){
 
             case GAME_WON_LINK_VERSUS:
                 MusicStop();
-                // TODO: Better sound for 2 Player link versus won
                 PLAY_SOUND_LEVEL_UP;
                 gameover_message_animate(SPR_YOU_WON_CHARS);
 
