@@ -430,7 +430,7 @@ void gameplay_update(void) {
         hinting_petlength_enabled--;
 
         if (hinting_petlength_enabled == 0)
-            hinting_petlength_showhide(); // TODO: rename to _update or _showhide
+            hinting_petlength_showhide();
     }
 
 
@@ -501,7 +501,6 @@ void gameplay_crunchup_update(void) {
         }
 
         PLAY_SOUND_CRUNCH_UP;
-        // TODO: pass the var as an argument and loop inside the function instead?
 
         // Switch to the alternate random number sequence for tail generation
         // Keeps random tail genetatoin from altering game piece sequence

@@ -48,8 +48,7 @@ void print_num_u16(UINT8 x, UINT8 y, UINT16 num, UINT8 print_digits) {
     if (print_digits > PRINT_MAX_DIGITS)
         print_digits = PRINT_MAX_DIGITS;
 
-    // Bounds checking
-// TODO: REMOVE?
+    // Optional: Bounds checking
 //    if (num <= PRINT_MAX_NUM) {
         // Store individual digits of n in reverse order
         // Starting at the END of the array and working forward
@@ -60,8 +59,6 @@ void print_num_u16(UINT8 x, UINT8 y, UINT16 num, UINT8 print_digits) {
             digits[index] = (num % 10) + TILES_FONT_NUMS_START;
             num = num / 10;
         } while (num != 0);
-
-        // TODO: OPTION TO SELECT LEFT / RIGHT ALIGN for padding
 
         // Fill remaining spaces with empty tiles
         while (index > 0) {
@@ -100,9 +97,6 @@ void print_text(const char* txt, unsigned char delay_time){
     start_x = print_x; // Save start X for newline return
 
     while(*txt) {
-        // Handle speedup-escape from delay printing
-        // if (joypad()) // TODO: remove or re-enable (delay printing escape)
-        //     delay_time = 0;
 
         if(*txt == ' ') {
             c = TILE_ID_FONT_BLANK;
@@ -146,10 +140,5 @@ void print_text(const char* txt, unsigned char delay_time){
 
         print_x++;
         txt++;
-        // TODO: Optional - re-enable delay printing
-        // if (delay_time)
-        //     delay(delay_time);
-            // OPTIONAL: enable or remove sounds while printing text
-            // PLAY_SOUND_PRINT_CHAR;
     }
 }

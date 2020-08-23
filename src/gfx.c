@@ -89,6 +89,7 @@ const UWORD intro_cat_palette[] = {
 };
 
 
+
 // Pointer used to load pet tiles/palettes,
 // allows tile sets/palettes to be easily swapped out
 UINT8 * p_pet_tiles;
@@ -150,8 +151,8 @@ void pet_tiles_hicontrast_prepare() {
         for (duplicate = 0; duplicate < repeat_num; duplicate++) {
 
             // Copy the tile one bytes at a time
-            // TODO: OPTIONAL: could optimize this with DMA / etc
-            //       (seems fast enough as is though)
+            // Could optimize this with DMA / etc
+            // but it seems fast enough as is
             for (c = 0; c < TILE_SIZE_BYTES; c++) {
                 *p_dest++ = *p_src_tile++;
             }
