@@ -12,21 +12,31 @@
 
 // Both player consoles start and mostly wait
 // in a ready-to-recieve state:
-// * External Clock + Transfer Start set
+// * External Clock + Transfer Start bit set
 //
 // 1. Either console can initiate connection by sending
 //    a INITIATE command.
 //
-// 2. The other console can respond by sending a READY,
-//    after sending of that command is completed then
+// 2. Receiver responds with RANDLO + random low nybble
+//
+// 3. Initiator responds with RANDHI + random high nybble
+//
+// 3. Receiver responds with READY + game type.
+//    After sending of that command is completed then
 //    **BOTH** consoles immediately set link status as CONNECTED
 //
-// State A: RESET                   /--Rx:-> CONNECTED (follower)
-// Link  A:  -> Tx:INITIATE        /
-// Link  B:           \--Rx--> Tx:READY
-// State B: RESET                   \------> CONNECTED (controller)
 
+//
+// State A   :      Command     : State B   : Data
+// -----------------------------------------------
+// RESET     :                  : RESET     :
+// RESET     :  -> Initiate ->  : RESET     :
+// RESET     :  <- Rand Lo  <-  : RESET     : Rand Lo
+// RESET     :  -> Rand Hi  ->  : RESET     : Rand Hi
+// CONNECTED :  <- Ready    <-  : CONNECTED : Game Type
+//
 
+// From the docs...
 // If a serial transfer with internal clock is performed and no external GameBoy
 // is present, a value of $FF will be received in the transfer.
 
