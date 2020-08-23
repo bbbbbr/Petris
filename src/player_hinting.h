@@ -15,7 +15,7 @@
 #define HINT_PET_LENGTH_SLOT_EMPTY -1
 #define HINT_PET_LENGTH_SLOT_NONE 255
 
-#define HINT_PET_LENGTH_TIMEOUT 150 // In Frames. TODO: Tune this
+#define HINT_PET_LENGTH_TIMEOUT 150 // In Frames
 
 extern UINT8 hinting_petlength_enabled;
 
