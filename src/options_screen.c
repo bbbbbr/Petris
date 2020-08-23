@@ -219,7 +219,7 @@ void options_screen_setting_draw(INT8 option_id) {
 
 
 
-// TODO: OPTIMIZE: rendering this to a global, shared, temp array would be much faster global_bg_scratch_tilemap[], global_bg_scratch_attribmap[]
+//Optional: could be faster to use a BG Map here or render into an array and then apply
 void options_screen_draw(void) {
 
     UINT8 x,y;
@@ -234,11 +234,12 @@ void options_screen_draw(void) {
             // Select BG tile map
             VBK_REG = 0;
 
-            // Draw a border of pet tiles, regular tiles in the middle
+            // Draw a gradient at the top of the screen
             if (y <= 2) {
                 set_bkg_tiles(x, y, 1, 1, &options_screen_tiles[y]);
 
             } else {
+                // Regular sky tiles for the rest
                 set_bkg_tiles(x, y, 1, 1, &options_screen_tiles[3]);
             }
 
@@ -261,7 +262,7 @@ void options_screen_sprites_init(void) {
     set_sprite_data(0, TILE_COUNT_PETTOTAL, pet_tiles);
 
     set_sprite_tile(SPR_OPTIONS_CURSOR, PET_DOG_HEAD);
-    set_sprite_prop(SPR_OPTIONS_CURSOR, BG_FLIP_X); // TODO: should prob set palette here
+    set_sprite_prop(SPR_OPTIONS_CURSOR, BG_FLIP_X | BG_PAL_0);
 
     SHOW_SPRITES;
 }
