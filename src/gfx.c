@@ -150,7 +150,7 @@ void pet_tiles_hicontrast_prepare() {
         // Copy the tile from CODE to RAM N times
         for (duplicate = 0; duplicate < repeat_num; duplicate++) {
 
-            // Copy the tile one bytes at a time
+            // Copy the tile one byte at a time
             // Could optimize this with DMA / etc
             // but it seems fast enough as is
             for (c = 0; c < TILE_SIZE_BYTES; c++) {

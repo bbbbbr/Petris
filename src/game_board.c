@@ -597,7 +597,7 @@ void board_check_completed_pet_xy(INT8 start_x, INT8 start_y, UINT8 piece, UINT8
         board_tile_clear_count = 1;
 
         // Initialize piece count (include current)
-        piece_count = 1;  // OPTIMIZE: this could probably be merged into board_tile_clear_count
+        piece_count = 1;  // OPTIONAL: this could probably be merged into board_tile_clear_count
 
         // Initialize end seg count
         headtail_count = 0;
