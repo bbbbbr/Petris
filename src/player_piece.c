@@ -93,12 +93,11 @@ UINT8 player_piece_try_reload(void) {
 
         if (player_piece & GP_SPECIAL_MASK) {
             player_hinting_special_update_gfx();
-            player_hinting_special_move(); // TODO: ?? move into player_piece_update_xy() ??
+            player_hinting_special_move();
             player_hinting_special_show(TRUE);
         } else
             player_hinting_special_show(FALSE);
 
-        // TODO: if (option_player_hinting_enabled)
         player_hinting_drop_show(TRUE);
         player_hinting_drop_update();
     }
@@ -124,7 +123,7 @@ UINT8 player_piece_connect_get(UINT8 piece, UINT8 rotate) {
 }
 
 
-// TODO: optimize out this function unless it starts doing more
+
 void player_piece_set_on_board(void) {
 
     UINT8 player_connect;
@@ -156,7 +155,6 @@ void player_piece_rotate_apply(UINT8 dir) {
     // Rotate sound
     PLAY_SOUND_PIECE_ROTATE;
 
-    // TODO: For larger pieces test whether they can turn
     if (dir == PLAYER_ROT_LEFT)
         player_rotate--;
     else if (dir == PLAYER_ROT_RIGHT)
@@ -168,7 +166,6 @@ void player_piece_rotate_apply(UINT8 dir) {
     else if (player_rotate > GP_ROTATE_MAX)
         player_rotate = GP_ROTATE_MIN;
 
-    // TODO: only need to update GFX if rotation succeeded
     player_piece_update_gfx();
 }
 
@@ -183,14 +180,13 @@ UINT8 player_piece_move(INT8 dir_x, INT8 dir_y) {
     INT8 new_x = (player_x + dir_x);
     INT8 new_y = (player_y + dir_y);
 
-    // TODO: optimize?
     if ((new_x >= BRD_MIN_X) &&
         (new_x <= BRD_MAX_X) &&
         (new_y >= BRD_MIN_Y) &&
         (new_y <= BRD_MAX_Y) &&
          board_check_open_xy(new_x, new_y)) {
 
-        // TODO: TICK sound??
+        // OPTIONAL: play movement tick sound
         // PLAY_SOUND_PIECE_MOVE;
 
         player_x = new_x;
@@ -217,7 +213,7 @@ void player_piece_update_gfx() {
 
     if (player_piece & GP_SPECIAL_MASK) {
         // player_piece = player_piece;
-        player_attrib = GP_PAL_SPECIAL; // TODO : Assign a "special" pal?
+        player_attrib = GP_PAL_SPECIAL;
 
     } else {
         // Update player rotation (clear rotate bits and then set)
@@ -233,7 +229,7 @@ void player_piece_update_gfx() {
 
         // L Turn pieces require mirror X and Y
         // when rotation is 180 and 270
-        // TODO: This could be simplified by using a full set of pieces instead of 1/2 set and mirroring them
+        // Note: This could be simplified by using a full set of pieces instead of 1/2 set and mirroring them
         if (((player_piece & GP_SEG_MASK) ==  GP_SEG_TURN_BITS) &&
              (player_rotate & GP_ROTATE_SEG_TURN_180_AND_270_USE_MIRROR_BITS))
             player_attrib |= (GP_MIRROR_X | GP_MIRROR_Y);
