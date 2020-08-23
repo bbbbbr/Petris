@@ -128,8 +128,7 @@ enum {
 #define BOMB_THR_EXPERT 8
 #define BOMB_THR_BEAST  8
 
-// TODO: This should have a randomness factor to make it less predictable
-//       I.E.: pieces_until_special_merge = N1 + random(N2)
+// This is predictable to the player, and that's fine :)
 // Number of pieces issued until delivering a special-merge
 // See: spec_merge_threshold_pieces
 #define MERGE_THR_EASY   0x001F // once every 32

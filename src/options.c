@@ -21,9 +21,6 @@
 #include "options.h"
 #include "options_screen.h"
 
-// TODO: rename "option_game_" -> "game_setting" , rename "options.c/h" -> "game_settings.c/h"
-
-// TODO: For now these aren't in an array/struct to reduce cost of access. Re-evaluate later
 INT8 option_game_type          = OPTION_GAME_TYPE_DEFAULT;
 INT8 option_game_difficulty    = OPTION_DIFFICULTY_DEFAULT;
 INT8 option_game_visual_hints  = OPTION_VISUAL_HINTS_DEFAULT;
@@ -56,12 +53,6 @@ const char * options_difficulty_abbrev_text_get(void) {
 }
 
 
-// TODO: ?? use accessor instead of directly accessing option_game_preview_next?
-//UINT8 options_preview_next_enabled_get(UINT8 level) {
-//     option_game_preview_next      = settings_LUT[ option_game_difficulty ].preview_next_enabled;
-//}
-
-
 // TODO: NOTE: level must *not* be zero <-- no longer true?
 UINT8 options_frames_per_drop_get(UINT8 level) {
 
@@ -91,9 +82,9 @@ UINT8 options_frames_per_drop_get(UINT8 level) {
         // Bounds check sub-level LUT array
         if (index < ARRAY_LEN(levels_per_fpd_decrement_LUT)) {
 
-            // TODO: OPTIMIZE: there is probably a more efficient way of doing this
             // Increase in drop speed between tiers is based on
             // levels elapsed since tier base divided by a scaling factor
+            // Optional: could optimize this
             sub_decrement = (level % FPD_LUT_LEVELS_PER_TIER) / levels_per_fpd_decrement_LUT[index];
         }
     }
