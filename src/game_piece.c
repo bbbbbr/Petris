@@ -112,10 +112,7 @@ void game_piece_next_set(UINT8 override_piece) {
     // Override the next piece
     game_piece_next = override_piece;
 
-    // Update the next preview display
-    // TODO: It looks kind of strange when the override shows up
-    //       for only a second in the preview and then pops up top
-    // game_piece_next_show(TRUE);
+    // Preview display is updated elsewhere (game_piece_next_show(TRUE)
 }
 
 
@@ -123,13 +120,8 @@ void game_piece_next_set(UINT8 override_piece) {
 void game_piece_next_show(UINT8 do_show) {
 
     UINT8 attrib;
-    // TODO: this could get animated to launch the next piece
-    //       to the top of the board
 
-    // TODO: OPTIMIZE: ?? would be less overhead to test option_game_preview_next before calling function?
     if ((do_show) && (option_game_preview_next == NEXT_PREV_ON)) {
-
-        // TODO: consolidate sprite calculation with player_piece_update_gfx() where this is duplicated from?
 
         // Update player rotation (clear rotate bits and then set)
         set_sprite_tile(SPR_PLAYER_NEXT,

@@ -138,7 +138,6 @@ void gameplay_init(void) {
     player_info_newgame_reset();
 
     // Flash a get ready message to the player
-    // TODO: function or struct to select game_start_message[option_game_type]
     if (option_game_type == OPTION_GAME_TYPE_PET_CLEANUP) {
 
         board_flash_message(MSG_GET_READY_X, MSG_GET_READY_Y,
@@ -161,17 +160,11 @@ void gameplay_init(void) {
 
     SHOW_SPRITES;
 
-    // TODO: move into player_info_init/reset
-    // game_speed_frames_per_drop = GAME_SPEED_FRAMES_PER_DROP_RESET;
-
+    // Init game state vars
     piece_state = PLAYER_START;
-
     key_down_repeat_needs_release = FALSE;
-
     gameplay_piece_drop_requested = FALSE;
-
     game_speed_drop_frame_counter = GAME_SPEED_DROP_FRAME_COUNTER_RESET;
-
     game_crunchup_counter = GAME_CRUNCHUP_FRAME_COUNTER_RESET;
     game_crunchups_enqueued = 0;
 }
@@ -179,7 +172,6 @@ void gameplay_init(void) {
 
 
 // Called on new game and during transition to new level
-// TODO: could be moved to board_prepare_new_level()
 void gameplay_prepare_board(void) {
 
     board_reset();

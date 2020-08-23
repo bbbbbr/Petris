@@ -49,7 +49,6 @@
 
 #define BRD_TILE_COUNT_BONUS_SOUND_THRESHOLD 4
 
-// TODO: move these to a different location?
 #define MSG_GET_READY_X  BRD_ST_X + 0
 #define MSG_GET_READY_Y  BRD_ST_Y + 5
 #define MSG_GET_READY_TEXT   "   GET\n\n  READY!"
@@ -99,7 +98,7 @@ void game_board_fill_random_tails(UINT8, INT8, UINT8);
 
 UINT8 board_piece_get_xy(INT8, INT8, UINT8 * , UINT8 * );
 UINT8 board_check_connected_xy(INT8, INT8, UINT8, UINT8 *, UINT8);
-UINT8 board_check_completed_pet_xy(INT8, INT8, UINT8, UINT8, UINT8);
+void  board_check_completed_pet_xy(INT8, INT8, UINT8, UINT8, UINT8);
 
 void board_handle_pet_completed(UINT8 flags);
 void board_debug_show_connect_entire_board(void);

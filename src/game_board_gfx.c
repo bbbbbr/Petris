@@ -51,7 +51,6 @@ const UINT8 LINK_ICONS[3] = {TILE_ID_2P_LINK_START,     // GB Icon
                              TILE_ID_2P_LINK_START};    // GB Icon
 
 
-// TODO: this could be collapsed into a single set of 4
 const UINT8 pet_tail_anim_tilenum[] = {TILES_PET_START + (ANIM_TAIL_BATCH_SIZE * 0), // Set 1
                                        TILES_PET_START + (ANIM_TAIL_BATCH_SIZE * 1),
                                        TILES_PET_START + (ANIM_TAIL_BATCH_SIZE * 2),
@@ -63,7 +62,6 @@ const UINT8 pet_tail_anim_tilenum[] = {TILES_PET_START + (ANIM_TAIL_BATCH_SIZE *
                                        TILES_PET_START + (ANIM_TAIL_BATCH_SIZE * 3)
                                    };
 
-// TODO: const UINT16 * ??
 const UINT16 pet_tail_anim_srcoffset[] = {
                                       // Regular Tail
                                       (TILE_OFFSET_PET_TAIL_REG + (ANIM_TAIL_BATCH_SIZE * 0)) * CGB_TILE_SIZE,
@@ -123,7 +121,6 @@ void board_gfx_init_sprites(void) {
 }
 
 
-// TODO: rename to board_init_background(); move to board_gfx.c
 void board_gfx_init_background(void) {
 
         //set_bkg_palette(BG_PAL_0, 4, board_pets_palette); // UBYTE first_palette, UBYTE nb_palettes, UWORD *rgb_data
@@ -134,7 +131,7 @@ void board_gfx_init_background(void) {
         fade_set_pal(BG_PAL_4, 4, intro_screen_palette, FADE_PAL_BKG);
 
         set_bkg_data(TILES_INTRO_START,     TILE_COUNT_INTRO,     intro_screen_tiles);
-        // TODO: move fonts to a global shared gfx init: print_gfx_init() ?
+
         set_bkg_data(TILES_FONT_START,      TILE_COUNT_FONT,      font_tiles);
 
         set_bkg_data(TILES_PET_START,       TILE_COUNT_PETTOTAL,  p_pet_tiles);
