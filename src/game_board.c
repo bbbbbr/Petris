@@ -45,30 +45,32 @@ UINT8 board_tile_clear_count;
 
 // 10 tiles wide for clearing the game board one row at a time
 // This MUST match game board width
-// TODO: move this to game_board_gfx.h
-const UINT8 board_blank_row[] = {TILE_ID_BOARD_BLANK_ROW_BG,
-                                 TILE_ID_BOARD_BLANK_ROW_BG,
-                                 TILE_ID_BOARD_BLANK_ROW_BG,
-                                 TILE_ID_BOARD_BLANK_ROW_BG,
-                                 TILE_ID_BOARD_BLANK_ROW_BG,
-                                 TILE_ID_BOARD_BLANK_ROW_BG,
-                                 TILE_ID_BOARD_BLANK_ROW_BG,
-                                 TILE_ID_BOARD_BLANK_ROW_BG,
-                                 TILE_ID_BOARD_BLANK_ROW_BG,
-                                 TILE_ID_BOARD_BLANK_ROW_BG};
+const UINT8 board_blank_row[BRD_WIDTH] = {
+                 TILE_ID_BOARD_BLANK_ROW_BG,
+                 TILE_ID_BOARD_BLANK_ROW_BG,
+                 TILE_ID_BOARD_BLANK_ROW_BG,
+                 TILE_ID_BOARD_BLANK_ROW_BG,
+                 TILE_ID_BOARD_BLANK_ROW_BG,
+                 TILE_ID_BOARD_BLANK_ROW_BG,
+                 TILE_ID_BOARD_BLANK_ROW_BG,
+                 TILE_ID_BOARD_BLANK_ROW_BG,
+                 TILE_ID_BOARD_BLANK_ROW_BG,
+                 TILE_ID_BOARD_BLANK_ROW_BG};
 
-const UINT8 board_x_row[] = {TILE_ID_BOARD_UP,
-                             TILE_ID_BOARD_UP,
-                             TILE_ID_BOARD_UP,
-                             TILE_ID_BOARD_UP,
-                             TILE_ID_BOARD_UP,
-                             TILE_ID_BOARD_UP,
-                             TILE_ID_BOARD_UP,
-                             TILE_ID_BOARD_UP,
-                             TILE_ID_BOARD_UP,
-                             TILE_ID_BOARD_UP};
+const UINT8 board_x_row[BRD_WIDTH] = {
+                TILE_ID_BOARD_UP,
+                TILE_ID_BOARD_UP,
+                TILE_ID_BOARD_UP,
+                TILE_ID_BOARD_UP,
+                TILE_ID_BOARD_UP,
+                TILE_ID_BOARD_UP,
+                TILE_ID_BOARD_UP,
+                TILE_ID_BOARD_UP,
+                TILE_ID_BOARD_UP,
+                TILE_ID_BOARD_UP};
 
-const UINT8 board_blank_row_pal[] = {0x04,0x04,0x04,0x04,0x04,0x04,0x04,0x04,0x04,0x04};
+const UINT8 board_blank_row_pal[BRD_WIDTH] = {
+                0x04,0x04,0x04,0x04,0x04,0x04,0x04,0x04,0x04,0x04};
 
 const UINT8 gp_dissolve_anim[] = {GP_DISSOLVE_1 + TILES_PET_START,
                                   GP_DISSOLVE_2 + TILES_PET_START,
@@ -186,7 +188,6 @@ void board_crunch_up(void) {
         }
 
 
-        // TODO: Smooth scroll up via window? May be hard to do
         board_redraw_all();
 
         // Shift the player piece up one row to compensate

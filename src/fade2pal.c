@@ -81,9 +81,10 @@ void fade2pal_prep_fade(UINT8 * p_dest_pal_gbr) {
 
     for (c = 0; c < FADE2PAL_ARY_SIZE; c++) {
 
-// TODO: inline function code here?
+
         // Initialze current channel of current palette color
         // Need to decode in order of B -> G -> R
+        // Note: function could be inlined here
         fade2pal_calc_entry( (UINT8)(t_color >> (5 * pal_inc)) & 0x1F, // color FROM
                             *p_dest_pal_gbr,       // color TO
                             c);                    // color lerp index
