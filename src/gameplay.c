@@ -222,12 +222,11 @@ void gameplay_handle_pause(void) {
     }
 
     // Hide the game board and player piece (except in long-pet mode)
-    // TODO: allow in all other modes?
-    if (option_game_type != OPTION_GAME_TYPE_LONG_PET) {
-        board_hide_all(BRD_CLR_DELAY_NONE);
-    }
+    // if (option_game_type != OPTION_GAME_TYPE_LONG_PET) {
+    //     board_hide_all(BRD_CLR_DELAY_NONE);
+    // }
 
-    // TODO: CONSOLIDATE: these hides are basically a dupe of gameplay_exit_cleanup()
+    // These hides are basically a dupe of gameplay_exit_cleanup()
     game_piece_next_show(FALSE);
     player_piece_update_xy(PLAYER_PIECE_HIDE);
     player_hinting_special_show(FALSE);
@@ -242,8 +241,8 @@ void gameplay_handle_pause(void) {
     // or unpause send over serial link
     waitpadticked_lowcpu(J_START, &game_is_paused);
 
-    // If unpause was triggered by button
-    // then state will still be paused, so clear it
+    // If unpause was triggered by a local button
+    // then pause state var will still be paused, so clear it
     if (game_is_paused == TRUE) {
 
             __critical {
