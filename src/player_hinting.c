@@ -323,49 +323,51 @@ void hinting_petlength_add(INT8 board_x, INT8 board_y, UINT8 length, UINT8 piece
 
 // Used to also move sprites on/off screen to show/hide them
 // but now only relies on transparent vs opaque tiles to do that
+//
+// Note: Using a separate counter for the sprite index instead of
+//       multiplying (c * 3) was producing compiler problems (below).
+//       The compiler also seems to produce shorter, faster code with the multiply...
+//       SDCC:
+//       * Warning: Non-connected liverange found and extended to connected component of the CFG:iTemp33. Please contact sdcc authors with source code to reproduce.
+//       * Warning: Non-connected liverange found and extended to connected component of the CFG:iTemp0. Please contact sdcc authors with source code to reproduce.
 void hinting_petlength_showhide(void) {
 
     UINT8 c;
     UINT8 sprite_idx;
 
-    // Set initial offset for hint sprites
-    sprite_idx = SPR_LONG_PET_HINT_NUM_START;
-
     for (c = 0; c < SPR_LONG_PET_HINT_POOL_SIZE; c++) {
+
+        // There are 3 sprites for every pet length hint, calculate offset
+        sprite_idx = SPR_LONG_PET_HINT_NUM_START + (c * SPR_LONG_PET_HINT_NUM_TILES_PER);
 
         // Show the entry if it's populated
         if ((hinting_petlength_enabled)
             && (hinting_petlength_x[c] != HINT_PET_LENGTH_SLOT_EMPTY))
         {
 
-            // Reveal sprite
-            set_sprite_tile(sprite_idx++, hinting_petlength_num_1[c]);
-            set_sprite_tile(sprite_idx++, hinting_petlength_num_2[c]);
-
-            // Skip Cross size hint sprite
-            sprite_idx++;
+            // Reveal first two sprites and skip every third (cross/size marker sprite)
+            set_sprite_tile(sprite_idx,     hinting_petlength_num_1[c]);
+            set_sprite_tile(sprite_idx + 1, hinting_petlength_num_2[c]);
 
             // // Move the sprite into view at board position
-            // move_sprite(sprite_idx++,
+            // move_sprite(sprite_idx,
             //             (hinting_petlength_x[c] * BRD_UNIT_SIZE) + SPR_LONG_PET_HINT_OFFSET_X,
             //             (hinting_petlength_y[c] * BRD_UNIT_SIZE) + SPR_LONG_PET_HINT_OFFSET_Y);
 
             // // Move the sprite into view at board position
-            // move_sprite(sprite_idx++,
+            // move_sprite(sprite_idx + 1,
             //             (hinting_petlength_x[c] * BRD_UNIT_SIZE) + SPR_LONG_PET_HINT_OFFSET_X + 8,
             //             (hinting_petlength_y[c] * BRD_UNIT_SIZE) + SPR_LONG_PET_HINT_OFFSET_Y);
         } else {
             // Otherwise entry is not visible
 
             // Hide the entry
-            // move_sprite(sprite_idx++, 0,0);
-            // move_sprite(sprite_idx++, 0,0);
+            // move_sprite(sprite_idx,    0,0);
+            // move_sprite(sprite_idx + 1, 0,0);
 
-            set_sprite_tile(sprite_idx++, GP_EMPTY);
-            set_sprite_tile(sprite_idx++, GP_EMPTY);
-
-            // Skip Cross size hint sprite
-            sprite_idx++;
+            // Hide first two sprites and skip every third (cross/size marker sprite)
+            set_sprite_tile(sprite_idx, GP_EMPTY);
+            set_sprite_tile(sprite_idx + 1, GP_EMPTY);
         }
     }
 }
