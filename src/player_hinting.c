@@ -128,10 +128,14 @@ void player_hinting_special_update_gfx() {
         // The LUT is zero based, so get an offset from the start of the special tiles
         hint_special_tile = GP_SPECIAL_HINT_LUT[ player_piece - GP_SPECIAL_START ];
 
-        set_sprite_tile(SPR_SPECIAL_HINT_1, hint_special_tile);
-        set_sprite_tile(SPR_SPECIAL_HINT_2, hint_special_tile);
-        set_sprite_tile(SPR_SPECIAL_HINT_3, hint_special_tile);
-        set_sprite_tile(SPR_SPECIAL_HINT_4, hint_special_tile);
+        // Setting the sprite is now redundant since
+        // player_hinting_special_show() is called immediately
+        // after the only time this is called
+        // set_sprite_tile(SPR_SPECIAL_HINT_1, hint_special_tile);
+        // set_sprite_tile(SPR_SPECIAL_HINT_2, hint_special_tile);
+        // set_sprite_tile(SPR_SPECIAL_HINT_3, hint_special_tile);
+        // set_sprite_tile(SPR_SPECIAL_HINT_4, hint_special_tile);
+
         // Set Pal and attribs
         set_sprite_prop(SPR_SPECIAL_HINT_1, GP_PAL_SPECIAL);
         set_sprite_prop(SPR_SPECIAL_HINT_2, GP_PAL_SPECIAL);
