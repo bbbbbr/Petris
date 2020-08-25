@@ -80,7 +80,7 @@ void link_reset(void) {
 
     // Set to external clock as default
     // Load a placeholder byte into the transfer register
-    SC_REG = LINK_CLOCK_EXT;
+    SC_REG = LINK_CLOCK_EXT | LINK_SPEED_FAST;
     SB_REG = LINK_CMD_IGNORE;
 }
 
@@ -91,6 +91,7 @@ void link_enable(void) {
     disable_interrupts();
     set_interrupts(IE_REG |= SIO_IFLAG);
     enable_interrupts();
+    LINK_WAIT_RECEIVE;
 }
 
 

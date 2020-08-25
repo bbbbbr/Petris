@@ -19,6 +19,11 @@
 #define LINK_XFER_START 0x80U // This gets cleared at the end of transfer
 #define LINK_XFER_MASK  0x80U
 
+#define LINK_SPEED_DMG  0x00U // 8KHz mode
+#define LINK_SPEED_FAST 0x02U // 256KHz mode (512KHz in CGB high-speed mode)
+#define LINK_SPEED_MASK 0x02U
+
+
 #define LINK_SENDING_MASK   (LINK_XFER_MASK | LINK_CLOCK_MASK)
 #define LINK_SENDING_ACTIVE (LINK_XFER_START | LINK_CLOCK_INT)
 
@@ -71,10 +76,10 @@ extern UINT8 volatile link_status;
 // 1. SC_REG -> Set Clock to internal (transfer bit cleared) to be the sender
 // 2. SB_REG -> Load data
 // 3. SC_REG -> Enable transfer bit (leave clock set to internal)
-#define LINK_SEND(command) \
     // The wait loop here could hang in some circumstances.
     // So maybe it's better to just overwrite any pending transfer
-    // OPTIONAL:    while ((SC_REG & LINK_SENDING_MASK) == LINK_SENDING_ACTIVE); \
+    // OPTIONAL:    while ((SC_REG & LINK_SENDING_MASK) == LINK_SENDING_ACTIVE);
+#define LINK_SEND(command) \
     SC_REG = LINK_CLOCK_INT; \
     SB_REG = command; \
     SC_REG = (LINK_XFER_START | LINK_CLOCK_INT);
@@ -85,9 +90,9 @@ extern UINT8 volatile link_status;
 // 2. SB_REG -> Load placeholder data
 // 3. SC_REG -> Enable transfer bit (leave clock set to external)
 #define LINK_WAIT_RECEIVE \
-    SC_REG = LINK_CLOCK_EXT; \
+    SC_REG = LINK_CLOCK_EXT | LINK_SPEED_FAST; \
     SB_REG = LINK_CMD_IGNORE; \
-    SC_REG = (LINK_XFER_START | LINK_CLOCK_EXT);
+    SC_REG = (LINK_XFER_START | LINK_CLOCK_EXT | LINK_SPEED_FAST);
 
 void init_link(void);
 void link_reset(void);
