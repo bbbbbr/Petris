@@ -19,6 +19,10 @@
 #define LINK_XFER_START 0x80U // This gets cleared at the end of transfer
 #define LINK_XFER_MASK  0x80U
 
+#define LINK_SENDING_MASK   (LINK_XFER_MASK | LINK_CLOCK_MASK)
+#define LINK_SENDING_ACTIVE (LINK_XFER_START | LINK_CLOCK_INT)
+
+
 // Game serial link command structure
 #define LINK_CMD_NOCONNECT   0xFFU
 #define LINK_CMD_MASK        0xF0U // Mask for command check bits
@@ -60,16 +64,23 @@ typedef enum {
 extern UINT8 volatile link_status;
 
 
-// For transmiting, the sequence is important:
+// Transmit one byte using internal clock
+// Expects the other device to be in recieving-waiting state
+// The setup sequence is important to ensure correct operation
+// OPTIONAL: 0. Ensure there isn't a pending transfer (SC_REG & Transmit flag set & Internal Clock)
 // 1. SC_REG -> Set Clock to internal (transfer bit cleared) to be the sender
 // 2. SB_REG -> Load data
 // 3. SC_REG -> Enable transfer bit (leave clock set to internal)
 #define LINK_SEND(command) \
+    // The wait loop here could hang in some circumstances.
+    // So maybe it's better to just overwrite any pending transfer
+    // OPTIONAL:    while ((SC_REG & LINK_SENDING_MASK) == LINK_SENDING_ACTIVE); \
     SC_REG = LINK_CLOCK_INT; \
     SB_REG = command; \
     SC_REG = (LINK_XFER_START | LINK_CLOCK_INT);
 
-// For receiving, the sequence is important:
+// Set up receive-waiting state
+// The setup sequence is important to ensure correct operation
 // 1. SC_REG -> Set Clock to external (transfer bit cleared) to be waiting for external sender
 // 2. SB_REG -> Load placeholder data
 // 3. SC_REG -> Enable transfer bit (leave clock set to external)
