@@ -30,12 +30,15 @@ typedef enum {
 
 #define GAMEPLAY_GET_READY_FLASHES 2
 
-#define GAME_CRUNCHUP_FRAME_THRESHOLD     (60 * 12) // N seconds between crunch-ups
-#define GAME_CRUNCHUP_SHAKE_THRESHOLD     GAME_CRUNCHUP_FRAME_THRESHOLD - 15 // Shake 1/4 second before crunch-up
+#define GAME_CRUNCHUP_NONE                0
+#define GAME_CRUNCHUP_SHAKE_RESET         0
+#define GAME_CRUNCHUP_SHAKE_START         13 // Shake ~1/4 second before crunch-up
+#define GAME_CRUNCHUP_FRAME_THRESHOLD     ((60 * 12) - GAME_CRUNCHUP_SHAKE_START) // N seconds between crunch-ups, when factoring in board shake time
 #define GAME_CRUNCHUP_FRAME_COUNTER_RESET 0
 
 extern UINT8 game_rand_init;
 extern UINT8 volatile game_crunchups_enqueued;
+extern UINT8 volatile game_shake_enqueued;
 extern UINT8 volatile game_is_paused;
 
 void gameplay_drop_speed_update(void);

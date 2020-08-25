@@ -12,6 +12,7 @@
 
 // Both player consoles start and mostly wait
 // in a ready-to-recieve state:
+//
 // * External Clock + Transfer Start bit set
 //
 // 1. Either console can initiate connection by sending
@@ -21,7 +22,7 @@
 //
 // 3. Initiator responds with RANDHI + random high nybble
 //
-// 3. Receiver responds with READY + game type.
+// 4. Receiver responds with READY + game type.
 //    After sending of that command is completed then
 //    **BOTH** consoles immediately set link status as CONNECTED
 //
@@ -185,6 +186,8 @@ void link_isr(void) {
 
                 case LINK_CMD_CRUNCHUP:
                         // enqueue N crunch-ups triggered by opponent
+                        // and start the board shake counter
+                        game_shake_enqueued = GAME_CRUNCHUP_SHAKE_START;
                         game_crunchups_enqueued += link_data & LINK_DATA_MASK;
                     break;
 
