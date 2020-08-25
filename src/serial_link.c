@@ -104,91 +104,109 @@ void link_disable(void) {
 }
 
 
-// Gets called after a successful RX **or* TX
-// This allows the sender to return to passive receiver waiting state
+// Gets called after a successful RX *OR* TX
+//
+// Is used to both receive new data and allow the
+// sender to return to passive receiver waiting state
 void link_isr(void) {
 
     UINT8 link_data;
 
     link_data = SB_REG;
 
-    if (link_status == LINK_STATUS_RESET) {
+    // === Handle TX Completed ===
+    // (Assume internal clock enabled
+    //  means GB was in sending mode)
+    if (SC_REG & LINK_CLOCK_INT) {
 
-        // === LINK-CONNECTION commands
+        // Now that transfer out is complete return to waiting state
+        // (external clock + transfer bit set)
+        LINK_WAIT_RECEIVE;
 
-        switch (link_data & LINK_CMD_MASK) {
+    } // === Handle RX New Data ===
+    else {
 
-            case LINK_CMD_INITIATE:
-                // Send Ready to send random number seed
-                // Then wait for transfer to complete
-                game_rand_init = DIV_REG & LINK_DATA_MASK;
-                LINK_SEND(LINK_CMD_RANDLO | (game_rand_init & LINK_DATA_MASK));
-                break;
+        if (link_status == LINK_STATUS_RESET) {
 
-            case LINK_CMD_RANDLO:
-                // Save incoming low nybble of shared random number seed
-                // Then generate the high nybble and send it
-                game_rand_init = (link_data & LINK_DATA_MASK) | (DIV_REG & 0xF0);
-                LINK_SEND(LINK_CMD_RANDHI | (game_rand_init >> 4) & LINK_DATA_MASK);
-                break;
+            // === LINK-CONNECTION commands
 
-            case LINK_CMD_RANDHI:
-                // Save incoming hi nybble of shared random number seed
-                game_rand_init |= (link_data & LINK_DATA_MASK) << 4;
+            switch (link_data & LINK_CMD_MASK) {
 
-                // Send ready to start & Game Type
-                //
-                // Wait until the transfer is complete then set link status to connected.
-                // That should happen at a similar-ish time
-                // as the other player processing LINK_CMD_READY
-                LINK_SEND(LINK_CMD_READY | (option_game_type & LINK_DATA_MASK));
-                while (SC_REG & LINK_XFER_START);
+                case LINK_CMD_INITIATE:
+                    // Send Ready to send random number seed
+                    // Then wait for transfer to complete
+                    game_rand_init = DIV_REG & LINK_DATA_MASK;
+                    LINK_SEND(LINK_CMD_RANDLO | (game_rand_init & LINK_DATA_MASK));
+                    break;
 
-                link_status = LINK_STATUS_CONNECTED;
-                break;
+                case LINK_CMD_RANDLO:
+                    // Save incoming low nybble of shared random number seed
+                    // Then generate the high nybble and send it
+                    game_rand_init = (link_data & LINK_DATA_MASK) | (DIV_REG & 0xF0);
+                    LINK_SEND(LINK_CMD_RANDHI | (game_rand_init >> 4) & LINK_DATA_MASK);
+                    break;
 
-            case LINK_CMD_READY:
-                // Save/apply incoming game type
-                option_game_type = link_data & LINK_DATA_MASK;
+                case LINK_CMD_RANDHI:
+                    // Save incoming hi nybble of shared random number seed
+                    game_rand_init |= (link_data & LINK_DATA_MASK) << 4;
 
-                // This will complete the connection
-                // should cause both players to start
-                // at a similar-ish time
-                link_status = LINK_STATUS_CONNECTED;
-                break;
-        }
-    } else if (link_status == LINK_STATUS_CONNECTED) {
+                    // Send ready to start & Game Type
+                    //
+                    // Wait until the transfer is complete then set link status to connected.
+                    // That should happen at a similar-ish time
+                    // as the other player processing LINK_CMD_READY
+                    LINK_SEND(LINK_CMD_READY | (option_game_type & LINK_DATA_MASK));
+                    while (SC_REG & LINK_XFER_START);
 
-        // === IN-GAME commands
+                    link_status = LINK_STATUS_CONNECTED;
+                    break;
 
-        switch (link_data & LINK_CMD_MASK) {
+                case LINK_CMD_READY:
+                    // Save/apply incoming game type
+                    option_game_type = link_data & LINK_DATA_MASK;
 
-            case LINK_CMD_OPPONENT_LOST:
-                    game_state = GAME_WON_LINK_VERSUS;
-                break;
+                    // This will complete the connection
+                    // should cause both players to start
+                    // at a similar-ish time
+                    link_status = LINK_STATUS_CONNECTED;
+                    break;
+            } // if (link_status == LINK_STATUS_RESET)
 
-            case LINK_CMD_CRUNCHUP:
-                    game_crunchups_enqueued++; // enqueue a(nother) crunch-up
-                break;
+        } else if (link_status == LINK_STATUS_CONNECTED) {
 
-            case LINK_CMD_PAUSE:
-                    game_is_paused = TRUE;
-                break;
+            // === IN-GAME commands
 
-            case LINK_CMD_UNPAUSE:
-                    game_is_paused = FALSE;
-                break;
-        }
+            switch (link_data & LINK_CMD_MASK) {
+
+                case LINK_CMD_OPPONENT_LOST:
+                        game_state = GAME_WON_LINK_VERSUS;
+                    break;
+
+                case LINK_CMD_CRUNCHUP:
+                        game_crunchups_enqueued++; // enqueue a(nother) crunch-up
+                    break;
+
+                case LINK_CMD_PAUSE:
+                        game_is_paused = TRUE;
+                    break;
+
+                case LINK_CMD_UNPAUSE:
+                        game_is_paused = FALSE;
+                    break;
+            }
+        } // else if (link_status == LINK_STATUS_CONNECTED)
+    } // else for: if (SC_REG & LINK_CLOCK_INT)
+
+    // Only return to waiting state (external clock + transfer bit set)
+    // if a transfer is NOT in progress (likely initiated in this ISR)
+    // which is indicated by TX bit set
+
+    // TODO: cleanup if ok
+    // FIXME Use instead? (!(SC_REG & LINK_XFER_START))
+    // if (!(SC_REG & LINK_CLOCK_INT)) {
+    if (! (SC_REG & LINK_XFER_START)) {
+        LINK_WAIT_RECEIVE;
     }
-
-// ***** POSSIBLE BUG? ****
-// TODO: is there a problem where performing a TX
-//       in the ISR and calling LINK_WAIT_RECEIVE
-//       TOO SOON SUCH that it dumps or interferes with
-//       the transfer in progress?
-
-    // Return to waiting on an external clock (transfer bit not set) to wait for a sender
-    LINK_WAIT_RECEIVE;
 }
 
 
