@@ -560,8 +560,8 @@ void board_handle_pet_completed(UINT8 flags) {
         // If in 2 player versus mode and the bonus length
         // threshold is met or passed, send N crunch ups
         // based on pet-length
-        if ((board_tile_clear_count >= BRD_TILE_COUNT_BONUS_SOUND_THRESHOLD) &&
-            (link_status == LINK_STATUS_CONNECTED)) {
+        if ((link_status == LINK_STATUS_CONNECTED) &&
+            (board_tile_clear_count >= BRD_TILE_COUNT_BONUS_SOUND_THRESHOLD)) {
 
                 // Number of crunch-ups sent is a function of length
                 // Cap max number to fit within serial data payload

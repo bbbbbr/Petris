@@ -20,6 +20,8 @@
 #include "gfx_print.h"
 #include "player_info.h"
 
+#include "serial_link.h"
+
 #include "game_piece.h"
 #include "game_piece_data.h"
 #include "game_board.h"
@@ -143,6 +145,16 @@ void score_update(UINT16 num_tiles) {
     // Check for level updates
     // (either triggered directly above OR elsewhere)
     if (level_increment_enqueue == TRUE) {
+
+        // If in 2 player versus mode and level completed
+        // AND pet length didn't already trigger a crunch-up (below VS_CRUNCH_DIV)
+        // THEN send 1 crunch-up to oppoinent
+        if ((link_status == LINK_STATUS_CONNECTED) &&
+            (num_tiles < VS_CRUNCH_DIV)) {
+
+            LINK_SEND(LINK_CMD_CRUNCHUP | 0x01 );
+        }
+
         level_increment();
 
         // After the new level transition is complete
