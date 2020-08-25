@@ -124,9 +124,20 @@ enum {
 // See: spec_bomb_threshold_pettiles
 #define BOMB_THR_EASY   5
 #define BOMB_THR_NORMAL 6
-#define BOMB_THR_HARD   8
+#define BOMB_THR_HARD   7
 #define BOMB_THR_EXPERT 8
-#define BOMB_THR_BEAST  8
+#define BOMB_THR_BEAST  7
+
+// Used to divide tiles in pet to determine number of
+// crunch-ups to send to opponent *IF* the pet has met the
+// spec_bomb_threshold_pettiles
+#define VS_CRUNCH_DIV  5
+// OPTIONAL: different divisors for different difficulty levels
+// #define VS_CRUNCH_DIV_EASY    4
+// #define VS_CRUNCH_DIV_NORMAL  5
+// #define VS_CRUNCH_DIV_HARD    6
+// #define VS_CRUNCH_DIV_EXPERT  6
+// #define VS_CRUNCH_DIV_BEAST   6
 
 // This is predictable to the player, and that's fine :)
 // Number of pieces issued until delivering a special-merge

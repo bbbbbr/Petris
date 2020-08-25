@@ -183,7 +183,8 @@ void link_isr(void) {
                     break;
 
                 case LINK_CMD_CRUNCHUP:
-                        game_crunchups_enqueued++; // enqueue a(nother) crunch-up
+                        // enqueue N crunch-ups triggered by opponent
+                        game_crunchups_enqueued += link_data & LINK_DATA_MASK;
                     break;
 
                 case LINK_CMD_PAUSE:

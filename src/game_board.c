@@ -529,6 +529,7 @@ UINT8 board_check_connected_xy(INT8 x, INT8 y, UINT8 piece, UINT8 * p_this_conne
 void board_handle_pet_completed(UINT8 flags) {
 
     UINT8 c = 0;
+    UINT8 crunchups_to_send;
 
     while (c < board_tile_clear_count) {
 
@@ -539,13 +540,6 @@ void board_handle_pet_completed(UINT8 flags) {
         }
         else if (c >= BRD_TILE_COUNT_BONUS_SOUND_THRESHOLD) {
             PLAY_SOUND_TILE_CLEAR_BONUS; // Bonus sound
-
-            // If in 2 player versus mode, send a crunch-up to the other player
-            // Only send once, right as the threshold is met
-            if ((c == BRD_TILE_COUNT_BONUS_SOUND_THRESHOLD) &&
-                (link_status == LINK_STATUS_CONNECTED)) {
-                LINK_SEND(LINK_CMD_CRUNCHUP);
-            }
         }
         else {
             PLAY_SOUND_TILE_CLEAR_NORMAL; // Normal sound
@@ -556,10 +550,29 @@ void board_handle_pet_completed(UINT8 flags) {
         c++;
     }
 
+
+
     //  Player gets no credit when special piece is used
     if (flags & BRD_CHECK_FLAGS_DONT_ADD_POINTS) {
         score_update(BRD_PIECE_CLEAR_COUNT_NONE);
     } else {
+
+        // If in 2 player versus mode and the bonus length
+        // threshold is met or passed, send N crunch ups
+        // based on pet-length
+        if ((board_tile_clear_count >= BRD_TILE_COUNT_BONUS_SOUND_THRESHOLD) &&
+            (link_status == LINK_STATUS_CONNECTED)) {
+
+                // Number of crunch-ups sent is a function of length
+                // Cap max number to fit within serial data payload
+                // (unlikely to exceed in reality)
+                crunchups_to_send = (board_tile_clear_count / VS_CRUNCH_DIV);
+                if (crunchups_to_send > LINK_DATA_MASK)
+                    crunchups_to_send = LINK_DATA_MASK;
+                LINK_SEND(LINK_CMD_CRUNCHUP | (crunchups_to_send & LINK_DATA_MASK));
+        }
+
+
         // Check completed pet size against level-up size requirement if it's Long pet game type
         if (option_game_type == OPTION_GAME_TYPE_LONG_PET) {
             game_type_long_pet_check_size(board_tile_clear_count);
