@@ -475,14 +475,13 @@ void gameplay_crunchup_update(void) {
         // Crunch up happens ~once every 10 seconds
         game_crunchup_counter++;
 
-        // Once the threshold is crossed, queue a crunch-up and reset the counter
+        // Once the threshold is crossed, queue a board shake + crunch-up
+        // and reset the counter
         if (game_crunchup_counter >= GAME_CRUNCHUP_FRAME_THRESHOLD) {
 
             game_crunchup_counter = GAME_CRUNCHUP_FRAME_COUNTER_RESET;
 
-            SCX_REG = 0;
-            // This var may also be modified in the SIO isr,
-            // so protect it when making changes
+            // Vars may be modified in the SIO isr, protect when making changes
             __critical {
                 game_crunchups_enqueued++;
                 game_shake_enqueued = GAME_CRUNCHUP_SHAKE_START;
@@ -491,36 +490,44 @@ void gameplay_crunchup_update(void) {
     }
 
     // If board shake has been queued up then play that out
-    // until finished, then trigger the crunch-up
+    // until finished, then trigger any pending crunch-ups
     if (game_shake_enqueued) {
-        // This var may also be modified in the SIO isr,
-        // so protect it when making changes
+
+        // Vars may be modified in the SIO isr, protect when making changes
         __critical {
-            game_shake_enqueued--;
-        }
-        SCX_REG = sys_time & 0x03;
+            game_shake_enqueued++;
 
-    } else {
-        // Crunch-ups can be triggered by
-        // * Elapsed time in game type: OPTION_GAME_TYPE_CRUNCH_UP
-        // * 2 Player vs serial link in *ANY GAME TYPE*, sent by the other versus player
-        while (game_crunchups_enqueued) {
-            // This var may also be modified in the SIO isr,
-            // so protect it when making changes
-            __critical {
-                game_crunchups_enqueued--;
+            // Keep shifting the board until it's the last pass,
+            // then make sure map is scrolled back to zero
+            if (game_shake_enqueued >= GAME_CRUNCHUP_SHAKE_COMPLETE) {
+                SCX_REG = 0;
+                game_shake_enqueued = GAME_CRUNCHUP_SHAKE_RESET;
+            } else {
+                SCX_REG = sys_time & 0x03;
             }
+        }
 
-            PLAY_SOUND_CRUNCH_UP;
+        // If shaking has finished then process the crunch-ups
+        if (game_shake_enqueued == GAME_CRUNCHUP_SHAKE_RESET) {
+            // Crunch-ups can be triggered by
+            // * Elapsed time in game type: OPTION_GAME_TYPE_CRUNCH_UP
+            // * 2 Player vs serial link in *ANY GAME TYPE*, sent by the other versus player
+            while (game_crunchups_enqueued) {
 
-            // Switch to the alternate random number sequence for tail generation
-            // Keeps random tail genetatoin from altering game piece sequence
-            swaprand();
+                // Vars may be modified in the SIO isr, protect when making changes
+                __critical {
+                    game_crunchups_enqueued--;
+                }
 
-            board_crunch_up();
+                PLAY_SOUND_CRUNCH_UP;
 
-            // Switch back to main random number sequence
-            swaprand();
+                // Temporarily switch to alternate random number sequence for
+                // tail generation. Keeps random tail generation from altering
+                // game piece sequence that may be synced over serial link
+                swaprand();
+                board_crunch_up();
+                swaprand();
+            }
         }
     }
 }
