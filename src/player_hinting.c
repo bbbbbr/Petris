@@ -89,7 +89,7 @@ void player_hinting_special_show(UINT8 do_show) {
         // move_sprite(SPR_SPECIAL_HINT_3, 0,0);
         // move_sprite(SPR_SPECIAL_HINT_4, 0,0);
         //
-        // Hide using a clear tile, maybe it's a little faster? // TODO
+        // Hide using a clear tile, maybe it's a little faster
         set_sprite_tile(SPR_SPECIAL_HINT_1, GP_EMPTY);
         set_sprite_tile(SPR_SPECIAL_HINT_2, GP_EMPTY);
         set_sprite_tile(SPR_SPECIAL_HINT_3, GP_EMPTY);
@@ -98,45 +98,44 @@ void player_hinting_special_show(UINT8 do_show) {
 }
 
 
+// Move the hinting sprites that surround the player (Special) piece
 // NOTE: expects to only be called if (player_piece & GP_SPECIAL_MASK)
-//
-//
-// TODO: OPTIMIZE: if there is CPU time left, roll this into a loop?
 void player_hinting_special_move(void) {
 
-        // TODO : OPTIMIZE : Better to avoid re-multiplying and adding all of these each time
-        move_sprite(SPR_SPECIAL_HINT_1,
-                    (player_x * BRD_UNIT_SIZE) + SPR_HINT_OFFSET_LUT_X[0] + BRD_PIECE_X_OFFSET,
-                    (player_y * BRD_UNIT_SIZE) + SPR_HINT_OFFSET_LUT_Y[0] + BRD_PIECE_Y_OFFSET);
+        INT8 spr_x, spr_y;
 
-        move_sprite(SPR_SPECIAL_HINT_2,
-                    (player_x * BRD_UNIT_SIZE) + SPR_HINT_OFFSET_LUT_X[1] + BRD_PIECE_X_OFFSET,
-                    (player_y * BRD_UNIT_SIZE) + SPR_HINT_OFFSET_LUT_Y[1] + BRD_PIECE_Y_OFFSET);
+        spr_x = (player_x * BRD_UNIT_SIZE) + BRD_PIECE_X_OFFSET;
+        spr_y = (player_y * BRD_UNIT_SIZE) + BRD_PIECE_Y_OFFSET;
 
-        move_sprite(SPR_SPECIAL_HINT_3,
-                    (player_x * BRD_UNIT_SIZE) + SPR_HINT_OFFSET_LUT_X[2] + BRD_PIECE_X_OFFSET,
-                    (player_y * BRD_UNIT_SIZE) + SPR_HINT_OFFSET_LUT_Y[2] + BRD_PIECE_Y_OFFSET);
+        move_sprite(SPR_SPECIAL_HINT_1, spr_x + SPR_HINT_OFFSET_LUT_X[0],
+                                        spr_y + SPR_HINT_OFFSET_LUT_Y[0]);
 
-        move_sprite(SPR_SPECIAL_HINT_4,
-                    (player_x * BRD_UNIT_SIZE) + SPR_HINT_OFFSET_LUT_X[3] + BRD_PIECE_X_OFFSET,
-                    (player_y * BRD_UNIT_SIZE) + SPR_HINT_OFFSET_LUT_Y[3] + BRD_PIECE_Y_OFFSET);
+        move_sprite(SPR_SPECIAL_HINT_2, spr_x + SPR_HINT_OFFSET_LUT_X[1],
+                                        spr_y + SPR_HINT_OFFSET_LUT_Y[1]);
+
+        move_sprite(SPR_SPECIAL_HINT_3, spr_x + SPR_HINT_OFFSET_LUT_X[2],
+                                        spr_y + SPR_HINT_OFFSET_LUT_Y[2]);
+
+        move_sprite(SPR_SPECIAL_HINT_4, spr_x + SPR_HINT_OFFSET_LUT_X[3],
+                                        spr_y + SPR_HINT_OFFSET_LUT_Y[3]);
 }
 
 
 // NOTE: expects to only be called if (player_piece & GP_SPECIAL_MASK)
-//
-//
-// TODO: OPTIMIZE: if there is CPU time left, roll this into a loop?
 void player_hinting_special_update_gfx() {
 
         // Load the corresponding special tile (for 4-direction preview)
         // The LUT is zero based, so get an offset from the start of the special tiles
         hint_special_tile = GP_SPECIAL_HINT_LUT[ player_piece - GP_SPECIAL_START ];
 
-        set_sprite_tile(SPR_SPECIAL_HINT_1, hint_special_tile);
-        set_sprite_tile(SPR_SPECIAL_HINT_2, hint_special_tile);
-        set_sprite_tile(SPR_SPECIAL_HINT_3, hint_special_tile);
-        set_sprite_tile(SPR_SPECIAL_HINT_4, hint_special_tile);
+        // Setting the sprite is now redundant since
+        // player_hinting_special_show() is called immediately
+        // after the only time this is called
+        // set_sprite_tile(SPR_SPECIAL_HINT_1, hint_special_tile);
+        // set_sprite_tile(SPR_SPECIAL_HINT_2, hint_special_tile);
+        // set_sprite_tile(SPR_SPECIAL_HINT_3, hint_special_tile);
+        // set_sprite_tile(SPR_SPECIAL_HINT_4, hint_special_tile);
+
         // Set Pal and attribs
         set_sprite_prop(SPR_SPECIAL_HINT_1, GP_PAL_SPECIAL);
         set_sprite_prop(SPR_SPECIAL_HINT_2, GP_PAL_SPECIAL);
@@ -157,7 +156,7 @@ void player_hinting_drop_show(UINT8 do_show) {
     } else {
         // Hide sprite
         // move_sprite(SPR_DROP_HINT, 0,0);
-        // Hide using a clear tile, maybe it's a little faster? // TODO
+        // Hide using a clear tile, maybe it's a little faster
         set_sprite_tile(SPR_DROP_HINT, GP_EMPTY);
     }
 }
@@ -230,7 +229,8 @@ void hinting_petlength_reset(void) {
 
         // Hide and set tile for size hint sprite
         move_sprite(sprite_idx, 0,0);
-        // TODO: These two could just be called once at the start of a game instead of every level
+        // These two could probably just be called once at the
+        // start of a game instead of every level
         set_sprite_tile(sprite_idx, GP_CROSS);
         set_sprite_prop(sprite_idx, GP_PAL_CROSS);
         sprite_idx++;
@@ -247,7 +247,7 @@ void hinting_petlength_turn_on(void) {
     hinting_petlength_enabled = HINT_PET_LENGTH_TIMEOUT;
 
     // Update display
-    hinting_petlength_show();
+    hinting_petlength_showhide();
 }
 
 
@@ -305,7 +305,7 @@ void hinting_petlength_add(INT8 board_x, INT8 board_y, UINT8 length, UINT8 piece
 
     // Render sprite visible if enabled (via setting tile)
     if (hinting_petlength_enabled) {
-        // hinting_petlength_show(); // TODO: change to a define NO_INCREMENT
+        // hinting_petlength_showhide();
         set_sprite_tile(sprite_idx    , hinting_petlength_num_1[slot]);
         set_sprite_tile(sprite_idx + 1, hinting_petlength_num_2[slot]);
     }
@@ -325,60 +325,53 @@ void hinting_petlength_add(INT8 board_x, INT8 board_y, UINT8 length, UINT8 piece
 
 
 
-void hinting_petlength_hide(void) {
-
-    hinting_petlength_enabled = FALSE;
-
-    // Update display
-    hinting_petlength_show();
-}
-
-
-
-// TODO Convert this to just show ALL numbers and not loop through them
-void hinting_petlength_show(void) {
+// Used to also move sprites on/off screen to show/hide them
+// but now only relies on transparent vs opaque tiles to do that
+//
+// Note: Using a separate counter for the sprite index instead of
+//       multiplying (c * 3) was producing compiler problems (below).
+//       The compiler also seems to produce shorter, faster code with the multiply...
+//       SDCC:
+//       * Warning: Non-connected liverange found and extended to connected component of the CFG:iTemp33. Please contact sdcc authors with source code to reproduce.
+//       * Warning: Non-connected liverange found and extended to connected component of the CFG:iTemp0. Please contact sdcc authors with source code to reproduce.
+void hinting_petlength_showhide(void) {
 
     UINT8 c;
-    UINT8 sprite_idx; // TODO use a pointer instead?
-
-    // Set initial offset for hint sprites
-    sprite_idx = SPR_LONG_PET_HINT_NUM_START;
+    UINT8 sprite_idx;
 
     for (c = 0; c < SPR_LONG_PET_HINT_POOL_SIZE; c++) {
+
+        // There are 3 sprites for every pet length hint, calculate offset
+        sprite_idx = SPR_LONG_PET_HINT_NUM_START + (c * SPR_LONG_PET_HINT_NUM_TILES_PER);
 
         // Show the entry if it's populated
         if ((hinting_petlength_enabled)
             && (hinting_petlength_x[c] != HINT_PET_LENGTH_SLOT_EMPTY))
         {
 
-            // Reveal sprite
-            set_sprite_tile(sprite_idx++, hinting_petlength_num_1[c]);
-            set_sprite_tile(sprite_idx++, hinting_petlength_num_2[c]);
-
-            // Skip Cross size hint sprite
-            sprite_idx++;
+            // Reveal first two sprites and skip every third (cross/size marker sprite)
+            set_sprite_tile(sprite_idx,     hinting_petlength_num_1[c]);
+            set_sprite_tile(sprite_idx + 1, hinting_petlength_num_2[c]);
 
             // // Move the sprite into view at board position
-            // move_sprite(sprite_idx++,
+            // move_sprite(sprite_idx,
             //             (hinting_petlength_x[c] * BRD_UNIT_SIZE) + SPR_LONG_PET_HINT_OFFSET_X,
             //             (hinting_petlength_y[c] * BRD_UNIT_SIZE) + SPR_LONG_PET_HINT_OFFSET_Y);
 
             // // Move the sprite into view at board position
-            // move_sprite(sprite_idx++,
+            // move_sprite(sprite_idx + 1,
             //             (hinting_petlength_x[c] * BRD_UNIT_SIZE) + SPR_LONG_PET_HINT_OFFSET_X + 8,
             //             (hinting_petlength_y[c] * BRD_UNIT_SIZE) + SPR_LONG_PET_HINT_OFFSET_Y);
         } else {
             // Otherwise entry is not visible
 
             // Hide the entry
-            // move_sprite(sprite_idx++, 0,0);
-            // move_sprite(sprite_idx++, 0,0);
+            // move_sprite(sprite_idx,    0,0);
+            // move_sprite(sprite_idx + 1, 0,0);
 
-            set_sprite_tile(sprite_idx++, GP_EMPTY);
-            set_sprite_tile(sprite_idx++, GP_EMPTY);
-
-            // Skip Cross size hint sprite
-            sprite_idx++;
+            // Hide first two sprites and skip every third (cross/size marker sprite)
+            set_sprite_tile(sprite_idx, GP_EMPTY);
+            set_sprite_tile(sprite_idx + 1, GP_EMPTY);
         }
     }
 }

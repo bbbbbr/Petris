@@ -68,32 +68,51 @@ void game_piece_next_generate(void) {
             game_piece_next = ((UINT8)(rand() ^ DIV_REG) & 0x1F);
         }
 
-        // Increase the count of total pieces used in the game
-        // if (player_numpieces < 0xFFFE) // Probably not necessary to prevent wraparound
-        player_numpieces++;
-
-        // Check to see whether a special piece (merge) should be delivered
-        if ((player_numpieces & p_game_settings->spec_merge_threshold_pieces) == p_game_settings->spec_merge_threshold_pieces)
-            game_piece_next_set(GP_SPECIAL_LIGHTENING);
-
 
         // == New piece adjusments to improve player experience in various modes ==
 
-        // Tail Cleanup : suppress adding tail pieces to make it less frustrating
-        if ((option_game_type == OPTION_GAME_TYPE_PET_CLEANUP) &&
-            ((game_piece_next & GP_SEG_MASK) == GP_SEG_TAIL_BITS)) {
+        // A SPECIAL piece should NEVER make it in here, but just in
+        // case, this will future proof it against unwitting changes.
+        // (SPECIAL pieces would get mangled to invalid values)
+        if (!(game_piece_next & GP_SPECIAL_MASK)) {
 
-            // Translate Tail pieces to Head pieces
-            game_piece_next = (game_piece_next & ~GP_SEG_MASK) | GP_SEG_HEAD_BITS;
+            // Tail Cleanup : suppress adding tail pieces to make it less frustrating
+            if ((option_game_type == OPTION_GAME_TYPE_PET_CLEANUP) &&
+                ((game_piece_next & GP_SEG_MASK) == GP_SEG_TAIL_BITS)) {
 
-        // Crunch-up mode: suppress all L-Turn pieces to make it less frustrating
-        } else if ((option_game_type == OPTION_GAME_TYPE_CRUNCH_UP) &&
-            ((game_piece_next & GP_SEG_MASK) == GP_SEG_TURN_BITS)) {
+                // Translate Tail pieces to Head pieces
+                game_piece_next = (game_piece_next & ~GP_SEG_MASK) | GP_SEG_HEAD_BITS;
 
-            // Translate L-Turn pieces to Torso
-            game_piece_next = (game_piece_next & ~GP_SEG_MASK) | GP_SEG_TORSO_BITS;
+            // Crunch-up mode: suppress all L-Turn pieces to make it less frustrating
+            } else if ((option_game_type == OPTION_GAME_TYPE_CRUNCH_UP) &&
+                ((game_piece_next & GP_SEG_MASK) == GP_SEG_TURN_BITS)) {
+
+                // Translate L-Turn pieces to Torso
+                game_piece_next = (game_piece_next & ~GP_SEG_MASK) | GP_SEG_TORSO_BITS;
+            }
         }
     }
+
+
+    // Done generating the new piece.
+    // Now count it and queue up a special piece if applicable
+    // WARNING: This needs to be done AFTER and OUTSIDE of any
+    //          of the game-type piece massaging that happens above
+
+    // Increase the count of total pieces used in the game
+    //
+    // Note: could prevent wraparound here, but if the player
+    // ever did reach this lofty amount it is probably better
+    // to let it wrap so they can continue to receive
+    // special pieces based on continued changes to this var
+    // (They are bitmask based so should still work)
+    //
+    // if (player_numpieces < PLAYER_NUMPIECES_MAX)
+        player_numpieces++;
+
+    // Check to see whether a special piece (merge) should be delivered
+    if ((player_numpieces & p_game_settings->spec_merge_threshold_pieces) == p_game_settings->spec_merge_threshold_pieces)
+        game_piece_next_set(GP_SPECIAL_LIGHTENING);
 }
 
 
@@ -112,10 +131,7 @@ void game_piece_next_set(UINT8 override_piece) {
     // Override the next piece
     game_piece_next = override_piece;
 
-    // Update the next preview display
-    // TODO: It looks kind of strange when the override shows up
-    //       for only a second in the preview and then pops up top
-    // game_piece_next_show(TRUE);
+    // Preview display is updated elsewhere (game_piece_next_show(TRUE)
 }
 
 
@@ -123,13 +139,8 @@ void game_piece_next_set(UINT8 override_piece) {
 void game_piece_next_show(UINT8 do_show) {
 
     UINT8 attrib;
-    // TODO: this could get animated to launch the next piece
-    //       to the top of the board
 
-    // TODO: OPTIMIZE: ?? would be less overhead to test option_game_preview_next before calling function?
     if ((do_show) && (option_game_preview_next == NEXT_PREV_ON)) {
-
-        // TODO: consolidate sprite calculation with player_piece_update_gfx() where this is duplicated from?
 
         // Update player rotation (clear rotate bits and then set)
         set_sprite_tile(SPR_PLAYER_NEXT,

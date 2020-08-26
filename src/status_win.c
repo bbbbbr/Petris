@@ -10,31 +10,6 @@
 // See: http://creativecommons.org/licenses/by-nc-sa/4.0/
 
 
-// Both player consoles start and mostly wait
-// in a ready-to-recieve state:
-// * External Clock + Transfer Start set
-//
-// 1. Either console can initiate connection by sending
-//    a INITIATE command.
-//
-// 2. The other console can respond by sending a READY,
-//    after sending of that command is completed then
-//    **BOTH** consoles immediately set link status as CONNECTED
-//
-// State A: RESET                   /--Rx:-> CONNECTED (follower)
-// Link  A:  -> Tx:INITIATE        /
-// Link  B:           \--Rx--> Tx:READY
-// State B: RESET                   \------> CONNECTED (controller)
-
-
-// TODO: what if link is lost?
-// TODO: icon to indicate link status? "-vs-" or "]--["
-
-
-// If a serial transfer with internal clock is performed and no external GameBoy
-// is present, a value of $FF will be received in the transfer.
-
-
 #include <gb/gb.h>
 #include <gb/cgb.h> // Include cgb functions
 #include <stdlib.h>

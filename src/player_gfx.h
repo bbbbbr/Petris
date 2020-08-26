@@ -10,7 +10,7 @@
 // Sprites used during Active Gameplay
 #define SPR_PLAYER          0x00 // Player tile
 #define SPR_PLAYER_NEXT     0x01 // Next piece preview
-#define SPR_DROP_HINT       0x02 // TODO: Helper hinting for where the tile will land
+#define SPR_DROP_HINT       0x02 // Helper hinting for where the tile will land
 #define SPR_SPECIAL_HINT_1  0x03 // Start of hint sprites
 #define SPR_SPECIAL_HINT_2  0x04 // Start of hint sprites
 #define SPR_SPECIAL_HINT_3  0x05 // Start of hint sprites

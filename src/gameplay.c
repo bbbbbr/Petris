@@ -48,6 +48,7 @@ UINT8 game_speed_frames_per_drop;
 UINT8 game_rand_init;
 UINT16 game_crunchup_counter;
 UINT8 volatile game_crunchups_enqueued;
+UINT8 volatile game_shake_enqueued;
 UINT8 volatile game_is_paused;
 
 
@@ -138,7 +139,6 @@ void gameplay_init(void) {
     player_info_newgame_reset();
 
     // Flash a get ready message to the player
-    // TODO: function or struct to select game_start_message[option_game_type]
     if (option_game_type == OPTION_GAME_TYPE_PET_CLEANUP) {
 
         board_flash_message(MSG_GET_READY_X, MSG_GET_READY_Y,
@@ -161,25 +161,19 @@ void gameplay_init(void) {
 
     SHOW_SPRITES;
 
-    // TODO: move into player_info_init/reset
-    // game_speed_frames_per_drop = GAME_SPEED_FRAMES_PER_DROP_RESET;
-
+    // Init game state vars
     piece_state = PLAYER_START;
-
     key_down_repeat_needs_release = FALSE;
-
     gameplay_piece_drop_requested = FALSE;
-
     game_speed_drop_frame_counter = GAME_SPEED_DROP_FRAME_COUNTER_RESET;
-
     game_crunchup_counter = GAME_CRUNCHUP_FRAME_COUNTER_RESET;
-    game_crunchups_enqueued = 0;
+    game_crunchups_enqueued = GAME_CRUNCHUP_NONE;
+    game_shake_enqueued = GAME_CRUNCHUP_SHAKE_RESET;
 }
 
 
 
 // Called on new game and during transition to new level
-// TODO: could be moved to board_prepare_new_level()
 void gameplay_prepare_board(void) {
 
     board_reset();
@@ -230,12 +224,11 @@ void gameplay_handle_pause(void) {
     }
 
     // Hide the game board and player piece (except in long-pet mode)
-    // TODO: allow in all other modes?
-    if (option_game_type != OPTION_GAME_TYPE_LONG_PET) {
-        board_hide_all(BRD_CLR_DELAY_NONE);
-    }
+    // if (option_game_type != OPTION_GAME_TYPE_LONG_PET) {
+    //     board_hide_all(BRD_CLR_DELAY_NONE);
+    // }
 
-    // TODO: CONSOLIDATE: these hides are basically a dupe of gameplay_exit_cleanup()
+    // These hides are basically a dupe of gameplay_exit_cleanup()
     game_piece_next_show(FALSE);
     player_piece_update_xy(PLAYER_PIECE_HIDE);
     player_hinting_special_show(FALSE);
@@ -250,8 +243,8 @@ void gameplay_handle_pause(void) {
     // or unpause send over serial link
     waitpadticked_lowcpu(J_START, &game_is_paused);
 
-    // If unpause was triggered by button
-    // then state will still be paused, so clear it
+    // If unpause was triggered by a local button
+    // then pause state var will still be paused, so clear it
     if (game_is_paused == TRUE) {
 
             __critical {
@@ -280,8 +273,6 @@ void gameplay_handle_pause(void) {
 void gameplay_handle_input(void) {
 
     // Move piece left/right
-    //
-    // TODO: OPTIMIZE: consolidate this into a single left/right test function
     if (KEY_PRESSED(J_LEFT)) {
         if (key_repeat_count == KEY_REPEAT_START)
             player_piece_move( -1, 0);
@@ -303,12 +294,12 @@ void gameplay_handle_input(void) {
     // Pressing Down Accelerate dropping the current piece
     if (KEY_PRESSED(J_DOWN)) {
 
-        // TODO: could this be handled more gracefully by setting
-        //       key_repeat_count = 0 on a new piece instead?
         // * Requires down key to be released on a new piece
         //   before key repeat can take effect again.
         //   That protects against accidental down
         //   repeat on a new piece
+        // *  Might be handled more gracefully by setting
+        //    key_repeat_count = 0 on a new piece instead?
         if (!key_down_repeat_needs_release) {
 
             if (key_repeat_count == KEY_REPEAT_START) {
@@ -435,15 +426,15 @@ void gameplay_update(void) {
     // Handle board animation updates
     board_gfx_tail_animate();
 
-    // TODO: consider moving into a function
+
     // Handle timeout of Pet Length Overlay if applicable
     if (hinting_petlength_enabled) {
-
         hinting_petlength_enabled--;
 
         if (hinting_petlength_enabled == 0)
-            hinting_petlength_show(); // TODO: rename to _update or _showhide
+            hinting_petlength_showhide();
     }
+
 
     // This should be called after gameplay_gravity_update
     gameplay_crunchup_update();
@@ -484,43 +475,59 @@ void gameplay_crunchup_update(void) {
         // Crunch up happens ~once every 10 seconds
         game_crunchup_counter++;
 
-        // Once the threshold is crossed, queue a crunch-up and reset the counter
+        // Once the threshold is crossed, queue a board shake + crunch-up
+        // and reset the counter
         if (game_crunchup_counter >= GAME_CRUNCHUP_FRAME_THRESHOLD) {
+
             game_crunchup_counter = GAME_CRUNCHUP_FRAME_COUNTER_RESET;
 
-            SCX_REG = 0;
-            // This var may also be modified in the SIO isr,
-            // so protect it when making changes
+            // Vars may be modified in the SIO isr, protect when making changes
             __critical {
                 game_crunchups_enqueued++;
+                game_shake_enqueued = GAME_CRUNCHUP_SHAKE_START;
             }
-        }
-        else if (game_crunchup_counter > (GAME_CRUNCHUP_FRAME_THRESHOLD - 15)) {
-            // Shake the board for 1/4 of a second before the crunch up happens
-            SCX_REG = sys_time & 0x03;
         }
     }
 
-    // Crunch-ups can be triggered by
-    // * Elapsed time in game type: OPTION_GAME_TYPE_CRUNCH_UP
-    // * 2 Player vs serial link in *ANY GAME TYPE*, sent by the other versus player
-    while (game_crunchups_enqueued) {
-        // This var may also be modified in the SIO isr,
-        // so protect it when making changes
+    // If board shake has been queued up then play that out
+    // until finished, then trigger any pending crunch-ups
+    if (game_shake_enqueued) {
+
+        // Vars may be modified in the SIO isr, protect when making changes
         __critical {
-            game_crunchups_enqueued--;
+            game_shake_enqueued++;
+
+            // Keep shifting the board until it's the last pass,
+            // then make sure map is scrolled back to zero
+            if (game_shake_enqueued >= GAME_CRUNCHUP_SHAKE_COMPLETE) {
+                SCX_REG = 0;
+                game_shake_enqueued = GAME_CRUNCHUP_SHAKE_RESET;
+            } else {
+                SCX_REG = sys_time & 0x03;
+            }
         }
 
-        PLAY_SOUND_CRUNCH_UP;
-        // TODO: pass the var as an argument and loop inside the function instead?
+        // If shaking has finished then process the crunch-ups
+        if (game_shake_enqueued == GAME_CRUNCHUP_SHAKE_RESET) {
+            // Crunch-ups can be triggered by
+            // * Elapsed time in game type: OPTION_GAME_TYPE_CRUNCH_UP
+            // * 2 Player vs serial link in *ANY GAME TYPE*, sent by the other versus player
+            while (game_crunchups_enqueued) {
 
-        // Switch to the alternate random number sequence for tail generation
-        // Keeps random tail genetatoin from altering game piece sequence
-        swaprand();
+                // Vars may be modified in the SIO isr, protect when making changes
+                __critical {
+                    game_crunchups_enqueued--;
+                }
 
-        board_crunch_up();
+                PLAY_SOUND_CRUNCH_UP;
 
-        // Switch back to main random number sequence
-        swaprand();
+                // Temporarily switch to alternate random number sequence for
+                // tail generation. Keeps random tail generation from altering
+                // game piece sequence that may be synced over serial link
+                swaprand();
+                board_crunch_up();
+                swaprand();
+            }
+        }
     }
 }

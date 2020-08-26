@@ -42,7 +42,7 @@ void game_types_init(void) {
     game_type_long_pet_required_size = 0;
 }
 
-// TODO: should probably be moved to gameplay_handle_level_transition()
+
 void game_types_handle_level_transition(void) {
 
     // Handle level transition
@@ -123,7 +123,7 @@ void game_type_pet_cleanup_increment_tail_count(void) {
         if (game_type_cleanup_tail_count < 255) {
             game_type_cleanup_tail_count++;
         }
-        // TODO: deduplicate this with player_info_display
+
         print_num_u16(DISPLAY_NUMPETS_X, DISPLAY_NUMPETS_Y, (UINT16)game_type_cleanup_tail_count, DIGITS_5);
     }
 }
@@ -157,7 +157,6 @@ void game_type_long_pet_set_pet_size(UINT8 player_level) {
     }
 
     // Display required Pet Size
-    // TODO: deduplicate this with player_info_display
     print_num_u16(DISPLAY_NUMPETS_X, DISPLAY_NUMPETS_Y, (UINT16)game_type_long_pet_required_size, DIGITS_3);
 }
 

@@ -45,30 +45,32 @@ UINT8 board_tile_clear_count;
 
 // 10 tiles wide for clearing the game board one row at a time
 // This MUST match game board width
-// TODO: move this to game_board_gfx.h
-const UINT8 board_blank_row[] = {TILE_ID_BOARD_BLANK_ROW_BG,
-                                 TILE_ID_BOARD_BLANK_ROW_BG,
-                                 TILE_ID_BOARD_BLANK_ROW_BG,
-                                 TILE_ID_BOARD_BLANK_ROW_BG,
-                                 TILE_ID_BOARD_BLANK_ROW_BG,
-                                 TILE_ID_BOARD_BLANK_ROW_BG,
-                                 TILE_ID_BOARD_BLANK_ROW_BG,
-                                 TILE_ID_BOARD_BLANK_ROW_BG,
-                                 TILE_ID_BOARD_BLANK_ROW_BG,
-                                 TILE_ID_BOARD_BLANK_ROW_BG};
+const UINT8 board_blank_row[BRD_WIDTH] = {
+                 TILE_ID_BOARD_BLANK_ROW_BG,
+                 TILE_ID_BOARD_BLANK_ROW_BG,
+                 TILE_ID_BOARD_BLANK_ROW_BG,
+                 TILE_ID_BOARD_BLANK_ROW_BG,
+                 TILE_ID_BOARD_BLANK_ROW_BG,
+                 TILE_ID_BOARD_BLANK_ROW_BG,
+                 TILE_ID_BOARD_BLANK_ROW_BG,
+                 TILE_ID_BOARD_BLANK_ROW_BG,
+                 TILE_ID_BOARD_BLANK_ROW_BG,
+                 TILE_ID_BOARD_BLANK_ROW_BG};
 
-const UINT8 board_x_row[] = {TILE_ID_BOARD_UP,
-                             TILE_ID_BOARD_UP,
-                             TILE_ID_BOARD_UP,
-                             TILE_ID_BOARD_UP,
-                             TILE_ID_BOARD_UP,
-                             TILE_ID_BOARD_UP,
-                             TILE_ID_BOARD_UP,
-                             TILE_ID_BOARD_UP,
-                             TILE_ID_BOARD_UP,
-                             TILE_ID_BOARD_UP};
+const UINT8 board_x_row[BRD_WIDTH] = {
+                TILE_ID_BOARD_UP,
+                TILE_ID_BOARD_UP,
+                TILE_ID_BOARD_UP,
+                TILE_ID_BOARD_UP,
+                TILE_ID_BOARD_UP,
+                TILE_ID_BOARD_UP,
+                TILE_ID_BOARD_UP,
+                TILE_ID_BOARD_UP,
+                TILE_ID_BOARD_UP,
+                TILE_ID_BOARD_UP};
 
-const UINT8 board_blank_row_pal[] = {0x04,0x04,0x04,0x04,0x04,0x04,0x04,0x04,0x04,0x04};
+const UINT8 board_blank_row_pal[BRD_WIDTH] = {
+                0x04,0x04,0x04,0x04,0x04,0x04,0x04,0x04,0x04,0x04};
 
 const UINT8 gp_dissolve_anim[] = {GP_DISSOLVE_1 + TILES_PET_START,
                                   GP_DISSOLVE_2 + TILES_PET_START,
@@ -186,7 +188,6 @@ void board_crunch_up(void) {
         }
 
 
-        // TODO: Smooth scroll up via window? May be hard to do
         board_redraw_all();
 
         // Shift the player piece up one row to compensate
@@ -222,21 +223,15 @@ void board_draw_tile_xy(INT8 x, INT8 y, UINT8 tile_index) {
 
 void board_reset(void) {
 
-    INT8 x, y;
-    // TODO: OPTIMIZE: convert to single loop counter
+    UINT8 c;
 
-    for (x=0; x < BRD_WIDTH; x++) {
-        for (y=0; y < BRD_HEIGHT; y++) {
-            // Set pet piece
-            board_pieces[x + (y * BRD_WIDTH)] = GP_EMPTY + TILES_PET_START;
-
-            // TODO: USE EMPTY PIECE PALETTE INSTEAD?
-            // Set palette based on pet type
-            board_attrib[x + (y * BRD_WIDTH)] = GP_PAL_EMPTY;
-
-            // Reset board connection bits
-            board_connect[x + (y * BRD_WIDTH)] = GP_CONNECT_NONE_BITS;
-        }
+    for (c=0; c < (BRD_WIDTH * BRD_HEIGHT); c++) {
+        // Set pet piece
+        // Set palette based on pet type
+        // Reset board connection bits
+        board_pieces[c] = GP_EMPTY + TILES_PET_START;
+        board_attrib[c] = GP_PAL_EMPTY;
+        board_connect[c] = GP_CONNECT_NONE_BITS;
     }
 
     board_redraw_all();
@@ -269,8 +264,6 @@ void board_flash_message(UINT8 start_x, UINT8 start_y, char * text, char * ctext
 // coordinate below the piece?
 //
 // Used for drop-piece hinting
-//
-// TODO: Bounds checking for board here (could then remove from calling function)
 INT8 board_find_lowest_open_in_column(INT8 x, INT8 y_st) {
 
     UINT8 offset; // 8 bits is ok sicne the board array is smaller than 255
@@ -297,23 +290,20 @@ INT8 board_find_lowest_open_in_column(INT8 x, INT8 y_st) {
 
 
 // Given X, Y board coordinate, is it open for a piece to move there?
-//
+// Note: Bounds checking happens in calling function
 UINT8 board_check_open_xy(INT8 x, INT8 y) {
 
-    // TODO: Bounds checking for board here (could then remove from calling function)
     return (board_pieces[x + (y * BRD_WIDTH)] == (GP_EMPTY + TILES_PET_START));
 }
 
 
 
-// TODO: animation?
 void board_clear_tile_xy(INT8 x, INT8 y) {
 
     UINT8 tile_index;
     UINT8 c;
     UINT8 is_tail = FALSE;
 
-    // TODO: Bounds checking for board here
     if ((x >= BRD_MIN_X) &&
         (x <= BRD_MAX_X) &&
         (y >= BRD_MIN_Y) &&
@@ -358,6 +348,7 @@ void board_clear_tile_xy(INT8 x, INT8 y) {
 
 
 // Should NOT be called if (piece & GP_SPECIAL_MASK)
+// Note: No bounds checking here
 void board_set_tile_xy(INT8 x, INT8 y, UINT8 piece, UINT8 attrib, UINT8 connect) {
 
     UINT8 tile_index;
@@ -373,11 +364,11 @@ void board_set_tile_xy(INT8 x, INT8 y, UINT8 piece, UINT8 attrib, UINT8 connect)
         // Add in offset to start of BG tile piece data
         piece += TILES_PET_START;
 
-        // TODO: Bounds checking for board here
-        board_pieces[tile_index] = piece;
+        // Update piece
         // Set palette based on pet type (CGB Pal bits are 0x07)
-        board_attrib[tile_index] = attrib;
         // Update connection setting
+        board_pieces[tile_index] = piece;
+        board_attrib[tile_index] = attrib;
         board_connect[tile_index] = connect;
 
         board_draw_tile_xy(x, y, tile_index);
@@ -388,7 +379,6 @@ void board_set_tile_xy(INT8 x, INT8 y, UINT8 piece, UINT8 attrib, UINT8 connect)
 
 void board_handle_new_piece(INT8 x, INT8 y, UINT8 piece, UINT8 connect) {
 
-    // TODO: move this into a function if it grows board_set_special_xy(INT8 x, INT8 y, UINT8 piece, UINT8 attrib, UINT8 connect)
     if (piece & GP_SPECIAL_MASK) {
 
         switch (piece) {
@@ -413,7 +403,7 @@ void board_handle_new_piece(INT8 x, INT8 y, UINT8 piece, UINT8 connect) {
         }
     } else {
 
-        board_check_completed_pet_xy(x, y, piece, connect, BRD_CHECK_FLAGS_NONE); // TODO: use result
+        board_check_completed_pet_xy(x, y, piece, connect, BRD_CHECK_FLAGS_NONE);
     }
 }
 
@@ -516,9 +506,8 @@ UINT8 board_check_connected_xy(INT8 x, INT8 y, UINT8 piece, UINT8 * p_this_conne
     // (Fails if edge board piece and returns false to break out of calling loop)
     if (board_piece_get_xy(x, y, &adj_piece, &adj_connect)) {
 
-        // TODO: could check for if (adj_piece != GP_EMPTY), but the connect test below should cover that
-
         // Check connection between pieces
+        // Below should effectively cover checking: if (adj_piece != GP_EMPTY)
         if (GP_CONNECT_MATCHING_LUT[(*p_this_connect)] & adj_connect) {
             // Make sure the pet type matches
             if ( ((piece & GP_PET_MASK) == (adj_piece & GP_PET_MASK)) ||
@@ -540,11 +529,9 @@ UINT8 board_check_connected_xy(INT8 x, INT8 y, UINT8 piece, UINT8 * p_this_conne
 void board_handle_pet_completed(UINT8 flags) {
 
     UINT8 c = 0;
+    UINT8 crunchups_to_send;
 
     while (c < board_tile_clear_count) {
-
-        // TODO: OPTIMIZE: smaller arrays could be used. or pre-calc BG tile location)
-        // TODO: OPTION: PET-PILE MODE (don't clear tiles, level is up and totaled when screen is filled
 
         // Play special sound (per tile) when more than N tiles have been cleared for a pet
         // Suppress bonus threshold on special pieces
@@ -553,13 +540,6 @@ void board_handle_pet_completed(UINT8 flags) {
         }
         else if (c >= BRD_TILE_COUNT_BONUS_SOUND_THRESHOLD) {
             PLAY_SOUND_TILE_CLEAR_BONUS; // Bonus sound
-
-            // If in 2 player versus mode, send a crunch-up to the other player
-            // Only send once, right as the threshold is met
-            if ((c == BRD_TILE_COUNT_BONUS_SOUND_THRESHOLD) &&
-                (link_status == LINK_STATUS_CONNECTED)) {
-                LINK_SEND(LINK_CMD_CRUNCHUP);
-            }
         }
         else {
             PLAY_SOUND_TILE_CLEAR_NORMAL; // Normal sound
@@ -570,10 +550,29 @@ void board_handle_pet_completed(UINT8 flags) {
         c++;
     }
 
+
+
     //  Player gets no credit when special piece is used
     if (flags & BRD_CHECK_FLAGS_DONT_ADD_POINTS) {
         score_update(BRD_PIECE_CLEAR_COUNT_NONE);
     } else {
+
+        // If in 2 player versus mode and the bonus length
+        // threshold is met or passed, send N crunch ups
+        // based on pet-length
+        if ((link_status == LINK_STATUS_CONNECTED) &&
+            (board_tile_clear_count >= BRD_TILE_COUNT_BONUS_SOUND_THRESHOLD)) {
+
+                // Number of crunch-ups sent is a function of length
+                // Cap max number to fit within serial data payload
+                // (unlikely to exceed in reality)
+                crunchups_to_send = (board_tile_clear_count / VS_CRUNCH_DIV);
+                if (crunchups_to_send > LINK_DATA_MASK)
+                    crunchups_to_send = LINK_DATA_MASK;
+                LINK_SEND(LINK_CMD_CRUNCHUP | (crunchups_to_send & LINK_DATA_MASK));
+        }
+
+
         // Check completed pet size against level-up size requirement if it's Long pet game type
         if (option_game_type == OPTION_GAME_TYPE_LONG_PET) {
             game_type_long_pet_check_size(board_tile_clear_count);
@@ -586,16 +585,17 @@ void board_handle_pet_completed(UINT8 flags) {
     board_tile_clear_count = 0;
 }
 
-// NOTE: no bounds checking, assumes incoming X,Y are valid board positions
+// Notes:
+//     * No bounds checking, assumes incoming X,Y are valid board positions
 //
-// NOTE: Assumes that incompatible special pieces (Bomb/etc) are not passed in
-// NOTE: IMPORTANT no piece on board should ever have more than 2 connection bits
+//     * Assumes that incompatible special pieces (Bomb/etc) are not passed in
+//     * IMPORTANT no piece on board should ever have more than 2 connection bits
 //       set. It's ok to pass those in as params, but never land them on the board.
 //
-// NOTE: Special-MERGE piece is passed in, but *NOT* copied onto the board array beforehand.
+//     * Special-MERGE piece is passed in, but *NOT* copied onto the board array beforehand.
 //       Any connection that tests it's board location will find an EMPTY entry (no connects)
 //
-UINT8 board_check_completed_pet_xy(INT8 start_x, INT8 start_y, UINT8 piece, UINT8 connect, UINT8 flags) {
+void board_check_completed_pet_xy(INT8 start_x, INT8 start_y, UINT8 piece, UINT8 connect, UINT8 flags) {
 
     UINT8 piece_count, headtail_count;
      INT8 check_x = 0, check_y = 0;  // Inits here and this_connect are just to quiet the compiler re long pet hinting add() location non-initialization
@@ -610,7 +610,7 @@ UINT8 board_check_completed_pet_xy(INT8 start_x, INT8 start_y, UINT8 piece, UINT
         board_tile_clear_count = 1;
 
         // Initialize piece count (include current)
-        piece_count = 1;  // TODO: this could be merged into board_tile_clear_count
+        piece_count = 1;  // OPTIONAL: this could probably be merged into board_tile_clear_count
 
         // Initialize end seg count
         headtail_count = 0;
@@ -736,7 +736,7 @@ UINT8 board_check_completed_pet_xy(INT8 start_x, INT8 start_y, UINT8 piece, UINT
 
                 // Process the pet if it was completed or is being cleared via a merge
                 board_handle_pet_completed(flags);
-                return (TRUE);
+                // return (TRUE); // Ended up not using return codes
             }
         }
         // Otherwise, if this is Long Pet mode, update pet length overlays
@@ -773,6 +773,6 @@ UINT8 board_check_completed_pet_xy(INT8 start_x, INT8 start_y, UINT8 piece, UINT
     // Reset global pet size var now that processing is completed
     board_tile_clear_count = 0;
 
-    return (FALSE);
+    // return (FALSE);  // Ended up not using return codes
 }
 

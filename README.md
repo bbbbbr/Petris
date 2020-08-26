@@ -3,15 +3,16 @@ Petris - A puzzle game of shapely pets for the Game Boy Color (CGB)
 
 (CURRENTLY A WORK IN PROGRESS, NOT YET RELEASED)
 
-* Cartridges available for purchase at ___LINK___
+* Cartridges available _______TBD_______
 
 Build your favorite pets in all shapes and sizes, keep ahead of dropping pieces and make it to the next level!
 
 Petris is a new home-brew 2D puzzle game built for the Game Boy Color (CGB) and will run on original hardware (CGB and GBA).
 
+
 You can [download the game here](/rom/Petris.gbc) or visit the [itch.io page](https://bbbbbr.itch.io/petris).
 
-Run it either in an emulator such as [BGB](http://bgb.bircd.org/) or on a real Game Boy if you have a flashable cartridge or want to buy a cartridge from ___LINK___.
+Run it either in an emulator such as [BGB](http://bgb.bircd.org/) or on a real Game Boy if you have a flashable cartridge or _______TBD_______.
 
 ![Petris game in Long Pet game type](/info/Petris_LongPet.png)
 ![Petris game in Tail Cleanup game type](/info/petris_tail_cleanup.gif)
@@ -23,15 +24,15 @@ Several game types with different incentives and strategies:
 * *Level Up* - Classic level-up style
 * *Marathon* - For the long distance player
 
-Head-to-Head 2 Player mode over Game Boy Link Cable (CGB and GBA) for *all game types*.
+*Head-to-Head 2 Player* mode over Game Boy Link Cable (CGB and GBA) for all game types.
 
-Difficulty levels for all players, from relaxing to breakneck speed:
+Difficulty levels for all players, from relaxing to full-tilt speed:
 * Easy / Normal / Hard / Expert / Beast
 
 Other Options and features:
 * Choose from multiple sound tracks
-* Visual hinting for drop location/etc can be turned on/off
 * High Contrast mode for small and non-backlit screens
+* Visual hinting for drop location/etc can be turned on/off
 
 
 ===========

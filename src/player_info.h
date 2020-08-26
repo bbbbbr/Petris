@@ -4,7 +4,7 @@
 #ifndef PLAYER_INFO_H
 #define PLAYER_INFO_H
 
-// TODO: POLISH: revisit launch delay. Increase to 10 Frames?
+
 #define GAME_SPEED_LAUNCH_DELAY_FRAMES         6 // 1/10 of a second (60/10) in practice its n+1 frames due to the state machine lag
 #define GAME_SPEED_LAUNCH_DELAY_RESET          0
 // https://tetris.wiki/ARE
@@ -18,8 +18,8 @@
 
 #define DISPLAY_NEXT_PIECE_TEXT_X 1
 #define DISPLAY_NEXT_PIECE_TEXT_Y 10
-// TODO: handle offset?
-#define GAME_PIECE_NEXT_PREVIEW_BG_X (DISPLAY_NEXT_PIECE_TEXT_X + 4)
+
+#define GAME_PIECE_NEXT_PREVIEW_BG_X (DISPLAY_NEXT_PIECE_TEXT_X + 4) // Offset 4 tiles from start of text label
 #define GAME_PIECE_NEXT_PREVIEW_BG_Y (DISPLAY_NEXT_PIECE_TEXT_Y)
 
 #define GAME_PIECE_NEXT_PREVIEW_X ( (GAME_PIECE_NEXT_PREVIEW_BG_X + 1) * 8)
@@ -50,7 +50,9 @@
 #define PLAYER_LEVEL_MAX      999
 #define PLAYER_NUMTILES_RESET 0
 #define PLAYER_NUMPETS_RESET  0
+#define PLAYER_NUMPETS_MAX    0xFFFF
 #define PLAYER_NUMPIECES_RESET 0
+#define PLAYER_NUMPIECES_MAX   0xFFFF
 
 // Transition to a new palette every N levels
 #define LEVEL_CHANGE_PAL_NUM 5 // (5 alternate palettes total)
