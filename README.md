@@ -18,21 +18,22 @@ Run it either in an emulator such as [BGB](http://bgb.bircd.org/) or on a real G
 ![Petris game in Tail Cleanup game type](/info/petris_tail_cleanup.gif)
 
 Several game types with different incentives and strategies:
-* *Long Pet* - Complete progressively longer pets to reach the next level
-* *Tails Cleanup* - Clear all tails off the screen per level
-* *Crunch-up* - Keep ahead as the screen crunches upward and new pets appear
-* *Level Up* - Classic level-up style
-* *Marathon* - For the long distance player
+ * *Long Pet* - Complete progressively longer pets to reach the next level
+ * *Tails Cleanup* - Clear all tails off the screen per level
+ * *Crunch-up* - Keep ahead as the screen crunches upward and new pets appear
+ * *Level Up* - Classic level-up style
+ * *Marathon* - For the long distance player
 
 *Head-to-Head 2 Player* mode over Game Boy Link Cable (CGB and GBA) for all game types.
+ * Send crunch-ups to your opponent when you complete long pets or level-up. The last player standing wins the match.
 
 Difficulty levels for all players, from relaxing to full-tilt speed:
-* Easy / Normal / Hard / Expert / Beast
+ * Easy / Normal / Hard / Expert / Beast
 
 Other Options and features:
-* Choose from multiple sound tracks
-* High Contrast mode for small and non-backlit screens
-* Visual hinting for drop location/etc can be turned on/off
+ * Choose from multiple sound tracks
+ * High Contrast mode for small and non-backlit screens
+ * Visual hinting for drop location/etc can be turned on/off
 
 
 ===========
