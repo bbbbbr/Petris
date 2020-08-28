@@ -25,6 +25,7 @@
 #include "input.h"
 #include "gfx_print.h"
 #include "fade.h"
+#include "fade2pal.h"
 
 #include "magic_code.h"
 
@@ -125,6 +126,7 @@ void random_init(void) {
 
 void gameplay_init(void) {
 
+    fade2pal_init();
     random_init();
 
     game_types_init(); // Call before board_gfx_init()

@@ -21,7 +21,7 @@
 extern UWORD ModPalBg[];
 
 
-UINT8 fade_sky_pal_idx = 0;
+UINT8 fade_sky_pal_idx;
 
 
 // Use Bresenham's algorithm to Linear Interpolate (lerp)
@@ -34,8 +34,7 @@ UINT8 fade_sky_pal_idx = 0;
 // distance x (dx) = FADE2PAL_FRAME_COUNT
 // distance y (dy) = color_from - color_to
 
-
-INT8 fade2pal_frame_count = 0;
+INT8 fade2pal_frame_count;
 
 // Arrays
 UINT8 fade2pal_color_val[FADE2PAL_ARY_SIZE];
@@ -44,23 +43,38 @@ INT8  fade2pal_err_accum[FADE2PAL_ARY_SIZE];
 INT8  fade2pal_err_framestep_add[FADE2PAL_ARY_SIZE];
 
 
+void fade2pal_init(void) {
+
+    fade_sky_pal_idx = FADE_SKY_PALS_RESET;
+    fade2pal_frame_count = 0;
+}
+
+
 void fade2pal_start_next(void) {
 
-    // Only increment and start a fade if there are palettes left
-    if (fade_sky_pal_idx < FADE_SKY_PALS_MAX) {
+    // Calculate fade to the currently queued palette
+    fade2pal_prep_fade(&fade_sky_pals[fade_sky_pal_idx][0]);
 
-        fade2pal_prep_fade(&fade_sky_pals[fade_sky_pal_idx][0]);
-        fade_sky_pal_idx++;
+    // Loop through transitions until done
+    while (fade2pal_frame_count) {
 
-        // Loop through transitions until done
-        while (fade2pal_frame_count) {
+        wait_vbl_done();
 
-            wait_vbl_done();
-
-            // if (sys_time & 0x01)
-                fade2pal_update_entry();
-        }
+        // Optional: fade can be stretched over more frames
+        // if (sys_time & 0x01)
+            fade2pal_update_entry();
     }
+
+    // Queue up next palette
+    if (fade_sky_pal_idx < FADE_SKY_PALS_MAX) {
+        fade_sky_pal_idx++;
+    }
+    else {
+        // Wrap around to first (default) palette
+        // Use MIN, not RESET which skips initial default palette
+        fade_sky_pal_idx = FADE_SKY_PALS_MIN;
+    }
+
 }
 
 
