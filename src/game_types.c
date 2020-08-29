@@ -102,6 +102,8 @@ void game_types_handle_level_transition(void) {
 }
 
 
+
+// Calculate how many tails to add to the board based on current level
 UINT8 game_type_pet_cleanup_get_tail_count(void) {
 
     UINT8 num_pets;
@@ -117,6 +119,8 @@ UINT8 game_type_pet_cleanup_get_tail_count(void) {
 
 
 
+// Keeps track of how many tail pieces have been added to the board.
+// That value gets decremented. Once zero level is complete (in tail cleanup mode)
 void game_type_pet_cleanup_increment_tail_count(void) {
 
     if (option_game_type == OPTION_GAME_TYPE_PET_CLEANUP) {
@@ -130,6 +134,9 @@ void game_type_pet_cleanup_increment_tail_count(void) {
 
 
 
+
+// Log removal of tail pieces from the board.
+// Once zero level is complete (in tail cleanup mode)
 void game_type_pet_cleanup_decrement_tail_count(void) {
 
     if (option_game_type == OPTION_GAME_TYPE_PET_CLEANUP) {
@@ -148,6 +155,7 @@ void game_type_pet_cleanup_decrement_tail_count(void) {
 
 
 
+// Calculate length of pet required to complete level, based on current player level
 void game_type_long_pet_set_pet_size(UINT8 player_level) {
 
     game_type_long_pet_required_size = player_level + GAME_TYPE_PET_LONG_PET_SIZE_MIN;
@@ -162,6 +170,8 @@ void game_type_long_pet_set_pet_size(UINT8 player_level) {
 
 
 
+// Check to see whether the size requirement has been met in
+// long pet mode. If so, flag the level as complete
 void game_type_long_pet_check_size(UINT8 tile_count) {
 
     if (tile_count >= game_type_long_pet_required_size) {
