@@ -70,6 +70,13 @@
 #define MSG_LONG_PET_START_CTEXT   "  MAKE A\n\n   LONG\n   PET!\n\n (PRESS\n  SELECT\n\n  FOR PET\n  SIZES)\n "
 #define MSG_LONG_PET_START_REPEAT 3
 
+#define MSG_COMPLETE_PET_X  BRD_ST_X + 0
+#define MSG_COMPLETE_PET_Y  BRD_ST_Y + 3
+#define MSG_COMPLETE_PET_START_TEXT    "          \n\n          \n\n\n    TO    \n\n LEVEL UP!\n\n"
+#define MSG_COMPLETE_PET_START_CTEXT   " COMPLETE \n\n   PETS   \n\n\n    TO    \n\n LEVEL UP!\n\n"
+#define MSG_COMPLETE_PET_START_REPEAT 3
+
+
 #define MSG_LEVEL_UP_REPEAT 2
 
 #define BRD_CLR_DELAY_NONE 0

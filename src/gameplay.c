@@ -151,6 +151,12 @@ void gameplay_init(void) {
         board_flash_message(MSG_LONG_PET_X, MSG_LONG_PET_Y,
                             MSG_LONG_PET_START_TEXT, MSG_LONG_PET_START_CTEXT,
                             MSG_LONG_PET_START_REPEAT);
+    } else if ((option_game_type == OPTION_GAME_TYPE_LEVEL_UP) ||
+               (option_game_type == OPTION_GAME_TYPE_CRUNCH_UP)) {
+
+        board_flash_message(MSG_COMPLETE_PET_X, MSG_COMPLETE_PET_Y,
+                            MSG_COMPLETE_PET_START_TEXT, MSG_COMPLETE_PET_START_CTEXT,
+                            MSG_COMPLETE_PET_START_REPEAT);
     } else {
         // Default Get Ready Message
         board_flash_message(MSG_GET_READY_X, MSG_GET_READY_Y,
