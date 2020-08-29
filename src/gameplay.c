@@ -209,6 +209,11 @@ void gameplay_prepare_board(void) {
     // Switch back to main random number sequence
     swaprand();
 
+    if (option_game_type == OPTION_GAME_TYPE_LONG_PET) {
+        // Update length requirement for long pet mode
+        game_type_long_pet_set_pet_size( (UINT8)player_level );
+    }
+
 
     // Generate the very first piece
     game_piece_next_reset();

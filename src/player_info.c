@@ -185,10 +185,6 @@ void level_increment(void) {
 
     game_types_handle_level_transition();
 
-    if (option_game_type == OPTION_GAME_TYPE_LONG_PET) {
-        game_type_long_pet_set_pet_size( (UINT8)player_level );
-    }
-
     // DEBUG: frames per drop (requires extern UINT8 game_speed_frames_per_drop;)
     #ifdef DEBUG_SHOW
         print_num_u16(DISPLAY_NUMPETS_X, DISPLAY_NUMPETS_Y + 1, (UINT16)game_speed_frames_per_drop, DIGITS_5);
