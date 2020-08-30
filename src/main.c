@@ -268,7 +268,7 @@ void main(void){
                     if (KEY_TICKED(J_START | J_A | J_B)) {
                         // Reset visible sprites, then display stats
                         gameplay_exit_cleanup();
-                        stats_maxpet_display();
+                        stats_display();
                         game_state = GAME_OVER_WAITEXIT;
                     }
                 break;

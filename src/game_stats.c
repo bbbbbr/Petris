@@ -35,7 +35,7 @@
 #define MAXPET_TXT_MSG    " BEST PET " // " LONGEST  "
 #define MAXPET_TXT_DELAY  100
 #define MAXPET_TILE_DELAY 120
-#define MAXPET_MIN_DISPLAY_SIZE 3
+#define MAXPET_MIN_DISPLAY_SIZE 2
 
 #define STATS_TXT_DELAY 80
 #define STATS_NUM_DELAY 35
@@ -61,14 +61,17 @@ void stats_maxpet_reset(void) {
 }
 
 
+
+// Copy current completed pet if it's the new longest pet
 void stats_maxpet_copy_iflongest(void) {
 
     UINT8 c;
     UINT8 tile_index;
 
-    // Copy current completed pet if it's the new longest pet
+
     if (board_tile_clear_count > maxpet_tilecount) {
 
+        // Update cached maxpet size
         maxpet_tilecount = board_tile_clear_count;
 
         for(c=0; c < maxpet_tilecount; c++) {
@@ -77,6 +80,7 @@ void stats_maxpet_copy_iflongest(void) {
             maxpet_x[c] = board_tile_clear_cache_x[c];
             maxpet_y[c] = board_tile_clear_cache_y[c];
 
+            // Calc index into baord arrays
             tile_index = board_tile_clear_cache_x[c]
                          + (board_tile_clear_cache_y[c] * BRD_WIDTH);
 
@@ -88,7 +92,9 @@ void stats_maxpet_copy_iflongest(void) {
 }
 
 
-void stats_maxpet_display(void) {
+
+// Display and End of Game stats readout
+void stats_display(void) {
 
     UINT8 c, max_x;
 
@@ -124,27 +130,32 @@ void stats_maxpet_display(void) {
         hinting_petlength_turn_on();
         hinting_petlength_showhide();
 
-
-        // == Numeric Stats Readout ==
-
+        // Wait for a button press to continue
         waitpadticked_lowcpu(J_START | J_A | J_B, NULL);
-        // Re-hide pet length overlay
-        hinting_petlength_reset();
-
-
-        board_hide_all(BRD_CLR_DELAY_CLEAR_MED);
-
-        stats_show_var(TILES_TXT_X, TILES_TXT_Y, PETS_TXT_MSG,
-                       player_numpets);
-
-        stats_show_var(TILES_TXT_X, TILES_TXT_Y + 4, PIECES_TXT_MSG,
-                       player_numpieces);
-
-        stats_show_var(TILES_TXT_X, TILES_TXT_Y + 8, TILES_TXT_MSG,
-                       player_numtiles);
     }
+
+    // == Numeric Stats Readout ==
+
+    // Re-hide pet length overlay
+    hinting_petlength_reset();
+
+
+    board_hide_all(BRD_CLR_DELAY_CLEAR_MED);
+
+    stats_show_var(TILES_TXT_X, TILES_TXT_Y, PETS_TXT_MSG,
+                   player_numpets);
+
+    stats_show_var(TILES_TXT_X, TILES_TXT_Y + 4, PIECES_TXT_MSG,
+                   player_numpieces);
+
+    stats_show_var(TILES_TXT_X, TILES_TXT_Y + 8, TILES_TXT_MSG,
+                   player_numtiles);
+
 }
 
+
+
+// Display a text label and an incrementing numeric readout for a value
 void stats_show_var(UINT8 x, UINT8 y, const char* text, UINT16 value) {
 
     UINT16 c, increment;
@@ -155,9 +166,14 @@ void stats_show_var(UINT8 x, UINT8 y, const char* text, UINT16 value) {
 
     PRINT(x, y, text, STATS_TXT_DELAY);
 
+    // Ramp value up from zero to it's value in N steps
     c = 0;
+    print_num_u16(x + 3, y + 2, c, DIGITS_5); // print initial value
+
     while(c < value) {
 
+        // Increments in integer don't guarantee it will hit final
+        // value evenly, so enforce that once it is reached or passed
         c += increment;
         if (c > value) c = value;
 
