@@ -265,15 +265,21 @@ void main(void){
 
 
             case GAME_OVER_SCREEN:
-                    stats_maxpet_display();
-                game_state = GAME_OVER_WAITEXIT;
+                    if (KEY_TICKED(J_START | J_A | J_B)) {
+                        // Reset visible sprites, then display stats
+                        gameplay_exit_cleanup();
+                        stats_maxpet_display();
+                        game_state = GAME_OVER_WAITEXIT;
+                    }
                 break;
 
 
             case GAME_OVER_WAITEXIT:
 
                 if (KEY_TICKED(J_START)) {
-                    gameplay_exit_cleanup();
+                    // Turn sprites off and then fade out
+                    HIDE_SPRITES;
+                    fade_start(FADE_OUT);
                     game_state = GAME_INTRO_INIT;
                 }
                 break;

@@ -89,9 +89,6 @@ void gameplay_drop_speed_update(void) {
 
 void gameplay_exit_cleanup(void) {
 
-    fade_start(FADE_OUT);
-    HIDE_SPRITES;
-
     player_piece_update_xy(PLAYER_PIECE_HIDE);
     game_piece_next_show(FALSE);
     player_hinting_special_show(FALSE);

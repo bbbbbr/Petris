@@ -94,11 +94,6 @@ void stats_maxpet_display(void) {
 
     if (maxpet_tilecount >= MAXPET_MIN_DISPLAY_SIZE) {
 
-        // Clean up beforehand, but only when displaying,
-        // otherwise it gets cleaned up during gameover transition
-        waitpadticked_lowcpu(J_START, NULL);
-        gameover_message_reset();
-
         board_hide_all(BRD_CLR_DELAY_CLEAR_MED);
         board_reset();
 
@@ -130,9 +125,9 @@ void stats_maxpet_display(void) {
         hinting_petlength_showhide();
 
 
-        // Stats readout
+        // == Numeric Stats Readout ==
 
-        waitpadticked_lowcpu(J_START, NULL);
+        waitpadticked_lowcpu(J_START | J_A | J_B, NULL);
         // Re-hide pet length overlay
         hinting_petlength_reset();
 
@@ -142,10 +137,10 @@ void stats_maxpet_display(void) {
         stats_show_var(TILES_TXT_X, TILES_TXT_Y, PETS_TXT_MSG,
                        player_numpets);
 
-        stats_show_var(TILES_TXT_X, TILES_TXT_Y + 5, PIECES_TXT_MSG,
+        stats_show_var(TILES_TXT_X, TILES_TXT_Y + 4, PIECES_TXT_MSG,
                        player_numpieces);
 
-        stats_show_var(TILES_TXT_X, TILES_TXT_Y + 10, TILES_TXT_MSG,
+        stats_show_var(TILES_TXT_X, TILES_TXT_Y + 8, TILES_TXT_MSG,
                        player_numtiles);
     }
 }
