@@ -100,14 +100,8 @@ void game_piece_next_generate(void) {
     //          of the game-type piece massaging that happens above
 
     // Increase the count of total pieces used in the game
-    //
-    // Note: could prevent wraparound here, but if the player
-    // ever did reach this lofty amount it is probably better
-    // to let it wrap so they can continue to receive
-    // special pieces based on continued changes to this var
-    // (They are bitmask based so should still work)
-    //
-    // if (player_numpieces < PLAYER_NUMPIECES_MAX)
+    // (prevent wraparound)
+    if (player_numpieces < PLAYER_NUMPIECES_MAX)
         player_numpieces++;
 
     // Check to see whether a special piece (merge) should be delivered

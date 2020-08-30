@@ -26,6 +26,7 @@
 // #include "game_board.h"
 #include "game_board_gfx.h"
 #include "gameover_message.h"
+#include "game_stats.h"
 
 #include "gameplay.h"
 
@@ -264,6 +265,12 @@ void main(void){
 
 
             case GAME_OVER_SCREEN:
+                    stats_maxpet_display();
+                game_state = GAME_OVER_WAITEXIT;
+                break;
+
+
+            case GAME_OVER_WAITEXIT:
 
                 if (KEY_TICKED(J_START)) {
                     gameplay_exit_cleanup();

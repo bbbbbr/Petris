@@ -60,9 +60,13 @@
 // #define PLAYER_TILES_PER_LEVEL  20 // 25
 #define PLAYER_PETS_PER_LEVEL   20 // 10
 
+extern UINT16 player_numtiles;
+extern UINT16 player_numpets;
+
 extern UINT16 player_level;
 extern UINT16 player_numpieces;
 extern UINT8 level_increment_enqueue;
+
 
 void score_update(UINT16 num_tiles);
 void score_reset(void);

@@ -40,6 +40,7 @@
 #include "game_board.h"
 #include "game_board_gfx.h"
 #include "game_types.h"
+#include "game_stats.h"
 #include "gameover_message.h"
 
 #include "gameplay.h"
@@ -134,6 +135,7 @@ void gameplay_init(void) {
     board_init();
     board_gfx_init();
     hinting_petlength_reset();
+    stats_maxpet_reset();
 
     options_player_settings_apply();
 

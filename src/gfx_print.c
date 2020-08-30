@@ -20,7 +20,7 @@
 #include <string.h>
 #include <types.h>
 
-
+#include "audio_common.h"
 #include "gfx.h"
 #include "gfx_print.h"
 
@@ -121,8 +121,6 @@ void print_text(const char* txt, unsigned char delay_time){
                     print_x = start_x;
                     print_y++;
                     txt++;
-                    if (delay_time)
-                        delay(delay_time);
                     continue;
             }
         }
@@ -140,5 +138,10 @@ void print_text(const char* txt, unsigned char delay_time){
 
         print_x++;
         txt++;
+
+        if (delay_time) {
+            PLAY_SOUND_PRINT_CHAR;
+            delay(delay_time);
+        }
     }
 }
