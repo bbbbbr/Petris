@@ -33,5 +33,7 @@ void hinting_petlength_turn_on(void);
 void hinting_petlength_add(INT8 board_x, INT8 board_y, UINT8 length, UINT8 attrib);
 void hinting_petlength_showhide(void);
 void hinting_petlength_remove(INT8 board_x, INT8 board_y);
+void hinting_petlength_scrollup(void);
+void hinting_petlength_refreshxy(void);
 
 #endif // PLAYER_HINTING_H

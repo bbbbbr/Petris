@@ -479,6 +479,7 @@ void gameplay_gravity_update(void) {
 }
 
 
+
 void gameplay_crunchup_update(void) {
 
     // Update crunch-up counter if needed
@@ -524,6 +525,7 @@ void gameplay_crunchup_update(void) {
             // Crunch-ups can be triggered by
             // * Elapsed time in game type: OPTION_GAME_TYPE_CRUNCH_UP
             // * 2 Player vs serial link in *ANY GAME TYPE*, sent by the other versus player
+
             while (game_crunchups_enqueued) {
 
                 // Vars may be modified in the SIO isr, protect when making changes
@@ -539,7 +541,14 @@ void gameplay_crunchup_update(void) {
                 swaprand();
                 board_crunch_up();
                 swaprand();
+
+                // Scroll pet-length hinting up by 1
+                // to keep the overlays in sync with board
+                hinting_petlength_scrollup();
             }
+
+            // Redraw pet-length hinting once scroll is complete
+            hinting_petlength_refreshxy();
         }
     }
 }

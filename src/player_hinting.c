@@ -345,6 +345,8 @@ void hinting_petlength_showhide(void) {
         sprite_idx = SPR_LONG_PET_HINT_NUM_START + (c * SPR_LONG_PET_HINT_NUM_TILES_PER);
 
         // Show the entry if it's populated
+        // If it's not populated ** OR ** overlay is disabled,
+        // then the sprite for the entry will get hidden (below via else {})
         if ((hinting_petlength_enabled)
             && (hinting_petlength_x[c] != HINT_PET_LENGTH_SLOT_EMPTY))
         {
@@ -382,7 +384,7 @@ void hinting_petlength_remove(INT8 board_x, INT8 board_y) {
     UINT8 c;
     UINT8 sprite_idx;
 
-    // Only search within max number of added hints
+// Only search within max number of added hints
     for (c = 0; c <= SPR_LONG_PET_HINT_POOL_SIZE; c++) {
 
         if ((board_x == hinting_petlength_x[c]) &&
@@ -414,3 +416,52 @@ void hinting_petlength_remove(INT8 board_x, INT8 board_y) {
     }
 }
 
+
+// Scroll the pet length overlays upward
+// (to compensate for board shifts upward via crunch-ups)
+//
+// Note: hinting_petlength_refreshxy() should
+// eventually be called afterward to refresh sprite locations
+void hinting_petlength_scrollup(void) {
+
+    UINT8 c;
+
+    // Only search within max number of added hints
+    for (c = 0; c < SPR_LONG_PET_HINT_POOL_SIZE; c++) {
+
+        if (hinting_petlength_x[c] != HINT_PET_LENGTH_SLOT_EMPTY) {
+            // Don't have to worry about wraparound here since
+            // negative Y values are unlikely and would just scroll
+            // off-screen, which is fine
+            hinting_petlength_y[c]--;
+        }
+    }
+}
+
+
+// Refresh the pet length overlay sprite locations
+void hinting_petlength_refreshxy(void) {
+
+    UINT8 c;
+    UINT8 sprite_idx;
+
+    // Only search within max number of added hints
+    for (c = 0; c < SPR_LONG_PET_HINT_POOL_SIZE; c++) {
+
+        if (hinting_petlength_x[c] != HINT_PET_LENGTH_SLOT_EMPTY) {
+
+            sprite_idx = SPR_LONG_PET_HINT_NUM_START + (c * SPR_LONG_PET_HINT_NUM_TILES_PER);
+
+            // Move the sprite into view at board position
+            move_sprite(sprite_idx,
+                        (hinting_petlength_x[c] * BRD_UNIT_SIZE) + SPR_LONG_PET_HINT_OFFSET_X,
+                        (hinting_petlength_y[c] * BRD_UNIT_SIZE) + SPR_LONG_PET_HINT_OFFSET_Y);
+
+            // Move the sprite into view at board position
+            move_sprite(sprite_idx + 1,
+                        (hinting_petlength_x[c] * BRD_UNIT_SIZE) + SPR_LONG_PET_HINT_OFFSET_X + 8,
+                        (hinting_petlength_y[c] * BRD_UNIT_SIZE) + SPR_LONG_PET_HINT_OFFSET_Y);
+
+        }
+    }
+}
