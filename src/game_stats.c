@@ -41,8 +41,9 @@
 #define STATS_NUM_DELAY 35
 #define STATS_NUM_STEPS 20
 
-#define TILES_TXT_X  BRD_ST_X + 1
-#define TILES_TXT_Y  BRD_ST_Y + 1
+#define STATS_TXT_X     BRD_ST_X + 1
+#define STATS_TXT_Y     BRD_ST_Y + 1
+#define STATS_TXT_OFST  5
 #define PETS_TXT_MSG "PETS  \nCLEARED:"
 #define PIECES_TXT_MSG "PIECES \nPLAYED:"
 #define TILES_TXT_MSG "TILES \nCLEARED:"
@@ -142,13 +143,13 @@ void stats_display(void) {
 
     board_hide_all(BRD_CLR_DELAY_CLEAR_MED);
 
-    stats_show_var(TILES_TXT_X, TILES_TXT_Y, PETS_TXT_MSG,
+    stats_show_var(STATS_TXT_X, STATS_TXT_Y, PETS_TXT_MSG,
                    player_numpets);
 
-    stats_show_var(TILES_TXT_X, TILES_TXT_Y + 4, PIECES_TXT_MSG,
+    stats_show_var(STATS_TXT_X, STATS_TXT_Y + STATS_TXT_OFST, PIECES_TXT_MSG,
                    player_numpieces);
 
-    stats_show_var(TILES_TXT_X, TILES_TXT_Y + 8, TILES_TXT_MSG,
+    stats_show_var(STATS_TXT_X, STATS_TXT_Y + (STATS_TXT_OFST * 2), TILES_TXT_MSG,
                    player_numtiles);
 
 }
