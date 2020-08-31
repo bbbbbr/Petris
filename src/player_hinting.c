@@ -385,7 +385,7 @@ void hinting_petlength_remove(INT8 board_x, INT8 board_y) {
     UINT8 sprite_idx;
 
 // Only search within max number of added hints
-    for (c = 0; c <= SPR_LONG_PET_HINT_POOL_SIZE; c++) {
+    for (c = 0; c < SPR_LONG_PET_HINT_POOL_SIZE; c++) {
 
         if ((board_x == hinting_petlength_x[c]) &&
             (board_y == hinting_petlength_y[c])) {
