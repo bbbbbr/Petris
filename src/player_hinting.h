@@ -21,10 +21,12 @@ extern UINT8 hinting_petlength_enabled;
 
 void player_hinting_flicker_update(void);
 
+void player_hinting_special_reset(void);
 void player_hinting_special_show(UINT8);
 void player_hinting_special_update_gfx(void);
 void player_hinting_special_move(void);
 
+void player_hinting_drop_reset(void);
 void player_hinting_drop_show(UINT8);
 void player_hinting_drop_update(void);
 
