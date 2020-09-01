@@ -259,7 +259,7 @@ void main(void){
 
             case GAME_OVER_WAITEXIT:
 
-                if (KEY_TICKED(J_START)) {
+                if (KEY_TICKED(J_START | J_A | J_B)) {
                     // Turn sprites off and then fade out
                     HIDE_SPRITES;
                     fade_start(FADE_OUT);
