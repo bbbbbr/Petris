@@ -72,6 +72,18 @@ void player_hinting_flicker_update() {
 
 
 
+// Hide special piece hinting sprites by moving them off-screen
+void player_hinting_special_reset(void) {
+
+        INT8 c;
+
+        for (c=SPR_SPECIAL_HINT_1; c <= SPR_SPECIAL_HINT_4; c++) {
+            move_sprite(c, 0, 0);
+        }
+}
+
+
+
 void player_hinting_special_show(UINT8 do_show) {
 
     if ((do_show) && (player_piece & GP_SPECIAL_MASK)) {
@@ -141,6 +153,13 @@ void player_hinting_special_update_gfx() {
         set_sprite_prop(SPR_SPECIAL_HINT_2, GP_PAL_SPECIAL);
         set_sprite_prop(SPR_SPECIAL_HINT_3, GP_PAL_SPECIAL);
         set_sprite_prop(SPR_SPECIAL_HINT_4, GP_PAL_SPECIAL);
+}
+
+
+
+// Hide player drop hint sprite by moving it off-screen
+void player_hinting_drop_reset(void) {
+    move_sprite(SPR_DROP_HINT, 0, 0);
 }
 
 

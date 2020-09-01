@@ -87,14 +87,38 @@ void gameplay_drop_speed_update(void) {
 
 
 
-void gameplay_exit_cleanup(void) {
+void gameplay_ended_cleanup(void) {
 
     player_piece_update_xy(PLAYER_PIECE_HIDE);
     game_piece_next_show(FALSE);
-    player_hinting_special_show(FALSE);
-    player_hinting_drop_show(FALSE);
+    player_hinting_drop_reset();
+    player_hinting_special_reset();
     hinting_petlength_reset();
+}
+
+
+
+void gameplay_handle_gameover_screen(void) {
+
+    // Stop music, play end game sound and hide all the sprites
+    MusicStop();
+    PLAY_SOUND_GAME_OVER;
+    gameplay_ended_cleanup();
+
+    // Display game over message
+    gameover_message_animate();
+
+    // Disconnect link if needed
+    if (link_status == LINK_STATUS_CONNECTED) {
+        link_reset();
+    }
+
+    // Clear game over message after a button press
+    waitpadticked_lowcpu(J_START | J_A | J_B, NULL);
     gameover_message_reset();
+
+    // Reset visible sprites, then display stats
+    stats_display();
 }
 
 

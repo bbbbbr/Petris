@@ -85,11 +85,12 @@ const INT8 SPR_GAMEOVER_LUT_Y[] = {
 #define SPR_GAMEOVER_LANDED  127
 
 UINT8 spr_gameover_y_idx[SPR_GAMEOVER_COUNT];
+const UINT8 * p_gameover_chars;
 
 
 // Drop "G A M E   O V E R" letters with a bounce, starting from left to right
 // Expects font data to already be loaded (see PRINT/etc)
-void gameover_message_animate(const UINT8 spr_text_chars[]) {
+void gameover_message_animate(void) {
 
     UINT8 c;
     UINT8 min_spr = 0; // Used to slowly exit the loop as pieces land
@@ -98,7 +99,7 @@ void gameover_message_animate(const UINT8 spr_text_chars[]) {
 
     // Load text message into tiles
     for (c = 0; c< SPR_GAMEOVER_COUNT; c++) {
-        set_sprite_tile(SPR_GAMEOVER_START + c, spr_text_chars[c]);
+        set_sprite_tile(SPR_GAMEOVER_START + c, p_gameover_chars[c]);
     }
 
     // Loop exits when all sprites have landed
@@ -136,6 +137,7 @@ void gameover_message_animate(const UINT8 spr_text_chars[]) {
     } // while (min_spr != SPR_GAMEOVER_COUNT)
 }
 
+// Hides gameover message sprites and initializes their CGB attributes
 // Expects font data to already be loaded (see PRINT/etc)
 void gameover_message_reset(void) {
 
@@ -148,7 +150,7 @@ void gameover_message_reset(void) {
         // Sprite tiles will get set just before display
         // in order to set the desired message
 
-        // Use solid color palette for all letter
+        // Use solid color palette for all letters
         set_sprite_prop(SPR_GAMEOVER_START + c, SPR_PAL_PRINT);
     }
 }
