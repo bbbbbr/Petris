@@ -94,43 +94,55 @@ void stats_maxpet_copy_iflongest(void) {
 
 
 
-// Display and End of Game stats readout
-void stats_display(void) {
+void stats_maxpet_draw(void) {
 
     UINT8 c, max_x;
 
+    board_hide_all(BRD_CLR_DELAY_CLEAR_MED);
+    board_reset();
+
+    PRINT(MAXPET_TXT_X, MAXPET_TXT_Y,
+          MAXPET_TXT_MSG, MAXPET_TXT_DELAY);
+
+    // Draw each tile from the longest pet with delay between each
+    max_x = 0;
+
+    for(c=0; c < maxpet_tilecount; c++) {
+
+        PLAY_SOUND_TILE_CLEAR_BONUS;
+
+        // Track right-most piece for subsequent length overlay
+        if (maxpet_x[c] > max_x) max_x = maxpet_x[c];
+
+        board_set_tile_xy((INT8)maxpet_x[c],
+                          (INT8)maxpet_y[c],
+                          maxpet_pieces[c],
+                          maxpet_attrib[c],
+                          GP_CONNECT_NONE_BITS);
+
+        delay(MAXPET_TILE_DELAY);
+    }
+
+    // Show the pet length overlay
+    hinting_petlength_reset();
+    hinting_petlength_add(max_x + 1,
+                          maxpet_y[0],
+                          maxpet_tilecount,
+                          maxpet_pieces[0]);
+    hinting_petlength_turn_on();
+    hinting_petlength_showhide();
+}
+
+
+
+// Display and End of Game stats readout
+void stats_display(void) {
+
+    // == Show longest pet size ==
+
     if (maxpet_tilecount >= MAXPET_MIN_DISPLAY_SIZE) {
 
-        board_hide_all(BRD_CLR_DELAY_CLEAR_MED);
-        board_reset();
-
-        PRINT(MAXPET_TXT_X, MAXPET_TXT_Y,
-              MAXPET_TXT_MSG, MAXPET_TXT_DELAY);
-
-        max_x = 0;
-        for(c=0; c < maxpet_tilecount; c++) {
-
-            PLAY_SOUND_TILE_CLEAR_BONUS;
-            // Track right-most piece for subsequent length overlay
-            if (maxpet_x[c] > max_x) max_x = maxpet_x[c];
-
-            board_set_tile_xy((INT8)maxpet_x[c],
-                              (INT8)maxpet_y[c],
-                              maxpet_pieces[c],
-                              maxpet_attrib[c],
-                              GP_CONNECT_NONE_BITS);
-            delay(MAXPET_TILE_DELAY);
-        }
-
-        // Show the pet length overlay
-        hinting_petlength_reset();
-        hinting_petlength_add(max_x + 1,
-                              maxpet_y[0],
-                              maxpet_tilecount,
-                              maxpet_pieces[0]);
-        hinting_petlength_turn_on();
-        hinting_petlength_showhide();
-
+        stats_maxpet_draw();
         // Wait for a button press to continue
         waitpadticked_lowcpu(J_START | J_A | J_B, NULL);
     }
