@@ -20,6 +20,7 @@ typedef enum {
     GAME_ENDED,
     GAME_WON_LINK_VERSUS,
     GAME_OVER_SCREEN,
+    GAME_OVER_WAITEXIT,
 } GAME_STATES;
 
 extern UINT8 game_state;

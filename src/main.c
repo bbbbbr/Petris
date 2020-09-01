@@ -26,6 +26,7 @@
 // #include "game_board.h"
 #include "game_board_gfx.h"
 #include "gameover_message.h"
+#include "game_stats.h"
 
 #include "gameplay.h"
 
@@ -226,37 +227,23 @@ void main(void){
 
 
             case GAME_WON_LINK_VERSUS:
-                MusicStop();
-                PLAY_SOUND_LEVEL_UP;
-                gameover_message_animate(SPR_YOU_WON_CHARS);
-
-                // Disconnect link (should be try if we're here)
-                if (link_status == LINK_STATUS_CONNECTED) {
-                    link_reset();
-                }
+                GAMEOVER_MESSAGE_SET(SPR_YOU_WON_CHARS);
 
                 game_state = GAME_OVER_SCREEN;
                 break;
 
 
             case GAME_ENDED:
-                // If in 2 player versus mode, notify other player they won
-                //
-                // The command is sent from here since GAME_ENDED can be
-                // triggered in multiple locations based on game type
                 if (link_status == LINK_STATUS_CONNECTED) {
+                    // If in 2 player versus mode, notify other player they won
+                    // The command is sent from here since GAME_ENDED can be
+                    // triggered in multiple locations based on game type
                     LINK_SEND(LINK_CMD_OPPONENT_LOST);
-                }
 
-                MusicStop();
-                PLAY_SOUND_GAME_OVER;
-
-                // Disconnect link
-                if (link_status == LINK_STATUS_CONNECTED) {
-                    link_reset();
-                    gameover_message_animate(SPR_YOU_LOST_CHARS);
+                    GAMEOVER_MESSAGE_SET(SPR_YOU_LOST_CHARS);
                 } else {
-                    gameover_message_animate(SPR_GAMEOVER_CHARS);
+                    // Non-link mode gets regular game over text
+                    GAMEOVER_MESSAGE_SET(SPR_GAMEOVER_CHARS);
                 }
 
                 game_state = GAME_OVER_SCREEN;
@@ -265,8 +252,17 @@ void main(void){
 
             case GAME_OVER_SCREEN:
 
-                if (KEY_TICKED(J_START)) {
-                    gameplay_exit_cleanup();
+                gameplay_handle_gameover_screen();
+                game_state = GAME_OVER_WAITEXIT;
+                break;
+
+
+            case GAME_OVER_WAITEXIT:
+
+                if (KEY_TICKED(J_START | J_A | J_B)) {
+                    // Turn sprites off and then fade out
+                    HIDE_SPRITES;
+                    fade_start(FADE_OUT);
                     game_state = GAME_INTRO_INIT;
                 }
                 break;

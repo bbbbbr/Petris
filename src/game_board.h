@@ -84,6 +84,16 @@
 
 #define BRD_PIECE_CLEAR_COUNT_NONE 0
 
+extern UINT8 board_pieces[BRD_SIZE];
+extern UINT8 board_attrib[BRD_SIZE];
+extern UINT8 board_connect[BRD_SIZE];
+
+extern UINT8 board_tile_clear_cache_x[BRD_SIZE];
+extern UINT8 board_tile_clear_cache_y[BRD_SIZE];
+extern UINT8 board_tile_clear_count;
+
+
+
 void board_init(void);
 
 void board_hide_all(UINT16);

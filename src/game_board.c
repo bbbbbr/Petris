@@ -24,6 +24,7 @@
 #include "game_board_special_pieces.h"
 #include "game_piece_data.h"
 #include "game_types.h"
+#include "game_stats.h"
 #include "gameplay.h"
 #include "gfx.h"
 #include "gfx_print.h"
@@ -530,6 +531,8 @@ void board_handle_pet_completed(UINT8 flags) {
 
     UINT8 c = 0;
     UINT8 crunchups_to_send;
+
+    stats_maxpet_copy_iflongest();
 
     while (c < board_tile_clear_count) {
 
