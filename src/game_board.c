@@ -122,17 +122,23 @@ void board_hide_all(UINT16 delay_amount) {
 // Redraws the game board from the game board arrays
 void board_redraw_all(void) {
 
+    // Workaround for slight flickr on board_redraw_all()
+    // draw tiles first, then attribs so that previous
+    // tile color doesn't turn yellow due to board default
+
+    // Update BG Tilemap from Game Board
+    VBK_REG = 0; // Select regular BG tile map
+    set_bkg_tiles(BRD_ST_X, BRD_ST_Y,
+                  BRD_WIDTH, BRD_HEIGHT,
+                  &board_pieces[0]);
+
     // Update BG Attrib Map from Game Board
     VBK_REG = 1; // Select BG tile attribute map
     set_bkg_tiles(BRD_ST_X, BRD_ST_Y,
                   BRD_WIDTH, BRD_HEIGHT,
                   &board_attrib[0]);
 
-    // Update BG Tilemap from Game Board
     VBK_REG = 0; // Re-Select regular BG tile map
-    set_bkg_tiles(BRD_ST_X, BRD_ST_Y,
-                  BRD_WIDTH, BRD_HEIGHT,
-                  &board_pieces[0]);
 }
 
 
