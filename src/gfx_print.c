@@ -90,7 +90,6 @@ void print_num_u16(UINT8 x, UINT8 y, UINT16 num, UINT8 print_digits) {
 // Removed some code, removed some characters
 void print_text(const char* txt, unsigned char delay_time){
 
-    UINT8 idx = 0;
     unsigned char c;
     unsigned char start_x;
 
