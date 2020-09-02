@@ -190,6 +190,11 @@ void gameplay_init(void) {
 
     gameplay_prepare_board();
 
+    // Make sure magic code is turned off in 2-player mode to ensure fairness
+    if (link_status == LINK_STATUS_CONNECTED) {
+        magic_code_reset();
+    }
+
     SHOW_SPRITES;
 
     // Init game state vars
