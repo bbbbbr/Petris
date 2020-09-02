@@ -51,6 +51,10 @@
 #define CLOUD_LEN_4 5
 #define CLOUD_LEN_5 5
 
+#define INTRO_TEXT_BLANK "            "
+#define INTRO_TEXT_START "PRESS  START"
+
+
 const UINT8 SPR_CLOUDS_LEN[]   = {CLOUD_LEN_1,
                                   CLOUD_LEN_2,
                                   CLOUD_LEN_3,
@@ -178,6 +182,10 @@ void intro_screen_init(void) {
     SHOW_BKG;
     SHOW_SPRITES;
 
+    // To avoid flicker from initial print changing the attrib tiles
+    // print the tiles before fade-in
+    PRINT(4,10, INTRO_TEXT_BLANK, 0);
+
     fade_start(FADE_IN);
 
 }
@@ -194,10 +202,10 @@ void intro_screen_handle(void) {
     intro_counter++;
 
     if (intro_counter == 1) {
-        PRINT(4,10, "PRESS  START", 0);
+        PRINT(4,10, INTRO_TEXT_START, 0);
     }
     else if (intro_counter == 125) {
-        PRINT(4,10, "            ", 0);
+        PRINT(4,10, INTRO_TEXT_BLANK, 0);
     }
     else if (intro_counter == 200) {
         intro_counter = 0;
