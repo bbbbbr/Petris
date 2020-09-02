@@ -58,7 +58,7 @@ const UINT8 board_blank_row[BRD_WIDTH] = {
                  TILE_ID_BOARD_BLANK_ROW_BG,
                  TILE_ID_BOARD_BLANK_ROW_BG};
 
-const UINT8 board_x_row[BRD_WIDTH] = {
+const UINT8 board_uparrow_row[BRD_WIDTH] = {
                 TILE_ID_BOARD_UP,
                 TILE_ID_BOARD_UP,
                 TILE_ID_BOARD_UP,
@@ -104,14 +104,18 @@ void board_hide_all(UINT16 delay_amount) {
         // Update BG Tilemap from Game Board
         VBK_REG = 0;
 
+        // If hide is called with a delay, then for each row
+        // briefly draw and show a row of up-arrows before
+        // the blank row gets drawn in the same place
         if (delay_amount) {
             set_bkg_tiles(BRD_ST_X, y,
-                          sizeof(board_x_row), 1,
-                          &board_x_row[0]);
+                          sizeof(board_uparrow_row), 1,
+                          &board_uparrow_row[0]);
 
             delay(delay_amount);
         }
 
+        // Draw the blank row
         set_bkg_tiles(BRD_ST_X, y,
                       sizeof(board_blank_row), 1,
                       &board_blank_row[0]);
