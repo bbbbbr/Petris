@@ -97,9 +97,7 @@ void print_text(const char* txt, unsigned char delay_time){
 
     while(*txt) {
 
-        if(*txt == ' ') {
-            c = TILE_ID_FONT_BLANK;
-        } else if(*txt >= 'A' && *txt <= 'Z'){
+        if(*txt >= 'A' && *txt <= 'Z'){
             c = TILES_FONT_CHARS_START + *txt - 'A';
         } else if(*txt >= 'a' && *txt <= 'z') {
             c = TILES_FONT_CHARS_START + *txt - 'a';
@@ -121,6 +119,8 @@ void print_text(const char* txt, unsigned char delay_time){
                     print_y++;
                     txt++;
                     continue;
+                // Default is blank tile for Space or any other unknown chars
+                default: c = TILE_ID_FONT_BLANK; break;
             }
         }
 
