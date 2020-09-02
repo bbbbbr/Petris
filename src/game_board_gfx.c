@@ -180,6 +180,7 @@ void board_gfx_init_background(void) {
 
         // Show a status icon if link connected
         if (link_status == LINK_STATUS_CONNECTED) {
+            VBK_REG = 0; // Select regular BG tile map
             set_bkg_tiles(LINK_STATUS_X, LINK_STATUS_Y,
                           ARRAY_LEN(LINK_ICONS),1,
                           LINK_ICONS);
