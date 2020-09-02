@@ -59,7 +59,7 @@ typedef enum {
 } LINK_STATUSES;
 
 
-#define LINK_CONNECT_TIMEOUT_LEN (60 * 5) // 5 seconds
+#define LINK_CONNECT_TIMEOUT_LEN (60 * 10) // 10 seconds
 //#define LINK_CONNECT_TIMEOUT_RESEND_MASK 0x1F // every 32 frames
 #define LINK_CONNECT_RESEND_MASK 0x3FU //every 64 frames
 
