@@ -256,7 +256,7 @@ void link_isr(void) {
                     // Save/apply incoming game type
                     // and force 2-player mode option = ON
                     option_game_type = link_data & LINK_DATA_MASK;
-                    option_game_link2p == OPTION_LINK2P_ON;
+                    option_game_link2p = OPTION_LINK2P_ON;
 
                     // This will complete the connection
                     // should cause both players to start
