@@ -310,17 +310,16 @@ void link_isr(void) {
 // establish a link for allowing -> link_try_gamestart()
 void link_check_connect(void) {
 
-    // Send periodic pings if in the idle Link Checking state
+    // If idle Link Checking state then periodically ping for other player
+    // (About 2x as often as the timeout window)
+    // Successful RX and reply of LINK_CMD_CONFIRM will reset link timeout
     if (link_status == LINK_STATUS_DETECTING) {
-        // Periodically ping over link for the presence of another player
-        // (About 2x as often as the timeout window)
         if ((sys_time & LINK_CHECK_MASK) == LINK_CHECK_MATCH) {
             LINK_SEND(LINK_CMD_INITIATE);
         }
     }
 
-    // Update the timeout window
-    // If it goes to zero then reset the link status
+    // Update the timeout, if it goes to zero then reset the link status
     __critical {
         if (link_timeout) {
             link_timeout--;
@@ -366,14 +365,18 @@ void link_try_gamestart(void) {
         while (link_status == LINK_STATUS_GAME_START) {
 
             UPDATE_KEYS();
+
             __critical {
                 link_timeout--;
+                // Abort if player pressed button or time is up
                 if ((KEY_TICKED(J_B)) ||
                     (link_timeout == LINK_TIMER_TIMEDOUT)) {
+
                     // Trigger loop exit
                     link_status = LINK_STATUS_FAILED;
                 }
             }
+
             // yield CPU while waiting
             wait_vbl_done();
         }
@@ -391,6 +394,7 @@ void link_try_gamestart(void) {
                    "\n\nPRESS B TO RETURN", 0);
         waitpadticked_lowcpu(J_B, NULL);
         status_win_popup_hide();
+
         // Resume detecting status
         __critical {
             link_status = LINK_STATUS_DETECTING;

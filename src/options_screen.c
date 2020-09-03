@@ -322,10 +322,13 @@ void options_screen_try_gamestart(void) {
     // If serial link 2-Player versus is being initiated
     // then try to link up with the other player
     // before starting the game.
-    //
-// If times out then drop back to the option screen
     if (option_game_link2p == OPTION_LINK2P_ON) {
 
+        // If this succeeds, the game start will be picked up
+        // during the main loop in options_screen_handle()
+        // for both Initiator and Follower.
+        // The timing of game start is less exact for players
+        // than the previous implementation.
         link_try_gamestart();
     } else {
         // If link not requested, then turn off link
@@ -341,14 +344,15 @@ void options_screen_try_gamestart(void) {
 
 void options_screen_handle(void) {
 
-    // Update 2-Player serial link status periodically
-    link_try_connect();
 
-    // If link status is connected that
-    //  means it's time to start the game
     if (link_status == LINK_STATUS_CONNECTED) {
+        // If link status is connected that
+        //  means it's time to start the game
         options_screen_exit_cleanup();
         game_state = GAME_READY_TO_START;
+    } else {
+        // Update 2-Player serial link status periodically
+        link_check_connect();
     }
 
     // Cursor Updates
