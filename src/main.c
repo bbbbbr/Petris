@@ -47,7 +47,7 @@
 #include "../res/font_tiles.h"
 
 
-#define DEBUG_SKIP_INTRO
+// #define DEBUG_SKIP_INTRO
 
 void init (void);
 void init_interrupts(void);
