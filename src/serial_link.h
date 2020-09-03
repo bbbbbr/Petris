@@ -38,14 +38,15 @@
 // Should only use bits within LINK_CMD_MASK
 // LINK-CONNECTION commands
 #define LINK_CMD_INITIATE       0x10U  // Signal that player is ready to start
-#define LINK_CMD_RANDLO         0x20U  // Random Number low bits
-#define LINK_CMD_RANDHI         0x30U  // Random Number high bits
-#define LINK_CMD_READY          0x40U  // Signal that player is ready to start
+#define LINK_CMD_CONFIRM        0x20U  // Signal that player is ready to start
+#define LINK_CMD_RANDLO         0x30U  // Random Number low bits
+#define LINK_CMD_RANDHI         0x40U  // Random Number high bits
+#define LINK_CMD_START          0x50U  // Signal that player is ready to start
 // IN-GAME commands
-#define LINK_CMD_OPPONENT_LOST  0x50U  // Signal that player lost, so opponent won
-#define LINK_CMD_CRUNCHUP       0x60U  // Send a crunch-up to the othe player
-#define LINK_CMD_PAUSE          0x70U  // Send Pause
-#define LINK_CMD_UNPAUSE        0x80U  // Send Un-Pause
+#define LINK_CMD_OPPONENT_LOST  0x60U  // Signal that player lost, so opponent won
+#define LINK_CMD_CRUNCHUP       0x70U  // Send a crunch-up to the othe player
+#define LINK_CMD_PAUSE          0x80U  // Send Pause
+#define LINK_CMD_UNPAUSE        0x90U  // Send Un-Pause
 //
 #define LINK_CMD_IGNORE         0xF0U  // Keep as 0xF0 since Link with No external GB may return 0xFF
 
@@ -53,20 +54,24 @@
 // Game serial link status
 typedef enum {
     LINK_STATUS_RESET = 0x00U,
-    LINK_STATUS_ABORTED,
-    LINK_STATUS_CONNECTED,
-    LINK_STATUS_FAILED
+    LINK_STATUS_FAILED,
+    LINK_STATUS_DETECTING,
+    LINK_STATUS_GAME_START,
+    LINK_STATUS_CONNECTED
 } LINK_STATUSES;
 
 
-#define LINK_CONNECT_TIMEOUT_LEN (60 * 10) // 10 seconds
-//#define LINK_CONNECT_TIMEOUT_RESEND_MASK 0x1F // every 32 frames
-#define LINK_CONNECT_RESEND_MASK 0x3FU //every 64 frames
-
 #define WIN_Y_LINKPOPUP  (144 - (8*9)) // 9 tile/font rows tall
 
+#define LINK_CHECK_MASK          0x0F // Every 1/2 second
+#define LINK_CHECK_MATCH         0x00
+#define LINK_TIMER_TIMEDOUT      0
+#define LINK_TIMER_CONNECT       (LINK_CHECK_MASK * 2) // 60 frames ebfore link timeout
+#define LINK_TIMER_GAMESTART     0xFF // 4 seconds
 
 extern UINT8 volatile link_status;
+
+extern UINT8 volatile link_timeout;
 
 
 // Transmit one byte using internal clock
@@ -98,9 +103,13 @@ void init_link(void);
 void link_reset(void);
 void link_enable(void);
 void link_disable(void);
+void link_start_detect(void);
 
 //void link_send(UINT8 command);
 void link_isr(void);
-void link_try_connect(void);
+void link_check_connect(void);
+void link_try_gamestart(void);
+
+void link_update_status_icon(void);
 
 #endif // SERIAL_LINK_H
