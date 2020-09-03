@@ -34,8 +34,8 @@
 // 0. start_detect()
 //      sets:  LINK_STATUS_RESET -> STATUS_DETECTING
 //
-// 1. Leader
-//    try_connect()
+// 1. Initiator
+//    check_connect()
 //      sets:  timeout = MAX
 //      sends: CMD_INITIATE (passes: rand-lo)
 //
@@ -53,7 +53,7 @@
 
 // == Game Starting sequence
 //
-// 1. Leader
+// 1. Initiator
 //    try_gamestart()
 //      sets:  STATUS_DETECTING -> STATUS_GAME_START
 //      sends: CMD_RANDLO (passes: rand-lo)
@@ -63,7 +63,7 @@
 //      sets:  STATUS_DETECTING -> STATUS_GAME_START
 //      sends: CMD_RANDHI (passes: rand-hi)
 //
-// 3. Leader
+// 3. Initiator
 //    rx: CMD_RANDHI
 //      sets:  STATUS_GAME_START -> STATUS_CONNECTED (triggers game start)
 //      sends: LINK_CMD_START (passes game-type)
@@ -130,7 +130,7 @@ void link_reset(void) {
 
     __critical {
         link_status = LINK_STATUS_RESET;
-        link_timeout = LINK_TIMEOUT_RESET;
+        link_timeout = LINK_TIMER_TIMEDOUT;
     }
 
     // Set to external clock as default
@@ -200,16 +200,16 @@ void link_isr(void) {
                     // Send reply to connection ping
                     // and reset connection timeout
                     LINK_SEND(LINK_CMD_CONFIRM);
-                    link_timeout = LINK_TIMEOUT_CONNECT_MAX;
+                    link_timeout = LINK_TIMER_CONNECT;
                     link_update_status_icon();
                     break;
 
                 case LINK_CMD_CONFIRM:
-                    // (Leader) - DETECT pt. 3
+                    // (Initiator) - DETECT pt. 3
 
                     // Complete connection ping round trip
                     // and reset connection timeout
-                    link_timeout = LINK_TIMEOUT_CONNECT_MAX;
+                    link_timeout = LINK_TIMER_CONNECT;
                     link_update_status_icon();
                     break;
 
@@ -234,7 +234,7 @@ void link_isr(void) {
             switch (link_data & LINK_CMD_MASK) {
 
                 case LINK_CMD_RANDHI:
-                    // (Leader) - GAME START pt 3
+                    // (Initiator) - GAME START pt 3
 
                     // Save incoming hi nybble of shared random number seed
                     game_rand_init |= (link_data & LINK_DATA_MASK) << 4;
@@ -294,10 +294,10 @@ void link_isr(void) {
         } // else if (link_status == LINK_STATUS_CONNECTED)
     } // else for: if (SC_REG & LINK_CLOCK_INT)
 
+
     // Only return to waiting state (external clock + transfer bit set)
     // if a transfer is NOT in progress (likely initiated in this ISR)
     // which is indicated by TX bit set
-
     if (! (SC_REG & LINK_XFER_START)) {
         LINK_WAIT_RECEIVE;
     }
@@ -307,8 +307,8 @@ void link_isr(void) {
 
 // Periodic connection detection and timeout
 // Meant to be called regularly to
-// establish a link for -> link_try_gamestart()
-void link_try_connect(void) {
+// establish a link for allowing -> link_try_gamestart()
+void link_check_connect(void) {
 
     // Send periodic pings if in the idle Link Checking state
     if (link_status == LINK_STATUS_DETECTING) {
@@ -326,7 +326,7 @@ void link_try_connect(void) {
             link_timeout--;
 
             // If link is timed out reset icon
-            if (link_timeout == LINK_TIMEOUT_RESET) {
+            if (link_timeout == LINK_TIMER_TIMEDOUT) {
                 link_status = LINK_STATUS_DETECTING;
                 link_update_status_icon();
             }
@@ -339,21 +339,71 @@ void link_try_connect(void) {
 // Try to initiate the game start sequence if requested by user
 void link_try_gamestart(void) {
 
+    // Show a popup window while waiting to connect
+    status_win_popup_init();
+    status_win_popup_show(WIN_Y_LINKPOPUP);
+    SET_PRINT_TARGET(PRINT_WIN);
+
+    PRINT(2,2, "CONNECTING..."
+               "\n\nPRESS B TO CANCEL", 0);
+
+
     // Only try the link start game sequence if already connected
-    if ((link_timeout != LINK_TIMEOUT_RESET) &&
+    if ((link_timeout != LINK_TIMER_TIMEDOUT) &&
         (link_status == LINK_STATUS_DETECTING)) {
 
-        // Reset timeout counter
+        // Reset timeout counter and enter game start status
         __critical {
-            link_timeout = LINK_TIMEOUT_CONNECT_MAX;
+            link_timeout = LINK_TIMER_GAMESTART;
             link_status = LINK_STATUS_GAME_START;
         }
 
-        // Send Ready to send random number seed
-        // Then wait for transfer to complete
+        // Send First sequence of Game Start with random number seed
         game_rand_init = DIV_REG & LINK_DATA_MASK;
         LINK_SEND(LINK_CMD_RANDLO | (game_rand_init & LINK_DATA_MASK));
+
+        // Wait a couple seconds to see if connection succeeds
+        while (link_status == LINK_STATUS_GAME_START) {
+
+            UPDATE_KEYS();
+            __critical {
+                link_timeout--;
+                if ((KEY_TICKED(J_B)) ||
+                    (link_timeout == LINK_TIMER_TIMEDOUT)) {
+                    // Trigger loop exit
+                    link_status = LINK_STATUS_FAILED;
+                }
+            }
+            // yield CPU while waiting
+            wait_vbl_done();
+        }
+    } else {
+        // Connect failed outright
+        __critical {
+            link_status = LINK_STATUS_FAILED;
+        }
     }
+
+    // Connection failed, notify user
+    if (link_status != LINK_STATUS_CONNECTED) {
+        PRINT(2,2, "CONNECTING..."
+                   "\n\nNO CONNECTION    "
+                   "\n\nPRESS B TO RETURN", 0);
+        waitpadticked_lowcpu(J_B, NULL);
+        status_win_popup_hide();
+        // Resume detecting status
+        __critical {
+            link_status = LINK_STATUS_DETECTING;
+        }
+    } else {
+        // To reduce time-of-game-start lag,
+        // don't retract window, just hide it
+        HIDE_WIN;
+    }
+
+    // Restore default print target (Background)
+    SET_PRINT_TARGET(PRINT_BKG);
+
 }
 
 
@@ -364,7 +414,7 @@ void link_update_status_icon(void) {
     VBK_REG = 0; // Select regular BG tile map
 
     // Show a status icon if link is detected or connected, otherwise blank
-    if ((link_timeout != LINK_TIMEOUT_RESET) ||
+    if ((link_timeout != LINK_TIMER_TIMEDOUT) ||
         (link_status == LINK_STATUS_CONNECTED)) {
 
         set_bkg_tiles(LINK_STATUS_X, LINK_STATUS_Y,

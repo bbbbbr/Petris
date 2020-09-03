@@ -65,8 +65,9 @@ typedef enum {
 
 #define LINK_CHECK_MASK          0x0F // Every 1/2 second
 #define LINK_CHECK_MATCH         0x00
-#define LINK_TIMEOUT_RESET       0
-#define LINK_TIMEOUT_CONNECT_MAX (LINK_CHECK_MASK * 2) // 60 frames ebfore link timeout
+#define LINK_TIMER_TIMEDOUT      0
+#define LINK_TIMER_CONNECT       (LINK_CHECK_MASK * 2) // 60 frames ebfore link timeout
+#define LINK_TIMER_GAMESTART     0xFF // 4 seconds
 
 extern UINT8 volatile link_status;
 
@@ -106,7 +107,7 @@ void link_start_detect(void);
 
 //void link_send(UINT8 command);
 void link_isr(void);
-void link_try_connect(void);
+void link_check_connect(void);
 void link_try_gamestart(void);
 
 void link_update_status_icon(void);
