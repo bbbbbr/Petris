@@ -311,34 +311,45 @@ void options_screen_init(void) {
 
     // Update music status to match option menu setting
     MusicUpdateStatus();
+
+    link_start_detect();
 }
 
 
 
 void options_screen_try_gamestart(void) {
 
-    // If serial link 2-Player versus is enabled
+    // If serial link 2-Player versus is being initiated
     // then try to link up with the other player
     // before starting the game.
     //
-    // If times out then drop back to the option screen
+// If times out then drop back to the option screen
     if (option_game_link2p == OPTION_LINK2P_ON) {
 
-        link_try_connect();
+        link_try_gamestart();
+    } else {
+        // If link not requested, then turn off link
+        // connection to avoid unwanted initiation in game play
+        link_disable();
 
-        // If link failed then exit without starting game
-        if (link_status != LINK_STATUS_CONNECTED)
-            return;
+        options_screen_exit_cleanup();
+        game_state = GAME_READY_TO_START;
     }
-
-    // If 2P versus is not enabled start immediately
-    options_screen_exit_cleanup();
-    game_state = GAME_READY_TO_START;
 }
 
 
 
 void options_screen_handle(void) {
+
+    // Update 2-Player serial link status periodically
+    link_try_connect();
+
+    // If link status is connected that
+    //  means it's time to start the game
+    if (link_status == LINK_STATUS_CONNECTED) {
+        options_screen_exit_cleanup();
+        game_state = GAME_READY_TO_START;
+    }
 
     // Cursor Updates
     if (KEY_TICKED(J_UP)) {

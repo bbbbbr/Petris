@@ -46,11 +46,6 @@
 const UINT8 NEXT_PIECE_BG_TILE = TILE_ID_BOARD_NEXT_PIECE_PREVIEW_BG;
 const UINT8 NEXT_PIECE_BG_PAL  = BG_PAL_BOARD_NEXT_PIECE_PREVIEW;
 
-const UINT8 LINK_ICONS[3] = {TILE_ID_2P_LINK_START,     // GB Icon
-                             TILE_ID_2P_LINK_START + 1, // Text
-                             TILE_ID_2P_LINK_START};    // GB Icon
-
-
 const UINT8 pet_tail_anim_tilenum[] = {TILES_PET_START + (ANIM_TAIL_BATCH_SIZE * 0), // Set 1
                                        TILES_PET_START + (ANIM_TAIL_BATCH_SIZE * 1),
                                        TILES_PET_START + (ANIM_TAIL_BATCH_SIZE * 2),
@@ -179,12 +174,7 @@ void board_gfx_init_background(void) {
         }
 
         // Show a status icon if link connected
-        if (link_status == LINK_STATUS_CONNECTED) {
-            VBK_REG = 0; // Select regular BG tile map
-            set_bkg_tiles(LINK_STATUS_X, LINK_STATUS_Y,
-                          ARRAY_LEN(LINK_ICONS),1,
-                          LINK_ICONS);
-        }
+        link_update_status_icon();
 
         SHOW_BKG;
 }
