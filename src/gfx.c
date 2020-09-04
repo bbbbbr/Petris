@@ -20,6 +20,7 @@
 
 #include "../res/pet_tiles.h"
 #include "../res/pet_tiles_hicontrast.h"
+#include "../res/pet_tiles_hicontrast2.h"
 #include "../res/pet_tiles_medcontrast.h"
 #include "../res/special_tiles.h"
 #include "../res/intro_screen_tiles.h"
@@ -27,7 +28,7 @@
 
 // On Game Board Palettes 0 - 3 are used for the Pet Tile Game Board Pieces
 // Palettes 0..3
-const UWORD board_pets_palette_high_contrast[] = {
+const UWORD board_pets_pal_high_contrast[] = {
     pet_tiles_hicontrastCGBPal0c0, pet_tiles_hicontrastCGBPal0c1, pet_tiles_hicontrastCGBPal0c2, pet_tiles_hicontrastCGBPal0c3, // Pet 0
     pet_tiles_hicontrastCGBPal1c0, pet_tiles_hicontrastCGBPal1c1, pet_tiles_hicontrastCGBPal1c2, pet_tiles_hicontrastCGBPal1c3, // Pet 1
     pet_tiles_hicontrastCGBPal2c0, pet_tiles_hicontrastCGBPal2c1, pet_tiles_hicontrastCGBPal2c2, pet_tiles_hicontrastCGBPal2c3, // Pet 2
@@ -35,6 +36,16 @@ const UWORD board_pets_palette_high_contrast[] = {
 
     pet_tiles_hicontrastCGBPal4c0, pet_tiles_hicontrastCGBPal4c1, pet_tiles_hicontrastCGBPal4c2, pet_tiles_hicontrastCGBPal4c3, // Specials
 };
+
+const UWORD board_pets_pal_high_contrast_2[] = {
+    pet_tiles_hicontras2CGBPal0c0, pet_tiles_hicontras2CGBPal0c1, pet_tiles_hicontras2CGBPal0c2, pet_tiles_hicontras2CGBPal0c3, // Pet 0
+    pet_tiles_hicontras2CGBPal1c0, pet_tiles_hicontras2CGBPal1c1, pet_tiles_hicontras2CGBPal1c2, pet_tiles_hicontras2CGBPal1c3, // Pet 1
+    pet_tiles_hicontras2CGBPal2c0, pet_tiles_hicontras2CGBPal2c1, pet_tiles_hicontras2CGBPal2c2, pet_tiles_hicontras2CGBPal2c3, // Pet 2
+    pet_tiles_hicontras2CGBPal3c0, pet_tiles_hicontras2CGBPal3c1, pet_tiles_hicontras2CGBPal3c2, pet_tiles_hicontras2CGBPal3c3, // Pet 3
+
+    pet_tiles_hicontrastCGBPal4c0, pet_tiles_hicontrastCGBPal4c1, pet_tiles_hicontrastCGBPal4c2, pet_tiles_hicontrastCGBPal4c3, // Specials
+};
+
 
 // On Game Board Palettes 0 - 3 are used for the Pet Tile Game Board Pieces
 // Palettes 0..3
@@ -126,7 +137,10 @@ void pet_tiles_hicontrast_prepare() {
     // Non-expanded source CODE tile data
     if (option_game_high_contrast == OPTION_HIGH_CONTRAST_HI) {
         p_src_tile = pet_tiles_hicontrast;
-        p_pet_palette = (UWORD *) board_pets_palette_high_contrast;
+        p_pet_palette = (UWORD *) board_pets_pal_high_contrast;
+    } else if (option_game_high_contrast == OPTION_HIGH_CONTRAST_HI_2) {
+        p_src_tile = pet_tiles_hicontrast;
+        p_pet_palette = (UWORD *) board_pets_pal_high_contrast_2;
     }
     else { // implied (option_game_high_contrast == OPTION_HIGH_CONTRAST_MED)
         p_src_tile = pet_tiles_mdcontrast;

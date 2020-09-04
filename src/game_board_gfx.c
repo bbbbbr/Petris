@@ -80,7 +80,7 @@ void board_gfx_init(void) {
         p_pet_tiles = pet_tiles;
         p_pet_palette = (UWORD *)board_pets_palette;
     }
-    else { // Implied: OPTION_HIGH_CONTRAST_MED or OPTION_HIGH_CONTRAST_HI
+    else { // Implied: OPTION_HIGH_CONTRAST_MED or OPTION_HIGH_CONTRAST_HI/2
         pet_tiles_hicontrast_prepare();
         p_pet_tiles = pet_tiles_hicontrast_ram;
     }

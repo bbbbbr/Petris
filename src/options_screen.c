@@ -90,7 +90,7 @@ const char * options_difficulty[]   = {"EASY  ",
                                        "BEAST "}; // Must match : option_difficulty_entries
 const char * options_link2p[]        = {"OFF", "ON "}; // Must match : option_link2p_entries
 const char * options_visual_hints[]  = {"ON ", "OFF"}; // Must match : option_visual_hints_entries
-const char * options_high_contrast[] = {"OFF", "MED", "HI "}; // Must match : option_visual_hints_entries
+const char * options_high_contrast[] = {"OFF ", "MED ", "HI  ", "HI-2"}; // Must match : option_visual_hints_entries
 
 const char * options_music[] = {"TWILIGHT",
                                 "CHILL   ",
