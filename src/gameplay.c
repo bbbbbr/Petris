@@ -23,6 +23,7 @@
 #include "sound.h"
 
 #include "input.h"
+#include "gfx.h"
 #include "gfx_print.h"
 #include "fade.h"
 #include "fade2pal.h"
@@ -365,8 +366,20 @@ void gameplay_handle_input(void) {
     }
     else if (KEY_TICKED(J_UP)) {
 
+        // Pet tile contrast setting can be changed in-game
+        // by pressing holding down SELECT and pressing UP
+        if (KEY_PRESSED(J_SELECT)) {
+
+            option_game_high_contrast++;
+            if (option_game_high_contrast == OPTION_HIGH_CONTRAST_END)
+                option_game_high_contrast = OPTION_HIGH_CONTRAST_MIN;
+
+            // Update pet tiles to match new setting
+            pet_tiles_prepare();
+            board_gfx_init_pettiles();
+        }
         // Cycle through different pet types if allowed
-        if (magic_code_state == MAGIC_CODE_STATE_ACTIVATED) {
+        else if (magic_code_state == MAGIC_CODE_STATE_ACTIVATED) {
             player_piece_cycle_pet_types();
         }
     }

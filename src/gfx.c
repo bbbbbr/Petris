@@ -49,7 +49,7 @@ const UWORD board_pets_pal_high_contrast_2[] = {
 
 // On Game Board Palettes 0 - 3 are used for the Pet Tile Game Board Pieces
 // Palettes 0..3
-const UWORD board_pets_palette_med_contrast[] = {
+const UWORD board_pets_pal_med_contrast[] = {
     pet_tiles_mdcontrastCGBPal0c0, pet_tiles_mdcontrastCGBPal0c1, pet_tiles_mdcontrastCGBPal0c2, pet_tiles_mdcontrastCGBPal0c3, // Pet 0
     pet_tiles_mdcontrastCGBPal1c0, pet_tiles_mdcontrastCGBPal1c1, pet_tiles_mdcontrastCGBPal1c2, pet_tiles_mdcontrastCGBPal1c3, // Pet 1
     pet_tiles_mdcontrastCGBPal2c0, pet_tiles_mdcontrastCGBPal2c1, pet_tiles_mdcontrastCGBPal2c2, pet_tiles_mdcontrastCGBPal2c3, // Pet 2
@@ -126,7 +126,7 @@ UINT8 pet_tiles_hicontrast_ram[ TILE_SIZE_BYTES * (TILE_COUNT_PETTOTAL + TILE_CO
 // Expand deduplicated high contrast
 //   pet tiles from CODE into RAM
 // And select matching color palette from CODE
-void pet_tiles_hicontrast_prepare() {
+void pet_tiles_prepare() {
 
     UINT8 * p_src_tile;
     UINT8 * p_dest;
@@ -134,52 +134,62 @@ void pet_tiles_hicontrast_prepare() {
     UINT8 c;
     UINT8 duplicate, repeat_num;
 
-    // Non-expanded source CODE tile data
-    if (option_game_high_contrast == OPTION_HIGH_CONTRAST_HI) {
-        p_src_tile = pet_tiles_hicontrast;
-        p_pet_palette = (UWORD *) board_pets_pal_high_contrast;
-    } else if (option_game_high_contrast == OPTION_HIGH_CONTRAST_HI_2) {
-        p_src_tile = pet_tiles_hicontrast;
-        p_pet_palette = (UWORD *) board_pets_pal_high_contrast_2;
+
+    if (option_game_high_contrast == OPTION_HIGH_CONTRAST_OFF) {
+        p_pet_tiles = pet_tiles;
+        p_pet_palette = (UWORD *)board_pets_palette;
     }
-    else { // implied (option_game_high_contrast == OPTION_HIGH_CONTRAST_MED)
-        p_src_tile = pet_tiles_mdcontrast;
-        p_pet_palette = (UWORD *) board_pets_palette_med_contrast;
-    }
+    else { // Implied: OPTION_HIGH_CONTRAST_MED or OPTION_HIGH_CONTRAST_HI/2
+
+        p_pet_tiles = pet_tiles_hicontrast_ram;
 
 
-    // Start of expanded RAM tile array
-    p_dest = pet_tiles_hicontrast_ram;
-
-    src_tile = 0;
-
-    // Loop through all deduplicated tiles
-    while (src_tile < TILE_COUNT_PETS_HICONTRAST_SRC) {
-
-        if (src_tile != TILE_INDEX_PETS_HICONTRAST_BLANK)
-            repeat_num = 4;
-        else
-            repeat_num = 1; // Don't expand blank tile
-
-        // Copy the tile from CODE to RAM N times
-        for (duplicate = 0; duplicate < repeat_num; duplicate++) {
-
-            // Copy the tile one byte at a time
-            // Could optimize this with DMA / etc
-            // but it seems fast enough as is
-            for (c = 0; c < TILE_SIZE_BYTES; c++) {
-                *p_dest++ = *p_src_tile++;
-            }
-
-            // Rewind to the start of the source tile
-            p_src_tile -= TILE_SIZE_BYTES;
+        // Non-expanded source CODE tile data
+        if (option_game_high_contrast == OPTION_HIGH_CONTRAST_HI) {
+            p_src_tile = pet_tiles_hicontrast;
+            p_pet_palette = (UWORD *) board_pets_pal_high_contrast;
+        } else if (option_game_high_contrast == OPTION_HIGH_CONTRAST_HI_2) {
+            p_src_tile = pet_tiles_hicontrast;
+            p_pet_palette = (UWORD *) board_pets_pal_high_contrast_2;
+        }
+        else { // implied (option_game_high_contrast == OPTION_HIGH_CONTRAST_MED)
+            p_src_tile = pet_tiles_mdcontrast;
+            p_pet_palette = (UWORD *) board_pets_pal_med_contrast;
         }
 
-        // Move to next source tile
-        p_src_tile += TILE_SIZE_BYTES;
-        src_tile++;
-    }
 
+        // Start of expanded RAM tile array
+        p_dest = pet_tiles_hicontrast_ram;
+
+        src_tile = 0;
+
+        // Loop through all deduplicated tiles
+        while (src_tile < TILE_COUNT_PETS_HICONTRAST_SRC) {
+
+            if (src_tile != TILE_INDEX_PETS_HICONTRAST_BLANK)
+                repeat_num = 4;
+            else
+                repeat_num = 1; // Don't expand blank tile
+
+            // Copy the tile from CODE to RAM N times
+            for (duplicate = 0; duplicate < repeat_num; duplicate++) {
+
+                // Copy the tile one byte at a time
+                // Could optimize this with DMA / etc
+                // but it seems fast enough as is
+                for (c = 0; c < TILE_SIZE_BYTES; c++) {
+                    *p_dest++ = *p_src_tile++;
+                }
+
+                // Rewind to the start of the source tile
+                p_src_tile -= TILE_SIZE_BYTES;
+            }
+
+            // Move to next source tile
+            p_src_tile += TILE_SIZE_BYTES;
+            src_tile++;
+        }
+    }
 
 }
 
