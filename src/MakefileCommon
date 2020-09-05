@@ -91,9 +91,15 @@ endif
 
 # Only turn on intro temporal faded clouds if this isn't a web build
 # make BUILDWEB=ON run
-ifndef BUILDWEB
+# or
+# make BUILDWEB=ON run
+ifndef SKIPINTRO=ON
 	CFLAGS += -DTRANSLUCENT_CLOUDS_ON
 endif
+ifndef SKIPINTRO
+    CFLAGS += -DDEBUG_SKIP_INTRO
+endif
+
 
 LFLAGS = $(LFLAGS_NBANKS)
 
