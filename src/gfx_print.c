@@ -20,6 +20,7 @@
 #include <string.h>
 #include <types.h>
 
+#include "input.h"
 #include "audio_common.h"
 #include "gfx.h"
 #include "gfx_print.h"
@@ -139,8 +140,13 @@ void print_text(const char* txt, unsigned char delay_time){
         txt++;
 
         if (delay_time) {
-            PLAY_SOUND_PRINT_CHAR;
-            delay(delay_time);
+
+            UPDATE_KEYS();
+            // Skip delay if buttons pressed
+            if (!KEY_PRESSED(J_B | J_A)) {
+                PLAY_SOUND_PRINT_CHAR;
+                delay(delay_time);
+            }
         }
     }
 }

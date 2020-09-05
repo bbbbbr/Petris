@@ -45,8 +45,8 @@
 #define STATS_TXT_Y     BRD_ST_Y + 1
 #define STATS_TXT_OFST  5
 #define PETS_TXT_MSG "PETS  \nCLEARED:"
-#define PIECES_TXT_MSG "PIECES \nPLAYED:"
 #define TILES_TXT_MSG "TILES \nCLEARED:"
+#define PIECES_TXT_MSG "PIECES \nPLAYED:"
 
 
 UINT8 maxpet_pieces[BRD_SIZE];
@@ -155,14 +155,16 @@ void stats_display(void) {
 
     board_hide_all(BRD_CLR_DELAY_CLEAR_MED);
 
+    // Update keys here to allow for pressing
+    // buttons A/B to speed through text printing
     stats_show_var(STATS_TXT_X, STATS_TXT_Y, PETS_TXT_MSG,
-                   player_numpets);
+                   player_numpets); // Pets Completed
 
-    stats_show_var(STATS_TXT_X, STATS_TXT_Y + STATS_TXT_OFST, PIECES_TXT_MSG,
-                   player_numpieces);
+    stats_show_var(STATS_TXT_X, STATS_TXT_Y + STATS_TXT_OFST, TILES_TXT_MSG,
+                   player_numtiles); // Tiles Cleared
 
-    stats_show_var(STATS_TXT_X, STATS_TXT_Y + (STATS_TXT_OFST * 2), TILES_TXT_MSG,
-                   player_numtiles);
+    stats_show_var(STATS_TXT_X, STATS_TXT_Y + (STATS_TXT_OFST * 2), PIECES_TXT_MSG,
+                   player_numpieces);  // Pieces player
 
 }
 
@@ -191,8 +193,13 @@ void stats_show_var(UINT8 x, UINT8 y, const char* text, UINT16 value) {
         if (c > value) c = value;
 
         print_num_u16(x + 3, y + 2, c, DIGITS_5);
-        PLAY_SOUND_PRINT_CHAR;
-        delay(STATS_NUM_DELAY);
+
+        UPDATE_KEYS();
+        // Skip delay and sound if buttons pressed
+        if (!KEY_PRESSED(J_B | J_A)) {
+            PLAY_SOUND_PRINT_CHAR;
+            delay(STATS_NUM_DELAY);
+        }
     }
 
 }
