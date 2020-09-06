@@ -5,7 +5,31 @@
 // #define PLAY_SOUND_CODE_ACTIVATED     PlayFx(CHANNEL_1, 60, 0x75, 0x86, 0xFF, 0x64, 0x86);
 #define PLAY_SOUND_CODE_ACTIVATED     PlayFx(CHANNEL_1, 60, 0x55, 0x80, 0xF7, 0x02, 0x86);
 
-#define PLAY_SOUND_GAME_OVER          PlayFx(CHANNEL_1, 30, 0x4D, 0x94, 0xF6, 0x26, 0x87); PlayFx(CHANNEL_4, 30, 0x26, 0x35, 0xF2, 0xC0); // delay(700)
+// #define PLAY_SOUND_GAME_OVER          PlayFx(CHANNEL_1, 30, 0x4D, 0x94, 0xF6, 0x26, 0x87); PlayFx(CHANNEL_4, 30, 0x26, 0x35, 0xF2, 0xC0); // delay(700)
+// V2 alternate
+/* #define PLAY_SOUND_GAME_OVER          PlayFx(CHANNEL_4, 30, 0x26, 0x35, 0xF2, 0xC0); \
+                                      PlayFx(CHANNEL_1, 30, 0x4D, 0x94, 0xF2, 0x26, 0x87); \
+                                      delay(185); \
+                                      PlayFx(CHANNEL_1, 30, 0x4D, 0x94, 0xF2, 0x5e, 0x86); \
+                                      delay(200); \
+                                      PlayFx(CHANNEL_1, 30, 0x4D, 0x94, 0xF3, 0x96, 0x85); \
+                                      delay(250); \
+                                      PlayFx(CHANNEL_1, 30, 0x4D, 0x94, 0xF5, 0xCD, 0x84);
+*/
+// V2
+#define PLAY_SOUND_GAME_OVER          PlayFx(CHANNEL_4, 30, 0x26, 0x35, 0xF2, 0xC0); \
+                                      PlayFx(CHANNEL_1, 30, 0x4D, 0x94, 0xF2, 0xC1, 0x86); \
+                                      delay(175); \
+                                      PlayFx(CHANNEL_1, 30, 0x4D, 0x94, 0xF2, 0x5D, 0x86); \
+                                      delay(195); \
+                                      PlayFx(CHANNEL_1, 30, 0x4D, 0x94, 0xF2, 0xF9, 0x85); \
+                                      delay(215); \
+                                      PlayFx(CHANNEL_1, 30, 0x4D, 0x94, 0xF5, 0x95, 0x85);
+
+
+
+                                    // PlayFx(CHANNEL_1, 30, 0x4D, 0x94, 0xF2, 0x31, 0x85);
+
 
 // #define PLAY_SOUND_LEVEL_UP        PlayFx(CHANNEL_2, 30, 0x00, 0x82, 0x06, 0xC7); delay(150); PlayFx(CHANNEL_2, 30, 0x00, 0x82, 0x06, 0xC7); delay(80); PlayFx(CHANNEL_2, 30, 0x41, 0x94, 0x22, 0x87);
 // #define PLAY_SOUND_LEVEL_UP        PlayFx(CHANNEL_2, 30, 0x41, 0x92, 0x0B, 0xC7); delay(150); PlayFx(CHANNEL_2, 30, 0x41, 0x92, 0x0B, 0xC7); delay(150); PlayFx(CHANNEL_2, 30, 0x41, 0x92, 0x47, 0xC7); // 5B
