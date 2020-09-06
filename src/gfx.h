@@ -88,8 +88,9 @@ extern UINT8 pet_tiles_hicontrast_ram[];
 
 
 extern const UWORD board_pets_palette[];
-extern const UWORD board_pets_palette_high_contrast[];
-extern const UWORD board_pets_palette_med_contrast[];
+extern const UWORD board_pets_pal_high_contrast[];
+extern const UWORD board_pets_pal_high_contrast_2[];
+extern const UWORD board_pets_pal_med_contrast[];
 
 extern const UWORD clouds_sprite_palette[];
 extern const UWORD option_title_palette[];
@@ -99,7 +100,7 @@ extern const UWORD intro_screen_palette[];
 extern const const UWORD intro_cat_palette[];
 
 // void print_font_palette_set(UINT8);
-void pet_tiles_hicontrast_prepare();
+void pet_tiles_prepare();
 
 #endif // GFX_H
 

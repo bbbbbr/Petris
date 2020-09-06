@@ -76,15 +76,8 @@ UINT8 tail_anim_alternate = 0;
 
 void board_gfx_init(void) {
 
-    if (option_game_high_contrast == OPTION_HIGH_CONTRAST_OFF) {
-        p_pet_tiles = pet_tiles;
-        p_pet_palette = (UWORD *)board_pets_palette;
-    }
-    else { // Implied: OPTION_HIGH_CONTRAST_MED or OPTION_HIGH_CONTRAST_HI
-        pet_tiles_hicontrast_prepare();
-        p_pet_tiles = pet_tiles_hicontrast_ram;
-    }
-
+    pet_tiles_prepare();
+    board_gfx_init_pettiles();
 
     board_gfx_init_background();
     board_gfx_init_sprites();
@@ -95,20 +88,41 @@ void board_gfx_init(void) {
 }
 
 
+void board_gfx_init_pettiles(void) {
+
+    // == Background data ==
+
+    // Uses High Contrast tile set if option is enabled
+    if (game_state == GAME_READY_TO_START)
+        fade_set_pal(BG_PAL_0, 4, p_pet_palette,   FADE_PAL_BKG);
+    else
+        set_bkg_palette(BG_PAL_0, 4, p_pet_palette);
+
+   // Load special sprite data after pet data
+    set_bkg_data(TILES_PET_START,       TILE_COUNT_PETTOTAL,  p_pet_tiles);
+    set_bkg_data(TILES_SPECIAL_START,   TILE_COUNT_SPECIALTOTAL, special_tiles);
+
+    // == Sprite data ==
+
+   // Uses High Contrast tile set if option is enabled
+    if (game_state == GAME_READY_TO_START)
+        fade_set_pal(BG_PAL_0, 5, p_pet_palette, FADE_PAL_SPRITES); // Includes Specials palette as #5
+    else
+        set_sprite_palette(BG_PAL_0, 5, p_pet_palette); // Includes Specials palette as #5
+
+
+    // Load special sprite data after pet data
+    set_sprite_data(SPRITE_TILE_PET_START, TILE_COUNT_PETTOTAL, p_pet_tiles);
+    set_sprite_data(SPRITE_TILE_SPECIAL_START, TILE_COUNT_SPECIALTOTAL, special_tiles);
+}
+
+
 void board_gfx_init_sprites(void) {
 
     SPRITES_8x8;
 
-    // Uses High Contrast tile set if option is enabled
-    fade_set_pal(BG_PAL_0, 5, p_pet_palette, FADE_PAL_SPRITES); // Includes Specials palette as #5
-
     // Just load first of 4 pals from this -> for printing font to sprites
     fade_set_pal(BG_PAL_5, 1, intro_screen_palette, FADE_PAL_SPRITES);
-
-    set_sprite_data(SPRITE_TILE_PET_START, TILE_COUNT_PETTOTAL, p_pet_tiles);
-
-    // Load special sprite data after pet data
-    set_sprite_data(SPRITE_TILE_SPECIAL_START, TILE_COUNT_SPECIALTOTAL, special_tiles);
 
     // Load overlay font data after sprite data
     set_sprite_data(SPRITE_TILE_FONT_DIGITS_START, TILE_COUNT_FONT_NUMS,
@@ -121,19 +135,11 @@ void board_gfx_init_background(void) {
         //set_bkg_palette(BG_PAL_0, 4, board_pets_palette); // UBYTE first_palette, UBYTE nb_palettes, UWORD *rgb_data
         //set_bkg_palette(BG_PAL_4, 4, intro_screen_palette); // UBYTE first_palette, UBYTE nb_palettes, UWORD *rgb_data
 
-        // Uses High Contrast tile set if option is enabled
-        fade_set_pal(BG_PAL_0, 4, p_pet_palette,   FADE_PAL_BKG);
         fade_set_pal(BG_PAL_4, 4, intro_screen_palette, FADE_PAL_BKG);
 
         set_bkg_data(TILES_INTRO_START,     TILE_COUNT_INTRO,     intro_screen_tiles);
 
         set_bkg_data(TILES_FONT_START,      TILE_COUNT_FONT,      font_tiles);
-
-        set_bkg_data(TILES_PET_START,       TILE_COUNT_PETTOTAL,  p_pet_tiles);
-
-        // Load special sprite data after pet data
-        set_bkg_data(TILES_SPECIAL_START,   TILE_COUNT_SPECIALTOTAL, special_tiles);
-
 
         // Load BG tile attribute map
         VBK_REG = 1;
