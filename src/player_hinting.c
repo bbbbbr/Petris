@@ -356,12 +356,9 @@ void hinting_petlength_add(INT8 board_x, INT8 board_y, UINT8 length, UINT8 piece
 void hinting_petlength_showhide(void) {
 
     UINT8 c;
-    UINT8 sprite_idx;
+    UINT8 sprite_idx = SPR_LONG_PET_HINT_NUM_START;
 
     for (c = 0; c < SPR_LONG_PET_HINT_POOL_SIZE; c++) {
-
-        // There are 3 sprites for every pet length hint, calculate offset
-        sprite_idx = SPR_LONG_PET_HINT_NUM_START + (c * SPR_LONG_PET_HINT_NUM_TILES_PER);
 
         // Show the entry if it's populated
         // If it's not populated ** OR ** overlay is disabled,
@@ -394,6 +391,9 @@ void hinting_petlength_showhide(void) {
             set_sprite_tile(sprite_idx, GP_EMPTY);
             set_sprite_tile(sprite_idx + 1, GP_EMPTY);
         }
+
+        // Update sprite index offset
+        sprite_idx += SPR_LONG_PET_HINT_NUM_TILES_PER;
     }
 }
 
@@ -401,7 +401,7 @@ void hinting_petlength_showhide(void) {
 void hinting_petlength_remove(INT8 board_x, INT8 board_y) {
 
     UINT8 c;
-    UINT8 sprite_idx;
+    UINT8 sprite_idx = SPR_LONG_PET_HINT_NUM_START;
 
 // Only search within max number of added hints
     for (c = 0; c < SPR_LONG_PET_HINT_POOL_SIZE; c++) {
@@ -414,7 +414,6 @@ void hinting_petlength_remove(INT8 board_x, INT8 board_y) {
             hinting_petlength_x[c] = HINT_PET_LENGTH_SLOT_EMPTY;
 
             // Hide sprite
-            sprite_idx = SPR_LONG_PET_HINT_NUM_START + (c * SPR_LONG_PET_HINT_NUM_TILES_PER);
             // move_sprite(sprite_idx    , 0,0);
             // move_sprite(sprite_idx + 1, 0,0);
             set_sprite_tile(sprite_idx    , GP_EMPTY);
@@ -432,6 +431,8 @@ void hinting_petlength_remove(INT8 board_x, INT8 board_y) {
             // stop search
             return;
         }
+        // Update sprite index offset
+        sprite_idx += SPR_LONG_PET_HINT_NUM_TILES_PER;
     }
 }
 
@@ -444,6 +445,7 @@ void hinting_petlength_remove(INT8 board_x, INT8 board_y) {
 void hinting_petlength_scrollup(void) {
 
     UINT8 c;
+    UINT8 sprite_idx = SPR_LONG_PET_HINT_NUM_START;
 
     // Only search within max number of added hints
     for (c = 0; c < SPR_LONG_PET_HINT_POOL_SIZE; c++) {
@@ -453,7 +455,13 @@ void hinting_petlength_scrollup(void) {
             // negative Y values are unlikely and would just scroll
             // off-screen, which is fine
             hinting_petlength_y[c]--;
+
+            // Scroll cross sprite up by -1 tile
+            scroll_sprite(sprite_idx + 2 ,0, -BRD_UNIT_SIZE);
         }
+
+        // Update sprite index offset
+        sprite_idx += SPR_LONG_PET_HINT_NUM_TILES_PER;
     }
 }
 
@@ -462,14 +470,12 @@ void hinting_petlength_scrollup(void) {
 void hinting_petlength_refreshxy(void) {
 
     UINT8 c;
-    UINT8 sprite_idx;
+    UINT8 sprite_idx = SPR_LONG_PET_HINT_NUM_START;
 
     // Only search within max number of added hints
     for (c = 0; c < SPR_LONG_PET_HINT_POOL_SIZE; c++) {
 
         if (hinting_petlength_x[c] != HINT_PET_LENGTH_SLOT_EMPTY) {
-
-            sprite_idx = SPR_LONG_PET_HINT_NUM_START + (c * SPR_LONG_PET_HINT_NUM_TILES_PER);
 
             // Move the sprite into view at board position
             move_sprite(sprite_idx,
@@ -482,5 +488,8 @@ void hinting_petlength_refreshxy(void) {
                         (hinting_petlength_y[c] * BRD_UNIT_SIZE) + SPR_LONG_PET_HINT_OFFSET_Y);
 
         }
+
+        // Update sprite index offset
+        sprite_idx += SPR_LONG_PET_HINT_NUM_TILES_PER;
     }
 }
