@@ -146,14 +146,16 @@ void score_update(UINT16 num_tiles) {
     // (either triggered directly above OR elsewhere)
     if (level_increment_enqueue == TRUE) {
 
-        // If in 2 player versus mode and level completed
-        // AND pet length didn't already trigger a crunch-up (below VS_CRUNCH_DIV)
-        // THEN send 1 crunch-up to oppoinent
-        if ((link_status == LINK_STATUS_CONNECTED) &&
-            (num_tiles < VS_CRUNCH_THR)) {
+        // // If in 2 player versus mode and level completed
+        // // AND pet length didn't already trigger a crunch-up (below VS_CRUNCH_DIV)
+        // // THEN send 1 crunch-up to oppoinent
+        // if ((link_status == LINK_STATUS_CONNECTED) &&
+        //     (num_tiles < VS_CRUNCH_THR)) {
+
+        // Changed: Always send crunch-up on level-up, to make it more competitive
 
             LINK_SEND(LINK_CMD_CRUNCHUP | 0x01 );
-        }
+        //}
 
         level_increment();
 
