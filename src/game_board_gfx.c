@@ -88,6 +88,18 @@ void board_gfx_init(void) {
 }
 
 
+void board_gfx_change_pettiles(void) {
+
+    // Change to next option setting and handle wraparound
+    option_game_high_contrast++;
+    if (option_game_high_contrast == OPTION_HIGH_CONTRAST_END)
+        option_game_high_contrast = OPTION_HIGH_CONTRAST_MIN;
+
+    // Update pet tiles to match new setting
+    pet_tiles_prepare();
+    board_gfx_init_pettiles();
+}
+
 void board_gfx_init_pettiles(void) {
 
     // == Background data ==
