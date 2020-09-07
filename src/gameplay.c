@@ -103,10 +103,20 @@ void gameplay_handle_gameover_screen(void) {
 
     // Stop music, play end game sound and hide all the sprites
     MusicStop();
+
     // Optional: fancier end game sound
     // (may need to re-enable sound channels after playing it)
     // MusicPlay(falling_asleep_mod, falling_asleep_mod_Data, GBT_LOOP_NO);
-    PLAY_SOUND_GAME_OVER;
+
+    // Play end game ended sound effect
+    if ((link_status == LINK_STATUS_CONNECTED) &&
+        (GAMEOVER_MESSAGE_CHK(SPR_YOU_WON_CHARS))) {
+        PLAY_SOUND_LEVEL_UP;
+    } else {
+        PLAY_SOUND_GAME_OVER;
+    }
+
+    // Clean up sprites and some other gfx
     gameplay_ended_cleanup();
 
     // Display game over message

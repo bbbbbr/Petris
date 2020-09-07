@@ -11,6 +11,7 @@ extern const UINT8 SPR_YOU_WON_CHARS[];
 extern const UINT8 * p_gameover_chars;
 
 #define GAMEOVER_MESSAGE_SET(p_msg) (p_gameover_chars = &p_msg[0])
+#define GAMEOVER_MESSAGE_CHK(p_msg) (p_gameover_chars == &p_msg[0])
 void gameover_message_animate(void);
 void gameover_message_reset(void);
 
