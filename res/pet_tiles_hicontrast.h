@@ -52,26 +52,26 @@
 
 /* Gameboy Color palette 0 */
 #define pet_tiles_hicontrastCGBPal0c0 0
-#define pet_tiles_hicontrastCGBPal0c1 32767
-#define pet_tiles_hicontrastCGBPal0c2 32767
+#define pet_tiles_hicontrastCGBPal0c1 15855
+#define pet_tiles_hicontrastCGBPal0c2 15855
 #define pet_tiles_hicontrastCGBPal0c3 0
 
 /* Gameboy Color palette 1 */
 #define pet_tiles_hicontrastCGBPal1c0 0
-#define pet_tiles_hicontrastCGBPal1c1 32224
-#define pet_tiles_hicontrastCGBPal1c2 32224
+#define pet_tiles_hicontrastCGBPal1c1 63
+#define pet_tiles_hicontrastCGBPal1c2 31
 #define pet_tiles_hicontrastCGBPal1c3 0
 
 /* Gameboy Color palette 2 */
 #define pet_tiles_hicontrastCGBPal2c0 0
-#define pet_tiles_hicontrastCGBPal2c1 15391
-#define pet_tiles_hicontrastCGBPal2c2 15391
+#define pet_tiles_hicontrastCGBPal2c1 6143
+#define pet_tiles_hicontrastCGBPal2c2 6143
 #define pet_tiles_hicontrastCGBPal2c3 0
 
 /* Gameboy Color palette 3 */
 #define pet_tiles_hicontrastCGBPal3c0 0
-#define pet_tiles_hicontrastCGBPal3c1 928
-#define pet_tiles_hicontrastCGBPal3c2 992
+#define pet_tiles_hicontrastCGBPal3c1 32736
+#define pet_tiles_hicontrastCGBPal3c2 32736
 #define pet_tiles_hicontrastCGBPal3c3 0
 
 /* Gameboy Color palette 4 */
