@@ -134,7 +134,8 @@ enum {
 // Used to divide tiles in pet to determine number of
 // crunch-ups to send to opponent *IF* the pet has met the
 // spec_bomb_threshold_pettiles
-#define VS_CRUNCH_DIV  5
+//
+#define VS_CRUNCH_THR  4
 // OPTIONAL: different divisors for different difficulty levels
 // #define VS_CRUNCH_DIV_EASY    4
 // #define VS_CRUNCH_DIV_NORMAL  5

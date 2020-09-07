@@ -150,7 +150,7 @@ void score_update(UINT16 num_tiles) {
         // AND pet length didn't already trigger a crunch-up (below VS_CRUNCH_DIV)
         // THEN send 1 crunch-up to oppoinent
         if ((link_status == LINK_STATUS_CONNECTED) &&
-            (num_tiles < VS_CRUNCH_DIV)) {
+            (num_tiles < VS_CRUNCH_THR)) {
 
             LINK_SEND(LINK_CMD_CRUNCHUP | 0x01 );
         }

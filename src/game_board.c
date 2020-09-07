@@ -551,7 +551,7 @@ void board_handle_pet_completed(UINT8 flags) {
         if (flags & BRD_CHECK_FLAGS_IGNORE_PET_TYPE) {
             PLAY_SOUND_TILE_CLEAR_SPECIAL; // Special piece no points sound (bomb)
         }
-        else if (c >= BRD_TILE_COUNT_BONUS_SOUND_THRESHOLD) {
+        else if (c >= p_game_settings->spec_bomb_threshold_pettiles) {
             PLAY_SOUND_TILE_CLEAR_BONUS; // Bonus sound
         }
         else {
@@ -574,12 +574,12 @@ void board_handle_pet_completed(UINT8 flags) {
         // threshold is met or passed, send N crunch ups
         // based on pet-length
         if ((link_status == LINK_STATUS_CONNECTED) &&
-            (board_tile_clear_count >= BRD_TILE_COUNT_BONUS_SOUND_THRESHOLD)) {
+            (board_tile_clear_count >= VS_CRUNCH_THR)) {
 
                 // Number of crunch-ups sent is a function of length
                 // Cap max number to fit within serial data payload
                 // (unlikely to exceed in reality)
-                crunchups_to_send = (board_tile_clear_count / VS_CRUNCH_DIV);
+                crunchups_to_send = (board_tile_clear_count / VS_CRUNCH_THR);
                 if (crunchups_to_send > LINK_DATA_MASK)
                     crunchups_to_send = LINK_DATA_MASK;
                 LINK_SEND(LINK_CMD_CRUNCHUP | (crunchups_to_send & LINK_DATA_MASK));
