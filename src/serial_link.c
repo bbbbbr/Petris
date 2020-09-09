@@ -10,6 +10,12 @@
 // See: http://creativecommons.org/licenses/by-nc-sa/4.0/
 
 
+// ==========================================
+// Well, this ended up more way complicated than
+// it probably needs to be. And... it works. :)
+// ==========================================
+
+
 // Both player consoles start and mostly wait
 // in a ready-to-recieve state:
 //
