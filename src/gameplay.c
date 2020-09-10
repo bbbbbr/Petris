@@ -177,6 +177,10 @@ void gameplay_init(void) {
     // Should be called before gameplay_prepare_board() ... -> game_board_fill_random_tails()
     player_info_newgame_reset();
 
+    // Show preview of upcoming piece so player has time to check it out
+    gameplay_prepare_piece();
+    SHOW_SPRITES;
+
     // Flash a get ready message to the player
     if (option_game_type == OPTION_GAME_TYPE_PET_CLEANUP) {
 
@@ -202,6 +206,7 @@ void gameplay_init(void) {
 
     }
 
+
     gameplay_prepare_board();
 
     // Make sure magic code is turned off in 2-player mode to ensure fairness
@@ -209,7 +214,6 @@ void gameplay_init(void) {
         magic_code_reset();
     }
 
-    SHOW_SPRITES;
 
     // Init game state vars
     piece_state = PLAYER_START;
@@ -221,6 +225,30 @@ void gameplay_init(void) {
     game_shake_enqueued = GAME_CRUNCHUP_SHAKE_RESET;
 }
 
+
+// Called on new game and during transition to new level
+// (before gameplay_prepare_board, so piece preview is visible while loading board)
+// Should also be called before board Message Flashing
+void gameplay_prepare_piece(void) {
+
+    // Generate the very first piece for the board/level
+    // Note: On level-up this (intentionally) wipes out
+    //       any special piece which might have been queued
+    //       by the last pet completed for a level.
+    game_piece_next_reset();
+    game_piece_next_generate();
+
+    // Hide the player piece initially
+    // it will get displayed after PLAYER_NEWPIECE is handled
+    // which then calls player_piece_try_reload()
+    player_piece_update_xy(PLAYER_PIECE_HIDE);
+
+    // Preview sprite will be displayed before player piece
+    // does, so player can preview as board loads. Turn it on now.
+    // Note: ALL sprites are still hidden when this is called,
+    //       but will be turned on shortly after.
+    game_piece_next_show(TRUE);
+}
 
 
 // Called on new game and during transition to new level
@@ -255,17 +283,6 @@ void gameplay_prepare_board(void) {
         // Update length requirement for long pet mode
         game_type_long_pet_set_pet_size( (UINT8)player_level );
     }
-
-
-    // Generate the very first piece
-    game_piece_next_reset();
-    game_piece_next_generate();
-
-    // Hide the player piece and preview sprites initially
-    // They will get displayed after PLAYER_NEWPIECE is handled
-    // which then calls player_piece_try_reload()
-    player_piece_update_xy(PLAYER_PIECE_HIDE);
-    game_piece_next_show(FALSE);
 }
 
 

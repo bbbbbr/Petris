@@ -47,6 +47,7 @@ void gameplay_ended_cleanup(void);
 void gameplay_handle_gameover_screen(void);
 void random_init(void);
 void gameplay_init(void);
+void gameplay_prepare_piece(void);
 void gameplay_prepare_board(void);
 void gameplay_handle_get_ready(void);
 void gameplay_handle_pause(void);

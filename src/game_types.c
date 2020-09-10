@@ -89,15 +89,17 @@ void game_types_handle_level_transition(void) {
             fade2pal_start_next();
         }
 
+        // Show preview of upcoming piece so player has time to check it out
+        gameplay_prepare_piece();
+        SHOW_SPRITES;
+
         // Flash a get ready message to the player
         board_flash_message(MSG_LEVEL_UP_X, MSG_LEVEL_UP_Y,
                             MSG_LEVEL_UP_TEXT, MSG_LEVEL_UP_CTEXT,
                             MSG_LEVEL_UP_REPEAT);
 
-
         gameplay_prepare_board();
 
-        SHOW_SPRITES;
     }
 }
 
