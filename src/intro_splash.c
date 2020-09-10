@@ -75,11 +75,11 @@ void intro_splash(void) {
 
     // Load BG tile attribute map
     VBK_REG = 1;
-    set_bkg_tiles(6, 6, intro_cat_mapWidth, intro_cat_mapHeight, intro_cat_mapPLN1);
+    set_bkg_tiles(6, 5, intro_cat_mapWidth, intro_cat_mapHeight, intro_cat_mapPLN1);
 
     // Load BG tile map
     VBK_REG = 0;
-    set_bkg_tiles(6, 6, intro_cat_mapWidth, intro_cat_mapHeight, intro_cat_mapPLN0);
+    set_bkg_tiles(6, 5, intro_cat_mapWidth, intro_cat_mapHeight, intro_cat_mapPLN0);
 
     SHOW_BKG;
 

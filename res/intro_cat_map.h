@@ -7,7 +7,7 @@
  Info:
    Section       : 
    Bank          : 0
-   Map size      : 8 x 6
+   Map size      : 8 x 7
    Tile set      : intro_cat.gbm.tiles.gbr
    Plane count   : 2 planes (16 bits)
    Plane order   : Planes are continues
@@ -19,7 +19,7 @@
 */
 
 #define intro_cat_mapWidth 8
-#define intro_cat_mapHeight 6
+#define intro_cat_mapHeight 7
 #define intro_cat_mapBank 0
 
 #define intro_cat_map intro_cat_mapPLN0
