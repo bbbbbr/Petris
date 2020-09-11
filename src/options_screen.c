@@ -60,7 +60,7 @@ const UINT8 options_screen_tiles[] = {TILES_INTRO_START + 0,
                                       TILES_INTRO_START + 3};
 
 // TODO: fold this into the options menu array?
-enum {
+enum option_menu_entries {
     OPTION_MENU_MIN = 0,
 
     OPTION_MENU_TYPE = OPTION_MENU_MIN,
@@ -74,7 +74,7 @@ enum {
     OPTION_MENU_VISUAL_HINTS,
 
     OPTION_MENU_MAX = OPTION_MENU_VISUAL_HINTS
-} option_menu_entries;
+};
 
 
 // Trailing spaces are to clear out previous option value text

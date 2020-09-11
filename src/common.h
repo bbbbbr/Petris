@@ -8,7 +8,7 @@
 
 #define ARRAY_LEN(A)  sizeof(A) / sizeof(A[0])
 
-typedef enum {
+typedef enum GAME_STATES {
     GAME_INTRO_INIT = 0,
     GAME_INTRO,
     GAME_OPTIONS_INIT,
@@ -21,7 +21,7 @@ typedef enum {
     GAME_WON_LINK_VERSUS,
     GAME_OVER_SCREEN,
     GAME_OVER_WAITEXIT,
-} GAME_STATES;
+};
 
 extern UINT8 game_state;
 

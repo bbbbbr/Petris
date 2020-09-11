@@ -52,13 +52,13 @@
 
 
 // Game serial link status
-typedef enum {
+typedef enum LINK_STATUSES {
     LINK_STATUS_RESET = 0x00U,
     LINK_STATUS_FAILED,
     LINK_STATUS_DETECTING,
     LINK_STATUS_GAME_START,
     LINK_STATUS_CONNECTED
-} LINK_STATUSES;
+};
 
 
 #define WIN_Y_LINKPOPUP  (144 - (8*9)) // 9 tile/font rows tall

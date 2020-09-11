@@ -36,7 +36,7 @@
 // Game Type Level
 //
 // Note: Make sure all values fit bitwise in LINK_DATA_MASK
-enum {
+enum option_game_type_entries {
     OPTION_GAME_TYPE_LONG_PET,
     OPTION_GAME_TYPE_CRUNCH_UP,
     OPTION_GAME_TYPE_PET_CLEANUP,
@@ -46,11 +46,11 @@ enum {
     OPTION_GAME_TYPE_DEFAULT = OPTION_GAME_TYPE_LONG_PET
     // OPTION_GAME_TYPE_DEFAULT = OPTION_GAME_TYPE_CRUNCH_UP
     // OPTION_GAME_TYPE_DEFAULT = OPTION_GAME_TYPE_PET_CLEANUP
-} option_game_type_entries;
+};
 
 
 // Game Difficulty Level
-enum {
+enum option_difficulty_entries {
     OPTION_DIFFICULTY_EASY, // = OPTION_DIFFICULTY_MIN,
     OPTION_DIFFICULTY_NORMAL,
     OPTION_DIFFICULTY_HARD,
@@ -58,20 +58,20 @@ enum {
     OPTION_DIFFICULTY_BEAST,
 
     OPTION_DIFFICULTY_DEFAULT = OPTION_DIFFICULTY_NORMAL
-} option_difficulty_entries;
+};
 
 
 // Visual Hinting
-enum {
+enum option_visual_hints_entries {
     OPTION_VISUAL_HINTS_ON,// = OPTION_VISUAL_HINTS_MIN,
     OPTION_VISUAL_HINTS_OFF,
 
     OPTION_VISUAL_HINTS_DEFAULT = OPTION_VISUAL_HINTS_ON
-} option_visual_hints_entries;
+};
 
 
 // High Contrast mode for non-backlit and small sized displays
-enum {
+enum option_high_contrast_entries {
     OPTION_HIGH_CONTRAST_OFF, // = OPTION_HIGH_CONTRAST_MIN,
     OPTION_HIGH_CONTRAST_MED,
     OPTION_HIGH_CONTRAST_HI,
@@ -80,11 +80,11 @@ enum {
     OPTION_HIGH_CONTRAST_MIN = OPTION_HIGH_CONTRAST_OFF,
 
     OPTION_HIGH_CONTRAST_DEFAULT = OPTION_HIGH_CONTRAST_OFF
-} option_high_contrast_entries;
+};
 
 
 // Music Status
-enum {
+enum option_music_entries {
     OPTION_MUSIC_TWILIGHT,
     OPTION_MUSIC_CHILL,
     OPTION_MUSIC_UPBEAT,
@@ -92,16 +92,16 @@ enum {
 
     // OPTION_MUSIC_DEFAULT = OPTION_MUSIC_OFF
     OPTION_MUSIC_DEFAULT = OPTION_MUSIC_TWILIGHT
-} option_music_entries;
+};
 
 // Music Status
-enum {
+enum option_link2p_entries {
     OPTION_LINK2P_OFF,
     OPTION_LINK2P_ON,
 
 //  OPTION_LINK2P_DEFAULT = OPTION_LINK2P_ON
     OPTION_LINK2P_DEFAULT = OPTION_LINK2P_OFF
-} option_link2p_entries;
+};
 
 
 #define NEXT_PREV_OFF  0
