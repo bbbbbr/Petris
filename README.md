@@ -14,6 +14,8 @@ You can [download the game here](/rom/Petris.gbc) or visit the [itch.io page](ht
 
 Run it either in an emulator such as [BGB](http://bgb.bircd.org/) or on a real Game Boy if you have a flashable cartridge or _______TBD_______.
 
+
+![Petris cartridge sticker](/res/printable/cartridge_sticker_petris_x300.png)
 ![Petris game in Long Pet game type](/info/Petris_LongPet.png)
 ![Petris game in Tail Cleanup game type](/info/petris_tail_cleanup.gif)
 
