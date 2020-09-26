@@ -10,6 +10,8 @@
 
 #define FADE_IN_START 5
 #define FADE_OUT_START 0
+
+#define FADE_EXCLUDE_LSBITS 0b0111101111011110
                         //   x    R    G    B
 const UWORD FADE_LUT[6] = {0b0000000000000000,  // No white present to mix
                            0b0000010000100001,
@@ -82,15 +84,35 @@ void fade_start(INT8 fade_dir) {
                 #ifdef PAL_FADE_WHITE
                     // Fade in/out from White
                     fade_mask = FADE_LUT[i];
-                    *p_mod_bg = *p_bg | fade_mask;
-                    *p_mod_sp = *p_sp | fade_mask;
+
+                    if (fade_dir == FADE_OUT) {
+                        // If fading out, just use currently cached/loaded palette
+                        // This makes it compatible with fade2pal adjustments
+                        *p_mod_bg = *p_mod_bg | fade_mask;
+                        *p_mod_sp = *p_mod_sp | fade_mask;
+                    } else {
+                        *p_mod_bg = *p_bg | fade_mask;
+                        *p_mod_sp = *p_sp | fade_mask;
+                    }
 
                 #else
                   #ifdef PAL_FADE_BLACK
-                    // Fade in/out from Black
-                    fade_mask = FADE_LUT[5 - i];
-                    *p_mod_bg = ((*p_bg) >> i) & fade_mask;
-                    *p_mod_sp = ((*p_sp) >> i) & fade_mask;
+
+                    if (fade_dir == FADE_OUT) {
+                        // If fading out, just use currently cached/loaded palette
+                        // This makes it compatible with fade2pal adjustments
+
+                        // Mask lowest bits then downshift all channels by 1
+                        *p_mod_bg = (*p_mod_bg & FADE_EXCLUDE_LSBITS) >> 1;
+                        *p_mod_sp = (*p_mod_sp & FADE_EXCLUDE_LSBITS) >> 1;
+
+                    } else {
+                        // Fade in/out from Black
+                        fade_mask = FADE_LUT[5 - i];
+
+                        *p_mod_bg = ((*p_bg) >> i) & fade_mask;
+                        *p_mod_sp = ((*p_sp) >> i) & fade_mask;
+                    }
 
                     #else
                     // No Fade
@@ -120,11 +142,7 @@ void fade_start(INT8 fade_dir) {
         set_sprite_palette(0, 8, ModPalSprite);
 
         // Wait a little while before performing the next step
-        #ifdef CPU_FAST_ENABLED
-            delay(70);
-        #else
-            delay(40);
-        #endif
+        delay(40);
 
         i += fade_dir;
     }
