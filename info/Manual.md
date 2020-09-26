@@ -45,10 +45,21 @@ If you run the "Cartridge" build of Petris in an emulator then you may want to t
 
 
 #### Head-to-Head 2 Player
-   - Two players can compete over Game Boy Link Cable (on CGB and GBA) for all game types.
-   - Send crunch-ups to your opponent when you complete pets and on level-up. **One crunch-up is sent for every 4 tiles in a completed pet.**
-   - The last player standing wins the match.
-   - Recommended game type: Crunch-up
+- Two players can compete over Game Boy Link Cable (on CGB and GBA) in all game types.
+- Send crunch-ups to your opponent when you complete pets and on level-up.
+- **One crunch-up is sent for every 4 tiles in a completed pet.**
+- The last player standing wins the match.
+- Recommended game type: Crunch-up
+- **To start 2 Player**
+  1. Go to the options screen *(both players)*
+  1. Connect link cable *(both players)*
+  1. When the link is detected a "2P" icon will appear in the upper-left of the screens
+  1. Difficulty: Players may choose different difficulty settings
+  1. Music: It is recommended for only *one* player to have music turned on
+  1. One of the players should:
+     1. Set *"2 Player VS"* to *"ON"*
+     1. Choose a game type
+     1. Press "Start" to begin the match
 
 
 #### Difficulty Setting
@@ -91,7 +102,7 @@ There are difficulty levels for all players, from relaxing to full-tilt speed.
 - Beast: 10x
 
 
-#### Speed by Difficulty level
+#### Speed by Difficulty Level
 
     FpD:   Frames per Drop
     Inc:   Decrease FpD once every Inc Levels
