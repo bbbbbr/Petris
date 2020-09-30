@@ -10,4 +10,4 @@
 #   -dRenderIntent=3     \
 #   -dDeviceGrayToK=true \
 #    input-doc.pdf
-gs -dSAFER -dBATCH -dNOPAUSE -dNOCACHE -sDEVICE=pdfwrite -dAutoRotatePages=/None -sColorConversionStrategy=CMYK -dProcessColorModel=/DeviceCMYK -sOutputFile=document_cmyk.pdf document_rgb.pdf
+gs -dSAFER -dBATCH -dNOPAUSE -dNOCACHE -sDEVICE=pdfwrite -dAutoRotatePages=/None -sColorConversionStrategy=CMYK -dProcessColorModel=/DeviceCMYK -sOutputFile=cartridge_sticker_petris_print_cmyk.pdf cartridge_sticker_petris_print_rgb.pdf
