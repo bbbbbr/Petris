@@ -1,0 +1,238 @@
+# Makefile derived from Zal0/ZGB
+
+# Currently built with:
+# * SDCC : mcs51/z80/z180/r2k/r3ka/gbz80/tlcs90/ds390/TININative/ds400/hc08/s08/stm8 3.5.0 #9253 (Mar 24 2016) (Linux)
+#
+# * GBDK 2.96
+# See patched GBDK files in /gbdk_mods
+# and:
+# https://github.com/Zal0/gbdk-2020/commit/f24d34bb0037dc2f1aad5dfd747d7b8353386e21
+# https://github.com/Zal0/gbdk-2020/commit/69c510d4058d316c7b5733f6d39d3007d6f04113
+
+# # Only set GBDK_HOME if it has no env value
+# ifeq ($(GBDK_HOME),)
+# 	GBDK_HOME := $(ZGB_PATH_UNIX)/../env/gbdk
+# endif
+# PATH := $(ZGB_PATH_UNIX)/../env/make-3.81-bin/bin;$(ZGB_PATH_UNIX)/../env/SDCC/bin;$(ZGB_PATH_UNIX)/../env/msys/bin;$(PATH)
+
+#--- Default build will be release. Can be overidden passing BUILD_TYPE = debug as a parameter
+# ex: Release, Debug, ReleaseColor, DebugColor
+
+BUILD_TYPE = ReleaseColor
+# BUILD_TYPE = DebugColor
+CGB = yes
+# To get cart type, see source for gbxcart_rw_flasher_v1.34.c
+CARTTYPE = 103
+
+ifneq (,$(findstring Release,$(BUILD_TYPE)))
+	BUILD_DEFS += -DNDEBUG
+else
+	PROJECT_NAME := $(PROJECT_NAME)_Debug
+	# --debug generates additional SDCC debug symbols
+	CDEBUG = --debug
+endif
+
+# PATH_PREFIX = ../
+PATH_PREFIX =
+
+OBJDIR = $(PATH_PREFIX)$(BUILD_TYPE)
+OBJDIR_RES = $(PATH_PREFIX)$(BUILD_TYPE)/res
+BINDIR = $(PATH_PREFIX)bin
+
+SRC2SYM = ./src2sym.pl
+
+LCC = $(GBDK_HOME)/bin/lcc
+SDCC = sdcc
+SDASGB = sdasgb
+ifeq ($(MOD2GBT),)
+	MOD2GBT = $(ZGB_PATH_UNIX)/../env/mod2gbt
+endif
+ifeq ($(BGB),)
+	BGB = $(ZGB_PATH_UNIX)/../env/bgb/bgb
+endif
+
+# http://gbdk.sourceforge.net/doc/html/c0303.html
+#
+# When linking all the object files together the number
+# of banks used should be specified with the flags:
+#   -Wl-yox
+#   -Wl-yax
+# and the MCB type with the flag:
+#   -Wl-ytx
+# The current supported values for x in -Wl-ytx are:
+#
+# 0 : ROM ONLY <-- No banking, so _CODE is a full 32K (instead of 16K), AND DON'T use _CODE_1
+# 1 : ROM+MBC1
+# 2 : ROM+MBC1+RAM
+# 3 : ROM+MBC1+RAM+BATTERY
+# 5 : ROM+MBC2
+# 6 : ROM+MBC2+BATTERY
+ifneq ($(strip $(N_BANKS)),)
+	# -Wl-yt1 -> MBC1
+	# LFLAGS_NBANKS = -Wl-yt1 -Wl-yo$(N_BANKS)
+	# lcc defaults to no MBC ("0") in absence of -Wl-yt[MBC#]
+	LFLAGS_NBANKS = -Wl-yt0 -Wl-yo$(N_BANKS)
+endif
+
+# These are SDCC flags (LCC is not used)
+CFLAGS = $(CDEBUG) -mgbz80 --no-std-crt0  --use-stdout -Dnonbanked=  -I $(GBDK_HOME)/include -I $(GBDK_HOME)/include/asm $(BUILD_DEFS) -I$(PATH_PREFIX)include
+# --print-search-dirs --verbose
+# --fsigned-char : doesn't seem to be supported currently
+
+EXTENSION = gb
+ifneq (,$(findstring Color,$(BUILD_TYPE)))
+	# Enable CGB mode
+	# 0x80 for games which support both CGB and monochrome
+    # 0xC0 for games which work on CGBs only
+	LFLAGS_NBANKS += -Wl-yp0x143=0xC0
+	CFLAGS += -DCGB
+	EXTENSION = gbc
+endif
+
+# Only turn on intro temporal faded clouds if this isn't a web build
+# make BUILDWEB=ON run
+# or
+# make SKIPINTRO=ON run
+ifndef BUILDWEB
+	CFLAGS += -DTRANSLUCENT_CLOUDS_ON
+endif
+ifdef SKIPINTRO
+    CFLAGS += -DDEBUG_SKIP_INTRO
+endif
+
+
+LFLAGS = $(LFLAGS_NBANKS)
+
+# enable linker map file output
+LFLAGS += -Wl-m
+# enable listing output
+# LFLAGS += -Wa-l
+
+ifdef CDEBUG
+# enable linker no$gmb symbol output on debug builds
+LFLAGS += -Wl-j
+endif
+
+
+current_dir = $(shell pwd)
+
+ASMS        = $(foreach dir,$(PATH_PREFIX)src,$(notdir $(wildcard $(dir)/*.s)))
+CLASSES     = $(foreach dir,$(PATH_PREFIX)src,$(notdir $(wildcard $(dir)/*.c)))
+RESOURCES   = $(foreach dir,$(PATH_PREFIX)res,$(notdir $(wildcard $(dir)/*.c)))
+MUSICS      = $(foreach dir,$(PATH_PREFIX)res/music,$(notdir $(wildcard $(dir)/*.mod)))
+OBJS = $(RESOURCES:%.c=$(OBJDIR_RES)/%.o) $(MUSICS:%.mod=$(OBJDIR_RES)/%.mod.o) $(ASMS:%.s=$(OBJDIR)/%.o) $(CLASSES:%.c=$(OBJDIR)/%.o)
+
+#dependencies -------------------------------------------------------------------------------------------
+ifneq ($(MAKECMDGOALS),clean)
+-include $(CLASSES:%.c=$(OBJDIR)/%.d)
+endif
+
+$(OBJDIR)/%.d: %.c
+	@set -e; mkdir -p $(OBJDIR);rm -f $@; \
+	$(SDCC) -MM $(CFLAGS) $< > $@.$$$$; \
+ 	sed 's,\($*\)\.rel[ :]*,$(OBJDIR)/$*.o $@ : ,g' < $@.$$$$ > $@; \
+	rm -f $@.$$$$
+#---------------------------------------------------------------------------------------------------------
+
+$(BINDIR):
+	@echo Creating folder: $(BINDIR)
+	@mkdir $(BINDIR)
+
+$(OBJDIR):
+	@echo Creating folder: $(OBJDIR)
+	@mkdir $(OBJDIR)
+
+$(OBJDIR_RES):
+	@echo Creating folder: $(OBJDIR_RES)
+	@mkdir $(OBJDIR_RES)
+
+$(OBJDIR)/%.o: $(PATH_PREFIX)src/%.s
+	@echo compiling $<
+	@$(SDASGB) -plosgff -I"libc" $(filter --constseg CODE_%, $(subst .b,--constseg CODE_,$(suffix $(<:%.s=%)))) -c -o $@ $<
+
+$(OBJDIR)/%.o: $(PATH_PREFIX)src/%.c
+	@echo compiling $<
+	@$(SDCC) $(CFLAGS) $(filter --constseg CODE_%, $(subst .b,--constseg CODE_,$(suffix $(<:%.c=%)))) -c -o $@ $<
+
+
+$(OBJDIR_RES)/%.o: $(PATH_PREFIX)res/%.c
+	@echo compiling resource: $<
+	@if grep -q "unsigned char" $<; then \
+		sed -i "s/unsigned char/const unsigned  char/g" $<; \
+	fi
+	@$(SDCC) $(CFLAGS) $(filter --constseg CODE_%, $(subst .b,--constseg CODE_,$(suffix $(<:%.c=%)))) -c -o $@ $<
+
+$(OBJDIR_RES)/%.mod.o: $(PATH_PREFIX)res/music/%.mod
+	@echo compiling music: $<
+# [song] [label] [bank]
+# non-single array version: (not compatible with compression implementation)
+
+# $(MOD2GBT) $< $(basename $(basename $(notdir $<)))_mod $(subst .b,,$(suffix $(<:%.mod=%))) > /dev/null
+# produces: output.c and associated output.bin
+	$(MOD2GBT_SINGLEARRAY) $< $(basename $(basename $(notdir $<)))_mod $(subst .b,,$(suffix $(<:%.mod=%))) > /dev/null
+
+# compress unified song array (requires modified mod2gbt to produce a single array)
+	$(APULTRA) output.bin output_comp.bin
+	$(BIN2C) output_comp.bin output_comp.c $(basename $(basename $(notdir $<)))_mod
+
+# merge compressed array back to main c file
+	cat output_comp.c >> output.c
+
+# cleanup intermediary files
+	rm output.bin output_comp.bin output_comp.c
+	@mv output.c $(OBJDIR)/music_tmp.c
+	@$(SDCC) $(CFLAGS) -c -o $@ $(OBJDIR)/music_tmp.c
+
+$(BINDIR)/$(PROJECT_NAME).$(EXTENSION): $(OBJDIR) $(OBJDIR_RES) $(BINDIR) $(OBJS) $(COMMON_OBJS)
+	@echo Linking
+	$(LCC) $(LFLAGS) -v -o $(OBJDIR)/$(PROJECT_NAME).$(EXTENSION) $(OBJS) $(COMMON_OBJS)
+	cp $(OBJDIR)/$(PROJECT_NAME).$(EXTENSION) $(BINDIR)/$(PROJECT_NAME).$(EXTENSION)
+
+# if this is a debug build, reprocess the mainsymbol output to include C source
+ifdef CDEBUG
+	@echo Reprocessing Symbols to include C Source
+	mv $(OBJDIR)/$(PROJECT_NAME).sym $(OBJDIR)/$(PROJECT_NAME)_raw.sym
+	$(SRC2SYM) $(OBJDIR)/$(PROJECT_NAME)_raw.sym > $(OBJDIR)/$(PROJECT_NAME).sym
+endif
+
+# Debug builds run from the object dir
+ifdef CDEBUG
+RUNTARGET = $(OBJDIR)/$(PROJECT_NAME).$(EXTENSION)
+else
+RUNTARGET = $(BINDIR)/$(PROJECT_NAME).$(EXTENSION)
+endif
+
+
+build_lib: $(OBJDIR) $(OBJS)
+
+build_gb: $(BINDIR)/$(PROJECT_NAME).$(EXTENSION)
+
+clean:
+	@echo Cleaning $(PROJECT_NAME)
+	@rm  -f $(BINDIR)/*.*
+	@rm  -f $(OBJDIR)/*.*
+	@rm  -f $(OBJDIR)/res/*.*
+	@rm -rf .map
+	@rm -rf .lst
+
+run: all
+	$(info $$BGB is [${BGB}])
+	@if test -f $(RUNTARGET); then \
+		echo Running $(RUNTARGET); \
+		$(BGB) $(RUNTARGET); \
+	fi
+
+runlink: all
+	$(info $$BGB is [${BGB}])
+	@if test -f $(RUNTARGET); then \
+		echo Running $(RUNTARGET); \
+		($(BGB) $(RUNTARGET) --listen 127.0.0.1:8765 &); \
+		($(BGB) $(RUNTARGET) --connect 127.0.0.1:8765 &); \
+	fi
+
+flashcart: all
+	$(info $$GBXFLASHER is [${GBXFLASHER}])
+	@if test -f $(RUNTARGET); then \
+		echo Flashing $(RUNTARGET); \
+		$(GBXFLASHER) $(RUNTARGET) $(CARTTYPE); \
+	fi
