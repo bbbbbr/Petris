@@ -65,7 +65,7 @@ extern UINT16 player_numpieces;
 extern UINT8 level_increment_enqueue;
 
 
-void score_update(UINT16 num_tiles);
+void score_and_level_update(UINT16 num_tiles);
 void score_reset(void);
 
 void level_check_update(void);

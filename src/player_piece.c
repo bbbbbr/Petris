@@ -130,7 +130,7 @@ void player_piece_set_on_board(void) {
 
     player_connect = player_piece_connect_get(player_piece, player_rotate);
 
-    // Hide sprite based piece before setting setting on the board
+    // Hide sprite based piece before setting on the board
     // (except for *specials*, which don't get placed).
     // This happens here so it doesn't obscure board animations
     // under the sprite based piece
@@ -142,6 +142,11 @@ void player_piece_set_on_board(void) {
                           player_piece,
                           player_attrib,
                           player_connect);
+    }
+
+    // Make sure special piece hinting is turned off once landed
+    if (option_game_visual_hints == OPTION_VISUAL_HINTS_ON) {
+        player_hinting_special_show(FALSE);
     }
 
     board_handle_new_piece(player_x, player_y,

@@ -84,7 +84,7 @@ void player_info_display(void) {
 
 
 
-void score_update(UINT16 num_tiles) {
+void score_and_level_update(UINT16 num_tiles) {
 
     // Check to see whether a special piece (bomb) should be delivered
     if (num_tiles >= p_game_settings->spec_bomb_threshold_pettiles)

@@ -567,7 +567,7 @@ void board_handle_pet_completed(UINT8 flags) {
 
     //  Player gets no credit when special piece is used
     if (flags & BRD_CHECK_FLAGS_DONT_ADD_POINTS) {
-        score_update(BRD_PIECE_CLEAR_COUNT_NONE);
+        score_and_level_update(BRD_PIECE_CLEAR_COUNT_NONE);
     } else {
 
         // If in 2 player versus mode and the bonus length
@@ -591,7 +591,7 @@ void board_handle_pet_completed(UINT8 flags) {
             game_type_long_pet_check_size(board_tile_clear_count);
         }
 
-        score_update((UINT16)board_tile_clear_count);
+        score_and_level_update((UINT16)board_tile_clear_count);
     }
 
     // Reset global pet size var

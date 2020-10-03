@@ -90,7 +90,10 @@ void game_types_handle_level_transition(void) {
         }
 
         // Show preview of upcoming piece so player has time to check it out
+        // Wait one frame (vbl) after the update so there is time for the player
+        // piece sprite location to be updated before re-showing the sprites.
         gameplay_prepare_piece();
+        wait_vbl_done();
         SHOW_SPRITES;
 
         // Flash a get ready message to the player
