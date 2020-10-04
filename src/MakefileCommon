@@ -41,9 +41,8 @@ BINDIR = $(PATH_PREFIX)bin
 
 SRC2SYM = ./src2sym.pl
 
-LCC = $(GBDK_HOME)/bin/lcc
-SDCC = sdcc
-SDASGB = sdasgb
+LCC = $(GBDK_HOME)/bin/lcc -Wa-l -Wl-m -Wl-j
+MAKEBIN = $(GBDK_HOME)/bin/makebin
 ifeq ($(MOD2GBT),)
 	MOD2GBT = $(ZGB_PATH_UNIX)/../env/mod2gbt
 endif
@@ -71,11 +70,12 @@ ifneq ($(strip $(N_BANKS)),)
 	# -Wl-yt1 -> MBC1
 	# LFLAGS_NBANKS = -Wl-yt1 -Wl-yo$(N_BANKS)
 	# lcc defaults to no MBC ("0") in absence of -Wl-yt[MBC#]
-	LFLAGS_NBANKS = -Wl-yt0 -Wl-yo$(N_BANKS)
+#	LFLAGS_NBANKS = -Wl-yt0 -Wl-yo$(N_BANKS)
+#>>>	BINFLAGS = -yt 1 -yo $(N_BANKS)
 endif
 
 # These are SDCC flags (LCC is not used)
-CFLAGS = $(CDEBUG) -mgbz80 --no-std-crt0  --use-stdout -Dnonbanked=  -I $(GBDK_HOME)/include -I $(GBDK_HOME)/include/asm $(BUILD_DEFS) -I$(PATH_PREFIX)include
+# CFLAGS = $(CDEBUG) -mgbz80 --no-std-crt0  --use-stdout -Dnonbanked=  -I $(GBDK_HOME)/include -I $(GBDK_HOME)/include/asm $(BUILD_DEFS) -I$(PATH_PREFIX)include
 # --print-search-dirs --verbose
 # --fsigned-char : doesn't seem to be supported currently
 
@@ -84,7 +84,10 @@ ifneq (,$(findstring Color,$(BUILD_TYPE)))
 	# Enable CGB mode
 	# 0x80 for games which support both CGB and monochrome
     # 0xC0 for games which work on CGBs only
-	LFLAGS_NBANKS += -Wl-yp0x143=0xC0
+	# LFLAGS_NBANKS += -Wl-yp0x143=0xC0
+	# LFLAGS_NBANKS += -Wl-yC
+	LFLAGS_NBANKS += -Wl-yc
+	# BINFLAGS += -yc
 	CFLAGS += -DCGB
 	EXTENSION = gbc
 endif
@@ -104,7 +107,7 @@ endif
 LFLAGS = $(LFLAGS_NBANKS)
 
 # enable linker map file output
-LFLAGS += -Wl-m
+#LFLAGS += -Wl-m
 # enable listing output
 # LFLAGS += -Wa-l
 
@@ -129,8 +132,9 @@ endif
 
 $(OBJDIR)/%.d: %.c
 	@set -e; mkdir -p $(OBJDIR);rm -f $@; \
-	$(SDCC) -MM $(CFLAGS) $< > $@.$$$$; \
- 	sed 's,\($*\)\.rel[ :]*,$(OBJDIR)/$*.o $@ : ,g' < $@.$$$$ > $@; \
+	# $(SDCC) -MM $(CFLAGS) $< > $@.$$$$; \
+	$(LCC) $(CFLAGS) -c -o $@ $<
+	sed 's,\($*\)\.rel[ :]*,$(OBJDIR)/$*.o $@ : ,g' < $@.$$$$ > $@; \
 	rm -f $@.$$$$
 #---------------------------------------------------------------------------------------------------------
 
@@ -148,11 +152,13 @@ $(OBJDIR_RES):
 
 $(OBJDIR)/%.o: $(PATH_PREFIX)src/%.s
 	@echo compiling $<
-	@$(SDASGB) -plosgff -I"libc" $(filter --constseg CODE_%, $(subst .b,--constseg CODE_,$(suffix $(<:%.s=%)))) -c -o $@ $<
+# @$(SDASGB) -plosgff -I"libc" $(filter --constseg CODE_%, $(subst .b,--constseg CODE_,$(suffix $(<:%.s=%)))) -c -o $@ $<
+	$(LCC) -c -o $@ $<
 
 $(OBJDIR)/%.o: $(PATH_PREFIX)src/%.c
 	@echo compiling $<
-	@$(SDCC) $(CFLAGS) $(filter --constseg CODE_%, $(subst .b,--constseg CODE_,$(suffix $(<:%.c=%)))) -c -o $@ $<
+# @$(SDCC) $(CFLAGS) $(filter --constseg CODE_%, $(subst .b,--constseg CODE_,$(suffix $(<:%.c=%)))) -c -o $@ $<
+	$(LCC) $(CFLAGS) -c -o $@ $<
 
 
 $(OBJDIR_RES)/%.o: $(PATH_PREFIX)res/%.c
@@ -160,32 +166,35 @@ $(OBJDIR_RES)/%.o: $(PATH_PREFIX)res/%.c
 	@if grep -q "unsigned char" $<; then \
 		sed -i "s/unsigned char/const unsigned  char/g" $<; \
 	fi
-	@$(SDCC) $(CFLAGS) $(filter --constseg CODE_%, $(subst .b,--constseg CODE_,$(suffix $(<:%.c=%)))) -c -o $@ $<
+# @$(SDCC) $(CFLAGS) $(filter --constseg CODE_%, $(subst .b,--constseg CODE_,$(suffix $(<:%.c=%)))) -c -o $@ $<
+	$(LCC) $(CFLAGS) -c -o $@ $<
 
 $(OBJDIR_RES)/%.mod.o: $(PATH_PREFIX)res/music/%.mod
 	@echo compiling music: $<
-# [song] [label] [bank]
-# non-single array version: (not compatible with compression implementation)
-
-# $(MOD2GBT) $< $(basename $(basename $(notdir $<)))_mod $(subst .b,,$(suffix $(<:%.mod=%))) > /dev/null
-# produces: output.c and associated output.bin
+	# [song] [label] [bank]
+	# non-single array version: (not compatible with compression implementation)
+	# $(MOD2GBT) $< $(basename $(basename $(notdir $<)))_mod $(subst .b,,$(suffix $(<:%.mod=%))) > /dev/null
+	# produces: output.c and associated output.bin
 	$(MOD2GBT_SINGLEARRAY) $< $(basename $(basename $(notdir $<)))_mod $(subst .b,,$(suffix $(<:%.mod=%))) > /dev/null
-
-# compress unified song array (requires modified mod2gbt to produce a single array)
+	# compress unified song array (requires modified mod2gbt to produce a single array)
 	$(APULTRA) output.bin output_comp.bin
 	$(BIN2C) output_comp.bin output_comp.c $(basename $(basename $(notdir $<)))_mod
-
-# merge compressed array back to main c file
+	# merge compressed array back to main c file
 	cat output_comp.c >> output.c
-
-# cleanup intermediary files
+	# cleanup intermediary files
 	rm output.bin output_comp.bin output_comp.c
 	@mv output.c $(OBJDIR)/music_tmp.c
-	@$(SDCC) $(CFLAGS) -c -o $@ $(OBJDIR)/music_tmp.c
+	# @$(SDCC) $(CFLAGS) -c -o $@ $(OBJDIR)/music_tmp.c
+	$(LCC) $(CFLAGS) -c -o $@ $(OBJDIR)/music_tmp.c
 
 $(BINDIR)/$(PROJECT_NAME).$(EXTENSION): $(OBJDIR) $(OBJDIR_RES) $(BINDIR) $(OBJS) $(COMMON_OBJS)
 	@echo Linking
-	$(LCC) $(LFLAGS) -v -o $(OBJDIR)/$(PROJECT_NAME).$(EXTENSION) $(OBJS) $(COMMON_OBJS)
+# $(LCC) $(LFLAGS) -v -o $(OBJDIR)/$(PROJECT_NAME).$(EXTENSION) $(OBJS) $(COMMON_OBJS)
+#	$(LCC) -v -o $@ $<
+# -Wl-yC
+	$(LCC) -v -o $(OBJDIR)/$(PROJECT_NAME).$(EXTENSION) $(OBJS) $(COMMON_OBJS)
+# THIS IS A HACK TO FIX handling of -yC above (-Wl-yC)
+	$(MAKEBIN) -Z -yC $(OBJDIR)/$(PROJECT_NAME).ihx $(OBJDIR)/$(PROJECT_NAME).$(EXTENSION)
 	cp $(OBJDIR)/$(PROJECT_NAME).$(EXTENSION) $(BINDIR)/$(PROJECT_NAME).$(EXTENSION)
 
 # if this is a debug build, reprocess the mainsymbol output to include C source
