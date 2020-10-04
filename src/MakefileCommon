@@ -86,7 +86,7 @@ ifneq (,$(findstring Color,$(BUILD_TYPE)))
     # 0xC0 for games which work on CGBs only
 	# LFLAGS_NBANKS += -Wl-yp0x143=0xC0
 	# LFLAGS_NBANKS += -Wl-yC
-	LFLAGS_NBANKS += -Wl-yc
+	MAKEBINFLAGS += -Wm-yc
 	# BINFLAGS += -yc
 	CFLAGS += -DCGB
 	EXTENSION = gbc
@@ -191,10 +191,7 @@ $(BINDIR)/$(PROJECT_NAME).$(EXTENSION): $(OBJDIR) $(OBJDIR_RES) $(BINDIR) $(OBJS
 	@echo Linking
 # $(LCC) $(LFLAGS) -v -o $(OBJDIR)/$(PROJECT_NAME).$(EXTENSION) $(OBJS) $(COMMON_OBJS)
 #	$(LCC) -v -o $@ $<
-# -Wl-yC
-	$(LCC) -v -o $(OBJDIR)/$(PROJECT_NAME).$(EXTENSION) $(OBJS) $(COMMON_OBJS)
-# THIS IS A HACK TO FIX handling of -yC above (-Wl-yC)
-	$(MAKEBIN) -Z -yC $(OBJDIR)/$(PROJECT_NAME).ihx $(OBJDIR)/$(PROJECT_NAME).$(EXTENSION)
+	$(LCC) $(MAKEBINFLAGS) -v -o $(OBJDIR)/$(PROJECT_NAME).$(EXTENSION) $(OBJS) $(COMMON_OBJS)
 	cp $(OBJDIR)/$(PROJECT_NAME).$(EXTENSION) $(BINDIR)/$(PROJECT_NAME).$(EXTENSION)
 
 # if this is a debug build, reprocess the mainsymbol output to include C source
