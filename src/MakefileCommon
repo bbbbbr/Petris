@@ -13,8 +13,8 @@
 #--- Default build will be release. Can be overidden passing BUILD_TYPE = debug as a parameter
 # ex: Release, Debug, ReleaseColor, DebugColor
 
-# BUILD_TYPE = ReleaseColor
-BUILD_TYPE = DebugColor
+BUILD_TYPE = ReleaseColor
+# BUILD_TYPE = DebugColor
 CGB = yes
 
 # For: make flashcart target
@@ -184,8 +184,7 @@ $(BINDIR)/$(PROJECT_NAME).$(EXTENSION): $(OBJDIR) $(OBJDIR_RES) $(BINDIR) $(OBJS
 # if this is a debug build, reprocess the mainsymbol output to include C source
 ifdef CDEBUG
 	@echo Reprocessing Symbols to include C Source
-	mv $(OBJDIR)/$(PROJECT_NAME).cdb $(OBJDIR)/$(PROJECT_NAME)_raw.cdb
-	$(SRC2SYM) $(OBJDIR)/$(PROJECT_NAME)_raw.cdb > $(OBJDIR)/$(PROJECT_NAME).cdb
+	$(SRC2SYM) $(OBJDIR)/$(PROJECT_NAME).noi > $(OBJDIR)/$(PROJECT_NAME).sym
 endif
 
 
