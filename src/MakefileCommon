@@ -9,11 +9,6 @@
 # https://github.com/Zal0/gbdk-2020/commit/f24d34bb0037dc2f1aad5dfd747d7b8353386e21
 # https://github.com/Zal0/gbdk-2020/commit/69c510d4058d316c7b5733f6d39d3007d6f04113
 
-# # Only set GBDK_HOME if it has no env value
-# ifeq ($(GBDK_HOME),)
-# 	GBDK_HOME := $(ZGB_PATH_UNIX)/../env/gbdk
-# endif
-# PATH := $(ZGB_PATH_UNIX)/../env/make-3.81-bin/bin;$(ZGB_PATH_UNIX)/../env/SDCC/bin;$(ZGB_PATH_UNIX)/../env/msys/bin;$(PATH)
 
 #--- Default build will be release. Can be overidden passing BUILD_TYPE = debug as a parameter
 # ex: Release, Debug, ReleaseColor, DebugColor
@@ -21,6 +16,8 @@
 BUILD_TYPE = ReleaseColor
 # BUILD_TYPE = DebugColor
 CGB = yes
+
+# For: make flashcart target
 # To get cart type, see source for gbxcart_rw_flasher_v1.34.c
 CARTTYPE = 103
 
@@ -28,7 +25,7 @@ ifneq (,$(findstring Release,$(BUILD_TYPE)))
 	BUILD_DEFS += -DNDEBUG
 else
 	PROJECT_NAME := $(PROJECT_NAME)_Debug
-	# --debug generates additional SDCC debug symbols
+# --debug generates additional SDCC debug symbols
 	CDEBUG = --debug
 endif
 
@@ -50,6 +47,7 @@ ifeq ($(BGB),)
 	BGB = $(ZGB_PATH_UNIX)/../env/bgb/bgb
 endif
 
+
 # http://gbdk.sourceforge.net/doc/html/c0303.html
 #
 # When linking all the object files together the number
@@ -67,27 +65,18 @@ endif
 # 5 : ROM+MBC2
 # 6 : ROM+MBC2+BATTERY
 ifneq ($(strip $(N_BANKS)),)
-	# -Wl-yt1 -> MBC1
-	# LFLAGS_NBANKS = -Wl-yt1 -Wl-yo$(N_BANKS)
-	# lcc defaults to no MBC ("0") in absence of -Wl-yt[MBC#]
+# -Wl-yt1 -> MBC1
+# LFLAGS_NBANKS = -Wl-yt1 -Wl-yo$(N_BANKS)
+# lcc defaults to no MBC ("0") in absence of -Wl-yt[MBC#]
 #	LFLAGS_NBANKS = -Wl-yt0 -Wl-yo$(N_BANKS)
-#>>>	BINFLAGS = -yt 1 -yo $(N_BANKS)
 endif
-
-# These are SDCC flags (LCC is not used)
-# CFLAGS = $(CDEBUG) -mgbz80 --no-std-crt0  --use-stdout -Dnonbanked=  -I $(GBDK_HOME)/include -I $(GBDK_HOME)/include/asm $(BUILD_DEFS) -I$(PATH_PREFIX)include
-# --print-search-dirs --verbose
-# --fsigned-char : doesn't seem to be supported currently
 
 EXTENSION = gb
 ifneq (,$(findstring Color,$(BUILD_TYPE)))
-	# Enable CGB mode
-	# 0x80 for games which support both CGB and monochrome
-    # 0xC0 for games which work on CGBs only
-	# LFLAGS_NBANKS += -Wl-yp0x143=0xC0
-	# LFLAGS_NBANKS += -Wl-yC
-	MAKEBINFLAGS += -Wm-yc
-	# BINFLAGS += -yc
+# Enable CGB mode
+# -yC for games which work on CGBs only
+# -yc for games that work with DMG/CGB
+	MAKEBINFLAGS += -Wm-yC
 	CFLAGS += -DCGB
 	EXTENSION = gbc
 endif
@@ -106,8 +95,9 @@ endif
 
 LFLAGS = $(LFLAGS_NBANKS)
 
+# TODO: Update these for GBDK2020
 # enable linker map file output
-#LFLAGS += -Wl-m
+# LFLAGS += -Wl-m
 # enable listing output
 # LFLAGS += -Wa-l
 
@@ -152,12 +142,10 @@ $(OBJDIR_RES):
 
 $(OBJDIR)/%.o: $(PATH_PREFIX)src/%.s
 	@echo compiling $<
-# @$(SDASGB) -plosgff -I"libc" $(filter --constseg CODE_%, $(subst .b,--constseg CODE_,$(suffix $(<:%.s=%)))) -c -o $@ $<
 	$(LCC) -c -o $@ $<
 
 $(OBJDIR)/%.o: $(PATH_PREFIX)src/%.c
 	@echo compiling $<
-# @$(SDCC) $(CFLAGS) $(filter --constseg CODE_%, $(subst .b,--constseg CODE_,$(suffix $(<:%.c=%)))) -c -o $@ $<
 	$(LCC) $(CFLAGS) -c -o $@ $<
 
 
@@ -166,33 +154,31 @@ $(OBJDIR_RES)/%.o: $(PATH_PREFIX)res/%.c
 	@if grep -q "unsigned char" $<; then \
 		sed -i "s/unsigned char/const unsigned  char/g" $<; \
 	fi
-# @$(SDCC) $(CFLAGS) $(filter --constseg CODE_%, $(subst .b,--constseg CODE_,$(suffix $(<:%.c=%)))) -c -o $@ $<
 	$(LCC) $(CFLAGS) -c -o $@ $<
 
 $(OBJDIR_RES)/%.mod.o: $(PATH_PREFIX)res/music/%.mod
 	@echo compiling music: $<
-	# [song] [label] [bank]
-	# non-single array version: (not compatible with compression implementation)
-	# $(MOD2GBT) $< $(basename $(basename $(notdir $<)))_mod $(subst .b,,$(suffix $(<:%.mod=%))) > /dev/null
-	# produces: output.c and associated output.bin
+# [song] [label] [bank]
+# non-single array version: (not compatible with compression implementation)
+# $(MOD2GBT) $< $(basename $(basename $(notdir $<)))_mod $(subst .b,,$(suffix $(<:%.mod=%))) > /dev/null
+# produces: output.c and associated output.bin
 	$(MOD2GBT_SINGLEARRAY) $< $(basename $(basename $(notdir $<)))_mod $(subst .b,,$(suffix $(<:%.mod=%))) > /dev/null
-	# compress unified song array (requires modified mod2gbt to produce a single array)
+# compress unified song array (requires modified mod2gbt to produce a single array)
 	$(APULTRA) output.bin output_comp.bin
 	$(BIN2C) output_comp.bin output_comp.c $(basename $(basename $(notdir $<)))_mod
-	# merge compressed array back to main c file
+# merge compressed array back to main c file
 	cat output_comp.c >> output.c
-	# cleanup intermediary files
+# cleanup intermediary files
 	rm output.bin output_comp.bin output_comp.c
 	@mv output.c $(OBJDIR)/music_tmp.c
-	# @$(SDCC) $(CFLAGS) -c -o $@ $(OBJDIR)/music_tmp.c
 	$(LCC) $(CFLAGS) -c -o $@ $(OBJDIR)/music_tmp.c
+
 
 $(BINDIR)/$(PROJECT_NAME).$(EXTENSION): $(OBJDIR) $(OBJDIR_RES) $(BINDIR) $(OBJS) $(COMMON_OBJS)
 	@echo Linking
-# $(LCC) $(LFLAGS) -v -o $(OBJDIR)/$(PROJECT_NAME).$(EXTENSION) $(OBJS) $(COMMON_OBJS)
-#	$(LCC) -v -o $@ $<
 	$(LCC) $(MAKEBINFLAGS) -v -o $(OBJDIR)/$(PROJECT_NAME).$(EXTENSION) $(OBJS) $(COMMON_OBJS)
 	cp $(OBJDIR)/$(PROJECT_NAME).$(EXTENSION) $(BINDIR)/$(PROJECT_NAME).$(EXTENSION)
+
 
 # if this is a debug build, reprocess the mainsymbol output to include C source
 ifdef CDEBUG
@@ -200,6 +186,7 @@ ifdef CDEBUG
 	mv $(OBJDIR)/$(PROJECT_NAME).sym $(OBJDIR)/$(PROJECT_NAME)_raw.sym
 	$(SRC2SYM) $(OBJDIR)/$(PROJECT_NAME)_raw.sym > $(OBJDIR)/$(PROJECT_NAME).sym
 endif
+
 
 # Debug builds run from the object dir
 ifdef CDEBUG
