@@ -22,6 +22,8 @@
 #include "gbt_player.h"
 #include "sound.h"
 
+#include "swaprand.h"
+
 #include "input.h"
 #include "gfx.h"
 #include "gfx_print.h"
