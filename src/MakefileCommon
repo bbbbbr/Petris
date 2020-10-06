@@ -27,6 +27,7 @@ else
 	PROJECT_NAME := $(PROJECT_NAME)_Debug
 # Have lcc pass --debug to SDCC to generate additional debug symbols
 	CDEBUG = -Wf--debug
+	LFLAGS = -Wl-m -Wl-w -Wl-y
 endif
 
 # PATH_PREFIX = ../
