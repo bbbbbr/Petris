@@ -8,6 +8,7 @@ export MOD2GBT_SINGLEARRAY="tools/mod2gbt_singlearray_withunbanked"
 export APULTRA="tools/apultra"
 export BIN2C="tools/bin2c"
 export GBXFLASHER="tools/gbxcart_rw_flasher_v1.34"
+export ROMUSAGE="tools/romusage"
 
 all: build_gb
 
