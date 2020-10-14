@@ -180,7 +180,7 @@ $(BINDIR)/$(PROJECT_NAME).$(EXTENSION): $(OBJDIR) $(OBJDIR_RES) $(BINDIR) $(OBJS
 	@echo Linking
 	$(LCC) $(MAKEBINFLAGS) $(LFLAGS) -v -o $(OBJDIR)/$(PROJECT_NAME).$(EXTENSION) $(OBJS) $(COMMON_OBJS)
 	cp $(OBJDIR)/$(PROJECT_NAME).$(EXTENSION) $(BINDIR)/$(PROJECT_NAME).$(EXTENSION)
-	$(ROMUSAGE) $(OBJDIR)/$(PROJECT_NAME).map -u32k
+	$(ROMUSAGE) $(OBJDIR)/$(PROJECT_NAME).map -e:STACK:DEFF:101 -e:SHADOW_OAM:C000:A0
 
 
 # if this is a debug build, reprocess the symbol output to include C source
