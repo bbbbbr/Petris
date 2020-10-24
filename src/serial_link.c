@@ -127,7 +127,8 @@ void init_link(void) {
 
     // Add interrupt handler for serial link rx and enable it
     disable_interrupts();
-    add_SIO(link_isr);
+    remove_SIO(serial_IO); // Remove default serial link ISR (relies on: void serial_IO(); being defined in gb.h)
+    add_SIO(link_isr);     // Install new ISR
     enable_interrupts();
 }
 
@@ -176,7 +177,7 @@ void link_start_detect(void) {
 //
 // Is used to both receive new data and allow the
 // sender to return to passive receiver waiting state
-void link_isr(void) {
+void link_isr(void) __critical __interrupt {
 
     UINT8 link_data;
 

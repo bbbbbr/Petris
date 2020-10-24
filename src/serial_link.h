@@ -85,7 +85,7 @@ extern UINT8 volatile link_timeout;
     // So maybe it's better to just overwrite any pending transfer
     // OPTIONAL:    while ((SC_REG & LINK_SENDING_MASK) == LINK_SENDING_ACTIVE);
 #define LINK_SEND(command) \
-    SC_REG = LINK_CLOCK_INT; \
+    SC_REG = LINK_CLOCK_INT | LINK_SPEED_FAST; \
     SB_REG = command; \
     SC_REG = (LINK_XFER_START | LINK_CLOCK_INT);
 
@@ -106,7 +106,7 @@ void link_disable(void);
 void link_start_detect(void);
 
 //void link_send(UINT8 command);
-void link_isr(void);
+void link_isr(void) __critical __interrupt;
 void link_check_connect(void);
 void link_try_gamestart(void);
 
