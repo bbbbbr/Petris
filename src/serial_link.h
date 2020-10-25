@@ -87,7 +87,7 @@ extern UINT8 volatile link_timeout;
 #define LINK_SEND(command) \
     SC_REG = LINK_CLOCK_INT | LINK_SPEED_FAST; \
     SB_REG = command; \
-    SC_REG = (LINK_XFER_START | LINK_CLOCK_INT);
+    SC_REG = (LINK_XFER_START | LINK_CLOCK_INT | LINK_SPEED_FAST);
 
 // Set up receive-waiting state
 // The setup sequence is important to ensure correct operation
