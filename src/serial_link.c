@@ -101,6 +101,8 @@
 #include "status_win.h"
 
 #include "serial_link.h"
+#include "custom_serial_ISR.h"
+
 
 #define LINK_STATUS_X 1
 #define LINK_STATUS_Y 0
@@ -127,8 +129,9 @@ void init_link(void) {
 
     // Add interrupt handler for serial link rx and enable it
     disable_interrupts();
-    remove_SIO(serial_IO); // Remove default serial link ISR (relies on: void serial_IO(); being defined in gb.h)
-    add_SIO(link_isr);     // Install new ISR
+    // This isn't needed with custom_serial_ISR.s
+    // remove_SIO(serial_IO); // Remove default serial link ISR (relies on: void serial_IO(); being defined in gb.h)
+    custom_add_SIO(link_isr);     // Install new ISR
     enable_interrupts();
 }
 
