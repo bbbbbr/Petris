@@ -1,5 +1,10 @@
 ; Modified version os serial.s from GBDK 2020 4.0
-; Removes default serial_IO handler that is not possible to remove with stock GBDK 2020 4.0
+;
+; Does not include default serial_IO handler that is not
+; possible to remove with stock GBDK 2020 4.0
+;
+; Standard GBDK 4.0 Serial Link / SIO handler will not be
+; linked unless any of it's functions are called/used.
 
 
 	.globl	.int
@@ -27,7 +32,7 @@ _custom_add_SIO::       ; Add an entry to the SIO chained interrupt table
 	RET
 
 .custom_add_SIO::
-	LD	HL,#.custom_int_0x58
+	LD	HL,#.custom_int_0x58 ; Load SIO chained interrupt table
 	JP	.add_int
 
 _custom_remove_SIO::  ; Remove an entry to the SIO chained interrupt table
@@ -41,13 +46,13 @@ _custom_remove_SIO::  ; Remove an entry to the SIO chained interrupt table
 	RET
 
 .custom_remove_SIO::
-	LD	HL,#.custom_int_0x58
+	LD	HL,#.custom_int_0x58 ; Load SIO chained interrupt table
 	JP	.remove_int
 
 
 	.area	_BSS
 
-.custom_int_0x58::
+.custom_int_0x58:: ; SIO chained interrupt table
 	.blkw	0x08
 
 	.area	_CODE
