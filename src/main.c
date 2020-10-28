@@ -54,7 +54,7 @@ void init_interrupts(void);
 void vbl_update(void);
 void init_sound(void);
 
-UINT8 vbl_count;
+UINT8 vbl_count = 0;
 
 #define ASM_HALT \
 __asm \
@@ -79,9 +79,8 @@ void handle_non_cgb() {
 }
 
 
-
 void vbl_update() {
-    vbl_count ++;
+    vbl_count++;
 
     // Optional: Animate can also be called from here instead
     //           to make it independent of game pause/etc
@@ -104,12 +103,12 @@ void vbl_update() {
 }
 
 
-
 void init_sound(void) {
     NR52_REG = 0x80; // Enables sound, always set this first
     NR51_REG = 0xFF; // Enables all channels (left and right)
     NR50_REG = 0x77; // Max volume
 }
+
 
 void init_interrupts() {
     disable_interrupts();
@@ -130,8 +129,13 @@ void init_interrupts() {
     enable_interrupts();
 }
 
+
 void init (void) {
+
+    vbl_count = 0;
     music_mute_frames = 0;
+    gbt_stop();
+
     game_state = GAME_INTRO_INIT;
 
     // Require CGB, otherwise display a warning (DMG/Pocket)

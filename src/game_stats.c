@@ -53,7 +53,7 @@ UINT8 maxpet_pieces[BRD_SIZE];
 UINT8 maxpet_attrib[BRD_SIZE];
 UINT8 maxpet_x[BRD_SIZE]; // (x << 4 | (y & 0x0f)?
 UINT8 maxpet_y[BRD_SIZE];
-UINT8 maxpet_tilecount;
+UINT8 maxpet_tilecount = 0;
 
 
 void stats_maxpet_reset(void) {

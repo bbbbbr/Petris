@@ -19,6 +19,15 @@
 	JP	.int            ; Call main interrupt handler
 
 
+	.area   _GSINIT
+
+	;; Clear SIO global variables
+	XOR A
+	LD  HL,#.start_custom_sio_globals
+	LD  C,#(.end_custom_sio_globals - .start_custom_sio_globals)
+	RST 0x28
+
+
 	.area	_BASE
 
 _custom_add_SIO::       ; Add an entry to the SIO chained interrupt table
@@ -52,9 +61,12 @@ _custom_remove_SIO::  ; Remove an entry to the SIO chained interrupt table
 
 	.area	_BSS
 
+.start_custom_sio_globals:
+
 .custom_int_0x58:: ; SIO chained interrupt table
 	.blkw	0x08
 
-	.area	_CODE
+.end_custom_sio_globals:
+
 
 

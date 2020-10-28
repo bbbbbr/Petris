@@ -118,8 +118,8 @@ const UINT8 LINK_ICONS_OFF[3] = {TILE_ID_2P_LINK_OFF,      // All blank tiles
 
 
 
-UINT8 volatile link_status;
-UINT8 volatile link_timeout;
+UINT8 volatile link_status = LINK_STATUS_RESET;
+UINT8 volatile link_timeout = LINK_TIMER_TIMEDOUT;
 
 // Initialize ISR
 void init_link(void) {
@@ -133,6 +133,7 @@ void init_link(void) {
     // remove_SIO(serial_IO); // Remove default serial link ISR (relies on: void serial_IO(); being defined in gb.h)
     custom_add_SIO(link_isr);     // Install new ISR
     enable_interrupts();
+    link_reset();
 }
 
 

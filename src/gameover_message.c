@@ -85,7 +85,7 @@ const INT8 SPR_GAMEOVER_LUT_Y[] = {
 #define SPR_GAMEOVER_LANDED  127
 
 UINT8 spr_gameover_y_idx[SPR_GAMEOVER_COUNT];
-const UINT8 * p_gameover_chars;
+const UINT8 * p_gameover_chars = NULL;
 
 
 // Drop "G A M E   O V E R" letters with a bounce, starting from left to right

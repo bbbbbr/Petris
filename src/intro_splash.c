@@ -29,7 +29,7 @@
 #define TILE_COUNT_SPLASH  23
 
 
-UINT8  effect_y_line;
+UINT8  effect_y_line = 0;
 UINT8  tmp_LY_REG;
 #define EFFECT_Y_LINE_MAX  143
 #define EFFECT_START_Y      16

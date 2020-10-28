@@ -40,7 +40,7 @@ UINT8 board_connect[BRD_SIZE];
 
 UINT8 board_tile_clear_cache_x[BRD_SIZE];
 UINT8 board_tile_clear_cache_y[BRD_SIZE];
-UINT8 board_tile_clear_count;
+UINT8 board_tile_clear_count = 0;
 
 #define TILE_ID_BOARD_BLANK_ROW_BG TILE_ID_BOARD_BLANK_BG
 

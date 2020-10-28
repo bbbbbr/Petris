@@ -92,7 +92,7 @@ const UINT8 SPR_CLOUDS_TILES[] = {0,1,2,3,4, // Cloud 1
                                   5,6,6,7,8, // Cloud 4
                                   0,1,3,1,4};//0,1,2,3,4};  // Cloud 5
 
-UINT8 intro_counter;
+UINT8 intro_counter = 0;
 
 void intro_clouds_init(void) {
 

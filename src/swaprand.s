@@ -11,7 +11,16 @@
 .randtemp::
     .ds 0x01
 
-    .area   _CODE
+
+    .area   _GSINIT
+
+    ;; Clear swaprand global variables
+    XOR A
+    LD  (#.randhi_b),A
+    LD  (#.randlo_b),A
+    LD  (#.randtemp),A
+    RST 0x28
+
 
     .area   _BASE
     ;; Swap random number state vars to the alternate set

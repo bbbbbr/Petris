@@ -45,7 +45,7 @@ const settings_data settings_LUT[] = {
     {SPD_ST_BEAST,  NEXT_PREV_OFF, BONUS_BEAST,  BOMB_THR_BEAST,  MERGE_THR_BEAST}
 };
 
-const settings_data * p_game_settings;
+const settings_data * p_game_settings = NULL;
 
 
 const char * options_difficulty_abbrev_text_get(void) {
