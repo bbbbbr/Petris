@@ -230,3 +230,8 @@ flashcart: all
 		echo Flashing $(RUNTARGET); \
 		$(GBXFLASHER) $(RUNTARGET) $(CARTTYPE); \
 	fi
+
+romusage: all
+# Show large map then small map at bottom
+	$(ROMUSAGE) $(OBJDIR)/$(PROJECT_NAME).map -G -e:STACK:DEFF:101 -e:SHADOW_OAM:C000:A0
+	$(ROMUSAGE) $(OBJDIR)/$(PROJECT_NAME).map -g -e:STACK:DEFF:101 -e:SHADOW_OAM:C000:A0
