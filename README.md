@@ -1,7 +1,7 @@
 Petris - A puzzle game of shapely pets for the Game Boy Color (CGB)
 ===========
 
-* Cartridges available _______TBD_______
+* __Physical Catridges available at:__ [Catskull Electronics](https://catskullelectronics.com/collections/games/products/petris)
 
 Build your favorite pets in all shapes and sizes, keep ahead of dropping pieces and make it to the next level!
 
