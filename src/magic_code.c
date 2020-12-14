@@ -21,7 +21,7 @@
 #include "magic_code.h"
 
 const UINT8 magic_code_seq[] = {J_UP, J_UP, J_DOWN, J_DOWN, J_LEFT, J_RIGHT, J_LEFT, J_RIGHT, J_B, J_A};
-UINT8 magic_code_state;
+UINT8 magic_code_state = MAGIC_CODE_STATE_RESET;
 
 
 void magic_code_reset(void) {

@@ -33,11 +33,11 @@
 
 #include "gameplay.h"
 
- INT8 player_x;
- INT8 player_y;
- INT8 player_rotate; // Uses wraparound, so allow negative nums
-UINT8 player_piece;
-UINT8 player_attrib;
+ INT8 player_x = BRD_NEWPIECE_X;
+ INT8 player_y = BRD_NEWPIECE_Y;
+ INT8 player_rotate = GP_ROTATE_DEFAULT; // Uses wraparound, so allow negative nums
+UINT8 player_piece = 0;
+UINT8 player_attrib = 0;
 
 
 

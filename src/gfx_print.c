@@ -99,21 +99,21 @@ void print_text(const char* txt, unsigned char delay_time){
     while(*txt) {
 
         if(*txt >= 'A' && *txt <= 'Z'){
-            c = TILES_FONT_CHARS_START + *txt - 'A';
+            c = TILES_FONT_CHARS_START + (unsigned char)(*txt - 'A');
         } else if(*txt >= 'a' && *txt <= 'z') {
-            c = TILES_FONT_CHARS_START + *txt - 'a';
+            c = TILES_FONT_CHARS_START + (unsigned char)(*txt - 'a');
         } else if(*txt >= '0' && *txt <= '9') {
-            c = TILES_FONT_NUMS_START + *txt - '0';
+            c = TILES_FONT_NUMS_START + (unsigned char)(*txt - '0');
         } else {
             switch(*txt) {
-                case  '!': c = TILES_FONT_START + 37; break;
-                case '\'': c = TILES_FONT_START + 38; break;
-                case  '(': c = TILES_FONT_START + 39; break;
-                case  ')': c = TILES_FONT_START + 40; break;
-                case  '-': c = TILES_FONT_START + 41; break;
-                case  '.': c = TILES_FONT_START + 42; break;
-                case  ':': c = TILES_FONT_START + 43; break;
-                case  '?': c = TILES_FONT_START + 44; break;
+                case  '!': c = TILES_FONT_START + 37U; break;
+                case '\'': c = TILES_FONT_START + 38U; break;
+                case  '(': c = TILES_FONT_START + 39U; break;
+                case  ')': c = TILES_FONT_START + 40U; break;
+                case  '-': c = TILES_FONT_START + 41U; break;
+                case  '.': c = TILES_FONT_START + 42U; break;
+                case  ':': c = TILES_FONT_START + 43U; break;
+                case  '?': c = TILES_FONT_START + 44U; break;
                 case '\n':
                     // Do a carriage return, no printing and skip to top of loop
                     print_x = start_x;

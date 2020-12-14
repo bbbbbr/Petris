@@ -5,7 +5,7 @@
 
 
 // Locations for loading Game Piece tile sprite data
-#define SPRITE_TILE_PET_START  0 // Load at start of sprite tile RAM
+#define SPRITE_TILE_PET_START  0U // Load at start of sprite tile RAM
 #define SPRITE_TILE_SPECIAL_START  (SPRITE_TILE_PET_START + TILE_COUNT_PETTOTAL) // Load directly after pet tiles
 
 // Start sprite font digit tiles after pet tiles
@@ -41,40 +41,40 @@
 #define GP_SPECIAL_START       (SPRITE_TILE_SPECIAL_START)
 
 // Special tiles (loaded from separate set)
-#define GP_SPECIAL_BOMB        (0 + GP_SPECIAL_START)
-#define GP_SPECIAL_LIGHTENING  (1 + GP_SPECIAL_START)
-#define GP_SPECIAL_BOMB_HINT   (2 + GP_SPECIAL_START)
-#define GP_SPECIAL_MERGE_HINT  (3 + GP_SPECIAL_START)
-#define GP_SPECIAL_DROP_HINT   (4 + GP_SPECIAL_START)
-#define GP_DISSOLVE_1          (5 + GP_SPECIAL_START)
-#define GP_DISSOLVE_2          (6 + GP_SPECIAL_START)
-#define GP_DISSOLVE_3          (7 + GP_SPECIAL_START)
-#define GP_CROSS               (8 + GP_SPECIAL_START)
+#define GP_SPECIAL_BOMB        (0U + GP_SPECIAL_START)
+#define GP_SPECIAL_LIGHTENING  (1U + GP_SPECIAL_START)
+#define GP_SPECIAL_BOMB_HINT   (2U + GP_SPECIAL_START)
+#define GP_SPECIAL_MERGE_HINT  (3U + GP_SPECIAL_START)
+#define GP_SPECIAL_DROP_HINT   (4U + GP_SPECIAL_START)
+#define GP_DISSOLVE_1          (5U + GP_SPECIAL_START)
+#define GP_DISSOLVE_2          (6U + GP_SPECIAL_START)
+#define GP_DISSOLVE_3          (7U + GP_SPECIAL_START)
+#define GP_CROSS               (8U + GP_SPECIAL_START)
 
 
-#define GP_PET_UPSHIFT  0
-#define GP_PET_DOG      0
-#define GP_PET_CAT      1
-#define GP_PET_FISH     2
-#define GP_PET_SNAKE    3
-#define GP_PET_NONE     4
-#define GP_PET_MASK_NOSHIFT 0x03
+#define GP_PET_UPSHIFT  0U
+#define GP_PET_DOG      0U
+#define GP_PET_CAT      1U
+#define GP_PET_FISH     2U
+#define GP_PET_SNAKE    3U
+#define GP_PET_NONE     4U
+#define GP_PET_MASK_NOSHIFT 0x03U
 
 
-#define GP_SEG_UPSHIFT  3
-#define GP_SEG_TAIL     0
-#define GP_SEG_TORSO    1
-#define GP_SEG_TURN     2
-#define GP_SEG_HEAD     3
+#define GP_SEG_UPSHIFT  3U
+#define GP_SEG_TAIL     0U
+#define GP_SEG_TORSO    1U
+#define GP_SEG_TURN     2U
+#define GP_SEG_HEAD     3U
 #define GP_SEG_TAIL_BITS  (0x00U << GP_SEG_UPSHIFT)
 #define GP_SEG_TORSO_BITS (0x01U << GP_SEG_UPSHIFT)
 #define GP_SEG_TURN_BITS  (0x02U << GP_SEG_UPSHIFT)
 #define GP_SEG_HEAD_BITS  (0x03U << GP_SEG_UPSHIFT)
 
 
-#define GP_ROT_UPSHIFT  2
-#define GP_ROT_HORZ     0
-#define GP_ROT_VERT     1
+#define GP_ROT_UPSHIFT  2U
+#define GP_ROT_HORZ     0U
+#define GP_ROT_VERT     1U
 #define GP_ROT_HORZ_BITS  (0x00U << GP_ROT_UPSHIFT)
 #define GP_ROT_VERT_BITS  (0x01U << GP_ROT_UPSHIFT)
 

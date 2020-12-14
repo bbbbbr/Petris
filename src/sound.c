@@ -9,7 +9,7 @@
 #include "unapack.h"
 
 #define MUSIC_NONE 0
-UINT8 music_mute_frames;
+UINT8 music_mute_frames = 0;
 void * last_music = MUSIC_NONE;
 
 const UINT8 FX_REG_SIZES[] = {5, 4, 5, 4, 3};

@@ -32,8 +32,8 @@
 #include "game_types.h"
 
 
-UINT8 game_type_cleanup_tail_count;
-UINT8 game_type_long_pet_required_size;
+UINT8 game_type_cleanup_tail_count = 0;
+UINT8 game_type_long_pet_required_size = 0;
 
 
 void game_types_init(void) {

@@ -34,14 +34,14 @@
 
 #include "options.h"
 
-UINT16 player_score;      // Current score
-UINT16 player_score_last; // Previous score to check against wraparound
-UINT16 player_numtiles;   // Number of tiles (pieces) cleared - UNUSED
-UINT16 player_numpets;    // Number of pets cleared
-UINT16 player_level;      // Current game level
-UINT16 player_numpieces;  // Number of pieces sent to player
+UINT16 player_score = 0;      // Current score
+UINT16 player_score_last = 0; // Previous score to check against wraparound
+UINT16 player_numtiles = 0;   // Number of tiles (pieces) cleared - UNUSED
+UINT16 player_numpets = 0;    // Number of pets cleared
+UINT16 player_level = 0;      // Current game level
+UINT16 player_numpieces = 0;  // Number of pieces sent to player
 
-UINT8 level_increment_enqueue;
+UINT8 level_increment_enqueue = FALSE;
 
 
 

@@ -22,6 +22,8 @@
 #include "gbt_player.h"
 #include "sound.h"
 
+#include "swaprand.h"
+
 #include "input.h"
 #include "gfx.h"
 #include "gfx_print.h"
@@ -46,13 +48,13 @@
 
 #include "gameplay.h"
 
-UINT8 game_speed_drop_frame_counter;
-UINT8 game_speed_frames_per_drop;
-UINT8 game_rand_init;
-UINT16 game_crunchup_counter;
-UINT8 volatile game_crunchups_enqueued;
-UINT8 volatile game_shake_enqueued;
-UINT8 volatile game_is_paused;
+UINT8 game_speed_drop_frame_counter = GAME_SPEED_DROP_FRAME_COUNTER_RESET;
+UINT8 game_speed_frames_per_drop = 0;
+UINT8 game_rand_init = 0;
+UINT16 game_crunchup_counter = GAME_CRUNCHUP_FRAME_COUNTER_RESET;
+UINT8 volatile game_crunchups_enqueued = GAME_CRUNCHUP_NONE;
+UINT8 volatile game_shake_enqueued = GAME_CRUNCHUP_SHAKE_RESET;
+UINT8 volatile game_is_paused = FALSE;
 
 
 #define KEY_REPEAT_START               0
@@ -60,11 +62,11 @@ UINT8 volatile game_is_paused;
 #define KEY_REPEAT_DOWN_THRESHOLD      (KEY_REPEAT_DOWN_RELOAD + 2)
 #define KEY_REPEAT_LEFTRIGHT_RELOAD    8
 #define KEY_REPEAT_LEFTRIGHT_THRESHOLD (KEY_REPEAT_LEFTRIGHT_RELOAD + 4) //6
-UINT8 key_down_repeat_needs_release;
-UINT8 gameplay_piece_drop_requested;
+UINT8 key_down_repeat_needs_release = FALSE;
+UINT8 gameplay_piece_drop_requested = FALSE;
 
-UINT8 piece_state;
-UINT8 new_piece_launch_delay;
+UINT8 piece_state = PLAYER_START;
+UINT8 new_piece_launch_delay = GAME_SPEED_LAUNCH_DELAY_FRAMES;
 
 
 void gameplay_drop_speed_update(void) {
@@ -216,6 +218,7 @@ void gameplay_init(void) {
 
 
     // Init game state vars
+    game_is_paused = FALSE;
     piece_state = PLAYER_START;
     key_down_repeat_needs_release = FALSE;
     gameplay_piece_drop_requested = FALSE;

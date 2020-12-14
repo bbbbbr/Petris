@@ -21,7 +21,7 @@
 extern UWORD ModPalBg[];
 
 
-UINT8 fade_sky_pal_idx;
+UINT8 fade_sky_pal_idx = 0;
 
 
 // Use Bresenham's algorithm to Linear Interpolate (lerp)
@@ -34,7 +34,7 @@ UINT8 fade_sky_pal_idx;
 // distance x (dx) = FADE2PAL_FRAME_COUNT
 // distance y (dy) = color_from - color_to
 
-INT8 fade2pal_frame_count;
+INT8 fade2pal_frame_count = 0;
 
 // Arrays
 UINT8 fade2pal_color_val[FADE2PAL_ARY_SIZE];

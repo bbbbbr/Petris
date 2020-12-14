@@ -13,4 +13,4 @@
 
 #include "common.h"
 
-UINT8 game_state;
+UINT8 game_state = GAME_INTRO_INIT;

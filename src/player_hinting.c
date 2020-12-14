@@ -48,7 +48,7 @@ const INT8 SPR_HINT_OFFSET_LUT_Y[] = { 0, -8, 0, 8};
 const UINT8 GP_SPECIAL_HINT_LUT[] = {GP_SPECIAL_BOMB_HINT, // for GP_SPECIAL_BOMB
                                      GP_SPECIAL_MERGE_HINT}; // for GP_SPECIAL_LIGHTENING
 
-UINT8 hint_special_tile;
+UINT8 hint_special_tile = GP_EMPTY;
 
 INT8  hinting_petlength_x[SPR_LONG_PET_HINT_POOL_SIZE];
 INT8  hinting_petlength_y[SPR_LONG_PET_HINT_POOL_SIZE];
@@ -56,9 +56,9 @@ UINT8 hinting_petlength_num_1[SPR_LONG_PET_HINT_POOL_SIZE];
 UINT8 hinting_petlength_num_2[SPR_LONG_PET_HINT_POOL_SIZE];
 UINT8 hinting_petlength_size[SPR_LONG_PET_HINT_POOL_SIZE];
 
-UINT8 hinting_petlength_enabled;
-UINT8 hinting_petlength_slot;
-UINT8 hinting_petlength_last_removed;
+UINT8 hinting_petlength_enabled = FALSE;
+UINT8 hinting_petlength_slot = 0;
+UINT8 hinting_petlength_last_removed = HINT_PET_LENGTH_SLOT_NONE;
 
 
 // Apply sprite flicker to special piece hinting and drop hinting if needed

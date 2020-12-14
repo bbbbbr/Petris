@@ -1,13 +1,14 @@
 PROJECT_NAME = Petris
 
-export GBDK_HOME="/opt/gbdk"
-export BGB="../tools/bgbw64-1.5.8/bgb64.exe"
+export GBDK_HOME="../gbdk"
+export BGB="../../tools/bgbw64-1.5.8/bgb64.exe"
 # export MOD2GBT="../tools/mod2gbt/mod2gbt.exe"
 export MOD2GBT="tools/mod2gbt_withunbanked"
 export MOD2GBT_SINGLEARRAY="tools/mod2gbt_singlearray_withunbanked"
 export APULTRA="tools/apultra"
 export BIN2C="tools/bin2c"
 export GBXFLASHER="tools/gbxcart_rw_flasher_v1.34"
+export ROMUSAGE="tools/romusage"
 
 all: build_gb
 

@@ -26,8 +26,8 @@
 #include "player_gfx.h"
 
 
-UINT8 game_piece_next;
-UINT8 game_piece_next_stash;
+UINT8 game_piece_next = 0;
+UINT8 game_piece_next_stash = GAME_PIECE_STASH_NONE;
 
 
 void  game_piece_next_reset(void) {

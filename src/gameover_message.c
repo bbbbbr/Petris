@@ -50,22 +50,22 @@ const UINT8 SPR_YOU_WON_CHARS[SPR_GAMEOVER_COUNT] = {
             CHR2SPR('W'),
             CHR2SPR('O'),
             CHR2SPR('N'),
-            TILES_FONT_START + 37 /* '!' char */ };
+            TILES_FONT_START + 37U /* '!' char */ };
 
 #define SPR_PAL_PRINT BG_PAL_5
 
-#define SPR_GAMEOVER_MAX_Y ((BRD_ST_Y + 8) * 8)
-#define SPR_GAMEOVER_START_X (((BRD_ST_X + 1) * 8) + 2) // 2 Pixels right of left board edge
+#define SPR_GAMEOVER_MAX_Y ((BRD_ST_Y + 8U) * 8U)
+#define SPR_GAMEOVER_START_X (((BRD_ST_X + 1U) * 8U) + 2U) // 2 Pixels right of left board edge
 
 const UINT8 SPR_GAMEOVER_LUT_X[] = {SPR_GAMEOVER_START_X,
-                                    SPR_GAMEOVER_START_X + (8 * 1) + 1, // 1 pixel between each letter
-                                    SPR_GAMEOVER_START_X + (8 * 2) + 2,
-                                    SPR_GAMEOVER_START_X + (8 * 3) + 3,
+                                    SPR_GAMEOVER_START_X + (8U * 1U) + 1U, // 1 pixel between each letter
+                                    SPR_GAMEOVER_START_X + (8U * 2U) + 2U,
+                                    SPR_GAMEOVER_START_X + (8U * 3U) + 3U,
                                     // Gap between GANE -- and -- OVER
-                                    SPR_GAMEOVER_START_X + (8 * 4) + 9,
-                                    SPR_GAMEOVER_START_X + (8 * 5) + 10,
-                                    SPR_GAMEOVER_START_X + (8 * 6) + 11,
-                                    SPR_GAMEOVER_START_X + (8 * 7) + 12};
+                                    SPR_GAMEOVER_START_X + (8U * 4U) + 9U,
+                                    SPR_GAMEOVER_START_X + (8U * 5U) + 10U,
+                                    SPR_GAMEOVER_START_X + (8U * 6U) + 11U,
+                                    SPR_GAMEOVER_START_X + (8U * 7U) + 12U};
 
 
 // Pre-calculated gravity drop bounce LUT
@@ -85,7 +85,7 @@ const INT8 SPR_GAMEOVER_LUT_Y[] = {
 #define SPR_GAMEOVER_LANDED  127
 
 UINT8 spr_gameover_y_idx[SPR_GAMEOVER_COUNT];
-const UINT8 * p_gameover_chars;
+const UINT8 * p_gameover_chars = NULL;
 
 
 // Drop "G A M E   O V E R" letters with a bounce, starting from left to right

@@ -43,29 +43,39 @@ if ($ARGV[0]) {
 
     while (my $FileLine = <MainSymbolFile>) {
 
+        # FROM: DEF C$player_hinting.c$119$1_0$194 0x5677
+        #   TO: 01:5677 C$player_hinting@119:spr_x=(player_x*BRD_UNIT_SIZE)+BRD_PIECE_X_OFFSET:
         # First convert C source references to labels that include the source
-        if ($FileLine =~ /(\d\d\:\w\w\w\w )(C\$)(\w*)\.c\$(\d*).*/) {
-            # $1 : Symbol Address info
-            # $2 : Label start ("C$")
-            # $3 : C source file name *without* file extension
-            # $4 : C source line number
-            my $CLabelFileNameNoExt = $3;
-            my $CLabelSourceLineNum = $4;
+        if ($FileLine =~ /DEF (C\$)(\w*)\.c\$(\d*)\$.*0x(\w*).*/) {
+            # $1 : Label start ("C$")
+            # $2 : C source file name *without* file extension
+            # $3 : C source line number
+            # $4 : Symbol Address info
+            my $CLabelFileNameNoExt = $2;
+            my $CLabelSourceLineNum = $3;
 
             my $CSourceLine = FindSourceLine($SymbolPath, $CLabelFileNameNoExt, $CLabelSourceLineNum);
             if ($CSourceLine) {
                 # Output Reformatted address and truncated label
-                print $1.$2.$3."\@".$CLabelSourceLineNum.":";
+                print "00\:".$4." ".$1.$2."\@".$CLabelSourceLineNum.":";
                 # Append C source code line to output
                 print $CSourceLine."\n";
             }
 
-        } elsif ($FileLine =~ /(\d\d\:\w\w\w\w )A\$.*\n/) {
+        } elsif ($FileLine =~ /DEF (A\$.*)\n/) {
+            #ex: DEF A$player_hinting$320 0x5677
             # strip out ASM lines
             # print $FileLine." -> (ASM, REMOVE)\n";
+        } elsif ($FileLine =~ /DEF (.*) 0x(\w*).*/) {
+            #ex: DEF _joypad 0x6E97
+            # This was not used in old gbdk/sdcc version
+            # $1 : symbol identifier
+            # $2 : symbol address
+            # reformat other symbol lines
+            print "00\:".$2." ".$1."\n";
         } else {
-            # Pass the remainder on through
-            print $FileLine;
+            # strip out other unknown lines
+            # print $FileLine." -> (OTHER, REMOVE)\n";
         }
 
     }
