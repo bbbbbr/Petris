@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+  <title>javascript CGB GIMP Palette converter</title>
+  <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+
+  <script id="insert"></script>
+
+
+</head>
+<body>
+    <span>Converts last 16 entries of 32 color palette. 8 bit RGB to 5 bit BGR
+    <br/> Palette format is #RRGGBB &rarr; 0xBB, 0xGG, 0xRR
+    <br/>
+    <input id='startButton' type="button" value="Convert Palette">
+    <br/>
+    <textarea id='textInput' style='width: 400px; height: 400px;'></textarea>
+    <textarea id='textOutput' style='width: 400px; height: 400px;'></textarea>
+
+<script type="text/javascript">
+
+function CGBPalAdjust(hexStr) {
+    // Convert from hex, reduce to 5 bits, convert back to hex
+    return (parseInt(hexStr, 16) >> 3).toString(16).padStart(2, "0");
+}
+
+function ConvertPal() {
+  // Attach to input fields
+  var inputStr = document.querySelector('#textInput').value;
+  var outputStr = "";
+  let regexp = /\#(\S\S)(\S\S)(\S\S)/g;
+  let results = inputStr.matchAll(regexp)
+  var palIndex = 0;
+
+  for(let result of results) {
+    palIndex++;
+    // outputStr = outputStr + palIndex.toString() + ":"
+
+    // Only include last 4 palette entries
+    // (4 colors per palette * 4 palettes = 16)
+    // Reverse order so the colors are B, G, R
+    if (palIndex > 16) {
+      outputStr = outputStr
+        + "    "
+        + "0x" + CGBPalAdjust(result[3]) + ", "
+        + "0x" + CGBPalAdjust(result[2]) + ", "
+        + "0x" + CGBPalAdjust(result[1]) + ","
+        + "\n";
+
+       // Line break every 4 colors
+       if ((palIndex % 4) === 0)
+         outputStr = outputStr + "\n";
+     }
+    // alert(result);
+  }
+
+
+
+
+  document.querySelector('#textOutput').value = outputStr;
+}
+
+document.querySelector('#startButton').onclick = ConvertPal;
+
+</script>
+
+
+
+</body>
+</html>
