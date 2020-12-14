@@ -1,0 +1,20 @@
+; palette 0
+	RGB 29, 31, 31
+	RGB 15, 24, 31
+	RGB 01, 15, 20
+	RGB 00, 00, 00
+; palette 1
+	RGB 29, 31, 31
+	RGB 30, 27, 14
+	RGB 06, 17, 11
+	RGB 16, 11, 00
+; palette 2
+	RGB 29, 31, 31
+	RGB 30, 14, 30
+	RGB 17, 05, 17
+	RGB 03, 03, 03
+; palette 3
+	RGB 29, 31, 31
+	RGB 11, 29, 11
+	RGB 06, 17, 11
+	RGB 00, 00, 00
