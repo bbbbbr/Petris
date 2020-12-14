@@ -1,7 +1,8 @@
 Petris - A puzzle game of shapely pets for the Game Boy Color (CGB)
 ===========
+(Updated source for GBDK2020)
 
-* Cartridges available _______TBD_______
+* __Physical Catridges available at:__ [Catskull Electronics](https://catskullelectronics.com/collections/games/products/petris)
 
 Build your favorite pets in all shapes and sizes, keep ahead of dropping pieces and make it to the next level!
 
@@ -9,14 +10,13 @@ Petris is a new home-brew 2D puzzle game for the Game Boy Color (CGB). It will r
 
 You can [download the game here](/rom/Petris.gbc) or visit the [itch.io page](https://bbbbbr.itch.io/petris).
 _________________
-Run it either in an emulator such as [BGB](http://bgb.bircd.org/), on a real Game Boy if you have a flashable cartridge, or you can buy a cartridge at _______TBD_______.
+Run it either in an emulator such as [BGB](http://bgb.bircd.org/), on a real Game Boy if you have a flashable cartridge, or you can buy a cartridge at [Catskull Electronics](https://catskullelectronics.com/collections/games/products/petris).
 
 ![Petris cartridge sticker](/res/printable/cartridge_sticker_petris_x300.png)
 ![Petris game in Long Pet game type](/info/Petris_LongPet.png)
 ![Petris game in Tail Cleanup game type](/info/petris_tail_cleanup.gif)
 
 You can read the [Instruction Manual](/info/Manual.md) for full details about game play.
-
 _________________
 
 ##### Game Types
@@ -45,7 +45,7 @@ _________________
  * Krümel (crumb) / GB Studio Community Assets - https://github.com/DeerTears/GB-Studio-Community-Assets
 
 ##### Tools and Resources Used
- * GBDK - http://gbdk.sourceforge.net/
+ * GBDK 2020 - https://github.com/Zal0/gbdk-2020/
  * BGB - http://bgb.bircd.org/
  * Game Boy Tile Designer - http://www.devrs.com/gb/hmgd/gbtd.html
  * GIMP TileMap GB - https://github.com/bbbbbr/gimp-tilemap
