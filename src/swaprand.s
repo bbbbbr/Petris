@@ -19,7 +19,6 @@
     LD  (#.randhi_b),A
     LD  (#.randlo_b),A
     LD  (#.randtemp),A
-    RST 0x28
 
 
     .area   _BASE
