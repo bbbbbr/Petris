@@ -30,6 +30,7 @@ else
 # Have lcc pass --debug to SDCC to generate additional debug symbols
 	CDEBUG = -Wf--debug
 	LFLAGS = -Wl-m -Wl-w -Wl-y
+    AFLAGS = -Wa-s -Wa-w
 endif
 
 # PATH_PREFIX = ../
@@ -42,6 +43,8 @@ BINDIR = $(PATH_PREFIX)bin
 SRC2SYM = ./src2sym.pl
 
 LCC = $(GBDK_HOME)/bin/lcc -Wa-l -Wl-m -Wl-j
+# bgb compatible symbol format from makebin
+# -Wm-yS
 MAKEBIN = $(GBDK_HOME)/bin/makebin
 ifeq ($(MOD2GBT),)
 	MOD2GBT = $(ZGB_PATH_UNIX)/../env/mod2gbt
@@ -107,7 +110,7 @@ LFLAGS = $(LFLAGS_NBANKS)
 ifdef CDEBUG
 # enable linker no$gmb symbol output on debug builds
 	CFLAGS += $(CDEBUG)
-LFLAGS += -Wl-j -Wl-y
+	LFLAGS += -Wl-j -Wl-y
 endif
 
 
@@ -146,7 +149,7 @@ $(OBJDIR_RES):
 
 $(OBJDIR)/%.o: $(PATH_PREFIX)src/%.s
 	@echo compiling $<
-	$(LCC) $(CFLAGS) -c -o $@ $<
+	$(LCC) $(CFLAGS) $(AFLAGS) -c -o $@ $<
 
 $(OBJDIR)/%.o: $(PATH_PREFIX)src/%.c
 	@echo compiling $<
@@ -180,7 +183,7 @@ $(OBJDIR_RES)/%.mod.o: $(PATH_PREFIX)res/music/%.mod
 
 $(BINDIR)/$(PROJECT_NAME).$(EXTENSION): $(OBJDIR) $(OBJDIR_RES) $(BINDIR) $(OBJS) $(COMMON_OBJS)
 	@echo Linking
-	$(LCC) $(MAKEBINFLAGS) $(LFLAGS) -v -o $(OBJDIR)/$(PROJECT_NAME).$(EXTENSION) $(OBJS) $(COMMON_OBJS)
+	$(LCC) $(MAKEBINFLAGS) $(LFLAGS) -Wl-w -v -o $(OBJDIR)/$(PROJECT_NAME).$(EXTENSION) $(OBJS) $(COMMON_OBJS)
 	cp $(OBJDIR)/$(PROJECT_NAME).$(EXTENSION) $(BINDIR)/$(PROJECT_NAME).$(EXTENSION)
 	$(ROMUSAGE) $(OBJDIR)/$(PROJECT_NAME).map -g -R -e:STACK:DEFF:101 -e:SHADOW_OAM:C000:A0
 
@@ -216,15 +219,15 @@ run: all
 	$(info $$BGB is [${BGB}])
 	@if test -f $(RUNTARGET); then \
 		echo Running $(RUNTARGET); \
-		$(BGB) $(RUNTARGET); \
+		$(BGB) -watch $(RUNTARGET); \
 	fi
 
 runlink: all
 	$(info $$BGB is [${BGB}])
 	@if test -f $(RUNTARGET); then \
 		echo Running $(RUNTARGET); \
-		($(BGB) $(RUNTARGET) --listen 127.0.0.1:8765 &); \
-		($(BGB) $(RUNTARGET) --connect 127.0.0.1:8765 &); \
+		($(BGB) -watch $(RUNTARGET) --listen 127.0.0.1:8765 &); \
+		($(BGB) -watch $(RUNTARGET) --connect 127.0.0.1:8765 &); \
 	fi
 
 flashcart: all
