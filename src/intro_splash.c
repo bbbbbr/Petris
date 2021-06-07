@@ -28,8 +28,8 @@
 #define TILES_SPLASH_START  0
 #define TILE_COUNT_SPLASH  23
 
-UINT8 scroll_x_amount;
-UINT8  effect_y_line;
+UINT8 scroll_x_amount = 0;
+UINT8  effect_y_line = 0;
 
 #define EFFECT_Y_LINE_MAX      143U
 #define EFFECT_START_Y          16U
