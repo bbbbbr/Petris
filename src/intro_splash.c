@@ -123,7 +123,7 @@ void intro_splash(void) {
 
     // Add the hblank ISR and enable it
     disable_interrupts();
-    STAT_REG = 0x18;
+    STAT_REG |=  STATF_MODE00; // (H-Blank)
     add_LCD(hblank_effect_isr);
     set_interrupts(VBL_IFLAG | LCD_IFLAG);
     enable_interrupts();
@@ -145,7 +145,9 @@ void intro_splash(void) {
     }
 
     // Disable HBlank interrupt
+    disable_interrupts();
     set_interrupts(VBL_IFLAG);
+    enable_interrupts();
 
     // ========== START EFFECT ==========
 

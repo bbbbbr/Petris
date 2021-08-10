@@ -135,10 +135,10 @@ void fade_start(INT8 fade_dir) {
         // To avoid flickering:
         // Wait until VBlank (mode == 1) and then write palette in one big chunk
         // Doing the opposite and gating with wait_vbl_done() yields mild top-of-screen flicker
-        while((STAT_REG & 0x03) != 0x01);
+        while((STAT_REG & (STATF_HBL | STATF_VBL | STATF_OAM | STATF_LCD)) != STATF_VBL);
         set_bkg_palette(0, 8, ModPalBg);
 
-        while((STAT_REG & 0x03) != 0x01);
+        while((STAT_REG & (STATF_HBL | STATF_VBL | STATF_OAM | STATF_LCD)) != STATF_VBL);
         set_sprite_palette(0, 8, ModPalSprite);
 
         // Wait a little while before performing the next step

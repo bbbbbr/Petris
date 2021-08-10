@@ -10,6 +10,8 @@
 # Uses patched gbt_player with gbt_pause logic de-inverted and mute fixed
 # Adds a small utility for swapping to another state set with rand.s/h
 
+# PLATFORM=GAMEBOY
+PLATFORM=POCKET
 
 
 #--- Default build will be release. Can be overidden passing BUILD_TYPE = debug as a parameter
@@ -87,6 +89,12 @@ ifneq (,$(findstring Color,$(BUILD_TYPE)))
 	EXTENSION = gbc
 endif
 
+# Platform overrides
+ifeq ($(PLATFORM),POCKET)
+	PLATFLAG = -mgbz80:ap
+	EXTENSION = pocket
+endif
+
 # Only turn on intro temporal faded clouds if this isn't a web build
 # make BUILDWEB=ON run
 # or
@@ -130,7 +138,7 @@ endif
 $(OBJDIR)/%.d: %.c
 	@set -e; mkdir -p $(OBJDIR);rm -f $@; \
 	# $(SDCC) -MM $(CFLAGS) $< > $@.$$$$; \
-	$(LCC) $(CFLAGS) -c -o $@ $<
+	$(LCC) $(PLATFLAG) $(CFLAGS) -c -o $@ $<
 	sed 's,\($*\)\.rel[ :]*,$(OBJDIR)/$*.o $@ : ,g' < $@.$$$$ > $@; \
 	rm -f $@.$$$$
 #---------------------------------------------------------------------------------------------------------
@@ -149,11 +157,11 @@ $(OBJDIR_RES):
 
 $(OBJDIR)/%.o: $(PATH_PREFIX)src/%.s
 	@echo compiling $<
-	$(LCC) $(CFLAGS) $(AFLAGS) -c -o $@ $<
+	$(LCC) $(PLATFLAG) $(CFLAGS) $(AFLAGS) -c -o $@ $<
 
 $(OBJDIR)/%.o: $(PATH_PREFIX)src/%.c
 	@echo compiling $<
-	$(LCC) $(CFLAGS) -c -o $@ $<
+	$(LCC) $(PLATFLAG) $(CFLAGS) -c -o $@ $<
 
 
 $(OBJDIR_RES)/%.o: $(PATH_PREFIX)res/%.c
@@ -161,7 +169,7 @@ $(OBJDIR_RES)/%.o: $(PATH_PREFIX)res/%.c
 	@if grep -q "unsigned char" $<; then \
 		sed -i "s/unsigned char/const unsigned  char/g" $<; \
 	fi
-	$(LCC) $(CFLAGS) -c -o $@ $<
+	$(LCC) $(PLATFLAG) $(CFLAGS) -c -o $@ $<
 
 $(OBJDIR_RES)/%.mod.o: $(PATH_PREFIX)res/music/%.mod
 	@echo compiling music: $<
@@ -178,12 +186,12 @@ $(OBJDIR_RES)/%.mod.o: $(PATH_PREFIX)res/music/%.mod
 # cleanup intermediary files
 	rm output.bin output_comp.bin output_comp.c
 	@mv output.c $(OBJDIR)/music_tmp.c
-	$(LCC) $(CFLAGS) -c -o $@ $(OBJDIR)/music_tmp.c
+	$(LCC) $(PLATFLAG) $(CFLAGS) -c -o $@ $(OBJDIR)/music_tmp.c
 
 
 $(BINDIR)/$(PROJECT_NAME).$(EXTENSION): $(OBJDIR) $(OBJDIR_RES) $(BINDIR) $(OBJS) $(COMMON_OBJS)
 	@echo Linking
-	$(LCC) $(MAKEBINFLAGS) $(LFLAGS) -Wl-w -v -o $(OBJDIR)/$(PROJECT_NAME).$(EXTENSION) $(OBJS) $(COMMON_OBJS)
+	$(LCC) $(PLATFLAG) $(MAKEBINFLAGS) $(LFLAGS) -Wl-w -v -o $(OBJDIR)/$(PROJECT_NAME).$(EXTENSION) $(OBJS) $(COMMON_OBJS)
 	cp $(OBJDIR)/$(PROJECT_NAME).$(EXTENSION) $(BINDIR)/$(PROJECT_NAME).$(EXTENSION)
 	$(ROMUSAGE) $(OBJDIR)/$(PROJECT_NAME).map -g -R -e:STACK:DEFF:101 -e:SHADOW_OAM:C000:A0
 
