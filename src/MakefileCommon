@@ -84,7 +84,7 @@ ifneq (,$(findstring Color,$(BUILD_TYPE)))
 # Enable CGB mode
 # -yC for games which work on CGBs only
 # -yc for games that work with DMG/CGB
-	MAKEBINFLAGS += -Wm-yC
+	MAKEBINFLAGS += -Wm-yC -Wm-yN  -Wm-yn"PETRIS"
 	CFLAGS += -DCGB
 	EXTENSION = gbc
 endif
