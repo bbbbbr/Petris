@@ -10,15 +10,15 @@
 # Uses patched gbt_player with gbt_pause logic de-inverted and mute fixed
 # Adds a small utility for swapping to another state set with rand.s/h
 
-# PLATFORM=GAMEBOY
-PLATFORM=POCKET
+PLATFORM=GAMEBOY
+# PLATFORM=POCKET
 
 
 #--- Default build will be release. Can be overidden passing BUILD_TYPE = debug as a parameter
 # ex: Release, Debug, ReleaseColor, DebugColor
 
-BUILD_TYPE = ReleaseColor
-# BUILD_TYPE = DebugColor
+# BUILD_TYPE = ReleaseColor
+BUILD_TYPE = DebugColor
 CGB = yes
 
 # For: make flashcart target
@@ -84,6 +84,9 @@ ifneq (,$(findstring Color,$(BUILD_TYPE)))
 # Enable CGB mode
 # -yC for games which work on CGBs only
 # -yc for games that work with DMG/CGB
+# -yn"<title>" (no space before is important)
+# -yN turns of Nintendo logo copy, for Analogue Pocket/etc, it's now built into GBDK
+# -yS noi -> bgb compatible symbol conversion ( -Wm-yS)
 	MAKEBINFLAGS += -Wm-yC -Wm-yN  -Wm-yn"PETRIS"
 	CFLAGS += -DCGB
 	EXTENSION = gbc
