@@ -21,9 +21,8 @@
 #
 # Example use in a makefile:
 # ifdef CDEBUG
-#     @echo Reprocessing Symbols to include C Source
-#     mv $(OBJDIR)/$(PROJECT_NAME).sym $(OBJDIR)/$(PROJECT_NAME)_raw.sym
-#     $(SRC2SYM) $(OBJDIR)/$(PROJECT_NAME)_raw.sym > $(OBJDIR)/$(PROJECT_NAME).sym
+#     @echo Reprocessing .NOI Debug data to include C Source
+#     $(SRC2SYM) $(OBJDIR)/$(PROJECT_NAME).noi > $(OBJDIR)/$(PROJECT_NAME).sym
 # endif
 
 

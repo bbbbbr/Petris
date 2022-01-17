@@ -199,7 +199,7 @@ void fade2pal_update_entry(void) {
     // To avoid flickering:
     // Wait until VBlank (mode == 1) and then write palette in one big chunk
     // Doing the opposite and gating with wait_vbl_done() yields mild top-of-screen flicker
-    while((STAT_REG & 0x03) != 0x01);
+    while((STAT_REG & (STATF_HBL | STATF_VBL | STATF_OAM | STATF_LCD)) != STATF_VBL);
     set_bkg_palette(FADE2PAL_PALNUM_START,
                     FADE2PAL_NUM_PALS,
                     &ModPalBg[FADE2PAL_PALNUM_START * COLORS_PER_PAL]);
