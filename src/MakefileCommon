@@ -17,8 +17,8 @@ PLATFORM=GAMEBOY
 #--- Default build will be release. Can be overidden passing BUILD_TYPE = debug as a parameter
 # ex: Release, Debug, ReleaseColor, DebugColor
 
-# BUILD_TYPE = ReleaseColor
-BUILD_TYPE = DebugColor
+BUILD_TYPE = ReleaseColor
+# BUILD_TYPE = DebugColor
 CGB = yes
 
 # For: make flashcart target
@@ -169,9 +169,9 @@ $(OBJDIR)/%.o: $(PATH_PREFIX)src/%.c
 
 $(OBJDIR_RES)/%.o: $(PATH_PREFIX)res/%.c
 	@echo compiling resource: $<
-	@if grep -q "unsigned char" $<; then \
-		sed -i "s/unsigned char/const unsigned  char/g" $<; \
-	fi
+#	@if grep -q "unsigned char" $<; then \
+#		sed -i "s/unsigned char/const unsigned  char/g" $<; \
+#	fi
 	$(LCC) $(PLATFLAG) $(CFLAGS) -c -o $@ $<
 
 $(OBJDIR_RES)/%.mod.o: $(PATH_PREFIX)res/music/%.mod
