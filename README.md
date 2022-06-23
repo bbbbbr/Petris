@@ -14,7 +14,7 @@ Petris is a new home-brew 2D puzzle game for the Game Boy Color (CGB). It will r
 
 ### Download ROMs and Play Online
 
-You can [download the game here](/rom/Petris.gbc) or visit the [itch.io page](https://bbbbbr.itch.io/petris).
+Downloads and online playable version are at: https://bbbbbr.itch.io/petris
 _________________
 Run it either in an emulator such as [BGB](http://bgb.bircd.org/), on a real Game Boy if you have a flashable cartridge, or you can buy a cartridge at [Catskull Electronics](https://catskullelectronics.com/collections/games/products/petris).
 
