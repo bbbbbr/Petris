@@ -1,4 +1,4 @@
-Petris - A puzzle game of shapely pets for the Game Boy Color (CGB)
+Petris - A puzzle game of shapely pets for the Game Boy Color (CGB), Analogue Pocket (AP) and Game Gear (GG)
 ===========
 
 Build your favorite pets in all shapes and sizes, keep ahead of dropping pieces and make it to the next level!
@@ -11,6 +11,8 @@ Petris is a new home-brew 2D puzzle game for the Game Boy Color (CGB). It will r
 
 ![Petris cart](/info/petris-cart_one_row.jpg)
 
+
+(Check other branches for Game Gear and Analogue Pocket sources)
 
 ### Download ROMs and Play Online
 
