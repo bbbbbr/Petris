@@ -7,7 +7,7 @@ Petris is a new home-brew 2D puzzle game for the Game Boy Color (CGB). It will r
 
 ### Physical Cartridge available:
 * ~~[Catskull Electronics](https://catskullelectronics.com/collections/games/products/petris)~~ 
-* Ferrante Crafts: https://www.etsy.com/listing/1162310473/petris-game-cartridge-for-game-boy-color
+* Ferrante Crafts: https://ferrantecrafts.com/products/petris
 
 ![Petris cart](/info/petris-cart_one_row.jpg)
 
@@ -18,7 +18,7 @@ Petris is a new home-brew 2D puzzle game for the Game Boy Color (CGB). It will r
 
 Downloads and online playable version are at: https://bbbbbr.itch.io/petris
 _________________
-Run it either in an emulator such as [BGB](http://bgb.bircd.org/), on a real Game Boy if you have a flashable cartridge, or you can buy a cartridge at [Catskull Electronics](https://catskullelectronics.com/collections/games/products/petris).
+Run it either in an emulator such as [BGB](http://bgb.bircd.org/), on a real Game Boy if you have a flashable cartridge, or you can buy a cartridge at ~~[Catskull Electronics](https://catskullelectronics.com/collections/games/products/petris)~~ [Ferrante Crafts](https://ferrantecrafts.com/products/petris).
 
 ![Petris cartridge sticker](/res/printable/cartridge_sticker_petris_x300.png)
 ![Petris game in Long Pet game type](/info/Petris_LongPet.png)
