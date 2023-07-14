@@ -214,7 +214,7 @@ UINT8 player_piece_move(INT8 dir_x, INT8 dir_y) {
 }
 
 
-void player_piece_update_gfx() {
+void player_piece_update_gfx(void) {
 
     if (player_piece & GP_SPECIAL_MASK) {
         // player_piece = player_piece;

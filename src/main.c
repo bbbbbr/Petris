@@ -61,7 +61,7 @@ __asm \
   halt \
 __endasm
 
-void handle_non_cgb() {
+void handle_non_cgb(void) {
 
     // _cpu will return CGB_TYPE for both CGB and GBA
     if (_cpu != CGB_TYPE) {
@@ -79,7 +79,7 @@ void handle_non_cgb() {
 }
 
 
-void vbl_update() {
+void vbl_update(void) {
     vbl_count++;
 
     // Optional: Animate can also be called from here instead
@@ -110,7 +110,7 @@ void init_sound(void) {
 }
 
 
-void init_interrupts() {
+void init_interrupts(void) {
     disable_interrupts();
     add_VBL(vbl_update);
     // add_TIM(update_gbt_music); // Moved this into vbl_udpate() as workaround for occasional gfx glitches
@@ -130,7 +130,7 @@ void init_interrupts() {
 }
 
 
-void init (void) {
+void init(void) {
 
     vbl_count = 0;
     music_mute_frames = 0;

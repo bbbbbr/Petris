@@ -35,7 +35,7 @@ UINT8  effect_y_line = 0;
 #define EFFECT_START_Y          16U
 #define SCX_INVERT_WAVE_BITS  0xFAU
 
-void hblank_effect_isr() {
+void hblank_effect_isr(void) {
 
 
     // Don't start until line [effect_y_line]

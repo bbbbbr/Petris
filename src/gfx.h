@@ -100,7 +100,7 @@ extern const UWORD intro_screen_palette[];
 extern const const UWORD intro_cat_palette[];
 
 // void print_font_palette_set(UINT8);
-void pet_tiles_prepare();
+void pet_tiles_prepare(void);
 
 #endif // GFX_H
 

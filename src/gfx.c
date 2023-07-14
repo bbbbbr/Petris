@@ -126,7 +126,7 @@ UINT8 pet_tiles_hicontrast_ram[ TILE_SIZE_BYTES * (TILE_COUNT_PETTOTAL + TILE_CO
 // Expand deduplicated high contrast
 //   pet tiles from CODE into RAM
 // And select matching color palette from CODE
-void pet_tiles_prepare() {
+void pet_tiles_prepare(void) {
 
     UINT8 * p_src_tile;
     UINT8 * p_dest;

@@ -62,7 +62,7 @@ UINT8 hinting_petlength_last_removed = HINT_PET_LENGTH_SLOT_NONE;
 
 
 // Apply sprite flicker to special piece hinting and drop hinting if needed
-void player_hinting_flicker_update() {
+void player_hinting_flicker_update(void) {
 
     if ((sys_time & 0x0F) == 0x00)
         player_hinting_special_show(TRUE);
@@ -134,7 +134,7 @@ void player_hinting_special_move(void) {
 
 
 // NOTE: expects to only be called if (player_piece & GP_SPECIAL_MASK)
-void player_hinting_special_update_gfx() {
+void player_hinting_special_update_gfx(void) {
 
         // Load the corresponding special tile (for 4-direction preview)
         // The LUT is zero based, so get an offset from the start of the special tiles

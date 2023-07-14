@@ -37,6 +37,6 @@ void PlayFx(SOUND_CHANNEL channel, UINT8 mute_frames, ...);
 void MusicPlay(const unsigned char music[], const unsigned int music_seq_offset[], unsigned char loop);
 void MusicUpdateStatus(void);
 void MusicStop(void);
-void update_gbt_music();
+void update_gbt_music(void);
 
 #endif

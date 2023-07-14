@@ -112,7 +112,7 @@ void MusicPlay(const unsigned char music_compressed[], const unsigned int music_
 }
 
 
-void MusicUpdateStatus() {
+void MusicUpdateStatus(void) {
 
     if (option_game_music == OPTION_MUSIC_TWILIGHT)
         MusicPlay(twilight_drive_mod, twilight_drive_mod_Data, GBT_LOOP_YES);
@@ -124,7 +124,7 @@ void MusicUpdateStatus() {
         MusicStop();
 }
 
-void update_gbt_music() {
+void update_gbt_music(void) {
     gbt_update();
     // REFRESH_BANK; // WARNING: re-enable if using banking with an MBC
 }
