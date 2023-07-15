@@ -1,16 +1,24 @@
-Petris - A puzzle game of shapely pets for the Game Boy Color (CGB)
+Petris - A puzzle game of shapely pets for the Game Boy Color (CGB), Analogue Pocket (AP) and Game Gear (GG)
 ===========
-(Updated source for GBDK2020)
-
-* __Physical Catridges available at:__ [Catskull Electronics](https://catskullelectronics.com/collections/games/products/petris)
 
 Build your favorite pets in all shapes and sizes, keep ahead of dropping pieces and make it to the next level!
 
 Petris is a new home-brew 2D puzzle game for the Game Boy Color (CGB). It will run on original hardware (CGB and GBA) and in most emulators.
 
-You can [download the game here](/rom/Petris.gbc) or visit the [itch.io page](https://bbbbbr.itch.io/petris).
+### Physical Cartridge available:
+* ~~[Catskull Electronics](https://catskullelectronics.com/collections/games/products/petris)~~ 
+* Ferrante Crafts: https://ferrantecrafts.com/products/petris
+
+![Petris cart](/info/petris-cart_one_row.jpg)
+
+
+(Check other branches for Game Gear and Analogue Pocket sources)
+
+### Download ROMs and Play Online
+
+Downloads and online playable version are at: https://bbbbbr.itch.io/petris
 _________________
-Run it either in an emulator such as [BGB](http://bgb.bircd.org/), on a real Game Boy if you have a flashable cartridge, or you can buy a cartridge at [Catskull Electronics](https://catskullelectronics.com/collections/games/products/petris).
+Run it either in an emulator such as [BGB](http://bgb.bircd.org/), on a real Game Boy if you have a flashable cartridge, or you can buy a cartridge at ~~[Catskull Electronics](https://catskullelectronics.com/collections/games/products/petris)~~ [Ferrante Crafts](https://ferrantecrafts.com/products/petris).
 
 ![Petris cartridge sticker](/res/printable/cartridge_sticker_petris_x300.png)
 ![Petris game in Long Pet game type](/info/Petris_LongPet.png)
@@ -55,4 +63,5 @@ _________________
  * Some GBDK patches by Toxa  - https://github.com/untoxa
  * UnaPACK aPack decompression by Toxa  - https://github.com/untoxa
  * apultra aPack compression - https://github.com/emmanuel-marty/apultra]
+
 
