@@ -103,6 +103,9 @@ void gameplay_ended_cleanup(void) {
 
 void gameplay_handle_gameover_screen(void) {
 
+    // Make sure scroll X is reset if it was doing any shaking at the moment the game ended
+    SCX_REG = 0;
+    
     // Stop music, play end game sound and hide all the sprites
     MusicStop();
 
