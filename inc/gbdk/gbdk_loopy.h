@@ -96,7 +96,6 @@ void set_bkg_4bpp_palette(unsigned int first_palette, unsigned int nb_palettes, 
 void set_bkg_4bpp_data(unsigned int start, unsigned int ntiles, const uint8_t *src);
 
 
-
 /** Sets a rectangular region of Background Tile Map.
 
     @param x      X Start position in Background Map tile coordinates
@@ -122,6 +121,7 @@ void set_bkg_4bpp_data(unsigned int start, unsigned int ntiles, const uint8_t *s
 */
 void set_bkg_tiles(unsigned int x, unsigned int y, unsigned int width, unsigned int height, const uint16_t *tiles);
 
+
 /** Sets a rectangular region of Background Tile Map.
     The offset value in __base_tile__ is added to
     the tile ID for each map entry.
@@ -142,6 +142,18 @@ void set_bkg_tiles(unsigned int x, unsigned int y, unsigned int width, unsigned 
     @see set_bkg_tilemap_base_address()    
 */
 void set_bkg_based_tiles(unsigned int x, unsigned int y, unsigned int width, unsigned int height, const uint16_t *tiles, unsigned int base_tile);
+
+
+
+/** Fills a rectangular region of Tile Map entries for the Background layer with tile.
+
+    @param x      X Start position in Background Map tile coordinates. Range 0 - 31
+    @param y      Y Start position in Background Map tile coordinates. Range 0 - 31
+    @param w      Width of area to set in tiles. Range 1 - 32
+    @param h      Height of area to set in tiles. Range 1 - 32
+    @param tile   Fill value
+*/
+void fill_bkg_rect(unsigned int x, unsigned int y, unsigned int width, unsigned int height, const uint16_t tile);
 
 
 /** Set base memory address used by the tilemap writing functions,

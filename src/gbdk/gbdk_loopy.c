@@ -76,7 +76,7 @@ void set_bkg_tiles(unsigned int x, unsigned int y, unsigned int width, unsigned 
             // Check for wraparound from right edge -> left.
             // In that case, preserve current row instead of letting it step down to next
             row_wrap--;
-            if (row_wrap == 0) {
+            if ((row_wrap == 0) && (row_len != 0)) {
                 p_dest -= DEVICE_SCREEN_BUFFER_WIDTH;
                 row_wrap = DEVICE_SCREEN_BUFFER_WIDTH;
             }
@@ -101,7 +101,7 @@ void set_bkg_based_tiles(unsigned int x, unsigned int y, unsigned int width, uns
             // Check for wraparound from right edge -> left.
             // In that case, preserve current row instead of letting it step down to next
             row_wrap--;
-            if (row_wrap == 0) {
+            if ((row_wrap == 0) && (row_len != 0)) {
                 p_dest -= DEVICE_SCREEN_BUFFER_WIDTH;
                 row_wrap = DEVICE_SCREEN_BUFFER_WIDTH;
             }
@@ -109,6 +109,31 @@ void set_bkg_based_tiles(unsigned int x, unsigned int y, unsigned int width, uns
         p_dest += row_stride;
     }
 }
+
+
+void fill_bkg_rect(unsigned int x, unsigned int y, unsigned int width, unsigned int height, const uint16_t tile) {
+
+          uint16_t * p_dest     = _bg_tilemap_base_address + (y * DEVICE_SCREEN_BUFFER_WIDTH) + x;
+    const uint32_t   row_stride = DEVICE_SCREEN_BUFFER_WIDTH - width;
+
+    bios_vsync();
+    while (height--) {
+        uint16_t row_len = width;
+        uint16_t row_wrap = DEVICE_SCREEN_BUFFER_WIDTH - x;
+        while (row_len--) {
+            *p_dest++ = tile | _tilemap_screen_ab_prop;
+            // Check for wraparound from right edge -> left.
+            // In that case, preserve current row instead of letting it step down to next
+            row_wrap--;
+            if ((row_wrap == 0) && (row_len != 0)) {
+                p_dest -= DEVICE_SCREEN_BUFFER_WIDTH;
+                row_wrap = DEVICE_SCREEN_BUFFER_WIDTH;
+            }
+        }
+        p_dest += row_stride;
+    }
+}
+
 
 void set_bkg_tilemap_base_address(uint16_t * p_tilemap_base_address) {
     _bg_tilemap_base_address = p_tilemap_base_address;
