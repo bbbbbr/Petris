@@ -6,7 +6,9 @@ build/
 *.noi
 *.sav
 !res/source_audio/*.sav
+res/generated/*.png
 *.ini
 package/
 itch.io/
 *.sublime*
+*/NOT_YET_PORTED/*
