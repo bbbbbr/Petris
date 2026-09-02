@@ -28,7 +28,7 @@
 // #include "gameplay.h"
 
 #include "intro_splash.h"
-// #include "intro_screen.h"
+#include "intro_screen.h"
 // #include "options_screen.h"
 
 // #include "options.h"
@@ -108,7 +108,7 @@ void init_gfx_hardware(void) {
     VDP.BG_SUBPAL[1]    = BG_PAL_SETUP(PAL_4, PAL_5, PAL_6, PAL_7);  // BG1
 
     VDP.SCREENPRIO      = BLEND_MATH_ADD | SCREEN_A_ENABLE | SCREEN_B_ENABLE | PRIORITY_BM_A | PRIORITY_BG0_A | PRIORITY_OBJ0_A;
-    VDP.LAYER_CTRL      = LAYER_SCREEN(LAYER_SCREEN_A, LAYER_SCREEN_A, LAYER_SCREEN_A, LAYER_SCREEN_A) | LAYER_ENABLE_BG0 | LAYER_ENABLE_BG1 | LAYER_ENABLE_OBJ0;
+    VDP.LAYER_CTRL      = LAYER_SCREEN(LAYER_SCREEN_A, LAYER_SCREEN_A, LAYER_SCREEN_A, LAYER_SCREEN_A) | LAYER_ENABLE_BG0; // | LAYER_ENABLE_BG1; //| LAYER_ENABLE_OBJ0;
 
 
     // Set up split between 8bpp and 4bpp tile patterns
@@ -156,15 +156,6 @@ int main() {
         UPDATE_KEYS();
         UPDATE_KEY_REPEAT((J_LEFT | J_RIGHT | J_DOWN));
 
-        if KEY_PRESSED(J_LEFT) {
-            VDP.BG_SCROLL[BG0_SCROLL_X]--;
-        }
-        else if KEY_PRESSED(J_RIGHT) {
-            VDP.BG_SCROLL[BG0_SCROLL_X]++;
-        }
-        VDP.BG_SCROLL[BG0_SCROLL_Y]--;
-
-/*
         switch (game_state) {
 
             case GAME_INTRO_INIT:
@@ -178,16 +169,35 @@ int main() {
                 // Done with intro screen, now start game
                 if (KEY_TICKED(J_START)) {
                     game_state = GAME_OPTIONS_INIT;
-                    fade_start(FADE_OUT);
+                    // fade_start(FADE_OUT);
                     intro_clouds_cleanup();
+                }
+                // Debug: use input to help indicate if game is alive and running
+                // Note: color showing in bg when scrolling is due to tile 1 filling the BG and using 4th palette
+                //       can be verified for example using fill_bkg_rect(0, 0, DEVICE_SCREEN_BUFFER_WIDTH, DEVICE_SCREEN_BUFFER_HEIGHT, 0);
+                if KEY_PRESSED(J_LEFT) {
+                    VDP.BG_SCROLL[BG0_SCROLL_X]++;
+                }
+                else if KEY_PRESSED(J_RIGHT) {
+                    VDP.BG_SCROLL[BG0_SCROLL_X]--;
+                }
+                if KEY_PRESSED(J_UP) {
+                    VDP.BG_SCROLL[BG0_SCROLL_Y]++;
+                }
+                else if KEY_PRESSED(J_DOWN) {
+                    VDP.BG_SCROLL[BG0_SCROLL_Y]--;
                 }
                 break;
 
             case GAME_OPTIONS_INIT:
-                options_screen_init();
+                // TODO: DEBUG: loop back around to title screen for now
+                game_state = GAME_INTRO_INIT;
+
+                // options_screen_init();
                 // Options screen will re-start music if music option = ON
-                game_state = GAME_OPTIONS;
+                // game_state = GAME_OPTIONS;
                 break;
+/*
 
             case GAME_OPTIONS:
                 options_screen_handle();
@@ -225,7 +235,7 @@ int main() {
                     game_state = GAME_INTRO_INIT;
                 }
                 break;
-        }
 */
+        }
     }
 }

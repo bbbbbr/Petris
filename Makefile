@@ -129,7 +129,7 @@ clean:
 assets-clean:
 	rm -f $(RESDIR)/*.c $(RESDIR)/*.h $(RESDIR)/*.png
 
-# Gradient color bar image from: http://www.jentronics.com/color.html
+# TODO: detection of changes and auto rebuilding from that
 assets:
 	$(TOOLSDIR)/tilepalquant $(RES_ASSET_DIR)/intro_cat.png -o $(RES_GENERATED_DIR)/intro_cat_out.png -use_metafile
 	$(TOOLSDIR)/png2asset $(RES_GENERATED_DIR)/intro_cat_out.png -o $(RESDIR)/intro_cat_out.c -use_metafile

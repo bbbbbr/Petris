@@ -5,6 +5,8 @@
 
 #define ARRAY_LEN(A)  sizeof(A) / sizeof(A[0])
 
+#define TILE_NUM_0  0u
+
 enum GAME_STATES {
     GAME_INTRO_INIT = 0,
     GAME_INTRO,
