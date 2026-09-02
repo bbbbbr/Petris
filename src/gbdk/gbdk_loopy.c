@@ -1,0 +1,171 @@
+
+#include "stdint.h"
+#include "loopy.h"
+#include "loopy_helpers.h"
+
+#include "gbdk/platform.h"
+
+static uint16_t * _bg_tilemap_base_address =  BG0_MAP_START();
+static uint8_t  * _4bpp_tile_patterns_base_address = 0;
+static uint16_t   _tilemap_screen_ab_prop = 0;
+
+
+/** Set background palette(s)
+
+    @param first_palette  Index of the first palette to write (0-7)
+    @param nb_palettes    Number of palettes to write (1-8, max depends on first_palette)
+    @param rgb_data       Pointer to source palette data
+
+    Writes __nb_palettes__ to background palette data starting
+    at __first_palette__, Palette data is sourced from __rgb_data__.
+
+    \li Each Palette is 32 bytes in size: 16 colors x 2 bytes per palette color entry.
+    \li Each color (16 per palette) is packed as RGB-555 format (1:5:5:5, MSBit [15] is unused).
+    \li Each component (R, G, B) may have values from 0 - 31 (5 bits), 31 is brightest.
+
+ */
+void set_bkg_4bpp_palette(unsigned int first_palette, unsigned int nb_palettes, const palette_color_t *rgb_data) {
+
+    uint16_t * p_pal = &VDP.PALETTE[first_palette * COLS_PER_PAL_4BPP];
+
+    for (unsigned int pal = 0; pal < nb_palettes; pal++) {
+        for (unsigned int col = 0; col < COLS_PER_PAL_4BPP; col++) {
+            *p_pal++ = *rgb_data++;
+        }
+    }
+}
+
+
+
+// TODO: convert to u16 to reduce number of writes
+/** Sets VRAM Tile Pattern data in the 4bpp format
+
+    @param first_tile  Index of the first tile to write (0 - 511)
+    @param nb_tiles    Number of tiles to write
+    @param data        Pointer to source Tile Pattern data.
+ */
+void set_bkg_4bpp_data(unsigned int start, unsigned int ntiles, const uint8_t *src) {
+
+    // offset into start of 4bpp tile pattern data based on 
+    uint8_t * p_dest = (start * BYTES_PER_4BPP_TILE) + _4bpp_tile_patterns_base_address;
+
+    // TODO: Use DMA (make a vmemcpy shim?)
+    // Tile VRAM is not dual-ported, so requires safe access timing, unlike bitmap vram
+    // TODO: This is the shoddiest safe access timing...
+    bios_vsync();
+    size_t copybytes = ntiles * BYTES_PER_4BPP_TILE;
+    while (copybytes--) {
+        *p_dest++ = *src++;
+    }
+}
+
+
+
+
+void set_bkg_tiles(unsigned int x, unsigned int y, unsigned int width, unsigned int height, const uint16_t *tiles) {
+    
+          uint16_t * p_dest     = _bg_tilemap_base_address + (y * DEVICE_SCREEN_BUFFER_WIDTH) + x;
+    const uint32_t   row_stride = DEVICE_SCREEN_BUFFER_WIDTH - width;
+
+    bios_vsync();
+    while (height--) {
+        uint16_t row_len = width;
+        uint16_t row_wrap = DEVICE_SCREEN_BUFFER_WIDTH - x;
+        while (row_len--) {
+            *p_dest++ = *tiles++ | _tilemap_screen_ab_prop;
+            // Check for wraparound from right edge -> left.
+            // In that case, preserve current row instead of letting it step down to next
+            row_wrap--;
+            if (row_wrap == 0) {
+                p_dest -= DEVICE_SCREEN_BUFFER_WIDTH;
+                row_wrap = DEVICE_SCREEN_BUFFER_WIDTH;
+            }
+        }
+        p_dest += row_stride;
+    }
+}
+
+
+void set_bkg_based_tiles(unsigned int x, unsigned int y, unsigned int width, unsigned int height, const uint16_t *tiles, unsigned int base_tile) {
+
+          uint16_t * p_dest     = _bg_tilemap_base_address + (y * DEVICE_SCREEN_BUFFER_WIDTH) + x;
+    const uint32_t   row_stride = DEVICE_SCREEN_BUFFER_WIDTH - width;
+
+    bios_vsync();
+    while (height--) {
+        uint16_t row_len = width;
+        uint16_t row_wrap = DEVICE_SCREEN_BUFFER_WIDTH - x;
+        while (row_len--) {
+            *p_dest++ = (*tiles & ~BG_TILEMAP_CHRNUM_MASK) | ((*tiles & BG_TILEMAP_CHRNUM_MASK) + base_tile) |  _tilemap_screen_ab_prop;
+            tiles++;
+            // Check for wraparound from right edge -> left.
+            // In that case, preserve current row instead of letting it step down to next
+            row_wrap--;
+            if (row_wrap == 0) {
+                p_dest -= DEVICE_SCREEN_BUFFER_WIDTH;
+                row_wrap = DEVICE_SCREEN_BUFFER_WIDTH;
+            }
+        }
+        p_dest += row_stride;
+    }
+}
+
+void set_bkg_tilemap_base_address(uint16_t * p_tilemap_base_address) {
+    _bg_tilemap_base_address = p_tilemap_base_address;
+}
+
+void set_4bpp_tile_patterns_base_address(uint8_t * p_tile_patterns_base_address) {
+    _4bpp_tile_patterns_base_address = p_tile_patterns_base_address;
+}
+
+void set_bkg_tiles_target_screen_a_or_b(unsigned int screen_a_or_b) {
+    if (screen_a_or_b & LAYER_SCREEN_B)
+        _tilemap_screen_ab_prop = BG_TILEMAP_SCREEN_B;
+    else
+        _tilemap_screen_ab_prop = 0;
+}
+
+
+
+void delay(uint16_t d) {
+    // TODO: calibrate delay time (how to measure...? count in vsyncs?)
+}
+
+// void set_native_tile_data(uint16_t start, uint16_t ntiles, const void *src) PRESERVES_REGS(iyh, iyl);
+// void set_bkg_4bpp_data(uint16_t start, uint16_t ntiles, const void *src) PRESERVES_REGS(iyh, iyl);
+// void set_bkg_native_data(uint16_t start, uint16_t ntiles, const void *src) PRESERVES_REGS(iyh, iyl);
+
+
+// void set_tile_map(uint8_t x, uint8_t y, uint8_t w, uint8_t h, const uint8_t *tiles) Z88DK_CALLEE;
+// void set_tile_map_compat(uint8_t x, uint8_t y, uint8_t w, uint8_t h, const uint8_t *tiles) Z88DK_CALLEE;
+// #define set_bkg_tiles set_tile_map_compat
+// #define set_win_tiles set_tile_map_compat
+
+
+
+/*
+// gbdk [convert]
+initrand()
+rand()
+
+add_LCD()
+add_VBL()
+disable_interrupts()
+enable_interrupts()
+init_interrupts()
+set_interrupts()
+
+vsync()
+delay()
+
+move_sprite()
+set_bkg_data()
+x set_bkg_palette()
+set_bkg_tiles()
+set_sprite_data()
+set_sprite_palette()
+set_sprite_prop()
+set_sprite_tile()
+
+~some kind of shadow oam/copy
+*/
