@@ -17,16 +17,15 @@
 #include <stdbool.h>
 
 // #include "gfx.h"
+#include "common.h"
 #include "input.h"
 // #include "gfx_print.h"
 // #include "fade.h"
 
 #include "intro_splash.h"
-
 #include "intro_cat_out.h"
 
 
-#define TILE_NUM_0  0u
 #define TILES_SPLASH_START  0
 #define TILE_COUNT_SPLASH  23
 
@@ -72,6 +71,9 @@ static void init_hblank_isr(void) {
 }
 
 static void init_gfx(void) {
+
+    // TODO: Due to scrolling, will probably need to fill entire BG buffer with black tile.
+    //       For example: fill_bkg_rect(0, 0, DEVICE_SCREEN_BUFFER_WIDTH, DEVICE_SCREEN_BUFFER_HEIGHT, 0);
 
     bios_vsync();
     set_bkg_4bpp_palette(PAL_0, intro_cat_out_PALETTE_COUNT, intro_cat_out_palettes);
