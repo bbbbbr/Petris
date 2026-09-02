@@ -1,0 +1,1 @@
+ -num_pals 2 -cols_per_pal 16 -dither slow -col_zero shared -shared_col 255,0,255
