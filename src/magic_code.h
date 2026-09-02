@@ -9,7 +9,7 @@
 //       these two upper and lower bound #defines
 #define MAGIC_CODE_STATE_ACTIVATED 0xFF // This should be higher than the index of the last button sequence entry
 
-extern UINT8 magic_code_state;
+extern uint8_t magic_code_state;
 
 void magic_code_reset(void);
 void magic_code_update(void);

@@ -1,4 +1,4 @@
-// Copyright 2020 (c) bbbbbr
+// Copyright 2026 (c) bbbbbr
 //
 // This software is licensed under:
 //
@@ -9,42 +9,39 @@
 // Attribution-NonCommercial-ShareAlike 4.0 International License
 // See: http://creativecommons.org/licenses/by-nc-sa/4.0/
 
-#include <gb/gb.h>
-#include <gb/cgb.h> // Include cgb functions
+#include <gbdk/platform.h>
 
-// #include "bgb_emu.h" // Used for debugging only, see BGB_MESSAGE
 
 #include "common.h"
-#include "serial_link.h"
 
-#include "sound.h"
-#include "gbt_player.h"
-#include "audio_common.h"
+// #include "sound.h"
+// #include "gbt_player.h"
+// #include "audio_common.h"
 
-#include "fade.h"
+// #include "fade.h"
 
-// #include "game_board.h"
-#include "game_board_gfx.h"
-#include "gameover_message.h"
-#include "game_stats.h"
+// // #include "game_board.h"
+// #include "game_board_gfx.h"
+// #include "gameover_message.h"
+// #include "game_stats.h"
 
-#include "gameplay.h"
+// #include "gameplay.h"
 
 #include "intro_splash.h"
-#include "intro_screen.h"
-#include "options_screen.h"
+// #include "intro_screen.h"
+// #include "options_screen.h"
 
-#include "options.h"
-#include "player_hinting.h"
+// #include "options.h"
+// #include "player_hinting.h"
 
 #include "input.h"
-#include "gfx.h"
-#include "gfx_print.h"
-#include "serial_link.h"
+// #include "gfx.h"
+// #include "gfx_print.h"
+
 
 #include "magic_code.h"
 
-#include "../res/font_tiles.h"
+// #include "../res/font_tiles.h"
 
 
 // #define DEBUG_SKIP_INTRO
@@ -53,43 +50,15 @@ void init (void);
 void init_interrupts(void);
 void vbl_update(void);
 void init_sound(void);
-
-UINT8 vbl_count = 0;
-
-#define ASM_HALT \
-__asm \
-  halt \
-__endasm
-
-void handle_non_cgb(void) {
-
-    // _cpu will return CGB_TYPE for both CGB and GBA
-    if (_cpu != CGB_TYPE) {
-        // BGB_MESSAGE("DMG DETECTED");
-        enable_interrupts(); // Make sure interrupts are enabled before calling HALT
-        set_bkg_data(TILES_FONT_START, TILE_COUNT_FONT, font_tiles);
-        PRINT(3,8,"GAMEBOY COLOR\nREQUIRED :(", 0);
-        SHOW_BKG;
-        DISPLAY_ON;
-        // Loop forever
-        while(1) {
-            ASM_HALT; // Use less power while idle
-        }
-    }
-}
+void init_gfx_hardware(void);
 
 
+// TODO: Wire up vblank callback, increment it
 void vbl_update(void) {
     vbl_count++;
 
-    // Optional: Animate can also be called from here instead
-    //           to make it independent of game pause/etc
-    // if (game_state == GAME_PLAYING)
-    //     board_gfx_tail_animate();
-
-    // OPTIONAL: Now that crt0.s is patched for ISR related VRAM exceptions,
-    //           this could be moved back to the TIM interrupt since it won't
-    //           cause gfx glitching during redraws
+    // TODO: Init Play/Pause sound
+/*
     update_gbt_music();
 
     if(music_mute_frames != 0) {
@@ -100,68 +69,72 @@ void vbl_update(void) {
             gbt_enable_channels(0xF);
         }
     }
+*/
 }
 
 
 void init_sound(void) {
-    NR52_REG = 0x80; // Enables sound, always set this first
-    NR51_REG = 0xFF; // Enables all channels (left and right)
-    NR50_REG = 0x77; // Max volume
+
+    // music_mute_frames = 0; // TODO
+    // Setup sound hardware (takes a few frames)
+    bios_soundChannels(SOUND_CHANS_4CH);
+    bios_soundVolume(SOUND_VOL_CH2_3, SOUND_VOL_100);
+    bios_soundVolume(SOUND_VOL_CH4,   SOUND_VOL_100);
+    bios_initSoundTransmission();
 }
 
 
 void init_interrupts(void) {
-    disable_interrupts();
-    add_VBL(vbl_update);
-    // add_TIM(update_gbt_music); // Moved this into vbl_udpate() as workaround for occasional gfx glitches
+    // Enable interrupts and DMA for music
+    sys_setInterruptPriority(INT_PRIO_ITU0, 0xF);
+    sys_setInterruptMask(0xE);
+    sys_setDmaEnabled(true);
+}
 
-    //#ifdef CGB
-    #ifdef CPU_FAST_ENABLED
-        TMA_REG = _cpu == CGB_TYPE ? 120U : 0xBCU;
-    #else
-        TMA_REG = 0xBCU;
-    #endif
-        TAC_REG = 0x04U;
 
-    // set_interrupts(VBL_IFLAG | TIM_IFLAG);
-    set_interrupts(VBL_IFLAG);
+void init_gfx_hardware(void) {
+    bios_vsync();
 
-    enable_interrupts();
+    VDP.BACKDROP_A      = RGB888(0,0,0);
+    VDP.BACKDROP_B      = RGB888(0,0,0);
+
+    // Blend style
+    VDP.BLEND           = BLEND_MATH;
+
+    VDP.BG_SCROLL[BG0_SCROLL_X] = 0;
+    VDP.BG_SCROLL[BG0_SCROLL_Y] = 0;
+    VDP.BG_CTRL         = BG_TILESIZE(BG_TILESIZE_8X8, BG_TILESIZE_8X8) | BG0_FORMAT_4BPP | BG_LAYOUT_64X64_SPLIT;
+    VDP.BG_SUBPAL[0]    = BG_PAL_SETUP(PAL_0, PAL_1, PAL_2, PAL_3);  // BG0
+    VDP.BG_SUBPAL[1]    = BG_PAL_SETUP(PAL_4, PAL_5, PAL_6, PAL_7);  // BG1
+
+    VDP.SCREENPRIO      = BLEND_MATH_ADD | SCREEN_A_ENABLE | SCREEN_B_ENABLE | PRIORITY_BM_A | PRIORITY_BG0_A | PRIORITY_OBJ0_A;
+    VDP.LAYER_CTRL      = LAYER_SCREEN(LAYER_SCREEN_A, LAYER_SCREEN_A, LAYER_SCREEN_A, LAYER_SCREEN_A) | LAYER_ENABLE_BG0 | LAYER_ENABLE_BG1 | LAYER_ENABLE_OBJ0;
+
+
+    // Set up split between 8bpp and 4bpp tile patterns
+    #define  RESERVE_8BPP_TILE_ROWS   0u  // Number of tile pattern rows to reserve for 8bpp tiles (8 per row)
+    // AKA CHAR_SPLIT, Tile Base, VDP.TILEBASE
+    VDP.CHARBASE        = RESERVE_8BPP_TILE_ROWS;
+    set_4bpp_tile_patterns_base_address(CHAR_VRAM_4BPP_START());
 }
 
 
 void init(void) {
 
     vbl_count = 0;
-    music_mute_frames = 0;
-    gbt_stop();
-
     game_state = GAME_INTRO_INIT;
 
-    // Require CGB, otherwise display a warning (DMG/Pocket)
-    handle_non_cgb();
-
-    // OPTIONAL: Extra speed doesn't seem to be required right now
-    #ifdef CPU_FAST_ENABLED
-        // Switch CGB to fast speed mode
-        cpu_fast();
-    #endif
-
-    init_link();
-
     init_sound();
-
-    // Optional: fade_start(FADE_OUT);
-
     init_interrupts();
+    init_gfx_hardware();
 
-    DISPLAY_ON;
+    // Set the appropriate controller scanning mode and video height
+    bios_vdpMode(CONTROL_MODE_GAMEPAD, VIDEO_HEIGHT_224P);    
 }
 
 
-void main(void){
+int main() {
     init();
-
     magic_code_reset();
 
     #ifdef DEBUG_SKIP_INTRO
@@ -176,22 +149,29 @@ void main(void){
         // before starting to process the next frame
         // (skip if already happened)
         if(!vbl_count)
-            wait_vbl_done();
+            vsync();
         vbl_count = 0;
 
         // Handle keyboard input
         UPDATE_KEYS();
         UPDATE_KEY_REPEAT((J_LEFT | J_RIGHT | J_DOWN));
 
+        if KEY_PRESSED(J_LEFT) {
+            VDP.BG_SCROLL[BG0_SCROLL_X]--;
+        }
+        else if KEY_PRESSED(J_RIGHT) {
+            VDP.BG_SCROLL[BG0_SCROLL_X]++;
+        }
+        VDP.BG_SCROLL[BG0_SCROLL_Y]--;
+
+/*
         switch (game_state) {
 
             case GAME_INTRO_INIT:
-
                 intro_screen_init();
-                MusicPlay(boss_fight_mod, boss_fight_mod_Data, GBT_LOOP_YES);
+                //  MusicPlay(boss_fight_mod, boss_fight_mod_Data, GBT_LOOP_YES); // TODO
                 game_state = GAME_INTRO;
                 break;
-
 
             case GAME_INTRO:
                 intro_screen_handle();
@@ -203,66 +183,41 @@ void main(void){
                 }
                 break;
 
-
             case GAME_OPTIONS_INIT:
                 options_screen_init();
                 // Options screen will re-start music if music option = ON
-
                 game_state = GAME_OPTIONS;
                 break;
-
 
             case GAME_OPTIONS:
                 options_screen_handle();
                 break;
 
-
             case GAME_READY_TO_START:
                 gameplay_init();
                 MusicUpdateStatus();
-
                 game_state = GAME_PLAYING;
                 break;
-
 
             case GAME_PLAYING:
                 gameplay_update();
                 break;
 
-
-            case GAME_WON_LINK_VERSUS:
-                GAMEOVER_MESSAGE_SET(SPR_YOU_WON_CHARS);
-
-                game_state = GAME_OVER_SCREEN;
-                break;
-
-
             case GAME_ENDED:
-                if (link_status == LINK_STATUS_CONNECTED) {
-                    // If in 2 player versus mode, notify other player they won
-                    // The command is sent from here since GAME_ENDED can be
-                    // triggered in multiple locations based on game type
-                    LINK_SEND(LINK_CMD_OPPONENT_LOST);
+                // TODO: 2 Player mode handling (need loopy hardware 4 player controller breakout)
 
-                    GAMEOVER_MESSAGE_SET(SPR_YOU_LOST_CHARS);
-                } else {
-                    // Non-link mode gets regular game over text
-                    GAMEOVER_MESSAGE_SET(SPR_GAMEOVER_CHARS);
-                }
-
+                GAMEOVER_MESSAGE_SET(SPR_GAMEOVER_CHARS);
                 game_state = GAME_OVER_SCREEN;
                 break;
 
 
             case GAME_OVER_SCREEN:
-
                 gameplay_handle_gameover_screen();
                 game_state = GAME_OVER_WAITEXIT;
                 break;
 
 
             case GAME_OVER_WAITEXIT:
-
                 if (KEY_TICKED(J_START | J_A | J_B)) {
                     // Turn sprites off and then fade out
                     HIDE_SPRITES;
@@ -271,6 +226,6 @@ void main(void){
                 }
                 break;
         }
-
+*/
     }
 }

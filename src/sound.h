@@ -1,7 +1,7 @@
 #ifndef SOUND_H
 #define SOUND_H
 
-#include <gb/gb.h>
+#include <gbdk/platform.h>
 
 typedef enum {
 	CHANNEL_1,
@@ -30,9 +30,9 @@ extern const unsigned char villainsofhiphop_mod[];
 
 
 
-extern UINT8 music_mute_frames;
+extern uint8_t music_mute_frames;
 
-void PlayFx(SOUND_CHANNEL channel, UINT8 mute_frames, ...);
+void PlayFx(SOUND_CHANNEL channel, uint8_t mute_frames, ...);
 // void MusicPlay(const unsigned char * music[], unsigned char loop);
 void MusicPlay(const unsigned char music[], const unsigned int music_seq_offset[], unsigned char loop);
 void MusicUpdateStatus(void);

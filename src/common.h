@@ -3,12 +3,9 @@
 #ifndef COMMON_H
 #define COMMON_H
 
-// Enable CGB Fast cpu mode
-// #define CPU_FAST_ENABLED
-
 #define ARRAY_LEN(A)  sizeof(A) / sizeof(A[0])
 
-typedef enum GAME_STATES {
+enum GAME_STATES {
     GAME_INTRO_INIT = 0,
     GAME_INTRO,
     GAME_OPTIONS_INIT,
@@ -18,12 +15,11 @@ typedef enum GAME_STATES {
     GAME_START,
     GAME_PLAYING,
     GAME_ENDED,
-    GAME_WON_LINK_VERSUS,
     GAME_OVER_SCREEN,
     GAME_OVER_WAITEXIT,
 };
 
-extern UINT8 game_state;
-
+extern uint16_t game_state;
+extern uint16_t vbl_count;
 
 #endif

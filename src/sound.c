@@ -4,16 +4,15 @@
 
 #include "sound.h"
 
-#include "gbt_player.h"
-#include "options.h"
-#include "unapack.h"
+// #include "gbt_player.h"
+// #include "options.h"
 
 #define MUSIC_NONE 0
-UINT8 music_mute_frames = 0;
+uint8_t music_mute_frames = 0;
 void * last_music = MUSIC_NONE;
 
-const UINT8 FX_REG_SIZES[] = {5, 4, 5, 4, 3};
-const UINT16 FX_ADDRESS[] = {0xFF10, 0xFF16, 0xFF1A, 0xFF20, 0xFF24};
+const uint8_t FX_REG_SIZES[] = {5, 4, 5, 4, 3};
+const uint16_t FX_ADDRESS[] = {0xFF10, 0xFF16, 0xFF1A, 0xFF20, 0xFF24};
 
 // uncompressed sizes of audio tracks
 //
@@ -25,14 +24,15 @@ const UINT16 FX_ADDRESS[] = {0xFF10, 0xFF16, 0xFF1A, 0xFF20, 0xFF24};
 // Arrays for storing the decompressed audio output in non-banked RAM
 #define MUSIC_LEN_BYTES_MAX      3100 // WARNING: MUST UPDATE if uncompressed audio size increases
 #define MUSIC_SEQ_ADDR_COUNT_MAX 20
-UINT8 music_decompressed[MUSIC_LEN_BYTES_MAX];
+uint8_t music_decompressed[MUSIC_LEN_BYTES_MAX];
 unsigned char * music_seq_addrs[MUSIC_SEQ_ADDR_COUNT_MAX];
 
 
 
-void PlayFx(SOUND_CHANNEL channel, UINT8 mute_frames, ...) {
-	UINT8 i;
-	UINT8* reg = (UINT8*)FX_ADDRESS[channel];
+void PlayFx(SOUND_CHANNEL channel, uint8_t mute_frames, ...) {  // TODO: Loopy SFX    
+/*
+	uint8_t i;
+	uint8_t* reg = (uint8_t*)FX_ADDRESS[channel];
 	va_list list;
 
 	va_start(list, mute_frames);
@@ -44,43 +44,24 @@ void PlayFx(SOUND_CHANNEL channel, UINT8 mute_frames, ...) {
 	if (channel != CHANNEL_5) {
 		gbt_enable_channels(~(0xF & (1 << channel)));
 	}
-
+*/
 	music_mute_frames = mute_frames;
 }
 
 
-void MusicStop(void) {
-    gbt_stop();
+void MusicStop(void) {  // TODO
+    // gbt_stop();
 
     // Reset last_music so that music will resume properly.
     last_music = MUSIC_NONE;
-
-    // Restore sound registers that get turned off
-    NR52_REG = 0x80; // Enables sound, always set this first
-    NR51_REG = 0xFF; // Enables all channels (left and right)
-    NR50_REG = 0x77; // Max volume
 }
-
-
-// void MusicPlay(const unsigned char * music[], unsigned char bank, unsigned char loop) {
-
-// Removed banking support
-// void MusicPlay(const unsigned char * music[], unsigned char loop) {
-//
-//     if (music != last_music) {
-//         last_music = music;
-//         // gbt_play(music, bank, 7);
-//         gbt_play(music, 0, 7); // Force bank to 0, no bank
-//         gbt_loop(loop);
-//         // REFRESH_BANK; // WARNING: re-enable if using banking with an MBC
-//     }
-// }
 
 // Added decompression support
 // Requires modified mod2gbt which produces a single large array and list of offsets
-void MusicPlay(const unsigned char music_compressed[], const unsigned int music_seq_offset[], unsigned char loop) {
+void MusicPlay(const unsigned char music_compressed[], const unsigned int music_seq_offset[], unsigned char loop) {  // TODO
 
-    UINT8 c;
+/*
+    uint8_t c;
 
     if (music_compressed != last_music) {
 
@@ -109,11 +90,13 @@ void MusicPlay(const unsigned char music_compressed[], const unsigned int music_
         gbt_loop(loop);
         // REFRESH_BANK; // WARNING: re-enable if using banking with an MBC
     }
+    */
 }
 
 
-void MusicUpdateStatus(void) {
+void MusicUpdateStatus(void) {  // TODO
 
+/*
     if (option_game_music == OPTION_MUSIC_TWILIGHT)
         MusicPlay(twilight_drive_mod, twilight_drive_mod_Data, GBT_LOOP_YES);
     else if (option_game_music == OPTION_MUSIC_UPBEAT)
@@ -122,9 +105,9 @@ void MusicUpdateStatus(void) {
        MusicPlay(villainsofhiphop_mod, villainsofhiphop_mod_Data, GBT_LOOP_YES);
     else
         MusicStop();
+*/        
 }
 
-void update_gbt_music(void) {
-    gbt_update();
-    // REFRESH_BANK; // WARNING: re-enable if using banking with an MBC
+void update_gbt_music(void) {  // TODO
+    // gbt_update();
 }

@@ -9,8 +9,9 @@
 // Attribution-NonCommercial-ShareAlike 4.0 International License
 // See: http://creativecommons.org/licenses/by-nc-sa/4.0/
 
-#include <gb/gb.h>
+#include <gbdk/platform.h>
 
 #include "common.h"
 
-UINT8 game_state = GAME_INTRO_INIT;
+uint16_t game_state = GAME_INTRO_INIT;
+uint16_t vbl_count = 0;
