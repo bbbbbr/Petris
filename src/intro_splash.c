@@ -76,13 +76,12 @@ static void init_gfx(void) {
     //       For example: fill_bkg_rect(0, 0, DEVICE_SCREEN_BUFFER_WIDTH, DEVICE_SCREEN_BUFFER_HEIGHT, 0);
 
     bios_vsync();
-    set_bkg_4bpp_palette(PAL_0, intro_cat_out_PALETTE_COUNT, intro_cat_out_palettes);
-    set_bkg_4bpp_data(TILE_NUM_0, intro_cat_out_TILE_COUNT, intro_cat_out_tiles);
 
-    // Set BG1 tilemap tiles to render on Screen B, then it can blend with BG0 on Screen A
-    // Otherwise it would be totally hidden by BG0 (it's current image has no transparent/backdrop tiles)
     set_bkg_tilemap_base_address(BG0_MAP_START());
     set_bkg_tiles_target_screen_a_or_b(LAYER_SCREEN_A);
+
+    set_bkg_4bpp_palette(PAL_0, intro_cat_out_PALETTE_COUNT, intro_cat_out_palettes);
+    set_bkg_4bpp_data(TILE_NUM_0, intro_cat_out_TILE_COUNT, intro_cat_out_tiles);
     set_bkg_based_tiles((DEVICE_SCREEN_WIDTH - intro_cat_out_TILES_WIDTH) / 2,  // Tile centered X
                   (DEVICE_SCREEN_HEIGHT - intro_cat_out_TILES_HEIGHT) / 2,  // Tile centered Y
                   intro_cat_out_TILES_WIDTH, intro_cat_out_TILES_HEIGHT, intro_cat_out_map, TILE_NUM_0);

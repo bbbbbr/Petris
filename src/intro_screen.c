@@ -28,6 +28,7 @@
 // #include "player_gfx.h"
 
 #include "intro_screen_out.h"
+#include "intro_logo_out.h"
 // #include "../res/pet_tiles.h"
 // #include "../res/font_tiles.h"
 
@@ -61,13 +62,36 @@ void intro_screen_init(void) {
     intro_clouds_init();
 
     bios_vsync();
-    set_bkg_4bpp_palette(PAL_0, intro_screen_out_PALETTE_COUNT, intro_screen_out_palettes);
-    set_bkg_4bpp_data(TILE_NUM_0, intro_screen_out_TILE_COUNT, intro_screen_out_tiles);
-    set_bkg_tilemap_base_address(BG0_MAP_START());
+    // Main background on BG1 layer
+    // BG1 is set to use pals 4,5,6,7 (so no need to offset palette)
     set_bkg_tiles_target_screen_a_or_b(LAYER_SCREEN_A);
+
+    set_bkg_4bpp_palette(PAL_4, intro_screen_out_PALETTE_COUNT, intro_screen_out_palettes);
+    set_bkg_4bpp_data(TILE_NUM_0, intro_screen_out_TILE_COUNT, intro_screen_out_tiles);
+    set_bkg_tilemap_base_address(BG1_MAP_START());
     set_bkg_tiles((DEVICE_SCREEN_WIDTH - intro_screen_out_TILES_WIDTH)/2,  // Tile centered X
                   (DEVICE_SCREEN_HEIGHT - intro_screen_out_TILES_HEIGHT)/2,  // Tile centered Y
                   intro_screen_out_TILES_WIDTH, intro_screen_out_TILES_HEIGHT, intro_screen_out_map);
+
+
+    // Petris Logo is now on BG0 so it can be scrolled over background in BG1
+
+    // Logo background on BG0 layer so it can scroll
+    // BG1 is set to use pals 0,1,2,3
+    #define TILE_LOAD_OFFSET (intro_screen_out_TILE_COUNT)
+    #define LOGO_TILE_Y_START 7u
+
+    set_bkg_tilemap_base_address(BG0_MAP_START());
+    set_bkg_tiles_target_screen_a_or_b(LAYER_SCREEN_A);
+
+    set_bkg_4bpp_palette(PAL_0, intro_logo_out_PALETTE_COUNT, intro_logo_out_palettes);
+    set_bkg_4bpp_data(TILE_LOAD_OFFSET, intro_logo_out_TILE_COUNT, intro_logo_out_tiles);
+    // First fill entire BG1 tilemap with clear tiles to ensure
+    // BG0 to shows through in transparent parts
+    fill_bkg_rect(0, 0, DEVICE_SCREEN_BUFFER_WIDTH, DEVICE_SCREEN_BUFFER_HEIGHT, TILE_LOAD_OFFSET);
+    set_bkg_based_tiles((DEVICE_SCREEN_WIDTH - intro_logo_out_TILES_WIDTH)/2,  // Tile centered X
+                        LOGO_TILE_Y_START,
+                        intro_logo_out_TILES_WIDTH, intro_logo_out_TILES_HEIGHT, intro_logo_out_map, TILE_LOAD_OFFSET);
 
     // fade_set_pal(BG_PAL_0, 3, intro_screen_logo_palette, FADE_PAL_BKG);
     // fade_set_pal(BG_PAL_4, 3, intro_screen_palette, FADE_PAL_BKG);
