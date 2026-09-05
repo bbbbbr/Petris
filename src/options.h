@@ -1,3 +1,4 @@
+
 // options.h
 
 #ifndef OPTIONS_H
@@ -157,25 +158,25 @@ enum option_link2p_entries {
 #define FPD_TIERS_MAX            (FPD_LEVEL_MAX / FPD_LUT_LEVELS_PER_TIER) // Level 40: FpD LUT tops out at 40 levels per difficulty setting
 
 typedef struct settings_rec {
-    UINT8  LUT_speed_offset;
-    UINT8  preview_next_enabled;
-    UINT8  score_bonus;
-    UINT8  spec_bomb_threshold_pettiles;
-    UINT16 spec_merge_threshold_pieces;
+    uint8_t  LUT_speed_offset;
+    uint8_t  preview_next_enabled;
+    uint8_t  score_bonus;
+    uint8_t  spec_bomb_threshold_pettiles;
+    uint16_t spec_merge_threshold_pieces;
 } settings_data;
 
 extern const settings_data * p_game_settings;
 
-extern INT8 option_game_difficulty;
-extern INT8 option_game_visual_hints;
-extern INT8 option_game_high_contrast;
-extern INT8 option_game_type;
-extern INT8 option_game_music;
-extern INT8 option_game_preview_next;
-extern INT8 option_game_link2p;
+extern int8_t option_game_difficulty;
+extern int8_t option_game_visual_hints;
+extern int8_t option_game_high_contrast;
+extern int8_t option_game_type;
+extern int8_t option_game_music;
+extern int8_t option_game_preview_next;
+extern int8_t option_game_link2p;
 
 const char * options_difficulty_abbrev_text_get(void);
-UINT8 options_frames_per_drop_get(UINT8);
+uint8_t options_frames_per_drop_get(uint8_t);
 void options_player_settings_apply(void);
 
 #endif // OPTIONS_H

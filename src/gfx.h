@@ -5,6 +5,8 @@
 
 // #define DEBUG_SHOW
 
+/*
+
 #define BG_PAL_0    0x00U
 #define BG_PAL_1    0x01U
 #define BG_PAL_2    0x02U
@@ -73,34 +75,46 @@
 // Font gets loaded at the end of tile RAM
 #define TILE_COUNT_FONT     45U //Tiles in order: <blank>ABC...XYZ0123456789!'()-.:?
 #define TILES_FONT_START    (255U - TILE_COUNT_FONT) // (TILES_BG_START + TILE_COUNT_BG)
-    #define TILE_ID_FONT_BLANK  TILES_FONT_START // blank tile
-    #define TILES_FONT_BLANK_LEN    1U
-    #define TILES_FONT_CHARS_START  (TILES_FONT_START  + TILES_FONT_BLANK_LEN)
+*/
+//    #define TILE_ID_FONT_BLANK  TILES_FONT_START // blank tile
+//    #define TILES_FONT_BLANK_LEN    1U
+//    #define TILES_FONT_CHARS_START  (TILES_FONT_START  + TILES_FONT_BLANK_LEN)
+//    // Numeric tiles are a subset of main font
+//    // So these are just for convenience
+//    #define TILES_FONT_CHARS_LEN   27U
+//    #define TILES_FONT_NUMS_START  (TILES_FONT_START  + TILES_FONT_CHARS_LEN)
+//    #define TILE_COUNT_FONT_NUMS   11U //Tiles in order: 0123456789<blank>
+//
+    #define TILE_ID_FONT_BLANK      0u // blank tile
+    #define TILES_FONT_BLANK_LEN    1u
+    #define TILES_FONT_CHARS_START  (TILES_FONT_BLANK_LEN)
     // Numeric tiles are a subset of main font
     // So these are just for convenience
-    #define TILES_FONT_CHARS_LEN   27U
-    #define TILES_FONT_NUMS_START  (TILES_FONT_START  + TILES_FONT_CHARS_LEN)
+    #define TILES_FONT_CHARS_LEN   27u
+    #define TILES_FONT_NUMS_START  (TILES_FONT_CHARS_LEN)
     #define TILE_COUNT_FONT_NUMS   11U //Tiles in order: 0123456789<blank>
+/*
+extern uint8_t * p_pet_tiles;
+extern uint16_t * p_pet_palette;
+extern uint8_t pet_tiles_hicontrast_ram[];
 
-extern UINT8 * p_pet_tiles;
-extern UWORD * p_pet_palette;
-extern UINT8 pet_tiles_hicontrast_ram[];
 
+extern const uint16_t board_pets_palette[];
+extern const uint16_t board_pets_pal_high_contrast[];
+extern const uint16_t board_pets_pal_high_contrast_2[];
+extern const uint16_t board_pets_pal_med_contrast[];
 
-extern const UWORD board_pets_palette[];
-extern const UWORD board_pets_pal_high_contrast[];
-extern const UWORD board_pets_pal_high_contrast_2[];
-extern const UWORD board_pets_pal_med_contrast[];
+extern const uint16_t clouds_sprite_palette[];
+extern const uint16_t option_title_palette[];
+extern const uint16_t intro_screen_logo_palette[];
+extern const uint16_t intro_screen_palette[];
 
-extern const UWORD clouds_sprite_palette[];
-extern const UWORD option_title_palette[];
-extern const UWORD intro_screen_logo_palette[];
-extern const UWORD intro_screen_palette[];
+extern const const uint16_t intro_cat_palette[];
 
-extern const const UWORD intro_cat_palette[];
-
-// void print_font_palette_set(UINT8);
+// void print_font_palette_set(uint8_t);
 void pet_tiles_prepare(void);
+
+*/
 
 #endif // GFX_H
 

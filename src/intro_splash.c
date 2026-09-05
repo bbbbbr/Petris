@@ -75,6 +75,7 @@ static void init_gfx(void) {
     // TODO: Due to scrolling, will probably need to fill entire BG buffer with black tile.
     //       For example: fill_bkg_rect(0, 0, DEVICE_SCREEN_BUFFER_WIDTH, DEVICE_SCREEN_BUFFER_HEIGHT, 0);
 
+    HIDE_SPRITES;
     bios_vsync();
 
     set_bkg_tilemap_base_address(BG0_MAP_START());

@@ -16,8 +16,8 @@
 #include <stdint.h>
 #include <stdbool.h>
 
-// #include "gfx.h"
-// #include "gfx_print.h"
+#include "gfx.h"
+#include "gfx_print.h"
 #include "common.h"
 #include "sound.h"
 #include "input.h"
@@ -33,28 +33,32 @@
 // #include "../res/font_tiles.h"
 
 
+#define LOGO_TILE_Y_START 5u
 
-// #define INTRO_TEXT_BLANK "            "
-// #define INTRO_TEXT_START "PRESS  START"
+#define STR_INTRO_TEXT_START "PRESS START"
+#define OAM_TEXT_INTRO_START 0u
+#define OAM_TEXT_START_X  72u
+#define OAM_TEXT_START_Y  136u
 
+static uint16_t oam_text_intro_end = 0;
+
+
+static uint16_t intro_counter = 0;
 
 // TODO: Translucent blended clouds overlay for intro screen, using Blend + Math ADD
-
-uint16_t intro_counter = 0;
-
 void intro_clouds_init(void) { // TODO
-
     intro_counter = 0;
 }
 
 void intro_clouds_update(void) { // TODO
-
-
 }
 
 
 void intro_clouds_cleanup(void) { // TODO
 }
+
+
+static void intro_text_sprites_update(void);
 
 
 void intro_screen_init(void) {
@@ -78,26 +82,36 @@ void intro_screen_init(void) {
 
     // Logo background on BG0 layer so it can scroll
     // BG1 is set to use pals 0,1,2,3
-    #define TILE_LOAD_OFFSET (intro_screen_out_TILE_COUNT)
-    #define LOGO_TILE_Y_START 7u
-
+    #define TILE_LOAD_OFFSET_LOGO (intro_screen_out_TILE_COUNT)
     set_bkg_tilemap_base_address(BG0_MAP_START());
     set_bkg_tiles_target_screen_a_or_b(LAYER_SCREEN_A);
 
     set_bkg_4bpp_palette(PAL_0, intro_logo_out_PALETTE_COUNT, intro_logo_out_palettes);
-    set_bkg_4bpp_data(TILE_LOAD_OFFSET, intro_logo_out_TILE_COUNT, intro_logo_out_tiles);
+    set_bkg_4bpp_data(TILE_LOAD_OFFSET_LOGO, intro_logo_out_TILE_COUNT, intro_logo_out_tiles);
     // First fill entire BG1 tilemap with clear tiles to ensure
     // BG0 to shows through in transparent parts
-    fill_bkg_rect(0, 0, DEVICE_SCREEN_BUFFER_WIDTH, DEVICE_SCREEN_BUFFER_HEIGHT, TILE_LOAD_OFFSET);
+    fill_bkg_rect(0, 0, DEVICE_SCREEN_BUFFER_WIDTH, DEVICE_SCREEN_BUFFER_HEIGHT, TILE_LOAD_OFFSET_LOGO);
     set_bkg_based_tiles((DEVICE_SCREEN_WIDTH - intro_logo_out_TILES_WIDTH)/2,  // Tile centered X
                         LOGO_TILE_Y_START,
-                        intro_logo_out_TILES_WIDTH, intro_logo_out_TILES_HEIGHT, intro_logo_out_map, TILE_LOAD_OFFSET);
+                        intro_logo_out_TILES_WIDTH, intro_logo_out_TILES_HEIGHT, intro_logo_out_map, TILE_LOAD_OFFSET_LOGO);
+
+
+    // Load the 8x16 font and print it to the sprites
+    #define TILE_LOAD_OFFSET_FONT (OBJ_TILEGROUP_BASE_512)
+    load_8x16_font_tiles(TILE_LOAD_OFFSET_FONT);
+
+    oam_text_intro_end = print_to_sprites(OAM_TEXT_INTRO_START, OAM_TEXT_START_X, OAM_TEXT_START_Y, S_PAL2, STR_INTRO_TEXT_START);
+    intro_text_sprites_update();
+
+
+    // uint16_t oam_next = print_to_sprites(oam_text_intro_end, DEVICE_SCREEN_PX_WIDTH - (13 * SPR_PRINT_SPACING_X), DEVICE_SCREEN_PX_HEIGHT - 16u,
+    //                                      S_PAL2, "bbbbbr 2026");
 
     // fade_set_pal(BG_PAL_0, 3, intro_screen_logo_palette, FADE_PAL_BKG);
     // fade_set_pal(BG_PAL_4, 3, intro_screen_palette, FADE_PAL_BKG);
 
-    // SHOW_BKG;
-    // SHOW_SPRITES;
+    // SHOW_BKG;  // TODO: ?? BG1 as BKG and BG0 as WIN?
+    SHOW_SPRITES;
 
     // // To avoid flicker from initial print changing the attrib tiles
     // // print the tiles before fade-in
@@ -108,20 +122,52 @@ void intro_screen_init(void) {
 }
 
 
+/** Generated using Dr LUT - Free Lookup Table Generator
+  * https://github.com/ppelikan/drlut
+  **/
+// Formula: sin(2*pi*t/T) 
+// Amp=4, Offs=0, Sz=16 (size should be an even power of 2 for range masking to work)
+const int16_t sine[32] = {
+    //  0,     1,     2,     2,     3,     3,     4,
+    //  4,     4,     4,     4,     3,     3,     2,
+    //  2,     1,     0,    -1,    -2,    -2,    -3,
+    // -3,    -4,    -4,    -4,    -4,    -4,    -3,
+    // -3,    -2,    -2,    -1 };
+     0,     1,     1,     2,     2,     2,     3,
+     3,     3,     3,     3,     2,     2,     2,
+     1,     1,     0,    -1,    -1,    -2,    -2,
+    -2,    -3,    -3,    -3,    -3,    -3,    -2,
+    -2,    -2,    -1,    -1 };
+
+static void intro_text_sprites_update(void) {
+
+    uint16_t lut_index = intro_counter >> 2;
+    // for (uint16_t c = OAM_TEXT_INTRO_START; c <= oam_text_intro_end;) {
+    uint16_t c = OAM_TEXT_INTRO_START;
+    while (c < oam_text_intro_end) {
+        shadow_OAM[c++].y = OAM_TEXT_START_Y + sine[lut_index & (ARRAY_LEN(sine) - 1)]; // Top of char sprite
+        shadow_OAM[c++].y = (OAM_TEXT_START_Y + SPR_8x8_HEIGHT) + sine[lut_index & (ARRAY_LEN(sine) - 1)]; // Top of char sprite
+        lut_index += 2;
+    }
+}
+
+
+
 
 void intro_screen_handle(void) {
 
+    intro_text_sprites_update();
     intro_clouds_update();
-
     magic_code_update();
 
     // Wait for the player to press start
-    intro_counter++;
+    // intro_counter++;
+    intro_counter += 3;
 
     // TODO: Some kind of "Press Start" indicator on intro screen, maybe less bare bones than original
     //
     // if (intro_counter == 1) {
-    //     PRINT(4,10, INTRO_TEXT_START, 0);
+    //     PRINT(4,10, STR_INTRO_TEXT_START, 0);
     // }
     // else if (intro_counter == 125) {
     //     PRINT(4,10, INTRO_TEXT_BLANK, 0);

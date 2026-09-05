@@ -1,4 +1,5 @@
-// Copyright 2020 (c) bbbbbr
+
+// Copyright 2026 (c) bbbbbr
 //
 // This software is licensed under:
 //
@@ -12,27 +13,28 @@
 // options.c
 
 
-#include <gb/gb.h>
-#include <gb/cgb.h> // Include cgb functions
-#include <stdlib.h>
+#include <gbdk/platform.h>
+
+#include <stdint.h>
+#include <stdbool.h>
 
 #include "common.h"
 
 #include "options.h"
 #include "options_screen.h"
 
-INT8 option_game_type          = OPTION_GAME_TYPE_DEFAULT;
-INT8 option_game_difficulty    = OPTION_DIFFICULTY_DEFAULT;
-INT8 option_game_visual_hints  = OPTION_VISUAL_HINTS_DEFAULT;
-INT8 option_game_high_contrast = OPTION_HIGH_CONTRAST_DEFAULT;
-INT8 option_game_music         = OPTION_MUSIC_DEFAULT;
-INT8 option_game_preview_next  = NEXT_PREV_DEFAULT;
-INT8 option_game_link2p        = OPTION_LINK2P_DEFAULT;
+int8_t option_game_type          = OPTION_GAME_TYPE_DEFAULT;
+int8_t option_game_difficulty    = OPTION_DIFFICULTY_DEFAULT;
+int8_t option_game_visual_hints  = OPTION_VISUAL_HINTS_DEFAULT;
+int8_t option_game_high_contrast = OPTION_HIGH_CONTRAST_DEFAULT;
+int8_t option_game_music         = OPTION_MUSIC_DEFAULT;
+int8_t option_game_preview_next  = NEXT_PREV_DEFAULT;
+int8_t option_game_link2p        = OPTION_LINK2P_DEFAULT;
 
 // See spreadsheet for more details
 // Speed increase per level bracket roughly doubles
-const UINT8 frames_per_drop_LUT[]          = {60,45,30,20,15,10,8,7,6,5,4,4,3};
-const UINT8 levels_per_fpd_decrement_LUT[] = { 1, 1, 1, 2, 2, 5,0,0,0,0,0,0,0};
+const uint8_t frames_per_drop_LUT[]          = {60,45,30,20,15,10,8,7,6,5,4,4,3};
+const uint8_t levels_per_fpd_decrement_LUT[] = { 1, 1, 1, 2, 2, 5,0,0,0,0,0,0,0};
 
 const char * options_difficulty_abrv[]  = {"EZ ", "NM", "HD", "XP", "BT"}; // Must match : option_difficulty_entries
 
@@ -54,10 +56,10 @@ const char * options_difficulty_abbrev_text_get(void) {
 
 
 // TODO: NOTE: level must *not* be zero <-- no longer true?
-UINT8 options_frames_per_drop_get(UINT8 level) {
+uint8_t options_frames_per_drop_get(uint8_t level) {
 
-    UINT8 index;
-    UINT8 sub_decrement = 0;
+    uint8_t index;
+    uint8_t sub_decrement = 0;
 
     // First get level index into frames-per-drop LUT
     index = (level / FPD_LUT_LEVELS_PER_TIER);

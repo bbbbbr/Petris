@@ -137,3 +137,5 @@ assets:
 	$(TOOLSDIR)/png2asset $(RES_GENERATED_DIR)/intro_screen_out.png -o $(RESDIR)/intro_screen_out.c -use_metafile
 	$(TOOLSDIR)/tilepalquant $(RES_ASSET_DIR)/intro_logo.png -o $(RES_GENERATED_DIR)/intro_logo_out.png -use_metafile
 	$(TOOLSDIR)/png2asset $(RES_GENERATED_DIR)/intro_logo_out.png -o $(RESDIR)/intro_logo_out.c -use_metafile
+	$(TOOLSDIR)/tilepalquant $(RES_ASSET_DIR)/font_8x16.png -o $(RES_GENERATED_DIR)/font_8x16_out.png -use_metafile
+	$(TOOLSDIR)/png2asset $(RES_GENERATED_DIR)/font_8x16_out.png -o $(RESDIR)/font_8x16_out.c -use_metafile

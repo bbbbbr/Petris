@@ -1,8 +1,14 @@
 #pragma #once
 
+#ifndef _GBDK_LOOPY_H
+#define _GBDK_LOOPY_H
+
+
 #include "stdint.h"
 #include "loopy.h"
 #include "loopy_helpers.h"
+
+#define ALWAYS_INLINE __attribute__((always_inline))
 
 // Casio Loopy Specific
 
@@ -50,9 +56,96 @@
 #define J_Y      (GAMEPAD_BTN_A)
 
 
+#define S_8x8         (0 << 2)
+#define S_16x16       (1 << 2)
+#define S_16x32       (2 << 2)
+#define S_32x32       (3 << 2)
+
+#define S_FLIPX       (1 << 6)
+#define S_FLIPY       (1 << 7)
+
+#define S_Y_HIBIT     (1 << 1)
+#define S_X_HIBIT     (1 << 0)
+#define S_Y_HIBIT_ON  (1 << 1)
+#define S_X_HIBIT_ON  (1 << 0)
+#define S_HIBIT_MASK_OFF (0xFCu)
+
+#define S_PAL0        (0 << 4)
+#define S_PAL1        (1 << 4)
+#define S_PAL2        (2 << 4)
+#define S_PAL3        (3 << 4)
+
+
 // No need for BANKREFS, zero them out
 #define BANKREF(x)
 #define BANKREF_EXTERN(x)
+
+typedef struct OAM_item_t {
+    uint8_t tile;  //< Sprite tile number VDP.OAM[N].[31..24] 
+    uint8_t y;     //< Y Coordinates (lowest 8 bits of 9) of the sprite on screen
+    uint8_t prop;  //< OAM Property Flags
+    uint8_t x;     //< X Coordinates (lowest 8 bits of 9) of the sprite on screen
+} OAM_item_t;
+
+// TODO: WARNING!: Direct writing the OAM without a Shadow OAM for now, also need to check safe timing
+// extern volatile struct OAM_item_t shadow_OAM[];
+#define shadow_OAM ((OAM_item_t *)VDP.OAM)
+
+// TODO: Docs
+inline void set_sprite_tile(uint8_t nb, uint8_t tile) {
+    shadow_OAM[nb].tile=tile;
+}
+
+inline uint8_t get_sprite_tile(uint8_t nb) {
+    return shadow_OAM[nb].tile;
+}
+
+inline void set_sprite_prop(uint8_t nb, uint8_t prop) {
+    shadow_OAM[nb].prop=prop;
+}
+
+inline uint8_t get_sprite_prop(uint8_t nb) {
+    return shadow_OAM[nb].prop;
+}
+
+// First compiler quirk on gcc wonderful sh1?
+// Build fails with unable to find move_sprite() at linking stage.
+// Maybe compiler is choosing not to inline and then the header guard
+// is preventing it from generating the function again? 
+//
+// Workaround is to use always_inline to force it.
+//
+// TODO: Using 8 bit x,y positions for now, but x and y are signed 9 bit (so -256 to 255)
+ALWAYS_INLINE inline void move_sprite(uint8_t nb, uint8_t x, uint8_t y) {
+    OAM_item_t * itm = &shadow_OAM[nb];
+    itm->y=y, itm->x=x;
+    itm->prop &= S_HIBIT_MASK_OFF;  // TODO: Forcing X,Y High bits off for now
+}
+
+// TODO: Using 8 bit x,y positions for now, but x and y are signed 9 bit (so -256 to 255)
+ALWAYS_INLINE inline void scroll_sprite(uint8_t nb, int8_t x, int8_t y) {
+    OAM_item_t * itm = &shadow_OAM[nb];
+    itm->y+=y, itm->x+=x;
+    itm->prop &= !(S_Y_HIBIT_ON | S_X_HIBIT_ON);  // TODO: Forcing X,Y High bits off for now
+}
+
+ALWAYS_INLINE inline void hide_sprite(uint8_t nb) {
+    OAM_item_t * itm = &shadow_OAM[nb];
+    itm->y = 128;
+    itm->prop |= S_Y_HIBIT_ON;  // Hide sprite by setting Y high (signed) bit and low y to give it a negative off-screen location
+}
+
+/** Turns on the sprites layers (OBJ0,OBJ1).
+*/
+#define SHOW_SPRITES \
+  VDP.LAYER_CTRL |= (LAYER_ENABLE_OBJ0 | LAYER_ENABLE_OBJ1)
+
+/** Turns off the sprites layers (OBJ0,OBJ1).
+    @see hide_sprite, hide_sprites_range
+*/
+#define HIDE_SPRITES \
+  VDP.LAYER_CTRL &= ~(LAYER_ENABLE_OBJ0 | LAYER_ENABLE_OBJ1)
+
 
 typedef uint16_t palette_color_t;
 
@@ -195,3 +288,5 @@ void set_bkg_tiles_target_screen_a_or_b(unsigned int screen_a_or_b);
     interrupts disabled
  */
 void delay(uint16_t d);
+
+#endif // _GBDK_LOOPY_H

@@ -1,3 +1,4 @@
+
 // Copyright 2020 (c) bbbbbr
 //
 // This software is licensed under:
@@ -11,31 +12,31 @@
 
 // options_screen.c
 
-#include <gb/gb.h>
-#include <gb/cgb.h> // Include cgb functions
-#include <stdlib.h>
+#include <gbdk/platform.h>
 
+#include <stdint.h>
+#include <stdbool.h>
 
 #include "gfx.h"
 #include "gfx_print.h"
 #include "input.h"
-#include "serial_link.h"
+
 
 #include "sound.h"
-#include "gbt_player.h"
-#include "audio_common.h"
+// #include "gbt_player.h"
+// #include "audio_common.h"
 
 #include "common.h"
-#include "fade.h"
+// #include "fade.h"
 
-#include "game_piece_data.h"
+// #include "game_piece_data.h"
 
 #include "options.h"
 #include "options_screen.h"
 
-#include "../res/intro_screen_tiles.h"
-#include "../res/pet_tiles.h"
-#include "../res/font_tiles.h"
+// #include "../res/intro_screen_tiles.h"
+// #include "../res/pet_tiles.h"
+// #include "../res/font_tiles.h"
 
 
 
@@ -51,13 +52,8 @@
 
 #define OPTION_TITLE_PRINT_PAL BG_PAL_3
 
-const UINT8 spr_cursor_offset[] = {0,1,2,3,3,2,1,0};
+const uint8_t spr_cursor_offset[] = {0,1,2,3,3,2,1,0};
 
-const UINT8 options_screen_attrib_pal = BG_PAL_4;
-const UINT8 options_screen_tiles[] = {TILES_INTRO_START + 0,
-                                      TILES_INTRO_START + 1,
-                                      TILES_INTRO_START + 2,
-                                      TILES_INTRO_START + 3};
 
 // TODO: fold this into the options menu array?
 enum option_menu_entries {
@@ -70,7 +66,6 @@ enum option_menu_entries {
     OPTION_MENU_STARTGAME,
 
     OPTION_MENU_LINK2P,
-    OPTION_MENU_HIGH_CONTRAST,
     OPTION_MENU_VISUAL_HINTS,
 
     OPTION_MENU_MAX = OPTION_MENU_VISUAL_HINTS
@@ -90,7 +85,6 @@ const char * options_difficulty[]   = {"EASY  ",
                                        "BEAST "}; // Must match : option_difficulty_entries
 const char * options_link2p[]        = {"OFF", "ON "}; // Must match : option_link2p_entries
 const char * options_visual_hints[]  = {"ON ", "OFF"}; // Must match : option_visual_hints_entries
-const char * options_high_contrast[] = {"OFF ", "MED ", "HI  ", "HI-2"}; // Must match : option_visual_hints_entries
 
 const char * options_music[] = {"TWILIGHT",
                                 "CHILL   ",
@@ -100,39 +94,39 @@ const char * options_music[] = {"TWILIGHT",
 
 typedef struct opt_item {
 
-    UINT8          menu_y;      // Y position of option menu entry
+    uint8_t          menu_y;      // Y position of option menu entry
     const char *   label;       // Option name
 
-    INT8           opt_entries; // Size of option values array
+    int8_t           opt_entries; // Size of option values array
     const char * * p_text_arr;  // Array of option text strings / values
-    INT8 *         p_curval;    // Pointer to (extern) option variable
+    int8_t *         p_curval;    // Pointer to (extern) option variable
 
 } option_item;
 
 // See above for meaning of each element
 const option_item options[] = {
-        {  5,"TYPE :",         (INT8)ARRAY_LEN(options_type),          &options_type[0],          &option_game_type},
-        {  7,"LEVEL:",         (INT8)ARRAY_LEN(options_difficulty),    &options_difficulty[0],    &option_game_difficulty},
-        {  9,"MUSIC:",         (INT8)ARRAY_LEN(options_music),         &options_music[0],         &option_game_music},
-        { 12,"   START GAME ", (INT8)ARRAY_LEN(options_visual_hints),  NULL, NULL},
-        { 14,"2 PLAYER VS.: ", (INT8)ARRAY_LEN(options_link2p),        &options_link2p[0],        &option_game_link2p},
-        { 15,"HI CONTRAST : ", (INT8)ARRAY_LEN(options_high_contrast), &options_high_contrast[0], &option_game_high_contrast},
-        { 16,"VISUAL HINTS: ", (INT8)ARRAY_LEN(options_visual_hints),  &options_visual_hints[0],  &option_game_visual_hints},
+        {  5,"TYPE :",         (int8_t)ARRAY_LEN(options_type),          &options_type[0],          &option_game_type},
+        {  7,"LEVEL:",         (int8_t)ARRAY_LEN(options_difficulty),    &options_difficulty[0],    &option_game_difficulty},
+        {  9,"MUSIC:",         (int8_t)ARRAY_LEN(options_music),         &options_music[0],         &option_game_music},
+        { 12,"   START GAME ", (int8_t)ARRAY_LEN(options_visual_hints),  NULL, NULL},
+        { 14,"2 PLAYER VS.: ", (int8_t)ARRAY_LEN(options_link2p),        &options_link2p[0],        &option_game_link2p},
+        { 16,"VISUAL HINTS: ", (int8_t)ARRAY_LEN(options_visual_hints),  &options_visual_hints[0],  &option_game_visual_hints},
     };
 
 
 
-INT8 options_menu_index = OPTION_MENU_STARTGAME;
+int8_t options_menu_index = OPTION_MENU_STARTGAME;
 
 
 
 // Update which option is currenrlt selected
-void options_screen_cursor_update(INT8 dir) {
+void options_screen_cursor_update(int8_t dir) {
 
+/*
     // Play a sound when moving the cursor
     if (dir != 0)
-        PLAY_SOUND_OPTION_CURSOR_MOVE;
-
+        PLAY_SOUND_OPTION_CURSOR_MOVE;  // TODO
+*/
     // Update menu selection
     options_menu_index += dir;
 
@@ -151,7 +145,7 @@ void options_screen_cursor_update(INT8 dir) {
 
 
 // Update the currently selected option's value
-void options_screen_setting_update(INT8 dir) {
+void options_screen_setting_update(int8_t dir) {
 
 
     // "Start Game" menu entry has no settings
@@ -168,10 +162,11 @@ void options_screen_setting_update(INT8 dir) {
                 *(options[options_menu_index].p_curval) = options[options_menu_index].opt_entries - 1; // zero indexed array
         } else {
             // Only play a sound if the cursor moved and wasn't clamped to min/max
+            /*
             if (dir != 0) {
-                PLAY_SOUND_OPTION_CURSOR_MOVE;
+                PLAY_SOUND_OPTION_CURSOR_MOVE;  // TODO
             }
-
+            */
         }
 
 
@@ -191,9 +186,9 @@ void options_screen_setting_update(INT8 dir) {
 
 
 // Print an option's name and current value
-void options_screen_setting_draw(INT8 option_id) {
+void options_screen_setting_draw(int8_t option_id) {
 
-    // Display option Titles using a lighter font (except Start)
+/*    // Display option Titles using a lighter font (except Start)
     if (option_id != OPTION_MENU_STARTGAME) {
         PRINT_PAL(OPTION_TITLE_PRINT_PAL);
     }
@@ -215,48 +210,22 @@ void options_screen_setting_draw(INT8 option_id) {
         print_text(options[option_id].p_text_arr[ *(options[option_id].p_curval) ], 0);
     }
 
+*/
+}
+
+
+void options_screen_draw(void) {  // TODO
+
+    // PRINT(2,3, "--- OPTIONS ---", 0);
 }
 
 
 
-//Optional: could be faster to use a BG Map here or render into an array and then apply
-void options_screen_draw(void) {
-
-    UINT8 x,y;
-
-    for (y = SCREEN_MIN_Y; y <= SCREEN_MAX_Y; y++) {
-        for (x = SCREEN_MIN_X; x <= SCREEN_MAX_X; x++) {
-
-            // Clear BG tile attribute map
-            VBK_REG = 1;
-            set_bkg_tiles(x, y, 1, 1, &options_screen_attrib_pal);
-
-            // Select BG tile map
-            VBK_REG = 0;
-
-            // Draw a gradient at the top of the screen
-            if (y <= 2) {
-                set_bkg_tiles(x, y, 1, 1, &options_screen_tiles[y]);
-
-            } else {
-                // Regular sky tiles for the rest
-                set_bkg_tiles(x, y, 1, 1, &options_screen_tiles[3]);
-            }
-
-        } // end x loop
-    } // end x loop
-
-
-    PRINT(2,3, "--- OPTIONS ---", 0);
-}
-
-
-
-void options_screen_sprites_init(void) {
-
+void options_screen_sprites_init(void) {  // TODO
+/*
     SPRITES_8x8;
 
-//    set_sprite_palette(BG_PAL_0, 4, board_pets_palette); // UBYTE first_palette, UBYTE nb_palettes, UWORD *rgb_data, pal_type
+//    set_sprite_palette(BG_PAL_0, 4, board_pets_palette); // UBYTE first_palette, UBYTE nb_palettes, uint16_t *rgb_data, pal_type
     // No need for high-contrast here (user has not yet selected high-contrast)
     fade_set_pal(BG_PAL_0, 4, board_pets_palette, FADE_PAL_SPRITES);
     set_sprite_data(0, TILE_COUNT_PETTOTAL, pet_tiles);
@@ -265,22 +234,24 @@ void options_screen_sprites_init(void) {
     set_sprite_prop(SPR_OPTIONS_CURSOR, BG_FLIP_X | BG_PAL_0);
 
     SHOW_SPRITES;
+*/
 }
 
 
 
 void options_screen_exit_cleanup(void) {
-
+/*
     fade_start(FADE_OUT);
     HIDE_SPRITES;
-
+*/
 }
 
 
-
-void options_screen_init(void) {
-
-    INT8 c;
+// Assumes and relies on "intro_screen" (title) having run and initialized
+void options_screen_init(void) {  // TODO
+/*
+    // 
+    int8_t c;
 
     // Note: The popup status window is relying on the gfx initialization here
     //       See: status_win_popup_init()
@@ -311,50 +282,31 @@ void options_screen_init(void) {
 
     // Update music status to match option menu setting
     MusicUpdateStatus();
-
-    link_start_detect();
+    */
 }
 
 
 
 void options_screen_try_gamestart(void) {
-
+/*
     // If serial link 2-Player versus is being initiated
     // then try to link up with the other player
     // before starting the game.
     if (option_game_link2p == OPTION_LINK2P_ON) {
 
-        // If this succeeds, the game start will be picked up
-        // during the main loop in options_screen_handle()
-        // for both Initiator and Follower.
-        // The timing of game start is less exact for players
-        // than the previous implementation.
-        link_try_gamestart();
+        // TODO: 2-Player game start
     } else {
-        // If link not requested, then turn off link
-        // connection to avoid unwanted initiation in game play
-        link_disable();
-
+        // 1-Player game start
         options_screen_exit_cleanup();
         game_state = GAME_READY_TO_START;
     }
+    */
 }
 
 
 
 void options_screen_handle(void) {
-
-
-    if (link_status == LINK_STATUS_CONNECTED) {
-        // If link status is connected that
-        //  means it's time to start the game
-        options_screen_exit_cleanup();
-        game_state = GAME_READY_TO_START;
-    } else {
-        // Update 2-Player serial link status periodically
-        link_check_connect();
-    }
-
+/*
     // Cursor Updates
     if (KEY_TICKED(J_UP)) {
 
@@ -426,4 +378,5 @@ void options_screen_handle(void) {
                     ((options[options_menu_index].menu_y + 2) * 8)  // + 2 is sprite vs bg offset
                     + spr_cursor_offset[(sys_time & CURSOR_LUT_MASK) >> CURSOR_BITSHIFT] - 2);
     }
+    */
 }

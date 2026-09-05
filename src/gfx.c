@@ -11,13 +11,14 @@
 
 // gfx.c
 
-#include <gb/gb.h>
-#include <gb/cgb.h> // Include cgb functions
+#include <gbdk/platform.h>
+
 
 #include "common.h"
 #include "gfx.h"
 #include "options.h"
 
+/*
 #include "../res/pet_tiles.h"
 #include "../res/pet_tiles_hicontrast.h"
 #include "../res/pet_tiles_hicontrast2.h"
@@ -28,7 +29,7 @@
 
 // On Game Board Palettes 0 - 3 are used for the Pet Tile Game Board Pieces
 // Palettes 0..3
-const UWORD board_pets_pal_high_contrast[] = {
+const uint16_t board_pets_pal_high_contrast[] = {
     pet_tiles_hicontrastCGBPal0c0, pet_tiles_hicontrastCGBPal0c1, pet_tiles_hicontrastCGBPal0c2, pet_tiles_hicontrastCGBPal0c3, // Pet 0
     pet_tiles_hicontrastCGBPal1c0, pet_tiles_hicontrastCGBPal1c1, pet_tiles_hicontrastCGBPal1c2, pet_tiles_hicontrastCGBPal1c3, // Pet 1
     pet_tiles_hicontrastCGBPal2c0, pet_tiles_hicontrastCGBPal2c1, pet_tiles_hicontrastCGBPal2c2, pet_tiles_hicontrastCGBPal2c3, // Pet 2
@@ -37,7 +38,7 @@ const UWORD board_pets_pal_high_contrast[] = {
     pet_tiles_hicontrastCGBPal4c0, pet_tiles_hicontrastCGBPal4c1, pet_tiles_hicontrastCGBPal4c2, pet_tiles_hicontrastCGBPal4c3, // Specials
 };
 
-const UWORD board_pets_pal_high_contrast_2[] = {
+const uint16_t board_pets_pal_high_contrast_2[] = {
     pet_tiles_hicontras2CGBPal0c0, pet_tiles_hicontras2CGBPal0c1, pet_tiles_hicontras2CGBPal0c2, pet_tiles_hicontras2CGBPal0c3, // Pet 0
     pet_tiles_hicontras2CGBPal1c0, pet_tiles_hicontras2CGBPal1c1, pet_tiles_hicontras2CGBPal1c2, pet_tiles_hicontras2CGBPal1c3, // Pet 1
     pet_tiles_hicontras2CGBPal2c0, pet_tiles_hicontras2CGBPal2c1, pet_tiles_hicontras2CGBPal2c2, pet_tiles_hicontras2CGBPal2c3, // Pet 2
@@ -49,7 +50,7 @@ const UWORD board_pets_pal_high_contrast_2[] = {
 
 // On Game Board Palettes 0 - 3 are used for the Pet Tile Game Board Pieces
 // Palettes 0..3
-const UWORD board_pets_pal_med_contrast[] = {
+const uint16_t board_pets_pal_med_contrast[] = {
     pet_tiles_mdcontrastCGBPal0c0, pet_tiles_mdcontrastCGBPal0c1, pet_tiles_mdcontrastCGBPal0c2, pet_tiles_mdcontrastCGBPal0c3, // Pet 0
     pet_tiles_mdcontrastCGBPal1c0, pet_tiles_mdcontrastCGBPal1c1, pet_tiles_mdcontrastCGBPal1c2, pet_tiles_mdcontrastCGBPal1c3, // Pet 1
     pet_tiles_mdcontrastCGBPal2c0, pet_tiles_mdcontrastCGBPal2c1, pet_tiles_mdcontrastCGBPal2c2, pet_tiles_mdcontrastCGBPal2c3, // Pet 2
@@ -58,7 +59,7 @@ const UWORD board_pets_pal_med_contrast[] = {
     pet_tiles_mdcontrastCGBPal4c0, pet_tiles_mdcontrastCGBPal4c1, pet_tiles_mdcontrastCGBPal4c2, pet_tiles_mdcontrastCGBPal4c3, // Specials
 };
 
-const UWORD board_pets_palette[] = {
+const uint16_t board_pets_palette[] = {
     pet_tilesCGBPal0c0, pet_tilesCGBPal0c1, pet_tilesCGBPal0c2, pet_tilesCGBPal0c3, // Pet 0
     pet_tilesCGBPal1c0, pet_tilesCGBPal1c1, pet_tilesCGBPal1c2, pet_tilesCGBPal1c3, // Pet 1
     pet_tilesCGBPal2c0, pet_tilesCGBPal2c1, pet_tilesCGBPal2c2, pet_tilesCGBPal2c3, // Pet 2
@@ -67,12 +68,12 @@ const UWORD board_pets_palette[] = {
     pet_tilesCGBPal4c0, pet_tilesCGBPal4c1, pet_tilesCGBPal4c2, pet_tilesCGBPal4c3, // Specials
 };
 
-const UWORD clouds_sprite_palette[] = {
+const uint16_t clouds_sprite_palette[] = {
     intro_screen_tilesCGBPal7c0, intro_screen_tilesCGBPal7c1, intro_screen_tilesCGBPal7c2, intro_screen_tilesCGBPal7c3,
 };
 
 // Mostly the same as default text pal (intro screen .4) except lighter final color
-const UWORD option_title_palette[] = {
+const uint16_t option_title_palette[] = {
     intro_screen_tilesCGBPal4c0,
     intro_screen_tilesCGBPal4c1,
     intro_screen_tilesCGBPal4c2,
@@ -80,14 +81,14 @@ const UWORD option_title_palette[] = {
 };
 
 // Palettes 0..1
-const UWORD intro_screen_logo_palette[] = {
+const uint16_t intro_screen_logo_palette[] = {
     intro_screen_tilesCGBPal0c0, intro_screen_tilesCGBPal0c1, intro_screen_tilesCGBPal0c2, intro_screen_tilesCGBPal0c3, // Logo Top
     intro_screen_tilesCGBPal1c0, intro_screen_tilesCGBPal1c1, intro_screen_tilesCGBPal1c2, intro_screen_tilesCGBPal1c3, // Logo Bottom
     intro_screen_tilesCGBPal2c0, intro_screen_tilesCGBPal2c1, intro_screen_tilesCGBPal2c2, intro_screen_tilesCGBPal2c3, // Logo Bottom
 };
 
 // Palettes 4..6
-const UWORD intro_screen_palette[] = {
+const uint16_t intro_screen_palette[] = {
     intro_screen_tilesCGBPal4c0, intro_screen_tilesCGBPal4c1, intro_screen_tilesCGBPal4c2, intro_screen_tilesCGBPal4c3, // Sky
     intro_screen_tilesCGBPal5c0, intro_screen_tilesCGBPal5c1, intro_screen_tilesCGBPal5c2, intro_screen_tilesCGBPal5c3, // Ground Top
     intro_screen_tilesCGBPal6c0, intro_screen_tilesCGBPal6c1, intro_screen_tilesCGBPal6c2, intro_screen_tilesCGBPal6c3, // Ground Bottom
@@ -95,7 +96,7 @@ const UWORD intro_screen_palette[] = {
 };
 
 // Intro Splash screen only uses Palette 1
-const UWORD intro_cat_palette[] = {
+const uint16_t intro_cat_palette[] = {
     intro_cat_tilesCGBPal0c0, intro_cat_tilesCGBPal0c1, intro_cat_tilesCGBPal0c2, intro_cat_tilesCGBPal0c3
 };
 
@@ -103,12 +104,12 @@ const UWORD intro_cat_palette[] = {
 
 // Pointer used to load pet tiles/palettes,
 // allows tile sets/palettes to be easily swapped out
-UINT8 * p_pet_tiles;
-UWORD * p_pet_palette;
+uint8_t * p_pet_tiles;
+uint16_t * p_pet_palette;
 
 // Storage for expanded hi contrast pet tiles
 // This isn't the most efficient way to do this, but this RAM is otherwise unused
-UINT8 pet_tiles_hicontrast_ram[ TILE_SIZE_BYTES * (TILE_COUNT_PETTOTAL + TILE_COUNT_PET_ANIM__NOTLOADED_ONSTART__)];
+uint8_t pet_tiles_hicontrast_ram[ TILE_SIZE_BYTES * (TILE_COUNT_PETTOTAL + TILE_COUNT_PET_ANIM__NOTLOADED_ONSTART__)];
 
 #define TILE_COPY_COUNT 4         // Duplicate each tile 4 times
 #define TILE_SIZE_EXPANDED_BYTES  (TILE_SIZE_BYTES * TILE_COPY_COUNT)
@@ -128,16 +129,16 @@ UINT8 pet_tiles_hicontrast_ram[ TILE_SIZE_BYTES * (TILE_COUNT_PETTOTAL + TILE_CO
 // And select matching color palette from CODE
 void pet_tiles_prepare(void) {
 
-    UINT8 * p_src_tile;
-    UINT8 * p_dest;
-    UINT8 src_tile;
-    UINT8 c;
-    UINT8 duplicate, repeat_num;
+    uint8_t * p_src_tile;
+    uint8_t * p_dest;
+    uint8_t src_tile;
+    uint8_t c;
+    uint8_t duplicate, repeat_num;
 
 
     if (option_game_high_contrast == OPTION_HIGH_CONTRAST_OFF) {
         p_pet_tiles = pet_tiles;
-        p_pet_palette = (UWORD *)board_pets_palette;
+        p_pet_palette = (uint16_t *)board_pets_palette;
     }
     else { // Implied: OPTION_HIGH_CONTRAST_MED or OPTION_HIGH_CONTRAST_HI/2
 
@@ -147,14 +148,14 @@ void pet_tiles_prepare(void) {
         // Non-expanded source CODE tile data
         if (option_game_high_contrast == OPTION_HIGH_CONTRAST_HI) {
             p_src_tile = pet_tiles_hicontrast;
-            p_pet_palette = (UWORD *) board_pets_pal_high_contrast;
+            p_pet_palette = (uint16_t *) board_pets_pal_high_contrast;
         } else if (option_game_high_contrast == OPTION_HIGH_CONTRAST_HI_2) {
             p_src_tile = pet_tiles_hicontrast;
-            p_pet_palette = (UWORD *) board_pets_pal_high_contrast_2;
+            p_pet_palette = (uint16_t *) board_pets_pal_high_contrast_2;
         }
         else { // implied (option_game_high_contrast == OPTION_HIGH_CONTRAST_MED)
             p_src_tile = pet_tiles_mdcontrast;
-            p_pet_palette = (UWORD *) board_pets_pal_med_contrast;
+            p_pet_palette = (uint16_t *) board_pets_pal_med_contrast;
         }
 
 
@@ -192,4 +193,4 @@ void pet_tiles_prepare(void) {
     }
 
 }
-
+*/

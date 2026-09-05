@@ -39,3 +39,6 @@
 #define OBJ_SUBPAL(s0,s1,s2,s3) ( (s0) | ((s1) << 4) | ((s2) << 8) | ((s3) << 12) )
 #define LAYER_SCREEN(bm01,bm23,ob0,ob1) ( ((bm01) << 8) | ((bm23) << 10) | ((ob0) << 12) | ((ob1) << 14) )
 
+
+#define OBJ_LAYER_SPLIT(num) (num)
+#define OAM_PAL(pal)         ((pal) << 12)

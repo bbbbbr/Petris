@@ -32,6 +32,9 @@
 #define BG0_FORMAT_4BPP 0
 #define BG0_FORMAT_8BPP 8
 
+#define BG0_SUBPALS  0
+#define BG1_SUBPALS  1
+
 #define BG0_SCROLL_X 0
 #define BG0_SCROLL_Y 1
 #define BG1_SCROLL_X 2
@@ -65,6 +68,53 @@
 
 #define OBJ_FORMAT_4BPP 0x0000
 #define OBJ_FORMAT_8BPP 0x4000
+
+#define OBJ_LAYER_SPLIT_ALL_OBJ0 (0x00u)
+#define OBJ_LAYER_SPLIT_ALL_OBJ1 (0x80u)
+#define OBJ_LAYER_SPLIT_HALF_OBJ0_HALF_OBJ1 (0x40)
+
+#define OBJ_TILEGROUP_BASE_0     0
+#define OBJ_TILEGROUP_BASE_256   256
+#define OBJ_TILEGROUP_BASE_512   512
+#define OBJ_TILEGROUP_BASE_768   768
+#define OBJ_TILEGROUP_BASE_1024  1024
+#define OBJ_TILEGROUP_BASE_1280  1280
+#define OBJ_TILEGROUP_BASE_1536  1536
+#define OBJ_TILEGROUP_BASE_1792  1792
+
+
+#define OBJ0_USE_TILEGROUP_0_255      (0 << 11)
+#define OBJ0_USE_TILEGROUP_256_511    (1 << 11)
+#define OBJ0_USE_TILEGROUP_512_767    (2 << 11)
+#define OBJ0_USE_TILEGROUP_768_1023   (3 << 11)
+#define OBJ0_USE_TILEGROUP_1024_1279  (4 << 11)
+#define OBJ0_USE_TILEGROUP_1280_1535  (5 << 11)
+#define OBJ0_USE_TILEGROUP_1536_1791  (6 << 11)
+#define OBJ0_USE_TILEGROUP_1792_2047  (7 << 11)
+
+#define OBJ1_USE_TILEGROUP_0_255      (0 << 8)
+#define OBJ1_USE_TILEGROUP_256_511    (1 << 8)
+#define OBJ1_USE_TILEGROUP_512_767    (2 << 8)
+#define OBJ1_USE_TILEGROUP_768_1023   (3 << 8)
+#define OBJ1_USE_TILEGROUP_1024_1279  (4 << 8)
+#define OBJ1_USE_TILEGROUP_1280_1535  (5 << 8)
+#define OBJ1_USE_TILEGROUP_1536_1791  (6 << 8)
+#define OBJ1_USE_TILEGROUP_1792_2047  (7 << 8)
+
+#define OBJ0_SUBPALS  0
+#define OBJ1_SUBPALS  1
+
+#define OAM_8x8   0
+#define OAM_16x16 1
+#define OAM_16x32 2
+#define OAM_32x32 3
+
+#define OAM_FLIPX      (1 << 14)
+#define OAM_FLIPY      (1 << 15)
+#define OAM_Y_HIBIT    (1 << 9)
+#define OAM_X_HIBIT    (1 << 8)
+#define OAM_Y_HIBIT_ON  (1 << 9)
+#define OAM_X_HIBIT_ON  (1 << 8)
 
 #define BLEND_MATH      0
 #define BLEND_MATH_HALF 1
