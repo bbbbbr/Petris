@@ -1,19 +1,24 @@
-#pragma #once
-
 #ifndef _GBDK_LOOPY_H
 #define _GBDK_LOOPY_H
-
 
 #include "stdint.h"
 #include "loopy.h"
 #include "loopy_helpers.h"
 
+#undef ALWAYS_INLINE
 #define ALWAYS_INLINE __attribute__((always_inline))
 
 // Casio Loopy Specific
 
 
 // hardware.h
+
+/** Amount of hardware sprites in OAM
+*/
+#define MAX_HARDWARE_SPRITES 128
+
+#define VSYNC_OAM_COPY_SZ      16u  // Copy N OAM entries in a row in vsync() current shim manual OAM copy
+#define SHADOW_OAM_MAX_SPRITES 64u  // For current shim oam copy, MUST BE MULTIPLE OF VSYNC_OAM_COPY_SZ. Controls size of Shadow OAM and how much of it that gets copied to hardware OAM
 
 // This is for Layout 0 (2 x 64x64 tilemaps) in 8x8 mode with 256x224 screen
 #define DEVICE_SCREEN_X_OFFSET       0u
@@ -68,7 +73,8 @@
 #define S_X_HIBIT     (1 << 0)
 #define S_Y_HIBIT_ON  (1 << 1)
 #define S_X_HIBIT_ON  (1 << 0)
-#define S_HIBIT_MASK_OFF (0xFCu)
+#define S_HIBITS_MASK_OFF (0xFCu)
+#define S_HIBITS_ON       (0x03u)
 
 #define S_PAL0        (0 << 4)
 #define S_PAL1        (1 << 4)
@@ -87,9 +93,12 @@ typedef struct OAM_item_t {
     uint8_t x;     //< X Coordinates (lowest 8 bits of 9) of the sprite on screen
 } OAM_item_t;
 
-// TODO: WARNING!: Direct writing the OAM without a Shadow OAM for now, also need to check safe timing
-// extern volatile struct OAM_item_t shadow_OAM[];
-#define shadow_OAM ((OAM_item_t *)VDP.OAM)
+// TODO: WARNING!: Need to use DMA to copy over shadow oam to actual oam
+// // extern volatile struct OAM_item_t shadow_OAM[];
+// #define shadow_OAM ((OAM_item_t *)VDP.OAM)
+extern OAM_item_t shadow_OAM[SHADOW_OAM_MAX_SPRITES];
+
+void vsync(void);
 
 // TODO: Docs
 inline void set_sprite_tile(uint8_t nb, uint8_t tile) {
@@ -119,14 +128,14 @@ inline uint8_t get_sprite_prop(uint8_t nb) {
 ALWAYS_INLINE inline void move_sprite(uint8_t nb, uint8_t x, uint8_t y) {
     OAM_item_t * itm = &shadow_OAM[nb];
     itm->y=y, itm->x=x;
-    itm->prop &= S_HIBIT_MASK_OFF;  // TODO: Forcing X,Y High bits off for now
+    itm->prop &= (S_HIBITS_MASK_OFF);  // TODO: Forcing X,Y High bits off for now
 }
 
 // TODO: Using 8 bit x,y positions for now, but x and y are signed 9 bit (so -256 to 255)
 ALWAYS_INLINE inline void scroll_sprite(uint8_t nb, int8_t x, int8_t y) {
     OAM_item_t * itm = &shadow_OAM[nb];
     itm->y+=y, itm->x+=x;
-    itm->prop &= !(S_Y_HIBIT_ON | S_X_HIBIT_ON);  // TODO: Forcing X,Y High bits off for now
+    itm->prop &= (S_HIBITS_MASK_OFF);  // TODO: Forcing X,Y High bits off for now
 }
 
 ALWAYS_INLINE inline void hide_sprite(uint8_t nb) {
@@ -155,8 +164,6 @@ typedef uint16_t palette_color_t;
 #define RGB888(r, g, b) (((uint16_t)((((r) >> 3) & 0x1f) << 10)) | ((uint16_t)((((g) >> 3) & 0x1f) << 5)) | (((b) >> 3) & 0x1f))
 #define RGB8 RGB888
 
-// Note: Loopy bios vsync also polls controller(s?)
-#define vsync  bios_vsync
 
 /** Set background palette(s)
 
@@ -186,7 +193,7 @@ void set_bkg_4bpp_palette(unsigned int first_palette, unsigned int nb_palettes, 
 
     @see set_4bpp_tile_patterns_base_address    
  */
-void set_bkg_4bpp_data(unsigned int start, unsigned int ntiles, const uint8_t *src);
+void set_bkg_4bpp_data(unsigned int start, unsigned int ntiles, const uint16_t *src);
 
 
 /** Sets a rectangular region of Background Tile Map.

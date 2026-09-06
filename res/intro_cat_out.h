@@ -30,6 +30,6 @@ extern const uint16_t intro_cat_out_map[896];
 BANKREF_EXTERN(intro_cat_out)
 
 extern const palette_color_t intro_cat_out_palettes[32];
-extern const uint8_t intro_cat_out_tiles[3232];
+extern const uint16_t intro_cat_out_tiles[1616];
 
 #endif

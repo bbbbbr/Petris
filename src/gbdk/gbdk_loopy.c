@@ -9,6 +9,39 @@ static uint16_t * _bg_tilemap_base_address =  BG0_MAP_START();
 static uint8_t  * _4bpp_tile_patterns_base_address = 0;
 static uint16_t   _tilemap_screen_ab_prop = 0;
 
+OAM_item_t shadow_OAM[SHADOW_OAM_MAX_SPRITES];
+
+
+// Note: Loopy bios vsync also polls controller(s)
+// #define vsync  bios_vsync  
+// TODO: IMPORTANT: manual OAM copy is inefficient, convert to interrupt driven vsync that increments a sys_time counter (possibly in the on-(?)-cpu ram)
+void vsync(void) {
+
+    volatile uint32_t * p_OAM = VDP.OAM;
+    volatile uint32_t * p_src = (uint32_t *)shadow_OAM;
+
+    bios_vsync();
+    for (uint16_t c = 0; c < (SHADOW_OAM_MAX_SPRITES / VSYNC_OAM_COPY_SZ); c++) {
+        // Number of unrolled writes here should match VSYNC_OAM_COPY_SZ
+        *p_OAM++ = *p_src++;
+        *p_OAM++ = *p_src++;
+        *p_OAM++ = *p_src++;
+        *p_OAM++ = *p_src++;
+        *p_OAM++ = *p_src++;
+        *p_OAM++ = *p_src++;
+        *p_OAM++ = *p_src++;
+        *p_OAM++ = *p_src++;
+
+        *p_OAM++ = *p_src++;
+        *p_OAM++ = *p_src++;
+        *p_OAM++ = *p_src++;
+        *p_OAM++ = *p_src++;
+        *p_OAM++ = *p_src++;
+        *p_OAM++ = *p_src++;
+        *p_OAM++ = *p_src++;
+        *p_OAM++ = *p_src++;
+    }
+}
 
 /** Set background palette(s)
 
@@ -44,22 +77,41 @@ void set_bkg_4bpp_palette(unsigned int first_palette, unsigned int nb_palettes, 
     @param nb_tiles    Number of tiles to write
     @param data        Pointer to source Tile Pattern data.
  */
-void set_bkg_4bpp_data(unsigned int start, unsigned int ntiles, const uint8_t *src) {
+void set_bkg_4bpp_data(unsigned int start, unsigned int ntiles, const uint16_t *src) {
 
-    // offset into start of 4bpp tile pattern data based on 
-    uint8_t * p_dest = (start * BYTES_PER_4BPP_TILE) + _4bpp_tile_patterns_base_address;
+    // Important! Writes to Tile VRAM *MUST* be 16 bit, 8 bit writes
+    // on real hardware will result in every other byte of tile pattern
+    // data being corrupted, yielding vertical lines on the screen (palette dependent).
+    
+    // Offset into start of 4bpp tile pattern data based on 
+    uint16_t * p_dest = (start * U16_WORDS_PER_4BPP_TILE) + (uint16_t *)_4bpp_tile_patterns_base_address;
 
     // TODO: Use DMA (make a vmemcpy shim?)
     // Tile VRAM is not dual-ported, so requires safe access timing, unlike bitmap vram
     // TODO: This is the shoddiest safe access timing...
-    bios_vsync();
-    size_t copybytes = ntiles * BYTES_PER_4BPP_TILE;
+    bios_vsync();  //TODO: FIXME
+    size_t copybytes = ntiles;
     while (copybytes--) {
+        // Write one 8x8 32 byte tile entry as a block
+        *p_dest++ = *src++;
+        *p_dest++ = *src++;
+        *p_dest++ = *src++;
+        *p_dest++ = *src++;
+        *p_dest++ = *src++;
+        *p_dest++ = *src++;
+        *p_dest++ = *src++;
+        *p_dest++ = *src++;
+
+        *p_dest++ = *src++;
+        *p_dest++ = *src++;
+        *p_dest++ = *src++;
+        *p_dest++ = *src++;
+        *p_dest++ = *src++;
+        *p_dest++ = *src++;
+        *p_dest++ = *src++;
         *p_dest++ = *src++;
     }
 }
-
-
 
 
 void set_bkg_tiles(unsigned int x, unsigned int y, unsigned int width, unsigned int height, const uint16_t *tiles) {
@@ -67,7 +119,7 @@ void set_bkg_tiles(unsigned int x, unsigned int y, unsigned int width, unsigned 
           uint16_t * p_dest     = _bg_tilemap_base_address + (y * DEVICE_SCREEN_BUFFER_WIDTH) + x;
     const uint32_t   row_stride = DEVICE_SCREEN_BUFFER_WIDTH - width;
 
-    bios_vsync();
+    bios_vsync();  // TODO: FIXME
     while (height--) {
         uint16_t row_len = width;
         uint16_t row_wrap = DEVICE_SCREEN_BUFFER_WIDTH - x;
@@ -91,7 +143,7 @@ void set_bkg_based_tiles(unsigned int x, unsigned int y, unsigned int width, uns
           uint16_t * p_dest     = _bg_tilemap_base_address + (y * DEVICE_SCREEN_BUFFER_WIDTH) + x;
     const uint32_t   row_stride = DEVICE_SCREEN_BUFFER_WIDTH - width;
 
-    bios_vsync();
+    bios_vsync();  // TODO: FIXME
     while (height--) {
         uint16_t row_len = width;
         uint16_t row_wrap = DEVICE_SCREEN_BUFFER_WIDTH - x;
@@ -116,7 +168,7 @@ void fill_bkg_rect(unsigned int x, unsigned int y, unsigned int width, unsigned 
           uint16_t * p_dest     = _bg_tilemap_base_address + (y * DEVICE_SCREEN_BUFFER_WIDTH) + x;
     const uint32_t   row_stride = DEVICE_SCREEN_BUFFER_WIDTH - width;
 
-    bios_vsync();
+    bios_vsync();  // TODO: FIXME
     while (height--) {
         uint16_t row_len = width;
         uint16_t row_wrap = DEVICE_SCREEN_BUFFER_WIDTH - x;

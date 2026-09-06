@@ -30,6 +30,6 @@ extern const uint16_t intro_screen_out_map[896];
 BANKREF_EXTERN(intro_screen_out)
 
 extern const palette_color_t intro_screen_out_palettes[16];
-extern const uint8_t intro_screen_out_tiles[1376];
+extern const uint16_t intro_screen_out_tiles[688];
 
 #endif

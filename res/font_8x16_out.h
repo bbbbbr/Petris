@@ -23,6 +23,6 @@
 BANKREF_EXTERN(font_8x16_out)
 
 extern const palette_color_t font_8x16_out_palettes[16];
-extern const uint8_t font_8x16_out_tiles[2880];
+extern const uint16_t font_8x16_out_tiles[1440];
 
 #endif
