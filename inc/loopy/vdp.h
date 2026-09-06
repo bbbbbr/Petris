@@ -31,8 +31,8 @@ struct vdp {
 	PADBYTES _pad_52200[0x5E00];
 	// General registers
 	uint16_t MODE;
-	uint16_t HCOUNT;
-	uint16_t VCOUNT;
+	int16_t  HCOUNT;
+	int16_t  VCOUNT;
 	uint16_t TRIGGER;
 	uint16_t SYNC_IRQ_CTRL;
 	PADBYTES _pad_5800A[0xFF6];
