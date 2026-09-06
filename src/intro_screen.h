@@ -8,6 +8,6 @@ void intro_clouds_update(void);
 void intro_clouds_cleanup(void);
 void intro_screen_init(void);
 void intro_screen_handle(void);
-
+void intro_screen_cleanup(void);
 
 #endif // INTRO_SCREEN_H

@@ -81,7 +81,7 @@ void intro_screen_init(void) {
     // Petris Logo is now on BG0 so it can be scrolled over background in BG1
 
     // Logo background on BG0 layer so it can scroll
-    // BG1 is set to use pals 0,1,2,3
+    // BG0 is set to use pals 0,1,2,3
     #define TILE_LOAD_OFFSET_LOGO (intro_screen_out_TILE_COUNT)
     set_bkg_tilemap_base_address(BG0_MAP_START());
     set_bkg_tiles_target_screen_a_or_b(LAYER_SCREEN_A);
@@ -154,25 +154,19 @@ static void intro_text_sprites_update(void) {
 
 
 
-void intro_screen_handle(void) {
+void intro_screen_handle(void) {  // TODO: Some kind of animated roll in of logo?
 
     intro_text_sprites_update();
     intro_clouds_update();
     magic_code_update();
 
     // Wait for the player to press start
-    // intro_counter++;
-    intro_counter += 3;
+    intro_counter += 2;
+}
 
-    // TODO: Some kind of "Press Start" indicator on intro screen, maybe less bare bones than original
-    //
-    // if (intro_counter == 1) {
-    //     PRINT(4,10, STR_INTRO_TEXT_START, 0);
-    // }
-    // else if (intro_counter == 125) {
-    //     PRINT(4,10, INTRO_TEXT_BLANK, 0);
-    // }
-    // else if (intro_counter == 200) {
-    //     intro_counter = 0;
-    // }
+
+void intro_screen_cleanup(void) {
+    // fade_start(FADE_OUT);    // TODO
+    hide_sprites_range(0, MAX_HARDWARE_SPRITES);
+    intro_clouds_cleanup();
 }

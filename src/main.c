@@ -150,7 +150,7 @@ int main() {
         // Wait for vertical blank (end of the frame)
         // before starting to process the next frame
         // (skip if already happened)
-        if(!vbl_count)
+        if(!vbl_count) // TODO: fixme with vbl_count increment in interrupt
             vsync();
         vbl_count = 0;
 
@@ -172,8 +172,7 @@ int main() {
                 // Done with intro screen, now start game
                 if (KEY_TICKED(J_START)) {
                     game_state = GAME_OPTIONS_INIT;
-                    // fade_start(FADE_OUT);
-                    intro_clouds_cleanup();
+                    intro_screen_cleanup();
                 }
                 // Debug: use input to help indicate if game is alive and running
                 // Note: color showing in bg when scrolling is due to tile 1 filling the BG and using 4th palette
