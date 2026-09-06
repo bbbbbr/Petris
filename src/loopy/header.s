@@ -12,5 +12,5 @@
 	! Example in the format of Wanwan header:
 !	.section .header.copyright
 !	.long 0
-!	.asciz "(C)2025 OIOIO All right reserved."
-!	.asciz "ver 1.23"
+!	.asciz "(C)2026 Petris by bbbbbr"
+!	.asciz "ver 1.00"
