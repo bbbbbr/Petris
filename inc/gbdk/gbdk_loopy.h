@@ -18,14 +18,14 @@
 #define MAX_HARDWARE_SPRITES 128
 
 #define VSYNC_OAM_COPY_SZ      16u  // Copy N OAM entries in a row in vsync() current shim manual OAM copy
-#define SHADOW_OAM_MAX_SPRITES 64u  // For current shim oam copy, MUST BE MULTIPLE OF VSYNC_OAM_COPY_SZ. Controls size of Shadow OAM and how much of it that gets copied to hardware OAM
+#define SHADOW_OAM_MAX_SPRITES 128u  // For current shim oam copy, MUST BE MULTIPLE OF VSYNC_OAM_COPY_SZ. Controls size of Shadow OAM and how much of it that gets copied to hardware OAM
 
 // This is for Layout 0 (2 x 64x64 tilemaps) in 8x8 mode with 256x224 screen
 #define DEVICE_SCREEN_X_OFFSET       0u
 #define DEVICE_SCREEN_Y_OFFSET       0u
 #define DEVICE_SCREEN_WIDTH          32u
 #define DEVICE_SCREEN_HEIGHT         28u
-#define DEVICE_SCREEN_BUFFER_WIDTH   64u
+#define DEVICE_SCREEN_BUFFER_WIDTH   64u // Assumes one of the BG_CTRL 64 x 64 layouts (split preferred)
 #define DEVICE_SCREEN_BUFFER_HEIGHT  64u
 #define DEVICE_SCREEN_MAP_ENTRY_SIZE 1u  // In this case 1 x uint16_t (vs gbdk uint8_t perspective)
 #define DEVICE_SPRITE_PX_OFFSET_X    0u  // TODO, but I think 0 iirc
@@ -33,8 +33,20 @@
 #define DEVICE_WINDOW_PX_OFFSET_X    0u
 #define DEVICE_WINDOW_PX_OFFSET_Y    0u
 
-#define DEVICE_SCREEN_PX_WIDTH (DEVICE_SCREEN_WIDTH * 8)
-#define DEVICE_SCREEN_PX_HEIGHT (DEVICE_SCREEN_HEIGHT * 8)
+#define DEVICE_SCREEN_PX_WIDTH (DEVICE_SCREEN_WIDTH * 8u)
+#define DEVICE_SCREEN_PX_HEIGHT (DEVICE_SCREEN_HEIGHT * 8u)
+
+#define DEVICE_BITMAP_8BPP_BUFFER_PX_WIDTH   256u // Assumes BM_CTRL 8BPP 256 x 512 shared layout
+#define DEVICE_BITMAP_8BPP_BUFFER_PX_HEIGHT  512
+
+#define DEVICE_BITMAP_4BPP_BUFFER_PX_WIDTH   512u // Assumes BM_CTRL 4BPP 512 x 256 shared layout
+#define DEVICE_BITMAP_4BPP_BUFFER_PX_HEIGHT  512u
+
+#define DEVICE_BITMAP_4BPP_BUFFER_BYTE_WIDTH   (DEVICE_BITMAP_4BPP_BUFFER_PX_WIDTH / 2u)
+#define DEVICE_BITMAP_4BPP_BUFFER_BYTE_HEIGHT  (DEVICE_BITMAP_4BPP_BUFFER_PX_HEIGHT / 2u)
+
+#define DEVICE_BITMAP_4BPP_BUFFER_U16_WIDTH   (DEVICE_BITMAP_4BPP_BUFFER_PX_WIDTH / 2u)
+#define DEVICE_BITMAP_4BPP_BUFFER_U16_HEIGHT  (DEVICE_BITMAP_4BPP_BUFFER_PX_HEIGHT / 2u)
 
 
 
@@ -101,19 +113,19 @@ extern OAM_item_t shadow_OAM[SHADOW_OAM_MAX_SPRITES];
 void vsync(void);
 
 // TODO: Docs
-inline void set_sprite_tile(uint8_t nb, uint8_t tile) {
+inline void set_sprite_tile(uint16_t nb, uint8_t tile) {
     shadow_OAM[nb].tile=tile;
 }
 
-inline uint8_t get_sprite_tile(uint8_t nb) {
+inline uint8_t get_sprite_tile(uint16_t nb) {
     return shadow_OAM[nb].tile;
 }
 
-inline void set_sprite_prop(uint8_t nb, uint8_t prop) {
+inline void set_sprite_prop(uint16_t nb, uint8_t prop) {
     shadow_OAM[nb].prop=prop;
 }
 
-inline uint8_t get_sprite_prop(uint8_t nb) {
+inline uint8_t get_sprite_prop(uint16_t nb) {
     return shadow_OAM[nb].prop;
 }
 
@@ -125,20 +137,20 @@ inline uint8_t get_sprite_prop(uint8_t nb) {
 // Workaround is to use always_inline to force it.
 //
 // TODO: Using 8 bit x,y positions for now, but x and y are signed 9 bit (so -256 to 255)
-ALWAYS_INLINE inline void move_sprite(uint8_t nb, uint8_t x, uint8_t y) {
+ALWAYS_INLINE inline void move_sprite(uint16_t nb, uint8_t x, uint8_t y) {
     OAM_item_t * itm = &shadow_OAM[nb];
     itm->y=y, itm->x=x;
     itm->prop &= (S_HIBITS_MASK_OFF);  // TODO: Forcing X,Y High bits off for now
 }
 
 // TODO: Using 8 bit x,y positions for now, but x and y are signed 9 bit (so -256 to 255)
-ALWAYS_INLINE inline void scroll_sprite(uint8_t nb, int8_t x, int8_t y) {
+ALWAYS_INLINE inline void scroll_sprite(uint16_t nb, int8_t x, int8_t y) {
     OAM_item_t * itm = &shadow_OAM[nb];
     itm->y+=y, itm->x+=x;
     itm->prop &= (S_HIBITS_MASK_OFF);  // TODO: Forcing X,Y High bits off for now
 }
 
-ALWAYS_INLINE inline void hide_sprite(uint8_t nb) {
+ALWAYS_INLINE inline void hide_sprite(uint16_t nb) {
     OAM_item_t * itm = &shadow_OAM[nb];
     itm->y = 128;
     itm->prop |= S_Y_HIBIT_ON;  // Hide sprite by setting Y high (signed) bit and low y to give it a negative off-screen location
@@ -256,10 +268,21 @@ void set_bkg_based_tiles(unsigned int x, unsigned int y, unsigned int width, uns
 void fill_bkg_rect(unsigned int x, unsigned int y, unsigned int width, unsigned int height, const uint16_t tile);
 
 
+/** Sets a rectangular region of a Bitmap layer.
+
+    @param x      X Start position in pixel coordinates. Range 0 - 510. Rounded down to even value. // TODO
+    @param y      Y Start position in pixel coordinates. Range 0 - 255
+    @param w      Width of area to set in tiles. Range 1 - 512. Rounded down to even value. // TODO
+    @param h      Height of area to set in tiles. Range 1 - 32
+    @param bitmap Pointer to source bitmap data
+*/
+void load_bitmap_4bpp(unsigned int x, unsigned int y, unsigned int width, unsigned int height, const uint8_t *bitmap);
+
+
 /** Set base memory address used by the tilemap writing functions,
     used for selecting between BG0 and BG1
  
-  @param p_tilemap_base_address   Should point to the starting (0,0)  Start position in Background Map tile coordinatesto the  a rectangular region of Background Tile Map.
+  @param p_tilemap_base_address   Should point to the starting (0,0) position in Background Map tile coordinates
 
     The Base address of BG0 is fixed to the start of tilemap memory,
     but the base address of BG1 depends on the tilemap settings selected

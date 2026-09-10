@@ -29,6 +29,11 @@
 
 #include "intro_screen_out.h"
 #include "intro_logo_out.h"
+
+#include "intro_clouds_dark_out.h"
+#include "intro_clouds_light_out.h"
+
+
 // #include "../res/pet_tiles.h"
 // #include "../res/font_tiles.h"
 
@@ -37,35 +42,29 @@
 
 #define STR_INTRO_TEXT_START "PRESS START"
 #define OAM_TEXT_INTRO_START 0u
-#define OAM_TEXT_START_X  72u
+#define OAM_TEXT_START_X  80u
 #define OAM_TEXT_START_Y  136u
 
 static uint16_t oam_text_intro_end = 0;
 
 
-static uint16_t intro_counter = 0;
-
-// TODO: Translucent blended clouds overlay for intro screen, using Blend + Math ADD
-void intro_clouds_init(void) { // TODO
-    intro_counter = 0;
-}
-
-void intro_clouds_update(void) { // TODO
-}
+static uint16_t sprite_counter = 0;
+static uint16_t cloud_counter = 0;
 
 
-void intro_clouds_cleanup(void) { // TODO
-}
+static void intro_background_and_logo_init(void);
+static void intro_text_init(void);
+static void intro_clouds_init(void);
+
+static void intro_text_update(void);
+static void intro_clouds_update(void);
+
+static void intro_clouds_cleanup(void);
+static void intro_text_cleanup(void);
 
 
-static void intro_text_sprites_update(void);
-
-
-void intro_screen_init(void) {
-
-    intro_clouds_init();
-
-    bios_vsync();
+static void intro_background_and_logo_init(void) {
+    
     // Main background on BG1 layer
     // BG1 is set to use pals 4,5,6,7 (so no need to offset palette)
     set_bkg_tiles_target_screen_a_or_b(LAYER_SCREEN_A);
@@ -95,36 +94,55 @@ void intro_screen_init(void) {
                         LOGO_TILE_Y_START,
                         intro_logo_out_TILES_WIDTH, intro_logo_out_TILES_HEIGHT, intro_logo_out_map, TILE_LOAD_OFFSET_LOGO);
 
+    // Scroll logo down the screen a bit to intended position
+    VDP.BG_SCROLL[BG0_SCROLL_Y] = (uint16_t)-8;  // TODO: Animated scroll in of Petris logo?    
+}
+
+
+// Translucent blended clouds overlay for intro screen
+static void intro_clouds_init(void) {
+
+    // Bitmap BM1/BM2 cloud layers on Screen B, Math ADD + BLEND
+    cloud_counter = 0;
+
+    // Set up shared palette (from one of the images)
+    set_bkg_4bpp_palette(PAL_12, 1, intro_clouds_light_out_palette);  // 1 Palette (actually 3 colors at present, but allow it to overrun to 16)
+
+    // Load both sets of cloud bitmaps to the shared VRAM, one at top and other lower
+    // Make the lighter clouds on BM2 so that they scroll over the darker ones
+    VDP.BM_SCROLLY[BM2_SCROLL_Y] = (uint16_t)-16u;
+    load_bitmap_4bpp(0, 0u, intro_clouds_light_out_PX_WIDTH, intro_clouds_light_out_PX_HEIGHT, intro_clouds_light_out);
+
+    VDP.BM_SCROLLY[BM3_SCROLL_Y] = (uint16_t)(-16u + DEVICE_SCREEN_PX_HEIGHT);
+    load_bitmap_4bpp(0, DEVICE_SCREEN_PX_HEIGHT, intro_clouds_dark_out_PX_WIDTH, intro_clouds_dark_out_PX_HEIGHT, intro_clouds_dark_out);
+}
+
+
+// Animated "Press Start" message using Sprites
+static void intro_text_init(void) {
+
+    sprite_counter = 0;
 
     // Load the 8x16 font and print it to the sprites
     #define TILE_LOAD_OFFSET_FONT (OBJ_TILEGROUP_BASE_512)
     load_8x16_font_tiles(TILE_LOAD_OFFSET_FONT);
 
     oam_text_intro_end = print_to_sprites(OAM_TEXT_INTRO_START, OAM_TEXT_START_X, OAM_TEXT_START_Y, S_PAL2, STR_INTRO_TEXT_START);
-    intro_text_sprites_update();
+    intro_text_update();
+}
 
 
-    // uint16_t oam_next = print_to_sprites(oam_text_intro_end, DEVICE_SCREEN_PX_WIDTH - (13 * SPR_PRINT_SPACING_X), DEVICE_SCREEN_PX_HEIGHT - 16u,
-    //                                      S_PAL2, "bbbbbr 2026");
-
-    // fade_set_pal(BG_PAL_0, 3, intro_screen_logo_palette, FADE_PAL_BKG);
-    // fade_set_pal(BG_PAL_4, 3, intro_screen_palette, FADE_PAL_BKG);
-
-    // SHOW_BKG;  // TODO: ?? BG1 as BKG and BG0 as WIN?
-    SHOW_SPRITES;
-
-    // // To avoid flicker from initial print changing the attrib tiles
-    // // print the tiles before fade-in
-    // PRINT(4,10, INTRO_TEXT_BLANK, 0);
-
-    // fade_start(FADE_IN);  // TODO
+void intro_clouds_update(void) {
+    cloud_counter += 3;
+    VDP.BM_SCROLLX[BM2_SCROLL_X] = cloud_counter >> 2;  // Lighter Clouds
+    VDP.BM_SCROLLX[BM3_SCROLL_X] = cloud_counter >> 3;  // Darker Clouds
 
 }
 
 
-/** Generated using Dr LUT - Free Lookup Table Generator
-  * https://github.com/ppelikan/drlut
-  **/
+// Generated using Dr LUT - Free Lookup Table Generator
+// https://github.com/ppelikan/drlut
+//
 // Formula: sin(2*pi*t/T) 
 // Amp=4, Offs=0, Sz=16 (size should be an even power of 2 for range masking to work)
 const int16_t sine[32] = {
@@ -139,10 +157,11 @@ const int16_t sine[32] = {
     -2,    -3,    -3,    -3,    -3,    -3,    -2,
     -2,    -2,    -1,    -1 };
 
-static void intro_text_sprites_update(void) {
+static void intro_text_update(void) {
 
-    uint16_t lut_index = intro_counter >> 2;
-    // for (uint16_t c = OAM_TEXT_INTRO_START; c <= oam_text_intro_end;) {
+    sprite_counter++;
+
+    uint16_t lut_index = sprite_counter >> 1;
     uint16_t c = OAM_TEXT_INTRO_START;
     while (c < oam_text_intro_end) {
         shadow_OAM[c++].y = OAM_TEXT_START_Y + sine[lut_index & (ARRAY_LEN(sine) - 1)]; // Top of char sprite
@@ -152,21 +171,43 @@ static void intro_text_sprites_update(void) {
 }
 
 
+static void intro_clouds_cleanup(void) { // TODO
+}
+
+
+static void intro_text_cleanup(void) {
+    hide_sprites_range(0, MAX_HARDWARE_SPRITES);
+}
+
+
+
+void intro_screen_init(void) {
+
+    intro_background_and_logo_init();
+    intro_clouds_init();
+    intro_text_init();
+
+    // fade_set_pal(BG_PAL_0, 3, intro_screen_logo_palette, FADE_PAL_BKG);
+    // fade_set_pal(BG_PAL_4, 3, intro_screen_palette, FADE_PAL_BKG);
+
+    // SHOW_BKG;  // TODO: ?? BG1 as BKG and BG0 as WIN?
+    SHOW_SPRITES;
+
+    // fade_start(FADE_IN);  // TODO
+}
 
 
 void intro_screen_handle(void) {  // TODO: Some kind of animated roll in of logo?
 
-    intro_text_sprites_update();
+    // Wait for the player to press start
+    intro_text_update();
     intro_clouds_update();
     magic_code_update();
-
-    // Wait for the player to press start
-    intro_counter += 2;
 }
 
 
 void intro_screen_cleanup(void) {
     // fade_start(FADE_OUT);    // TODO
-    hide_sprites_range(0, MAX_HARDWARE_SPRITES);
-    intro_clouds_cleanup();
+    intro_text_cleanup();
+    // intro_clouds_cleanup();
 }

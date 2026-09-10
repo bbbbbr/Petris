@@ -16,6 +16,25 @@
 #define BM_MODE_4BPP_HSPLIT 3
 #define BM_MODE_4BPP_SHARED 4
 
+#define BM0_SUBPALS  0
+#define BM1_SUBPALS  1
+#define BM2_SUBPALS  2
+#define BM3_SUBPALS  3
+
+#define BM0_SCROLL_X 0
+#define BM1_SCROLL_X 1
+#define BM2_SCROLL_X 2
+#define BM3_SCROLL_X 3
+#define BM0_SCROLL_Y 0
+#define BM1_SCROLL_Y 1
+#define BM2_SCROLL_Y 2
+#define BM3_SCROLL_Y 3
+
+#define BM_X_SCROLL_REGION_LEFT  0
+#define BM_X_SCROLL_REGION_RIGHT (1 << 8)
+#define BM_Y_SCROLL_REGION_UPPER  0
+#define BM_Y_SCROLL_REGION_LOWER (1 << 8)
+
 #define BM_LATCH_ENABLE 0x100
 
 #define BG_TILEMAP_CHRNUM_MASK 0x07FFu

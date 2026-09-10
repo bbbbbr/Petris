@@ -187,6 +187,37 @@ void fill_bkg_rect(unsigned int x, unsigned int y, unsigned int width, unsigned 
 }
 
 
+// TODO: this could be a DMA
+// Only operates on width multiples of 2, X is rounded down to multiple of 2
+void load_bitmap_4bpp(unsigned int x, unsigned int y, unsigned int width, unsigned int height, const uint8_t *bitmap) {
+
+        if (width & 0x0001) return; // TODO: handle odd numbered widths and start x (requires splitting and shifting all bytes)
+
+          x /= 2;      // 4BPP packs 2 pixels into 1 byte
+          width /= 2;  // 4BPP packs 2 pixels into 1 byte
+
+           uint8_t * p_dest     = VDP.BITMAP_VRAM_8BIT + ((y * DEVICE_BITMAP_4BPP_BUFFER_BYTE_WIDTH) + x);
+    const uint32_t   row_stride = DEVICE_BITMAP_4BPP_BUFFER_BYTE_WIDTH - width;
+
+    // bios_vsync();  // TODO: FIXME (bitmap vram is dual ported, so always ok to write, but may want to time it to reduce tearing)
+    while (height--) {
+        uint16_t row_len = width;
+        uint16_t row_wrap = DEVICE_BITMAP_4BPP_BUFFER_BYTE_WIDTH - x;
+        while (row_len--) {
+            *p_dest++ = *bitmap++;
+            // Check for wraparound from right edge -> left.
+            // In that case, preserve current row instead of letting it step down to next
+            row_wrap--;
+            if ((row_wrap == 0) && (row_len != 0)) {
+                p_dest -= DEVICE_BITMAP_4BPP_BUFFER_BYTE_WIDTH;
+                row_wrap = DEVICE_BITMAP_4BPP_BUFFER_BYTE_WIDTH - x;
+            }
+        }
+        p_dest += row_stride;
+    }
+}
+
+
 void set_bkg_tilemap_base_address(uint16_t * p_tilemap_base_address) {
     _bg_tilemap_base_address = p_tilemap_base_address;
 }
@@ -207,6 +238,7 @@ void set_bkg_tiles_target_screen_a_or_b(unsigned int screen_a_or_b) {
 void delay(uint16_t d) {
     // TODO: calibrate delay time (how to measure...? count in vsyncs?)
 }
+
 
 // void set_native_tile_data(uint16_t start, uint16_t ntiles, const void *src) PRESERVES_REGS(iyh, iyl);
 // void set_bkg_4bpp_data(uint16_t start, uint16_t ntiles, const void *src) PRESERVES_REGS(iyh, iyl);
