@@ -15,7 +15,7 @@
 #define intro_screen_out_HEIGHT 224
 #define intro_screen_out_TILES_WIDTH 32
 #define intro_screen_out_TILES_HEIGHT 28
-#define intro_screen_out_TILE_COUNT 43
+#define intro_screen_out_TILE_COUNT 48
 #define intro_screen_out_PALETTE_COUNT 1
 #define intro_screen_out_COLORS_PER_PALETTE 16
 #define intro_screen_out_TOTAL_COLORS 16
@@ -30,6 +30,6 @@ extern const uint16_t intro_screen_out_map[896];
 BANKREF_EXTERN(intro_screen_out)
 
 extern const palette_color_t intro_screen_out_palettes[16];
-extern const uint16_t intro_screen_out_tiles[688];
+extern const uint16_t intro_screen_out_tiles[768];
 
 #endif
