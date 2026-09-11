@@ -68,12 +68,15 @@ OBJS_S = $(patsubst $(SRCDIR)/%.s,$(OBJDIR)/%.o,$(SRCS_S))
 LOOPY_SRCS_S = $(wildcard $(LOOPY_SRCDIR)/*.s)
 LOOPY_OBJS_S = $(patsubst $(LOOPY_SRCDIR)/%.s,$(OBJDIR)/%.o,$(LOOPY_SRCS_S))
 
+ALL_OBJS = $(OBJS_S) $(LOOPY_OBJS_S) $(OBJS_C) $(RES_OBJS_C) $(GBDK_OBJS_C) $(LOOPY_OBJS_C)
+
 CFLAGS  = $(OPTIMIZE) -g -gdwarf-4
 CFLAGS += -m1 -mrenesas
 CFLAGS += -ffreestanding
 CFLAGS += -falign-functions=4 -ffunction-sections -fdata-sections
 CFLAGS += -fomit-frame-pointer -fno-asynchronous-unwind-tables -fno-unwind-tables
 CFLAGS += -Wstack-usage=$(shell numfmt --from=iec $(STACKSIZE)) -I$(INCDIR) -I$(RES_SRCDIR)
+CFLAGS += -MMD -MP # Header file dependency output (-MMD) for Makefile use + per-header Phony rules (-MP)
 
 CXXFLAGS = -std=c++23 -fno-exceptions -fno-non-call-exceptions -fno-rtti -fno-threadsafe-statics
 
@@ -83,6 +86,10 @@ SIZEDEFS += -Wl,--defsym=STACKSIZE=$(STACKSIZE)
 LDFLAGS  = -nostartfiles -nolibc -Wl,--gc-sections -Wl,--no-warn-rwx-segment -Wl,--orphan-handling=error -Wl,--print-memory-usage
 LDFLAGS += $(SIZEDEFS) -Wl,-T $(LDSCRIPT) $(LIBS)
 
+# Dependencies from headers (using output from -MMD -MP)
+DEPS = $(ALL_OBJS:%.o=%.d)
+
+
 .PHONY: clean rom
 
 all: rom
@@ -91,12 +98,13 @@ rom: $(ROM)
 
 %.elf:
 	$(CC) $(LDFLAGS) $^ -o $@
+-include $(DEPS)
 
 %.bin: %.elf
 	$(OBJ) -O binary $< $@
 	$(FIXROM) $(ROM)
 
-$(ROM:.bin=.elf): $(OBJS_S) $(LOOPY_OBJS_S) $(OBJS_C) $(RES_OBJS_C) $(GBDK_OBJS_C) $(LOOPY_OBJS_C)
+$(ROM:.bin=.elf): $(ALL_OBJS)
 
 $(OBJDIR)/%.o: $(SRCDIR)/%.s | $(OBJDIR)
 	$(CC) $(CFLAGS) -c $< -o $@
