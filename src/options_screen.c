@@ -118,9 +118,9 @@ const char str_options_heading[] = "---- OPTIONS ----";
 
 // See above for meaning of each element
 const option_item options[] = {
-        { MENU_Y( 3),"TYPE :",         (int8_t)ARRAY_LEN(options_type),          &options_type[0],          &option_game_type},
-        { MENU_Y( 5),"LEVEL:",         (int8_t)ARRAY_LEN(options_difficulty),    &options_difficulty[0],    &option_game_difficulty},
-        { MENU_Y( 7),"MUSIC:",         (int8_t)ARRAY_LEN(options_music),         &options_music[0],         &option_game_music},
+        { MENU_Y( 3),"TYPE : ",        (int8_t)ARRAY_LEN(options_type),          &options_type[0],          &option_game_type},
+        { MENU_Y( 5),"LEVEL: ",        (int8_t)ARRAY_LEN(options_difficulty),    &options_difficulty[0],    &option_game_difficulty},
+        { MENU_Y( 7),"MUSIC: ",        (int8_t)ARRAY_LEN(options_music),         &options_music[0],         &option_game_music},
         { MENU_Y(10),"   START GAME ", (int8_t)ARRAY_LEN(options_visual_hints),  NULL, NULL},
         // TODO: High Score menu item here or at bottom of list
         { MENU_Y(13),"2 PLAYER VS:  ", (int8_t)ARRAY_LEN(options_link2p),        &options_link2p[0],        &option_game_link2p},
