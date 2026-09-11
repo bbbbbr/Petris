@@ -191,6 +191,27 @@ ALWAYS_INLINE inline void hide_sprite(uint16_t nb) {
   VDP.SCREENPRIO &= ~SCREEN_A_ENABLE
 
 
+/** Turns on the Background Tilemap 0 layer.
+*/
+#define SHOW_BKG_0 \
+  VDP.LAYER_CTRL |= LAYER_ENABLE_BG0
+
+/** Turns off the Background Tilemap 0 layer.
+*/
+#define HIDE_BKG_0 \
+  VDP.LAYER_CTRL &= ~LAYER_ENABLE_BG0
+
+/** Turns on the Background Tilemap 1 layer.
+*/
+#define SHOW_BKG_1 \
+  VDP.LAYER_CTRL |= LAYER_ENABLE_BG1
+
+/** Turns off the Background Tilemap 1 layer.
+*/
+#define HIDE_BKG_1 \
+  VDP.LAYER_CTRL &= ~LAYER_ENABLE_BG1
+
+
 typedef uint16_t palette_color_t;
 
 #define COLS_PER_PAL_4BPP  16u
