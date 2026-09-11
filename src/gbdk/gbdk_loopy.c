@@ -9,6 +9,7 @@ static uint16_t * _bg_tilemap_base_address =  BG0_MAP_START();
 static uint8_t  * _4bpp_tile_patterns_base_address = 0;
 static uint16_t   _tilemap_screen_ab_prop = 0;
 
+uint16_t sys_time = 0;
 OAM_item_t shadow_OAM[SHADOW_OAM_MAX_SPRITES];
 
 
@@ -17,6 +18,7 @@ OAM_item_t shadow_OAM[SHADOW_OAM_MAX_SPRITES];
 // TODO: IMPORTANT: manual OAM copy is inefficient, convert to interrupt driven vsync that increments a sys_time counter (possibly in the on-(?)-cpu ram)
 void vsync(void) {
 
+    sys_time++;
     volatile uint32_t * p_OAM = VDP.OAM;
     volatile uint32_t * p_src = (uint32_t *)shadow_OAM;
 
@@ -148,6 +150,7 @@ void set_bkg_based_tiles(unsigned int x, unsigned int y, unsigned int width, uns
         uint16_t row_len = width;
         uint16_t row_wrap = DEVICE_SCREEN_BUFFER_WIDTH - x;
         while (row_len--) {
+            // Mask out tile ID then OR in isolated tile ID + offset, OR in properties
             *p_dest++ = (*tiles & ~BG_TILEMAP_CHRNUM_MASK) | ((*tiles & BG_TILEMAP_CHRNUM_MASK) + base_tile) |  _tilemap_screen_ab_prop;
             tiles++;
             // Check for wraparound from right edge -> left.
@@ -160,6 +163,15 @@ void set_bkg_based_tiles(unsigned int x, unsigned int y, unsigned int width, uns
         }
         p_dest += row_stride;
     }
+}
+
+
+uint16_t * set_bkg_tile_xy(uint16_t x, uint16_t y, uint16_t tile) {
+
+    uint16_t * p_dest = _bg_tilemap_base_address + (y * DEVICE_SCREEN_BUFFER_WIDTH) + x;
+    *p_dest = tile | _tilemap_screen_ab_prop;
+
+    return p_dest;
 }
 
 

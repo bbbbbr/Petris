@@ -29,7 +29,7 @@
 
 #include "intro_splash.h"
 #include "intro_screen.h"
-// #include "options_screen.h"
+#include "options_screen.h"
 
 // #include "options.h"
 // #include "player_hinting.h"
@@ -44,7 +44,8 @@
 // #include "../res/font_tiles.h"
 
 
-#define DEBUG_SKIP_INTRO
+// #define DEBUG_SKIP_INTRO
+
 
 void init (void);
 void init_interrupts(void);
@@ -151,7 +152,7 @@ int main() {
     magic_code_reset();
 
     #ifdef DEBUG_SKIP_INTRO
-        game_state = GAME_OPTIONS_INIT;
+        game_state = GAME_INTRO_INIT;
     #else
         intro_splash();
     #endif
@@ -183,38 +184,22 @@ int main() {
                 // Done with intro screen, now start game
                 if (KEY_TICKED(J_START)) {
                     game_state = GAME_OPTIONS_INIT;
-                    intro_screen_cleanup();
-                }
-                // Debug: use input to help indicate if game is alive and running
-                // Note: color showing in bg when scrolling is due to tile 1 filling the BG and using 4th palette
-                //       can be verified for example using fill_bkg_rect(0, 0, DEVICE_SCREEN_BUFFER_WIDTH, DEVICE_SCREEN_BUFFER_HEIGHT, 0);
-                if KEY_PRESSED(J_LEFT) {
-                    VDP.BG_SCROLL[BG0_SCROLL_X]++;
-                }
-                else if KEY_PRESSED(J_RIGHT) {
-                    VDP.BG_SCROLL[BG0_SCROLL_X]--;
-                }
-                if KEY_PRESSED(J_UP) {
-                    VDP.BG_SCROLL[BG0_SCROLL_Y]++;
-                }
-                else if KEY_PRESSED(J_DOWN) {
-                    VDP.BG_SCROLL[BG0_SCROLL_Y]--;
+                   intro_screen_cleanup();
                 }
                 break;
 
             case GAME_OPTIONS_INIT:
-                // TODO: DEBUG: loop back around to title screen for now
-                game_state = GAME_INTRO_INIT;
-
-                // options_screen_init();
-                // Options screen will re-start music if music option = ON
-                // game_state = GAME_OPTIONS;
+                game_state = GAME_OPTIONS;
+                options_screen_init();
+                game_state = GAME_OPTIONS;
                 break;
-/*
 
             case GAME_OPTIONS:
                 options_screen_handle();
+                // TODO: DEBUG: loop back around to title screen for now
+                if (game_state == GAME_READY_TO_START) game_state = GAME_INTRO_INIT;
                 break;
+/*
 
             case GAME_READY_TO_START:
                 gameplay_init();

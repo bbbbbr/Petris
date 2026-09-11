@@ -1,0 +1,1 @@
+-keep_duplicate_tiles -use_map_attributes -keep_palette_order -bpp 4 -max_palettes 2 -pack_mode casioloopy -tiles_only 

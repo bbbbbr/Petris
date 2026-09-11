@@ -59,6 +59,7 @@ static void intro_clouds_init(void);
 static void intro_text_update(void);
 static void intro_clouds_update(void);
 
+static void intro_background_and_logo_cleanup(void);
 static void intro_clouds_cleanup(void);
 static void intro_text_cleanup(void);
 
@@ -103,6 +104,7 @@ static void intro_background_and_logo_init(void) {
 static void intro_clouds_init(void) {
 
     // Bitmap BM1/BM2 cloud layers on Screen B, Math ADD + BLEND
+    SHOW_SCREEN_B;
     cloud_counter = 0;
 
     // Set up shared palette (from one of the images)
@@ -126,8 +128,10 @@ static void intro_text_init(void) {
     // Load the 8x16 font and print it to the sprites
     #define TILE_LOAD_OFFSET_FONT (OBJ_TILEGROUP_BASE_512)
     load_8x16_font_tiles(TILE_LOAD_OFFSET_FONT);
+    load_8x16_font_sprite_palettes();
 
-    oam_text_intro_end = print_to_sprites(OAM_TEXT_INTRO_START, OAM_TEXT_START_X, OAM_TEXT_START_Y, S_PAL2, STR_INTRO_TEXT_START);
+    PRINT_POS(OAM_TEXT_START_X, OAM_TEXT_START_Y);
+    oam_text_intro_end = print_to_sprites(OAM_TEXT_INTRO_START, PRINT_PAL_OAM_GREY, STR_INTRO_TEXT_START);
     intro_text_update();
 }
 
@@ -171,11 +175,27 @@ static void intro_text_update(void) {
 }
 
 
-static void intro_clouds_cleanup(void) { // TODO
+static void intro_background_and_logo_cleanup(void) {
+
+    // TODO: could do a bounce out of the logo
+
+    // Logo background on BG0 layer so it can scroll
+    // BG0 is set to use pals 0,1,2,3
+    set_bkg_tilemap_base_address(BG0_MAP_START());
+    set_bkg_tiles_target_screen_a_or_b(LAYER_SCREEN_A);
+    fill_bkg_rect(0, 0, DEVICE_SCREEN_BUFFER_WIDTH, DEVICE_SCREEN_BUFFER_HEIGHT, TILE_LOAD_OFFSET_LOGO);
+    VDP.BG_SCROLL[BG0_SCROLL_Y] = 0;
+}
+
+
+static void intro_clouds_cleanup(void) {
+    // Hide the clouds
+    HIDE_SCREEN_B;
 }
 
 
 static void intro_text_cleanup(void) {
+    // Hide sprites used for text
     hide_sprites_range(0, MAX_HARDWARE_SPRITES);
 }
 
@@ -208,6 +228,7 @@ void intro_screen_handle(void) {  // TODO: Some kind of animated roll in of logo
 
 void intro_screen_cleanup(void) {
     // fade_start(FADE_OUT);    // TODO
+    intro_background_and_logo_cleanup();
     intro_text_cleanup();
-    // intro_clouds_cleanup();
+    intro_clouds_cleanup();
 }

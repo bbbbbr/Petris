@@ -13,6 +13,7 @@
 // options_screen.c
 
 #include <gbdk/platform.h>
+#include <gbdk/metasprites.h>
 
 #include <stdint.h>
 #include <stdbool.h>
@@ -34,23 +35,31 @@
 #include "options.h"
 #include "options_screen.h"
 
-// #include "../res/intro_screen_tiles.h"
-// #include "../res/pet_tiles.h"
-// #include "../res/font_tiles.h"
+#include "intro_screen_out.h"  // For determining where to start loading font tiles
+#include "pet_tiles_out.h"
 
 
+#define TILE_LOAD_OFFSET_FONT          (intro_screen_out_TILE_COUNT)
+#define TILE_LOAD_OFFSET_CURSOR_SPRITE (OBJ_TILEGROUP_BASE_512)
+
+#define PET_DOG_HEAD       3u // ((GP_PET_DOG << GP_PET_UPSHIFT) | (GP_SEG_HEAD << GP_SEG_UPSHIFT))  // TODO: FIXME: once game_piece_data is ported
+#define SPR_TILE_CURSOR    (PET_DOG_HEAD)  // Tile ID is offset from the Base automatically in hardware
 
 #define SPR_OPTIONS_CURSOR 0 // Cursor is sprite "0"
-#define PET_DOG_HEAD       ((GP_PET_DOG << GP_PET_UPSHIFT) | (GP_SEG_HEAD << GP_SEG_UPSHIFT))
 
-#define OPTION_MENU_X_START 2
-#define OPTION_CURSOR_X     12 // (tiles from Left Edge: 1.5 x 8 pixels per tile)
+#define OPTION_MENU_Y_START 3u
+#define OPTION_MENU_X_START ((DEVICE_SCREEN_WIDTH - 16u) / 2)     // 16 is about max width of option name + text
+#define OPTION_CURSOR_X     ((OPTION_MENU_X_START * 8u) - 16u)    // x8 for Tile width, -16 for space between start of text and cursor sprite
+#define OPTION_CURSOR_X_ITEM_START (OPTION_CURSOR_X + (8u * 3u))  // Inset cursor further for Start menu entry since it's inset
 
 #define CURSOR_UPDATE_MASK 0x03 // Only update cursor once every 8 frames
-#define CURSOR_BITSHIFT    2
+#define CURSOR_BITSHIFT    3
 #define CURSOR_LUT_MASK    0x07 << CURSOR_BITSHIFT // 8 offset entries in the LUT
 
-#define OPTION_TITLE_PRINT_PAL BG_PAL_3
+#define PRINT_PAL_HEADING    (PRINT_PAL_TILE_GREY)
+#define PRINT_PAL_VALUE      (PRINT_PAL_TILE_YELLOW)
+#define PRINT_PAL_HIGHLIGHT  (PRINT_PAL_TILE_PINK)
+
 
 const uint8_t spr_cursor_offset[] = {0,1,2,3,3,2,1,0};
 
@@ -94,23 +103,28 @@ const char * options_music[] = {"TWILIGHT",
 
 typedef struct opt_item {
 
-    uint8_t          menu_y;      // Y position of option menu entry
+    uint16_t       menu_y;      // Y position of option menu entry
     const char *   label;       // Option name
 
-    int8_t           opt_entries; // Size of option values array
+    int8_t         opt_entries; // Size of option values array
     const char * * p_text_arr;  // Array of option text strings / values
-    int8_t *         p_curval;    // Pointer to (extern) option variable
+    int8_t *       p_curval;    // Pointer to (extern) option variable
 
 } option_item;
 
+const char str_options_heading[] = "---- OPTIONS ----";
+
+#define MENU_Y(n) (OPTION_MENU_Y_START + n)
+
 // See above for meaning of each element
 const option_item options[] = {
-        {  5,"TYPE :",         (int8_t)ARRAY_LEN(options_type),          &options_type[0],          &option_game_type},
-        {  7,"LEVEL:",         (int8_t)ARRAY_LEN(options_difficulty),    &options_difficulty[0],    &option_game_difficulty},
-        {  9,"MUSIC:",         (int8_t)ARRAY_LEN(options_music),         &options_music[0],         &option_game_music},
-        { 12,"   START GAME ", (int8_t)ARRAY_LEN(options_visual_hints),  NULL, NULL},
-        { 14,"2 PLAYER VS.: ", (int8_t)ARRAY_LEN(options_link2p),        &options_link2p[0],        &option_game_link2p},
-        { 16,"VISUAL HINTS: ", (int8_t)ARRAY_LEN(options_visual_hints),  &options_visual_hints[0],  &option_game_visual_hints},
+        { MENU_Y( 3),"TYPE :",         (int8_t)ARRAY_LEN(options_type),          &options_type[0],          &option_game_type},
+        { MENU_Y( 5),"LEVEL:",         (int8_t)ARRAY_LEN(options_difficulty),    &options_difficulty[0],    &option_game_difficulty},
+        { MENU_Y( 7),"MUSIC:",         (int8_t)ARRAY_LEN(options_music),         &options_music[0],         &option_game_music},
+        { MENU_Y(10),"   START GAME ", (int8_t)ARRAY_LEN(options_visual_hints),  NULL, NULL},
+        // TODO: High Score menu item here or at bottom of list
+        { MENU_Y(13),"2 PLAYER VS:  ", (int8_t)ARRAY_LEN(options_link2p),        &options_link2p[0],        &option_game_link2p},
+        { MENU_Y(15),"VISUAL HINTS: ", (int8_t)ARRAY_LEN(options_visual_hints),  &options_visual_hints[0],  &option_game_visual_hints},
     };
 
 
@@ -184,39 +198,40 @@ void options_screen_setting_update(int8_t dir) {
 }
 
 
-
 // Print an option's name and current value
 void options_screen_setting_draw(int8_t option_id) {
 
-/*    // Display option Titles using a lighter font (except Start)
+    // Display option Titles using a different color (except Start)
     if (option_id != OPTION_MENU_STARTGAME) {
-        PRINT_PAL(OPTION_TITLE_PRINT_PAL);
+        PRINT_PAL(PRINT_PAL_HEADING);
+    } else {
+        PRINT_PAL(PRINT_PAL_VALUE);
     }
 
     // Print option Title
     // (they have trailing spaces)
-    PRINT(OPTION_MENU_X_START,
-          options[option_id].menu_y,
-          options[option_id].label, 0);
+    PRINTXY(OPTION_MENU_X_START,
+            options[option_id].menu_y,
+            options[option_id].label, 0);
 
     // Restore default palette
-    PRINT_PAL(PRINT_ATTRIB_PAL_DEFAULT);
+    PRINT_PAL(PRINT_PAL_VALUE);
 
     // Next print the current setting value, using the
     // print cursor at the end of the previous print
     //
     // Don't print current settings for "Start Game" menu entry
     if (option_id != OPTION_MENU_STARTGAME) {
-        print_text(options[option_id].p_text_arr[ *(options[option_id].p_curval) ], 0);
+        PRINT(options[option_id].p_text_arr[ *(options[option_id].p_curval) ], 0);
     }
-
-*/
 }
 
 
 void options_screen_draw(void) {  // TODO
 
-    // PRINT(2,3, "--- OPTIONS ---", 0);
+    PRINT_PAL(PRINT_PAL_HEADING);
+    PRINTXY(OPTION_MENU_X_START - 1u, MENU_Y(0), str_options_heading, 0);
+    // PRINTXY((DEVICE_SCREEN_WIDTH - ARRAY_LEN(str_title)) / 2,3, str_title, 0);
 }
 
 
@@ -235,54 +250,66 @@ void options_screen_sprites_init(void) {  // TODO
 
     SHOW_SPRITES;
 */
+        // Use a pet tile as a cursor, so load the pet tiles into the chosen tile obj area
+    set_bkg_tiles_target_screen_a_or_b(LAYER_SCREEN_A);
+    set_bkg_4bpp_data(TILE_LOAD_OFFSET_CURSOR_SPRITE, pet_tiles_out_TILE_COUNT, pet_tiles_out_tiles);
+    set_bkg_4bpp_palette(PAL_8, pet_tiles_out_PALETTE_COUNT, pet_tiles_out_palettes);  // TODO: Constant for assigned start pals, i.e. : SPR_PALS_START instead of absolutes like PAL_8
+
+    set_sprite_tile(SPR_OPTIONS_CURSOR, SPR_TILE_CURSOR);
+    set_sprite_prop(SPR_OPTIONS_CURSOR, S_8x8 | S_FLIPX | S_PAL0);
+
+    SHOW_SPRITES;
 }
 
 
 
 void options_screen_exit_cleanup(void) {
 /*
-    fade_start(FADE_OUT);
-    HIDE_SPRITES;
+    fade_start(FADE_OUT);  // TODO fade out
+    HIDE_SPRITES;  // TODO
 */
+    // TODO: Fill BG0 tilemap with empty tiles
+    hide_sprites_range(0, MAX_HARDWARE_SPRITES);
 }
 
 
 // Assumes and relies on "intro_screen" (title) having run and initialized
 void options_screen_init(void) {  // TODO
-/*
-    // 
-    int8_t c;
 
     // Note: The popup status window is relying on the gfx initialization here
     //       See: status_win_popup_init()
 
-    // Add a lighter font for options
+/*    // Add a lighter font for options  // TODO: palette fading
     fade_set_pal(OPTION_TITLE_PRINT_PAL, 1, option_title_palette, FADE_PAL_BKG);
     // Upper 4 palettes from intro screen
     fade_set_pal(BG_PAL_4, 4, intro_screen_palette, FADE_PAL_BKG);
+*/
 
-    set_bkg_data(TILES_INTRO_START,     TILE_COUNT_INTRO,     intro_screen_tiles);
-    set_bkg_data(TILES_FONT_START,      TILE_COUNT_FONT,      font_tiles);
-    set_bkg_data(TILES_PET_START,       TILE_COUNT_PETTOTAL,  pet_tiles);
+    // Rely on Title screen graphics loading for Background image and Font tiles / drawing setup
+    // set_bkg_data(TILES_INTRO_START,     TILE_COUNT_INTRO,     intro_screen_tiles);
+    // set_bkg_data(TILES_FONT_START,      TILE_COUNT_FONT,      font_tiles);
+    load_8x16_font_tiles(TILE_LOAD_OFFSET_FONT);
 
-    SHOW_BKG;
+    // SHOW_BKG;
 
     options_menu_index = OPTION_MENU_STARTGAME;
 
+    load_8x16_font_tilemap_palettes();
+
     options_screen_draw();
 
-    for (c = OPTION_MENU_MIN; c <= OPTION_MENU_MAX; c++) {
+    for (int c = OPTION_MENU_MIN; c <= OPTION_MENU_MAX; c++) {  // TODO
         options_screen_setting_draw(c);
     }
 
-    // Reveal sprite last since other screen setup/drawing is slow
+    // // Reveal sprite last since other screen setup/drawing is slow
     options_screen_sprites_init();
     options_screen_cursor_update(0);
-    fade_start(FADE_IN);
+    // fade_start(FADE_IN);
 
-    // Update music status to match option menu setting
-    MusicUpdateStatus();
-    */
+    // // Update music status to match option menu setting
+    // MusicUpdateStatus();
+    
 }
 
 
@@ -296,9 +323,11 @@ void options_screen_try_gamestart(void) {
 
         // TODO: 2-Player game start
     } else {
+    */
         // 1-Player game start
         options_screen_exit_cleanup();
         game_state = GAME_READY_TO_START;
+    /*        
     }
     */
 }
@@ -306,7 +335,7 @@ void options_screen_try_gamestart(void) {
 
 
 void options_screen_handle(void) {
-/*
+
     // Cursor Updates
     if (KEY_TICKED(J_UP)) {
 
@@ -373,10 +402,11 @@ void options_screen_handle(void) {
     // Update cursor every N frames
     if ((sys_time & CURSOR_UPDATE_MASK) == CURSOR_UPDATE_MASK) {
         // Animate the cursor with a mild bounce
+        uint8_t cursor_x = (options_menu_index == OPTION_MENU_STARTGAME) ? OPTION_CURSOR_X_ITEM_START : OPTION_CURSOR_X;
         move_sprite(SPR_OPTIONS_CURSOR,
-                    OPTION_CURSOR_X,
-                    ((options[options_menu_index].menu_y + 2) * 8)  // + 2 is sprite vs bg offset
+                    cursor_x,
+                    (((options[options_menu_index].menu_y) * 8) + 4)  // + 2 is sprite vs bg offset
                     + spr_cursor_offset[(sys_time & CURSOR_LUT_MASK) >> CURSOR_BITSHIFT] - 2);
     }
-    */
+
 }

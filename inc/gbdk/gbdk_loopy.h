@@ -98,6 +98,8 @@
 #define BANKREF(x)
 #define BANKREF_EXTERN(x)
 
+extern uint16_t sys_time;
+
 typedef struct OAM_item_t {
     uint8_t tile;  //< Sprite tile number VDP.OAM[N].[31..24] 
     uint8_t y;     //< Y Coordinates (lowest 8 bits of 9) of the sprite on screen
@@ -166,6 +168,27 @@ ALWAYS_INLINE inline void hide_sprite(uint16_t nb) {
 */
 #define HIDE_SPRITES \
   VDP.LAYER_CTRL &= ~(LAYER_ENABLE_OBJ0 | LAYER_ENABLE_OBJ1)
+
+
+/** Turns on the Screen B meta layer.
+*/
+#define SHOW_SCREEN_B \
+  VDP.SCREENPRIO |= SCREEN_B_ENABLE
+
+/** Turns off the Screen B meta layer.
+*/
+#define HIDE_SCREEN_B \
+  VDP.SCREENPRIO &= ~SCREEN_B_ENABLE
+
+/** Turns on the Screen A meta layer.
+*/
+#define SHOW_SCREEN_A \
+  VDP.SCREENPRIO |= SCREEN_A_ENABLE
+
+/** Turns off the Screen A meta layer.
+*/
+#define HIDE_SCREEN_A \
+  VDP.SCREENPRIO &= ~SCREEN_A_ENABLE
 
 
 typedef uint16_t palette_color_t;
@@ -255,6 +278,16 @@ void set_bkg_tiles(unsigned int x, unsigned int y, unsigned int width, unsigned 
 */
 void set_bkg_based_tiles(unsigned int x, unsigned int y, unsigned int width, unsigned int height, const uint16_t *tiles, unsigned int base_tile);
 
+
+/** Set single tile t on background layer at x,y
+    @param x X-coordinate
+    @param y Y-coordinate
+    @param t tile index
+
+    @return returns the address of tile, so you may use faster set_vram_byte() later
+*/
+uint16_t * set_bkg_tile_xy(uint16_t x, uint16_t y, uint16_t t);
+#define set_tile_xy set_bkg_tile_xy
 
 
 /** Fills a rectangular region of Tile Map entries for the Background layer with tile.
