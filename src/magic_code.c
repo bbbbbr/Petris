@@ -1,4 +1,4 @@
-// Copyright 2020 (c) bbbbbr
+// Copyright 2026 (c) bbbbbr
 //
 // This software is licensed under:
 //
