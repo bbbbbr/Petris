@@ -13,6 +13,15 @@ uint16_t sys_time = 0;
 OAM_item_t shadow_OAM[SHADOW_OAM_MAX_SPRITES];
 
 
+#define NO_BIOS_VSYNC_BEFORE_WRITES
+
+// Turn bios vsync timing on/off for writes
+#ifdef NO_BIOS_VSYNC_BEFORE_WRITES
+    #define OPTIONAL_IF_ENABLED_BIOS_VSYNC_BEFORE_VDP_WRITES()
+#else
+    #define OPTIONAL_IF_ENABLED_BIOS_VSYNC_BEFORE_VDP_WRITES()  bios_vsync();  // TODO: FIXME With safe (?) VDP write timing, to at least reduce tearing  
+#endif
+
 // Note: Loopy bios vsync also polls controller(s)
 // #define vsync  bios_vsync  
 // TODO: IMPORTANT: manual OAM copy is inefficient, convert to interrupt driven vsync that increments a sys_time counter (possibly in the on-(?)-cpu ram)
@@ -91,7 +100,7 @@ void set_bkg_4bpp_data(unsigned int start, unsigned int ntiles, const uint16_t *
     // TODO: Use DMA (make a vmemcpy shim?)
     // Tile VRAM is not dual-ported, so requires safe access timing, unlike bitmap vram
     // TODO: This is the shoddiest safe access timing...
-    bios_vsync();  //TODO: FIXME
+    OPTIONAL_IF_ENABLED_BIOS_VSYNC_BEFORE_VDP_WRITES();
     size_t copybytes = ntiles;
     while (copybytes--) {
         // Write one 8x8 32 byte tile entry as a block
@@ -121,7 +130,7 @@ void set_bkg_tiles(unsigned int x, unsigned int y, unsigned int width, unsigned 
           uint16_t * p_dest     = _bg_tilemap_base_address + (y * DEVICE_SCREEN_BUFFER_WIDTH) + x;
     const uint32_t   row_stride = DEVICE_SCREEN_BUFFER_WIDTH - width;
 
-    bios_vsync();  // TODO: FIXME
+    OPTIONAL_IF_ENABLED_BIOS_VSYNC_BEFORE_VDP_WRITES();
     while (height--) {
         uint16_t row_len = width;
         uint16_t row_wrap = DEVICE_SCREEN_BUFFER_WIDTH - x;
@@ -145,7 +154,7 @@ void set_bkg_based_tiles(unsigned int x, unsigned int y, unsigned int width, uns
           uint16_t * p_dest     = _bg_tilemap_base_address + (y * DEVICE_SCREEN_BUFFER_WIDTH) + x;
     const uint32_t   row_stride = DEVICE_SCREEN_BUFFER_WIDTH - width;
 
-    bios_vsync();  // TODO: FIXME
+    OPTIONAL_IF_ENABLED_BIOS_VSYNC_BEFORE_VDP_WRITES();
     while (height--) {
         uint16_t row_len = width;
         uint16_t row_wrap = DEVICE_SCREEN_BUFFER_WIDTH - x;
@@ -180,7 +189,7 @@ void fill_bkg_rect(unsigned int x, unsigned int y, unsigned int width, unsigned 
           uint16_t * p_dest     = _bg_tilemap_base_address + (y * DEVICE_SCREEN_BUFFER_WIDTH) + x;
     const uint32_t   row_stride = DEVICE_SCREEN_BUFFER_WIDTH - width;
 
-    bios_vsync();  // TODO: FIXME
+    OPTIONAL_IF_ENABLED_BIOS_VSYNC_BEFORE_VDP_WRITES();
     while (height--) {
         uint16_t row_len = width;
         uint16_t row_wrap = DEVICE_SCREEN_BUFFER_WIDTH - x;
@@ -211,7 +220,7 @@ void load_bitmap_4bpp(unsigned int x, unsigned int y, unsigned int width, unsign
            uint8_t * p_dest     = VDP.BITMAP_VRAM_8BIT + ((y * DEVICE_BITMAP_4BPP_BUFFER_BYTE_WIDTH) + x);
     const uint32_t   row_stride = DEVICE_BITMAP_4BPP_BUFFER_BYTE_WIDTH - width;
 
-    // bios_vsync();  // TODO: FIXME (bitmap vram is dual ported, so always ok to write, but may want to time it to reduce tearing)
+    OPTIONAL_IF_ENABLED_BIOS_VSYNC_BEFORE_VDP_WRITES();
     while (height--) {
         uint16_t row_len = width;
         uint16_t row_wrap = DEVICE_BITMAP_4BPP_BUFFER_BYTE_WIDTH - x;
