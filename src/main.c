@@ -20,7 +20,7 @@
 
 // #include "fade.h"
 
-// // #include "game_board.h"
+#include "game_board.h"
 // #include "game_board_gfx.h"
 // #include "gameover_message.h"
 // #include "game_stats.h"
@@ -31,12 +31,12 @@
 #include "intro_screen.h"
 #include "options_screen.h"
 
-// #include "options.h"
+#include "options.h"
 // #include "player_hinting.h"
 
 #include "input.h"
-// #include "gfx.h"
-// #include "gfx_print.h"
+#include "gfx.h"
+#include "gfx_print.h"
 
 
 #include "magic_code.h"

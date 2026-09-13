@@ -28,13 +28,13 @@
 
 // #include "game_piece.h"
 // #include "game_piece_data.h"
-// #include "game_board.h"
+#include "game_board.h"
 // #include "game_board_special_pieces.h"
 
 #include "gameplay.h"
 #include "gameplay.h"
 
-// #include "game_types.h"
+#include "game_types.h"
 
 #include "options.h"
 
@@ -65,11 +65,11 @@ void player_info_display(void) {
     // Display number of pets completed
     if (option_game_type == OPTION_GAME_TYPE_PET_CLEANUP) {
         // Display Tail remaining count
-/*        print_num_u16(DISPLAY_NUMPETS_X, DISPLAY_NUMPETS_Y, (uint16_t)game_type_cleanup_tail_count, STR_DIGIT_LEN_5);*/  // TODO
+        print_num_u16(DISPLAY_NUMPETS_X, DISPLAY_NUMPETS_Y, (uint16_t)game_type_cleanup_tail_count, STR_DIGIT_LEN_5);
 
     } else if (option_game_type == OPTION_GAME_TYPE_LONG_PET) {
         // Display required Pet Size
-/*        print_num_u16(DISPLAY_NUMPETS_X, DISPLAY_NUMPETS_Y, (uint16_t)game_type_long_pet_required_size, STR_DIGIT_LEN_3);*/ // TODO
+        print_num_u16(DISPLAY_NUMPETS_X, DISPLAY_NUMPETS_Y, (uint16_t)game_type_long_pet_required_size, STR_DIGIT_LEN_3);
 
     } else if ((option_game_type == OPTION_GAME_TYPE_LEVEL_UP)||
                (option_game_type == OPTION_GAME_TYPE_CRUNCH_UP)) {
@@ -150,7 +150,7 @@ void score_and_level_update(uint16_t num_tiles) {
     // (either triggered directly above OR elsewhere)
     if (level_increment_enqueue == true) {
 
-        // LINK_SEND(LINK_CMD_CRUNCHUP | 0x01 );  // TODO: Send crunch up to opponent player
+        // LINK_SEND(LINK_CMD_CRUNCHUP | 0x01 );  // TODO: Send crunch up to opponent player (create an events_rx_queue[] for each player)
 
         level_increment();
 
@@ -180,7 +180,7 @@ void level_increment(void) {
     // Update game piece speed
     gameplay_drop_speed_update();
 
-/*    game_types_handle_level_transition();*/ // TODO
+    game_types_handle_level_transition();
 
     // DEBUG: frames per drop (requires extern uint8_t game_speed_frames_per_drop;)
     #ifdef DEBUG_SHOW
@@ -217,10 +217,10 @@ void player_info_newgame_reset(void) {
     // Set initial game piece speed
     gameplay_drop_speed_update();
 
-/*    if (option_game_type == OPTION_GAME_TYPE_LONG_PET) {  // TODO
+    if (option_game_type == OPTION_GAME_TYPE_LONG_PET) {
         game_type_long_pet_set_pet_size( (uint8_t)player_level );
     }
-*/
+
     level_show();
     player_info_display();
 }

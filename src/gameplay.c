@@ -40,9 +40,9 @@
 #include "options.h"
 // #include "game_piece.h"
 // #include "game_piece_data.h"
-// #include "game_board.h"
+#include "game_board.h"
 // #include "game_board_gfx.h"
-// #include "game_types.h"
+#include "game_types.h"
 // #include "game_stats.h"
 // #include "gameover_message.h"
 
@@ -152,9 +152,9 @@ void gameplay_init(void) {
     // fade2pal_init();  // TODO
     random_init();
 
-/* // TODO
     game_types_init(); // Call before board_gfx_init()
 
+/* // TODO
     board_init();
     board_gfx_init();
     hinting_petlength_reset();
@@ -162,15 +162,15 @@ void gameplay_init(void) {
 */
     options_player_settings_apply();
 
-/*  // TODO
     // Should be called before gameplay_prepare_board() ... -> game_board_fill_random_tails()
     player_info_newgame_reset();
 
+/*  // TODO
     // Show preview of upcoming piece so player has time to check it out
     gameplay_prepare_piece();
 */    SHOW_SPRITES;
 
-/*    // Flash a get ready message to the player  // TODO
+/*    // Flash a get ready message to the player  // TODO  -- MAYBE ANIMATED SPRITE BASED MESSAGE INSTEAD, Sine wavey, or rotate in like canyon racer
     if (option_game_type == OPTION_GAME_TYPE_PET_CLEANUP) {
 
         board_flash_message(MSG_GET_READY_X, MSG_GET_READY_Y,
@@ -196,7 +196,7 @@ void gameplay_init(void) {
     }
 */
 
-/*    gameplay_prepare_board();*/ // TODO
+    gameplay_prepare_board();
 
     // Init game state vars
     game_is_paused = false;
@@ -260,18 +260,19 @@ void gameplay_prepare_board(void) {
                                      BRD_MAX_Y,
                                      BRD_TAIL_ADD_NORMAL);
     }
+    */
     // Switch back to main random number sequence
     swaprand();
 
     if (option_game_type == OPTION_GAME_TYPE_LONG_PET) {
         // Update length requirement for long pet mode
         game_type_long_pet_set_pet_size( (uint8_t)player_level );
-    }*/
+    }
 }
 
 
 void gameplay_handle_pause(void) {
-/*
+/*  // TODO
     if (option_game_music != OPTION_MUSIC_OFF) {
         // gbt_pause(1);  // TODO pause music
         // Mute output of all sound since gpt_pause just freezes the sound and holds the current note
@@ -289,33 +290,30 @@ void gameplay_handle_pause(void) {
     player_piece_update_xy(PLAYER_PIECE_HIDE);
     player_hinting_special_show(false);
     player_hinting_drop_show(false);
-
-    PRINTXY(BRD_ST_X + 2, BRD_ST_Y + 2,"PAUSED");
+*/
+    PRINTXY(BRD_ST_X + 2, BRD_ST_Y + 2,"PAUSED",0);   // TODO: Sprite based pause text instead of on the bg tilemap
 
 
     // Wait until unpaused by player
     // or unpause send over serial link
-    waitpadticked_lowcpu(J_START, &game_is_paused);
+    waitpadticked_lowcpu(J_START);
 
     // If unpause was triggered by a local button
     // then pause state var will still be paused, so clear it
     if (game_is_paused == true) {
-
-            __critical {
-                game_is_paused = false;
-            }
+        game_is_paused = false;
     }
 
-    // Redraw the board and player piece
+/*    // Redraw the board and player piece  // TODO
     board_redraw_all();
     player_piece_update_xy(PLAYER_PIECE_SHOW);
     game_piece_next_show(true);
-
+*/
     if (option_game_music != OPTION_MUSIC_OFF) {
         // gbt_pause(0);  // TODO: unpause music
         //NR50_REG = 0x77; // Max volume .[2..0] Right Main Vol, .[6..4] Left Main Volume
         // NR51_REG = 0xFF; // Turn ON all channels (left and right)
-    }*/
+    }
 }
 
 
