@@ -1,4 +1,4 @@
-// Copyright 2020 (c) bbbbbr
+// Copyright 2026 (c) bbbbbr
 //
 // This software is licensed under:
 //
@@ -11,15 +11,15 @@
 
 // gameplay.c
 
-#include <gb/gb.h>
-#include <gb/cgb.h> // Include cgb functions
-#include <rand.h>
+#include <gbdk/platform.h>
+#include <gbdk/rand.h>
+#include <stdint.h>
+#include <stdbool.h>
 
 #include "common.h"
-#include "serial_link.h"
 
 #include "audio_common.h"
-#include "gbt_player.h"
+// #include "gbt_player.h"  // TODO: Audio driver
 #include "sound.h"
 
 #include "swaprand.h"
@@ -27,34 +27,34 @@
 #include "input.h"
 #include "gfx.h"
 #include "gfx_print.h"
-#include "fade.h"
-#include "fade2pal.h"
+// // #include "fade.h"  // TODO
+// // #include "fade2pal.h" // TODO
 
 #include "magic_code.h"
 
-#include "player_piece.h"
-#include "player_hinting.h"
+// #include "player_piece.h"
+// #include "player_hinting.h"
 #include "player_info.h"
-#include "player_gfx.h"
+// #include "player_gfx.h"
 
 #include "options.h"
-#include "game_piece.h"
-#include "game_piece_data.h"
-#include "game_board.h"
-#include "game_board_gfx.h"
-#include "game_types.h"
-#include "game_stats.h"
-#include "gameover_message.h"
+// #include "game_piece.h"
+// #include "game_piece_data.h"
+// #include "game_board.h"
+// #include "game_board_gfx.h"
+// #include "game_types.h"
+// #include "game_stats.h"
+// #include "gameover_message.h"
 
 #include "gameplay.h"
 
-UINT8 game_speed_drop_frame_counter = GAME_SPEED_DROP_FRAME_COUNTER_RESET;
-UINT8 game_speed_frames_per_drop = 0;
-UINT8 game_rand_init = 0;
-UINT16 game_crunchup_counter = GAME_CRUNCHUP_FRAME_COUNTER_RESET;
-UINT8 volatile game_crunchups_enqueued = GAME_CRUNCHUP_NONE;
-UINT8 volatile game_shake_enqueued = GAME_CRUNCHUP_SHAKE_RESET;
-UINT8 volatile game_is_paused = FALSE;
+uint8_t game_speed_drop_frame_counter = GAME_SPEED_DROP_FRAME_COUNTER_RESET;
+uint8_t game_speed_frames_per_drop = 0;
+uint16_t game_rand_init = 0;
+uint16_t game_crunchup_counter = GAME_CRUNCHUP_FRAME_COUNTER_RESET;
+uint8_t volatile game_crunchups_enqueued = GAME_CRUNCHUP_NONE;
+uint8_t volatile game_shake_enqueued = GAME_CRUNCHUP_SHAKE_RESET;
+uint8_t volatile game_is_paused = false;
 
 
 #define KEY_REPEAT_START               0
@@ -62,16 +62,16 @@ UINT8 volatile game_is_paused = FALSE;
 #define KEY_REPEAT_DOWN_THRESHOLD      (KEY_REPEAT_DOWN_RELOAD + 2)
 #define KEY_REPEAT_LEFTRIGHT_RELOAD    8
 #define KEY_REPEAT_LEFTRIGHT_THRESHOLD (KEY_REPEAT_LEFTRIGHT_RELOAD + 4) //6
-UINT8 key_down_repeat_needs_release = FALSE;
-UINT8 gameplay_piece_drop_requested = FALSE;
+uint8_t key_down_repeat_needs_release = false;
+uint8_t gameplay_piece_drop_requested = false;
 
-UINT8 piece_state = PLAYER_START;
-UINT8 new_piece_launch_delay = GAME_SPEED_LAUNCH_DELAY_FRAMES;
+uint8_t piece_state = PLAYER_START;
+uint8_t new_piece_launch_delay = GAME_SPEED_LAUNCH_DELAY_FRAMES;
 
 
 void gameplay_drop_speed_update(void) {
 
-    UINT8 level = (UINT8)player_level;
+    uint8_t level = (uint8_t)player_level;
 
     // For Long Pet and Pet Cleanup modes the speed
     // increases slower (1/4th) since it could otherwise
@@ -86,40 +86,36 @@ void gameplay_drop_speed_update(void) {
     }
 
     game_speed_frames_per_drop = options_frames_per_drop_get( level );
+
 }
 
 
 
 void gameplay_ended_cleanup(void) {
 
+/*
     player_piece_update_xy(PLAYER_PIECE_HIDE);
-    game_piece_next_show(FALSE);
+    game_piece_next_show(false);
     player_hinting_drop_reset();
     player_hinting_special_reset();
     hinting_petlength_reset();
+*/
 }
 
 
 
 void gameplay_handle_gameover_screen(void) {
 
-    // Make sure scroll X is reset if it was doing any shaking at the moment the game ended
-    SCX_REG = 0;
+/*    // Make sure scroll X is reset if it was doing any shaking at the moment the game ended
+    // SCX_REG = 0; // TODO SCROLL TILEMAP
     
     // Stop music, play end game sound and hide all the sprites
-    MusicStop();
+    // MusicStop();  // TODO
 
     // Optional: fancier end game sound
     // (may need to re-enable sound channels after playing it)
     // MusicPlay(falling_asleep_mod, falling_asleep_mod_Data, GBT_LOOP_NO);
-
-    // Play end game ended sound effect
-    if ((link_status == LINK_STATUS_CONNECTED) &&
-        (GAMEOVER_MESSAGE_CHK(SPR_YOU_WON_CHARS))) {
-        PLAY_SOUND_LEVEL_UP;
-    } else {
-        PLAY_SOUND_GAME_OVER;
-    }
+    PLAY_SOUND_GAME_OVER;
 
     // Clean up sprites and some other gfx
     gameplay_ended_cleanup();
@@ -127,37 +123,24 @@ void gameplay_handle_gameover_screen(void) {
     // Display game over message
     gameover_message_animate();
 
-    // Disconnect link if needed
-    if (link_status == LINK_STATUS_CONNECTED) {
-        link_reset();
-    }
-
     // Clear game over message after a button press
     waitpadticked_lowcpu(J_START | J_A | J_B, NULL);
     gameover_message_reset();
 
     // Reset visible sprites, then display stats
-    stats_display();
+    stats_display();*/
 }
 
 
 // Initialize the random number generator
 void random_init(void) {
 
-    // If not connected in 2 Player Link then
-    // use DIV_REG to seed the generator.
-    //
-    // In 2 Player Link mode, the seed value will
-    // have *already* been negotiated over the link
-    // (and ultimately sourced from DIV_REG as well)
-    if (link_status != LINK_STATUS_CONNECTED) {
-        game_rand_init = DIV_REG;
-    }
+    game_rand_init = sys_time;
 
     initrand(game_rand_init);
 
     // Switch to the alternate random number sequence for tail generation
-    // Keeps random tail genetatoin from altering game piece sequence
+    // Keeps random tail generation from altering game piece sequence
     // Use a slightly different seed for the alternate state
     swaprand();
     initrand(game_rand_init + 1);
@@ -166,27 +149,28 @@ void random_init(void) {
 
 
 void gameplay_init(void) {
-
-    fade2pal_init();
+    // fade2pal_init();  // TODO
     random_init();
 
+/* // TODO
     game_types_init(); // Call before board_gfx_init()
 
     board_init();
     board_gfx_init();
     hinting_petlength_reset();
     stats_maxpet_reset();
-
+*/
     options_player_settings_apply();
 
+/*  // TODO
     // Should be called before gameplay_prepare_board() ... -> game_board_fill_random_tails()
     player_info_newgame_reset();
 
     // Show preview of upcoming piece so player has time to check it out
     gameplay_prepare_piece();
-    SHOW_SPRITES;
+*/    SHOW_SPRITES;
 
-    // Flash a get ready message to the player
+/*    // Flash a get ready message to the player  // TODO
     if (option_game_type == OPTION_GAME_TYPE_PET_CLEANUP) {
 
         board_flash_message(MSG_GET_READY_X, MSG_GET_READY_Y,
@@ -210,21 +194,15 @@ void gameplay_init(void) {
                             MSG_GET_READY_REPEAT);
 
     }
+*/
 
-
-    gameplay_prepare_board();
-
-    // Make sure magic code is turned off in 2-player mode to ensure fairness
-    if (link_status == LINK_STATUS_CONNECTED) {
-        magic_code_reset();
-    }
-
+/*    gameplay_prepare_board();*/ // TODO
 
     // Init game state vars
-    game_is_paused = FALSE;
+    game_is_paused = false;
     piece_state = PLAYER_START;
-    key_down_repeat_needs_release = FALSE;
-    gameplay_piece_drop_requested = FALSE;
+    key_down_repeat_needs_release = false;
+    gameplay_piece_drop_requested = false;
     game_speed_drop_frame_counter = GAME_SPEED_DROP_FRAME_COUNTER_RESET;
     game_crunchup_counter = GAME_CRUNCHUP_FRAME_COUNTER_RESET;
     game_crunchups_enqueued = GAME_CRUNCHUP_NONE;
@@ -236,7 +214,7 @@ void gameplay_init(void) {
 // (before gameplay_prepare_board, so piece preview is visible while loading board)
 // Should also be called before board Message Flashing
 void gameplay_prepare_piece(void) {
-
+/*
     // Generate the very first piece for the board/level
     // Note: On level-up this (intentionally) wipes out
     //       any special piece which might have been queued
@@ -253,13 +231,13 @@ void gameplay_prepare_piece(void) {
     // does, so player can preview as board loads. Turn it on now.
     // Note: ALL sprites are still hidden when this is called,
     //       but will be turned on shortly after.
-    game_piece_next_show(TRUE);
+    game_piece_next_show(true);*/
 }
 
 
 // Called on new game and during transition to new level
 void gameplay_prepare_board(void) {
-
+/*
     board_reset();
 
     // Switch to the alternate random number sequence for tail generation
@@ -287,18 +265,18 @@ void gameplay_prepare_board(void) {
 
     if (option_game_type == OPTION_GAME_TYPE_LONG_PET) {
         // Update length requirement for long pet mode
-        game_type_long_pet_set_pet_size( (UINT8)player_level );
-    }
+        game_type_long_pet_set_pet_size( (uint8_t)player_level );
+    }*/
 }
 
 
 void gameplay_handle_pause(void) {
-
+/*
     if (option_game_music != OPTION_MUSIC_OFF) {
-        gbt_pause(1);
+        // gbt_pause(1);  // TODO pause music
         // Mute output of all sound since gpt_pause just freezes the sound and holds the current note
         //NR50_REG = 0x00; // Max volume .[2..0] Right Main Vol, .[6..4] Left Main Volume
-        NR51_REG = 0x00; // Turn off all channels (left and right)
+        // NR51_REG = 0x00; // Turn off all channels (left and right)
     }
 
     // Hide the game board and player piece (except in long-pet mode)
@@ -307,14 +285,12 @@ void gameplay_handle_pause(void) {
     // }
 
     // These hides are basically a dupe of gameplay_exit_cleanup()
-    game_piece_next_show(FALSE);
+    game_piece_next_show(false);
     player_piece_update_xy(PLAYER_PIECE_HIDE);
-    player_hinting_special_show(FALSE);
-    player_hinting_drop_show(FALSE);
+    player_hinting_special_show(false);
+    player_hinting_drop_show(false);
 
-    PRINT(BRD_ST_X + 2,
-          BRD_ST_Y + 2,
-          "PAUSED",0);
+    PRINTXY(BRD_ST_X + 2, BRD_ST_Y + 2,"PAUSED");
 
 
     // Wait until unpaused by player
@@ -323,28 +299,23 @@ void gameplay_handle_pause(void) {
 
     // If unpause was triggered by a local button
     // then pause state var will still be paused, so clear it
-    if (game_is_paused == TRUE) {
+    if (game_is_paused == true) {
 
             __critical {
-                game_is_paused = FALSE;
-            }
-
-            // If 2 Player then send unpause
-            if (link_status == LINK_STATUS_CONNECTED) {
-                 LINK_SEND( LINK_CMD_UNPAUSE);
+                game_is_paused = false;
             }
     }
 
     // Redraw the board and player piece
     board_redraw_all();
     player_piece_update_xy(PLAYER_PIECE_SHOW);
-    game_piece_next_show(TRUE);
+    game_piece_next_show(true);
 
     if (option_game_music != OPTION_MUSIC_OFF) {
-        gbt_pause(0);
+        // gbt_pause(0);  // TODO: unpause music
         //NR50_REG = 0x77; // Max volume .[2..0] Right Main Vol, .[6..4] Left Main Volume
-        NR51_REG = 0xFF; // Turn ON all channels (left and right)
-    }
+        // NR51_REG = 0xFF; // Turn ON all channels (left and right)
+    }*/
 }
 
 
@@ -352,20 +323,20 @@ void gameplay_handle_input(void) {
 
     // Move piece left/right
     if (KEY_PRESSED(J_LEFT)) {
-        if (key_repeat_count == KEY_REPEAT_START)
+/*        if (key_repeat_count == KEY_REPEAT_START)
             player_piece_move( -1, 0);
         else if (key_repeat_count >= KEY_REPEAT_LEFTRIGHT_THRESHOLD) {
             player_piece_move( -1, 0);
             RESET_KEY_REPEAT(KEY_REPEAT_LEFTRIGHT_RELOAD);
-        }
+        }*/  // TODO
     }
     else if (KEY_PRESSED(J_RIGHT)) {
-        if (key_repeat_count == KEY_REPEAT_START)
+/*        if (key_repeat_count == KEY_REPEAT_START)
             player_piece_move( 1, 0);
         else if (key_repeat_count >= KEY_REPEAT_LEFTRIGHT_THRESHOLD) {
             player_piece_move( 1, 0);
             RESET_KEY_REPEAT(KEY_REPEAT_LEFTRIGHT_RELOAD);
-        }
+        }*/  // TODO
     }
 
 
@@ -381,36 +352,37 @@ void gameplay_handle_input(void) {
         if (!key_down_repeat_needs_release) {
 
             if (key_repeat_count == KEY_REPEAT_START) {
-                gameplay_piece_drop_requested = TRUE;// Request moving a piece down earlier than tick time
+                gameplay_piece_drop_requested = true;// Request moving a piece down earlier than tick time
 
             } else if (key_repeat_count >= KEY_REPEAT_DOWN_THRESHOLD) {
-                gameplay_piece_drop_requested = TRUE; // Request moving a piece down earlier than tick time
+                gameplay_piece_drop_requested = true; // Request moving a piece down earlier than tick time
                 RESET_KEY_REPEAT(KEY_REPEAT_DOWN_RELOAD);
             }
         }
     } else {
-        key_down_repeat_needs_release = FALSE;  // Clear pending requirement for down key to be released before it can repeat again
+        key_down_repeat_needs_release = false;  // Clear pending requirement for down key to be released before it can repeat again
     }
 
 
     // Rotate piece
     if (KEY_TICKED(J_A)) {
-        player_piece_rotate_apply(PLAYER_ROT_RIGHT);
+/*        player_piece_rotate_apply(PLAYER_ROT_RIGHT);*/  // TODO
     }
     else if (KEY_TICKED(J_B)) {
-        player_piece_rotate_apply(PLAYER_ROT_LEFT);
+        /*player_piece_rotate_apply(PLAYER_ROT_LEFT);*/  // TODO
     }
     else if (KEY_TICKED(J_UP)) {
 
-        // Pet tile contrast setting can be changed in-game
-        // by pressing holding down SELECT and pressing UP
-        if (KEY_PRESSED(J_SELECT)) {
-            board_gfx_change_pettiles();
-        }
-        else if (magic_code_state == MAGIC_CODE_STATE_ACTIVATED) {
+        // // Pet tile contrast setting can be changed in-game  // TODO: high-contrast mode is off for now, but it could be added if needed on some CRTs
+        // // by pressing holding down SELECT and pressing UP
+        // if (KEY_PRESSED(J_SELECT)) {
+        //     board_gfx_change_pettiles();
+        // }
+        // else
+        if (magic_code_state == MAGIC_CODE_STATE_ACTIVATED) {
             // Otherwise, if magic code is active then
             // change pet type for current piece
-            player_piece_cycle_pet_types();
+/*            player_piece_cycle_pet_types();*/  // TODO
         }
     }
 
@@ -420,18 +392,10 @@ void gameplay_handle_input(void) {
     if (KEY_TICKED(J_START) || game_is_paused) {
 
         // Update paused state. It will be:
-        // * FALSE if triggered locally
-        // * TRUE if triggered over serial link
-        if (game_is_paused == FALSE) {
-            __critical {
-
-                game_is_paused = TRUE;
-
-                // If 2 Player then send pause
-                if (link_status == LINK_STATUS_CONNECTED) {
-                     LINK_SEND(LINK_CMD_PAUSE);
-                }
-            }
+        // * false if triggered locally
+        // * true if triggered over serial link
+        if (game_is_paused == false) {
+            game_is_paused = true;
         }
 
         gameplay_handle_pause();
@@ -440,12 +404,12 @@ void gameplay_handle_input(void) {
 
     // Toggle Pet Length overlay
     if (KEY_TICKED(J_SELECT)) {
-
+/*
         // PET_LENGTH_PREVIEW_ENABLED_FOR_ALL_MODES
         //
         // if (option_game_type == OPTION_GAME_TYPE_LONG_PET) {
             hinting_petlength_turn_on();
-        // }
+        // }*/  // TODO
     }
 
 }
@@ -471,15 +435,16 @@ void gameplay_update(void) {
             if (new_piece_launch_delay) {
                 new_piece_launch_delay--;
             } else {
-
+/* // TODO
                 if (player_piece_try_reload()) {
                     // require down key to be released before it can repeat again
-                    key_down_repeat_needs_release = TRUE;
+                    key_down_repeat_needs_release = true;
                     piece_state = PLAYER_INPLAY;
                 } else {
                     // failed to load the piece -> game over
                     game_state = GAME_ENDED;
                 }
+*/                
             }
             break;
 
@@ -489,24 +454,24 @@ void gameplay_update(void) {
             gameplay_gravity_update();
             // Update any flickering hint sprite elements
             // NOTE: This should happen after player_piece_move()
-            player_hinting_flicker_update();
-
+/*            player_hinting_flicker_update(); // TODO
+*/
             break;
 
 
         case PLAYER_PIECE_LANDED:
             PLAY_SOUND_PIECE_LANDED;
 
-            // Sets the piece on the board
+/*            // Sets the piece on the board
             // Then checks for completed pet removal
             player_piece_set_on_board();
-
+*/  // TODO
             piece_state = PLAYER_NEWPIECE_PRELAUNCH;
             break;
     }
 
-    // == Take care of various timer/counter activity here ==
-
+    // == Take care of various timer/counter activity here ==  // TODO
+/*
     // Handle board animation updates
     board_gfx_tail_animate();
 
@@ -518,7 +483,7 @@ void gameplay_update(void) {
         if (hinting_petlength_enabled == 0)
             hinting_petlength_showhide();
     }
-
+*/
 
     // This should be called after gameplay_gravity_update
     gameplay_crunchup_update();
@@ -539,14 +504,14 @@ void gameplay_gravity_update(void) {
 
         // Clear current request to move a piece down earlier than tick time
         // (will get re-enabled next pass if player continues to hold drop key down)
-        gameplay_piece_drop_requested = FALSE;
+        gameplay_piece_drop_requested = false;
 
-        // Try to move the piece down one tile
+/*        // Try to move the piece down one tile   // TODO
         if (player_piece_move( 0, 1) == MOVE_BLOCKED) {
 
             // Piece landed on board
             piece_state = PLAYER_PIECE_LANDED;
-        }
+        }*/
     }
 }
 
@@ -566,11 +531,8 @@ void gameplay_crunchup_update(void) {
 
             game_crunchup_counter = GAME_CRUNCHUP_FRAME_COUNTER_RESET;
 
-            // Vars may be modified in the SIO isr, protect when making changes
-            __critical {
-                game_crunchups_enqueued++;
-                game_shake_enqueued = GAME_CRUNCHUP_SHAKE_START;
-            }
+            game_crunchups_enqueued++;
+            game_shake_enqueued = GAME_CRUNCHUP_SHAKE_START;
         }
     }
 
@@ -578,18 +540,15 @@ void gameplay_crunchup_update(void) {
     // until finished, then trigger any pending crunch-ups
     if (game_shake_enqueued) {
 
-        // Vars may be modified in the SIO isr, protect when making changes
-        __critical {
-            game_shake_enqueued++;
+        game_shake_enqueued++;
 
-            // Keep shifting the board until it's the last pass,
-            // then make sure map is scrolled back to zero
-            if (game_shake_enqueued >= GAME_CRUNCHUP_SHAKE_COMPLETE) {
-                SCX_REG = 0;
-                game_shake_enqueued = GAME_CRUNCHUP_SHAKE_RESET;
-            } else {
-                SCX_REG = sys_time & 0x03;
-            }
+        // Keep shifting the board until it's the last pass,
+        // then make sure map is scrolled back to zero
+        if (game_shake_enqueued >= GAME_CRUNCHUP_SHAKE_COMPLETE) {
+            // SCX_REG = 0; // TODO: GAME SHAKE SCROLL X
+            game_shake_enqueued = GAME_CRUNCHUP_SHAKE_RESET;
+        } else {
+            // SCX_REG = sys_time & 0x03; // SCX_REG = 0; // TODO: GAME SHAKE SCROLL X
         }
 
         // If shaking has finished then process the crunch-ups
@@ -600,10 +559,7 @@ void gameplay_crunchup_update(void) {
 
             while (game_crunchups_enqueued) {
 
-                // Vars may be modified in the SIO isr, protect when making changes
-                __critical {
-                    game_crunchups_enqueued--;
-                }
+                game_crunchups_enqueued--;
 
                 PLAY_SOUND_CRUNCH_UP;
 
@@ -611,16 +567,18 @@ void gameplay_crunchup_update(void) {
                 // tail generation. Keeps random tail generation from altering
                 // game piece sequence that may be synced over serial link
                 swaprand();
-                board_crunch_up();
+                /*board_crunch_up();*/ // TODO
                 swaprand();
 
-                // Scroll pet-length hinting up by 1
+/*
+                // Scroll pet-length hinting up by 1  // TODO
                 // to keep the overlays in sync with board
-                hinting_petlength_scrollup();
+                hinting_petlength_scrollup();*/
             }
 
-            // Redraw pet-length hinting once scroll is complete
+/*            // Redraw pet-length hinting once scroll is complete  // TODO
             hinting_petlength_refreshxy();
-        }
+*/        }
     }
+
 }

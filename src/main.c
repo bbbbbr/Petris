@@ -25,7 +25,7 @@
 // #include "gameover_message.h"
 // #include "game_stats.h"
 
-// #include "gameplay.h"
+#include "gameplay.h"
 
 #include "intro_splash.h"
 #include "intro_screen.h"
@@ -41,10 +41,8 @@
 
 #include "magic_code.h"
 
-// #include "../res/font_tiles.h"
 
-
-// #define DEBUG_SKIP_INTRO
+#define DEBUG_SKIP_INTRO
 
 
 void init (void);
@@ -196,21 +194,25 @@ int main() {
 
             case GAME_OPTIONS:
                 options_screen_handle();
-                // TODO: DEBUG: loop back around to title screen for now
-                if (game_state == GAME_READY_TO_START) game_state = GAME_INTRO_INIT;
                 break;
-/*
 
             case GAME_READY_TO_START:
                 gameplay_init();
-                MusicUpdateStatus();
+                // MusicUpdateStatus();  // TODO
                 game_state = GAME_PLAYING;
+
                 break;
 
             case GAME_PLAYING:
                 gameplay_update();
+
+                // TODO: DEBUG: loop back around to title screen for now
+                if (KEY_TICKED(J_START)) {
+                    game_state = GAME_INTRO_INIT;
+                }
                 break;
 
+/*
             case GAME_ENDED:
                 // TODO: 2 Player mode handling (need loopy hardware 4 player controller breakout)
 
@@ -229,7 +231,7 @@ int main() {
                 if (KEY_TICKED(J_START | J_A | J_B)) {
                     // Turn sprites off and then fade out
                     HIDE_SPRITES;
-                    fade_start(FADE_OUT);
+                    // fade_start(FADE_OUT);
                     game_state = GAME_INTRO_INIT;
                 }
                 break;

@@ -3,23 +3,23 @@
 #ifndef GAMEPLAY_H
 #define GAMEPLAY_H
 
-typedef enum PLAYER_MOVE_STATES {
+enum PLAYER_MOVE_STATES {
     PLAYER_MV_LEFT = 1,
     PLAYER_MV_RIGHT,
     PLAYER_MV_DOWN
 };
 
-typedef enum PLAYER_ROT_STATES {
+enum PLAYER_ROT_STATES {
     PLAYER_ROT_LEFT = 1,
     PLAYER_ROT_RIGHT
 };
 
-typedef enum PIECE_MOVE_STATES {
+enum PIECE_MOVE_STATES {
     MOVE_OK = 0,
     MOVE_BLOCKED
 };
 
-typedef enum PLAYER_STATES {
+enum PLAYER_STATES {
     PLAYER_START = 0,
     PLAYER_NEWPIECE_PRELAUNCH,
     PLAYER_NEWPIECE_LAUNCH,
@@ -37,10 +37,10 @@ typedef enum PLAYER_STATES {
 #define GAME_CRUNCHUP_FRAME_THRESHOLD     (60 * 12) // N seconds between crunch-ups (don't factor in board shake time)
 #define GAME_CRUNCHUP_FRAME_COUNTER_RESET 0
 
-extern UINT8 game_rand_init;
-extern UINT8 volatile game_crunchups_enqueued;
-extern UINT8 volatile game_shake_enqueued;
-extern UINT8 volatile game_is_paused;
+extern uint16_t game_rand_init;
+extern uint8_t volatile game_crunchups_enqueued;
+extern uint8_t volatile game_shake_enqueued;
+extern uint8_t volatile game_is_paused;
 
 void gameplay_drop_speed_update(void);
 void gameplay_ended_cleanup(void);
