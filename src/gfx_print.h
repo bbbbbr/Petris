@@ -10,9 +10,9 @@
 #define SPR_PRINT_SPACING_X 7  // (SPR_8x8_WIDTH  + 1u)  // 1 pixels between character sprites
 #define SPR_PRINT_SPACING_Y (SPR_8x8_HEIGHT + 8u)  // 8 pixels between character sprites
 
-#define DIGITS_5 5
-#define DIGITS_3 3
-#define DIGITS_2 2
+#define STR_DIGIT_LEN_5 5
+#define STR_DIGIT_LEN_3 3
+#define STR_DIGIT_LEN_2 2
 
 #define PRINT_MAX_DIGITS  5
 #define PRINT_MAX_NUM     99999 // ((10 ^ PRINT_MAX_DIGITS) - 1)
@@ -37,7 +37,7 @@ extern uint16_t print_x, print_y, print_tile_attribs;
 #define SET_PRINT_TARGET(TARGET) set_bkg_tilemap_base_address(TARGET)
 
 
-void print_num_u16(uint8_t, uint8_t, uint16_t, uint8_t);
+void print_num_u16(uint16_t x, uint16_t y, uint16_t num, uint16_t fixed_str_length);
 
 void load_8x16_font_tilemap_palettes(void);
 void load_8x16_font_sprite_palettes(void);
