@@ -4,12 +4,12 @@
 #define GAME_PIECE_DATA_H
 
 
-// Locations for loading Game Piece tile sprite data
-#define SPRITE_TILE_PET_START  0U // Load at start of sprite tile RAM
-#define SPRITE_TILE_SPECIAL_START  (SPRITE_TILE_PET_START + TILE_COUNT_PETTOTAL) // Load directly after pet tiles
+// Locations for loading Game Piece tile sprite data (same as BG data, but accessed with the hardware OAM offset on Loopy, which in this case places them at OAM tile id zero)
+#define SPRITE_TILE_PET_START      (TILE_PET_TAIL_REG_START_
+#define SPRITE_TILE_SPECIAL_START  (TILES_SPECIAL_START)
 
 // Start sprite font digit tiles after pet tiles
-#define SPRITE_TILE_FONT_DIGITS_START (SPRITE_TILE_SPECIAL_START + TILE_COUNT_SPECIALTOTAL)
+#define SPRITE_TILE_FONT_DIGITS_START (FONT_8x8_NUMS_PET_COLORED_START)
 
 
 
@@ -25,13 +25,13 @@
 //
 //     (Head, L-shape, Midriff, Tail)
 //
-#define GP_EMPTY_MASK 0xE0U // .5+
+#define GP_EMPTY_MASK   0xE0U // .5+
 #define GP_SPECIAL_MASK 0x20U // .5+
-#define GP_SEG_MASK   0x18U // .4-3
-#define GP_ROT_MASK   0x04U // .2
-#define GP_PET_MASK   0x03U // .1-0
+#define GP_SEG_MASK     0x18U // .4-3
+#define GP_ROT_MASK     0x04U // .2
+#define GP_PET_MASK     0x03U // .1-0
 
-#define GP_PET_BITS_MASK  0x1FU
+#define GP_PET_BITS_MASK  (GP_SEG_MASK | GP_ROT_MASK | GP_PET_MASK) // 0x1FU
 
 
 // Extra tiles above pet tiles
@@ -83,7 +83,8 @@
 #define GP_PAL_CAT      0x01U
 #define GP_PAL_FISH     0x02U
 #define GP_PAL_SNAKE    0x03U
-#define GP_PAL_EMPTY    0x00U // Use first pet palette
+//#define GP_PAL_EMPTY    0x00U // Use first pet palette -> Replaced with GP_ATTRIB_EMPTY
+#define GP_ATTRIB_EMPTY 0x00u
 #define GP_PAL_SPECIAL  0x04U
 #define GP_PAL_CLEAR    GP_PAL_SPECIAL
 #define GP_PAL_DROPHINT GP_PAL_SPECIAL
@@ -112,12 +113,12 @@
 #define GP_MIRROR_X    S_FLIPX
 #define GP_MIRROR_Y    S_FLIPY
 
-extern const UINT8 GP_ROT_LUT_TILE[];
-extern const UINT8 GP_ROT_LUT_ATTR[];
-extern const UINT8 GP_CONNECT_LUT[];
-extern const UINT8 GP_CONNECT_MATCHING_LUT[];
-extern const  INT8 GP_CONNECT_NEXT_X_LUT[];
-extern const  INT8 GP_CONNECT_NEXT_Y_LUT[];
+extern const uint8_t GP_ROT_LUT_TILE[4];
+extern const uint8_t GP_ROT_LUT_ATTR[4];
+extern const uint8_t GP_CONNECT_LUT[];
+extern const uint8_t GP_CONNECT_MATCHING_LUT[];
+extern const  int8_t GP_CONNECT_NEXT_X_LUT[];
+extern const  int8_t GP_CONNECT_NEXT_Y_LUT[];
 
 
 #define GP_CONNECT_WRAP_DOWNSHIFT 4

@@ -149,4 +149,5 @@ assets:
 	$(TOOLSDIR)/png2asset      $(RES_GENERATED_DIR)/font_8x16_out.png    -o $(RESDIR)/font_8x16_out.c -use_metafile
 	$(TOOLSDIR)/png2reducedrgb $(RES_ASSET_DIR)/intro_clouds_dark.png    -o $(RESDIR)/intro_clouds_dark_out.c -use_metafile
 	$(TOOLSDIR)/png2reducedrgb $(RES_ASSET_DIR)/intro_clouds_light.png   -o $(RESDIR)/intro_clouds_light_out.c -use_metafile
-	$(TOOLSDIR)/png2asset      $(RES_ASSET_DIR)/pet_tiles.png            -o $(RESDIR)/pet_tiles_out.c -use_metafile
+	$(TOOLSDIR)/png2asset      $(RES_ASSET_DIR)/pet_and_special_tiles.png -o $(RESDIR)/pet_and_special_tiles_out.c -use_metafile
+	$(TOOLSDIR)/png2asset      $(RES_ASSET_DIR)/font_8x8_nums_pet_colored.png -o $(RESDIR)/font_8x8_nums_pet_colored_out.c -use_metafile

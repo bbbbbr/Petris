@@ -16,7 +16,7 @@
 #include <stdint.h>
 #include <stdbool.h>
 
-// #include "gfx.h"
+#include "gfx.h"
 #include "common.h"
 #include "input.h"
 // #include "gfx_print.h"
@@ -81,7 +81,7 @@ static void init_gfx(void) {
     set_bkg_tilemap_base_address(BG0_MAP_START());
     set_bkg_tiles_target_screen_a_or_b(LAYER_SCREEN_A);
 
-    set_bkg_4bpp_palette(PAL_0, intro_cat_out_PALETTE_COUNT, intro_cat_out_palettes);
+    set_bkg_4bpp_palette(PAL_ASSIGN_BG0_0, intro_cat_out_PALETTE_COUNT, intro_cat_out_palettes);
     set_bkg_4bpp_data(TILE_NUM_0, intro_cat_out_TILE_COUNT, intro_cat_out_tiles);
     set_bkg_based_tiles((DEVICE_SCREEN_WIDTH - intro_cat_out_TILES_WIDTH) / 2,  // Tile centered X
                   (DEVICE_SCREEN_HEIGHT - intro_cat_out_TILES_HEIGHT) / 2,  // Tile centered Y

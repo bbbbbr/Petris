@@ -1,4 +1,4 @@
-// Copyright 2020 (c) bbbbbr
+// Copyright 2026 (c) bbbbbr
 //
 // This software is licensed under:
 //
@@ -11,23 +11,23 @@
 
 // game_board.c
 
-#include <gb/gb.h>
-#include <gb/cgb.h> // Include cgb functions
-#include <stdlib.h>
-#include <rand.h>
+#include <gbdk/platform.h>
+#include <gbdk/rand.h>
+#include <stdint.h>
+#include <stdbool.h>
 
 #include "audio_common.h"
 #include "gfx.h"
 #include "gfx_print.h"
-#include "game_piece_data.h"
-#include "game_board.h"
-#include "player_info.h"
-#include "player_hinting.h"
-
-#include "gameover_message.h"
 #include "input.h"
 
+#include "game_piece_data.h"
+#include "game_board.h"
 #include "game_stats.h"
+#include "gameover_message.h"
+
+#include "player_info.h"
+#include "player_hinting.h"
 
 
 #define MAXPET_TXT_X       BRD_ST_X + 0
@@ -49,11 +49,11 @@
 #define PIECES_TXT_MSG "PIECES \nPLAYED:"
 
 
-UINT8 maxpet_pieces[BRD_SIZE];
-UINT8 maxpet_attrib[BRD_SIZE];
-UINT8 maxpet_x[BRD_SIZE]; // (x << 4 | (y & 0x0f)?
-UINT8 maxpet_y[BRD_SIZE];
-UINT8 maxpet_tilecount = 0;
+uint8_t maxpet_pieces[BRD_SIZE];
+uint8_t maxpet_attrib[BRD_SIZE];
+uint8_t maxpet_x[BRD_SIZE]; // (x << 4 | (y & 0x0f)?
+uint8_t maxpet_y[BRD_SIZE];
+uint8_t maxpet_tilecount = 0;
 
 
 void stats_maxpet_reset(void) {
@@ -66,8 +66,8 @@ void stats_maxpet_reset(void) {
 // Copy current completed pet if it's the new longest pet
 void stats_maxpet_copy_iflongest(void) {
 
-    UINT8 c;
-    UINT8 tile_index;
+    uint8_t c;
+    uint8_t tile_index;
 
 
     if (board_tile_clear_count > maxpet_tilecount) {
@@ -85,8 +85,7 @@ void stats_maxpet_copy_iflongest(void) {
             tile_index = board_tile_clear_cache_x[c]
                          + (board_tile_clear_cache_y[c] * BRD_WIDTH);
 
-            // To extract the piece from the board, strip the TILES_PET_START offset
-            maxpet_pieces[c] = board_pieces[tile_index] - TILES_PET_START;
+            maxpet_pieces[c] = board_pieces[tile_index];
             maxpet_attrib[c] = board_attrib[tile_index];
         }
     }
@@ -96,12 +95,12 @@ void stats_maxpet_copy_iflongest(void) {
 
 void stats_maxpet_draw(void) {
 
-    UINT8 c, max_x;
+    uint8_t c, max_x;
 
     board_hide_all(BRD_CLR_DELAY_CLEAR_MED);
     board_reset();
 
-    PRINT(MAXPET_TXT_X, MAXPET_TXT_Y,
+    PRINTXY(MAXPET_TXT_X, MAXPET_TXT_Y,
           MAXPET_TXT_MSG, MAXPET_TXT_DELAY);
 
     // Draw each tile from the longest pet with delay between each
@@ -114,8 +113,8 @@ void stats_maxpet_draw(void) {
         // Track right-most piece for subsequent length overlay
         if (maxpet_x[c] > max_x) max_x = maxpet_x[c];
 
-        board_set_tile_xy((INT8)maxpet_x[c],
-                          (INT8)maxpet_y[c],
+        board_set_tile_xy((int8_t)maxpet_x[c],
+                          (int8_t)maxpet_y[c],
                           maxpet_pieces[c],
                           maxpet_attrib[c],
                           GP_CONNECT_NONE_BITS);
@@ -144,7 +143,7 @@ void stats_display(void) {
 
         stats_maxpet_draw();
         // Wait for a button press to continue
-        waitpadticked_lowcpu(J_START | J_A | J_B, NULL);
+        waitpadticked_lowcpu(J_START | J_A | J_B);
     }
 
     // == Numeric Stats Readout ==
@@ -171,19 +170,19 @@ void stats_display(void) {
 
 
 // Display a text label and an incrementing numeric readout for a value
-void stats_show_var(UINT8 x, UINT8 y, const char* text, UINT16 value) {
+void stats_show_var(uint8_t x, uint8_t y, const char* text, uint16_t value) {
 
-    UINT16 c, increment;
+    uint16_t c, increment;
 
     // Set display increment
     increment = value / STATS_NUM_STEPS;
     if (increment == 0) increment++;
 
-    PRINT(x, y, text, STATS_TXT_DELAY);
+    PRINTXY(x, y, text, STATS_TXT_DELAY);
 
     // Ramp value up from zero to it's value in N steps
     c = 0;
-    print_num_u16(x + 3, y + 2, c, DIGITS_5); // print initial value
+    print_num_u16(x + 3, y + 2, c, STR_DIGIT_LEN_5); // print initial value
 
     while(c < value) {
 
@@ -192,7 +191,7 @@ void stats_show_var(UINT8 x, UINT8 y, const char* text, UINT16 value) {
         c += increment;
         if (c > value) c = value;
 
-        print_num_u16(x + 3, y + 2, c, DIGITS_5);
+        print_num_u16(x + 3, y + 2, c, STR_DIGIT_LEN_5);
 
         UPDATE_KEYS();
         // Skip delay and sound if buttons pressed

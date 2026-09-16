@@ -1,4 +1,4 @@
-// Copyright 2020 (c) bbbbbr
+// Copyright 2026 (c) bbbbbr
 //
 // This software is licensed under:
 //
@@ -11,8 +11,11 @@
 
 // player_piece.c
 
-#include <gb/gb.h>
-#include <gb/cgb.h> // Include cgb functions
+#include <gbdk/platform.h>
+
+#include <stdint.h>
+#include <stdbool.h>
+
 
 #include "common.h"
 #include "input.h"
@@ -33,16 +36,16 @@
 
 #include "gameplay.h"
 
- INT8 player_x = BRD_NEWPIECE_X;
- INT8 player_y = BRD_NEWPIECE_Y;
- INT8 player_rotate = GP_ROTATE_DEFAULT; // Uses wraparound, so allow negative nums
-UINT8 player_piece = 0;
-UINT8 player_attrib = 0;
+ int8_t player_x = BRD_NEWPIECE_X;
+ int8_t player_y = BRD_NEWPIECE_Y;
+ int8_t player_rotate = GP_ROTATE_DEFAULT; // Uses wraparound, so allow negative nums
+uint8_t player_piece = 0;
+uint8_t player_attrib = 0;
 
 
 
 
-void player_piece_update_xy(UINT8 do_show) {
+void player_piece_update_xy(uint8_t do_show) {
 
     if (do_show) {
         // Update sprite to current coordinates
@@ -58,13 +61,13 @@ void player_piece_update_xy(UINT8 do_show) {
 
 
 
-UINT8 player_piece_try_reload(void) {
+uint8_t player_piece_try_reload(void) {
 
     // If the board already has a tile in the default load location then
     // that means game over. Signal failure
     if (!board_check_open_xy(BRD_NEWPIECE_X, BRD_NEWPIECE_Y)) {
 
-        return (FALSE);
+        return (false);
     }
 
 
@@ -83,7 +86,7 @@ UINT8 player_piece_try_reload(void) {
     game_piece_next_generate();
 
     // Show a preview of the next piece, if applicable
-    game_piece_next_show(TRUE);
+    game_piece_next_show(true);
 
     player_piece_update_gfx();
     player_piece_update_xy(PLAYER_PIECE_SHOW);
@@ -94,23 +97,23 @@ UINT8 player_piece_try_reload(void) {
         if (player_piece & GP_SPECIAL_MASK) {
             player_hinting_special_update_gfx();
             player_hinting_special_move();
-            player_hinting_special_show(TRUE);
+            player_hinting_special_show(true);
         } else
-            player_hinting_special_show(FALSE);
+            player_hinting_special_show(false);
 
-        player_hinting_drop_show(TRUE);
+        player_hinting_drop_show(true);
         player_hinting_drop_update();
     }
 
     // Signal successful load of a new piece
-    return (TRUE);
+    return (true);
 }
 
 
 
-UINT8 player_piece_connect_get(UINT8 piece, UINT8 rotate) {
+uint8_t player_piece_connect_get(uint8_t piece, uint8_t rotate) {
 
-    UINT8 connect;
+    uint8_t connect;
 
     // Get connection info for piece and downshift to use as a LUT index
     connect = GP_CONNECT_LUT[ (piece & GP_SEG_MASK) >> GP_SEG_UPSHIFT ];
@@ -126,7 +129,7 @@ UINT8 player_piece_connect_get(UINT8 piece, UINT8 rotate) {
 
 void player_piece_set_on_board(void) {
 
-    UINT8 player_connect;
+    uint8_t player_connect;
 
     player_connect = player_piece_connect_get(player_piece, player_rotate);
 
@@ -146,7 +149,7 @@ void player_piece_set_on_board(void) {
 
     // Make sure special piece hinting is turned off once landed
     if (option_game_visual_hints == OPTION_VISUAL_HINTS_ON) {
-        player_hinting_special_show(FALSE);
+        player_hinting_special_show(false);
     }
 
     board_handle_new_piece(player_x, player_y,
@@ -155,7 +158,7 @@ void player_piece_set_on_board(void) {
  }
 
 
-void player_piece_rotate_apply(UINT8 dir) {
+void player_piece_rotate_apply(uint8_t dir) {
 
     // Rotate sound
     PLAY_SOUND_PIECE_ROTATE;
@@ -180,10 +183,10 @@ void player_piece_rotate_apply(UINT8 dir) {
 //
 // Returns MOVE_OK if piece was moved
 //
-UINT8 player_piece_move(INT8 dir_x, INT8 dir_y) {
+uint8_t player_piece_move(int8_t dir_x, int8_t dir_y) {
 
-    INT8 new_x = (player_x + dir_x);
-    INT8 new_y = (player_y + dir_y);
+    int8_t new_x = (player_x + dir_x);
+    int8_t new_y = (player_y + dir_y);
 
     if ((new_x >= BRD_MIN_X) &&
         (new_x <= BRD_MAX_X) &&
@@ -218,7 +221,7 @@ void player_piece_update_gfx(void) {
 
     if (player_piece & GP_SPECIAL_MASK) {
         // player_piece = player_piece;
-        player_attrib = GP_PAL_SPECIAL;
+        // player_attrib = GP_PAL_SPECIAL;  // Special pal not needed in Loopy version
 
     } else {
         // Update player rotation (clear rotate bits and then set)
@@ -228,8 +231,8 @@ void player_piece_update_gfx(void) {
 
         // Set palette based on pet type (CGB Pal bits are 0x07)
         // And mirror bits based on rotation setting from LUT
-        player_attrib = ((player_piece & GP_PET_MASK) >> GP_PET_UPSHIFT) // Palette
-                         | GP_ROT_LUT_ATTR[player_rotate];               // Rotation sprite mirror bits
+        // Piece sprites share a single 16 color palette on Loopy 
+        player_attrib =  GP_ROT_LUT_ATTR[player_rotate]; // Rotation sprite mirror bits
 
 
         // L Turn pieces require mirror X and Y

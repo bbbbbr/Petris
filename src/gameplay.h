@@ -37,10 +37,10 @@ enum PLAYER_STATES {
 #define GAME_CRUNCHUP_FRAME_THRESHOLD     (60 * 12) // N seconds between crunch-ups (don't factor in board shake time)
 #define GAME_CRUNCHUP_FRAME_COUNTER_RESET 0
 
-extern uint16_t game_rand_init;
+extern uint8_t game_rand_init;
 extern uint8_t volatile game_crunchups_enqueued;
 extern uint8_t volatile game_shake_enqueued;
-extern uint8_t volatile game_is_paused;
+extern bool volatile game_is_paused;
 
 void gameplay_drop_speed_update(void);
 void gameplay_ended_cleanup(void);

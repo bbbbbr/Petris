@@ -1,4 +1,4 @@
-// Copyright 2020 (c) bbbbbr
+// Copyright 2026 (c) bbbbbr
 //
 // This software is licensed under:
 //
@@ -11,8 +11,10 @@
 
 // player_hinting.c
 
-#include <gb/gb.h>
-#include <gb/cgb.h> // Include cgb functions
+#include <gbdk/platform.h>
+
+#include <stdint.h>
+#include <stdbool.h>
 
 #include "common.h"
 #include "input.h"
@@ -33,41 +35,41 @@
 
 #include "gameplay.h"
 
-extern  INT8 player_x;
-extern  INT8 player_y;
-extern  INT8 player_rotate; // Uses wraparound, so allow negative nums
-extern UINT8 player_piece;
-extern UINT8 player_attrib;
+extern  int8_t player_x;
+extern  int8_t player_y;
+extern  int8_t player_rotate; // Uses wraparound, so allow negative nums
+extern uint8_t player_piece;
+extern uint8_t player_attrib;
 
 
 // Hint sprites are arranged clockwise around player piece
 // --> Left, Top, Right, Bottom
-const INT8 SPR_HINT_OFFSET_LUT_X[] = {-8,  0, 8, 0};
-const INT8 SPR_HINT_OFFSET_LUT_Y[] = { 0, -8, 0, 8};
+const int8_t SPR_HINT_OFFSET_LUT_X[] = {-8,  0, 8, 0};
+const int8_t SPR_HINT_OFFSET_LUT_Y[] = { 0, -8, 0, 8};
 
-const UINT8 GP_SPECIAL_HINT_LUT[] = {GP_SPECIAL_BOMB_HINT, // for GP_SPECIAL_BOMB
+const uint8_t GP_SPECIAL_HINT_LUT[] = {GP_SPECIAL_BOMB_HINT, // for GP_SPECIAL_BOMB
                                      GP_SPECIAL_MERGE_HINT}; // for GP_SPECIAL_LIGHTENING
 
-UINT8 hint_special_tile = GP_EMPTY;
+uint8_t hint_special_tile = GP_EMPTY;
 
-INT8  hinting_petlength_x[SPR_LONG_PET_HINT_POOL_SIZE];
-INT8  hinting_petlength_y[SPR_LONG_PET_HINT_POOL_SIZE];
-UINT8 hinting_petlength_num_1[SPR_LONG_PET_HINT_POOL_SIZE];
-UINT8 hinting_petlength_num_2[SPR_LONG_PET_HINT_POOL_SIZE];
-UINT8 hinting_petlength_size[SPR_LONG_PET_HINT_POOL_SIZE];
+int8_t  hinting_petlength_x[SPR_LONG_PET_HINT_POOL_SIZE];
+int8_t  hinting_petlength_y[SPR_LONG_PET_HINT_POOL_SIZE];
+uint8_t hinting_petlength_num_1[SPR_LONG_PET_HINT_POOL_SIZE];
+uint8_t hinting_petlength_num_2[SPR_LONG_PET_HINT_POOL_SIZE];
+uint8_t hinting_petlength_size[SPR_LONG_PET_HINT_POOL_SIZE];
 
-UINT8 hinting_petlength_enabled = FALSE;
-UINT8 hinting_petlength_slot = 0;
-UINT8 hinting_petlength_last_removed = HINT_PET_LENGTH_SLOT_NONE;
+bool hinting_petlength_enabled = false;
+uint8_t hinting_petlength_slot = 0;
+uint8_t hinting_petlength_last_removed = HINT_PET_LENGTH_SLOT_NONE;
 
 
 // Apply sprite flicker to special piece hinting and drop hinting if needed
 void player_hinting_flicker_update(void) {
 
     if ((sys_time & 0x0F) == 0x00)
-        player_hinting_special_show(TRUE);
+        player_hinting_special_show(true);
     else if ((sys_time & 0x0F) == 0x08)
-        player_hinting_special_show(FALSE);
+        player_hinting_special_show(false);
 }
 
 
@@ -75,16 +77,17 @@ void player_hinting_flicker_update(void) {
 // Hide special piece hinting sprites by moving them off-screen
 void player_hinting_special_reset(void) {
 
-        INT8 c;
+        int8_t c;
 
         for (c=SPR_SPECIAL_HINT_1; c <= SPR_SPECIAL_HINT_4; c++) {
-            move_sprite(c, 0, 0);
+            // move_sprite(c, 0, 0);
+            hide_sprite(c);
         }
 }
 
 
 
-void player_hinting_special_show(UINT8 do_show) {
+void player_hinting_special_show(uint8_t do_show) {
 
     if ((do_show) && (player_piece & GP_SPECIAL_MASK)) {
 
@@ -114,7 +117,7 @@ void player_hinting_special_show(UINT8 do_show) {
 // NOTE: expects to only be called if (player_piece & GP_SPECIAL_MASK)
 void player_hinting_special_move(void) {
 
-        INT8 spr_x, spr_y;
+        int8_t spr_x, spr_y;
 
         spr_x = (player_x * BRD_UNIT_SIZE) + BRD_PIECE_X_OFFSET;
         spr_y = (player_y * BRD_UNIT_SIZE) + BRD_PIECE_Y_OFFSET;
@@ -149,28 +152,30 @@ void player_hinting_special_update_gfx(void) {
         // set_sprite_tile(SPR_SPECIAL_HINT_4, hint_special_tile);
 
         // Set Pal and attribs
-        set_sprite_prop(SPR_SPECIAL_HINT_1, GP_PAL_SPECIAL);
-        set_sprite_prop(SPR_SPECIAL_HINT_2, GP_PAL_SPECIAL);
-        set_sprite_prop(SPR_SPECIAL_HINT_3, GP_PAL_SPECIAL);
-        set_sprite_prop(SPR_SPECIAL_HINT_4, GP_PAL_SPECIAL);
+        // Piece sprites share a single 16 color palette on Loopy 
+        // set_sprite_prop(SPR_SPECIAL_HINT_1, GP_PAL_SPECIAL);
+        // set_sprite_prop(SPR_SPECIAL_HINT_2, GP_PAL_SPECIAL);
+        // set_sprite_prop(SPR_SPECIAL_HINT_3, GP_PAL_SPECIAL);
+        // set_sprite_prop(SPR_SPECIAL_HINT_4, GP_PAL_SPECIAL);
 }
 
 
 
 // Hide player drop hint sprite by moving it off-screen
 void player_hinting_drop_reset(void) {
-    move_sprite(SPR_DROP_HINT, 0, 0);
+    // move_sprite(SPR_DROP_HINT, 0, 0);
+    hide_sprite(SPR_DROP_HINT);
 }
 
 
 
-void player_hinting_drop_show(UINT8 do_show) {
+void player_hinting_drop_show(uint8_t do_show) {
 
     if (do_show) {
 
         // Update sprite to use visible tile
         set_sprite_tile(SPR_DROP_HINT, GP_SPECIAL_DROP_HINT);
-        set_sprite_prop(SPR_DROP_HINT, GP_PAL_DROPHINT);
+        // set_sprite_prop(SPR_DROP_HINT, GP_PAL_DROPHINT);  // Piece sprites share a single 16 color palette Loopy 
 
     } else {
         // Hide sprite
@@ -184,7 +189,7 @@ void player_hinting_drop_show(UINT8 do_show) {
 
 void player_hinting_drop_update(void) {
 
-    INT8 drop_hint_y;
+    int8_t drop_hint_y;
 
     drop_hint_y = board_find_lowest_open_in_column(player_x, player_y);
 
@@ -196,9 +201,9 @@ void player_hinting_drop_update(void) {
                     (drop_hint_y * BRD_UNIT_SIZE) + BRD_PIECE_Y_OFFSET);
         // Need to re-show the sprite, in case it got hidden when the player
         // came close to a stack of pieces, but then moved to be over a gap again
-        player_hinting_drop_show(TRUE);
+        player_hinting_drop_show(true);
     } else {
-        player_hinting_drop_show(FALSE);
+        player_hinting_drop_show(false);
     }
 }
 
@@ -214,14 +219,14 @@ void player_hinting_drop_update(void) {
 
 void hinting_petlength_reset(void) {
 
-    UINT8 c;
-    UINT8 sprite_idx;
+    uint8_t c;
+    uint8_t sprite_idx;
 
     // Make sure all the sprites are hidden
     // and the location cache is cleared
 
     hinting_petlength_last_removed = HINT_PET_LENGTH_SLOT_NONE;
-    hinting_petlength_enabled = FALSE;
+    hinting_petlength_enabled = false;
     hinting_petlength_slot = 0;
 
     sprite_idx = SPR_LONG_PET_HINT_NUM_START;
@@ -251,7 +256,7 @@ void hinting_petlength_reset(void) {
         // These two could probably just be called once at the
         // start of a game instead of every level
         set_sprite_tile(sprite_idx, GP_CROSS);
-        set_sprite_prop(sprite_idx, GP_PAL_CROSS);
+        // set_sprite_prop(sprite_idx, GP_PAL_CROSS); // Single shared 16 color palette on the Loopy
         sprite_idx++;
 
         // Move to next sprite
@@ -272,10 +277,11 @@ void hinting_petlength_turn_on(void) {
 
 // Adds a pet length hint sprite overlay
 // for pets that almost meeting required Long Pet length
-void hinting_petlength_add(INT8 board_x, INT8 board_y, UINT8 length, UINT8 piece) {
+void hinting_petlength_add(int8_t board_x, int8_t board_y, uint8_t length, uint8_t piece) {
 
-    UINT8 slot;
-    UINT8 sprite_idx;
+    uint8_t slot;
+    uint8_t sprite_idx;
+    uint8_t pet_type;
 
     // Try to use the last freed slot,
     // otherwise continue with rotating through slots sequentially
@@ -302,16 +308,18 @@ void hinting_petlength_add(INT8 board_x, INT8 board_y, UINT8 length, UINT8 piece
     hinting_petlength_y[slot] = board_y;
 
     // Set sprite palettes
-    set_sprite_prop(sprite_idx    , ((piece & GP_PET_MASK) >> GP_PET_UPSHIFT));
-    set_sprite_prop(sprite_idx + 1, ((piece & GP_PET_MASK) >> GP_PET_UPSHIFT));
+    // Piece sprites share a single 16 color palette on Loopy 
+    // set_sprite_prop(sprite_idx    , ((piece & GP_PET_MASK) >> GP_PET_UPSHIFT));
+    // set_sprite_prop(sprite_idx + 1, ((piece & GP_PET_MASK) >> GP_PET_UPSHIFT));
+    pet_type = piece & GP_PET_MASK;
 
     // Calculate numeric sprites and save for later display
     if (length <= 9) {
-        hinting_petlength_num_1[slot] = SPRITE_TILE_FONT_DIGITS_START + length;
+        hinting_petlength_num_1[slot] = CALC_PET_FONT_8x8_NUM_TILE(length, pet_type);
         hinting_petlength_num_2[slot] = GP_EMPTY;
     } else if (length <= 99) {
-        hinting_petlength_num_1[slot] = SPRITE_TILE_FONT_DIGITS_START + (length / 10);
-        hinting_petlength_num_2[slot] = SPRITE_TILE_FONT_DIGITS_START + (length % 10);
+        hinting_petlength_num_1[slot] = CALC_PET_FONT_8x8_NUM_TILE((length / 10), pet_type);
+        hinting_petlength_num_2[slot] = CALC_PET_FONT_8x8_NUM_TILE((length % 10), pet_type);
     }
 
     // Move sprites to board position
@@ -355,8 +363,8 @@ void hinting_petlength_add(INT8 board_x, INT8 board_y, UINT8 length, UINT8 piece
 //       * Warning: Non-connected liverange found and extended to connected component of the CFG:iTemp0. Please contact sdcc authors with source code to reproduce.
 void hinting_petlength_showhide(void) {
 
-    UINT8 c;
-    UINT8 sprite_idx = SPR_LONG_PET_HINT_NUM_START;
+    uint8_t c;
+    uint8_t sprite_idx = SPR_LONG_PET_HINT_NUM_START;
 
     for (c = 0; c < SPR_LONG_PET_HINT_POOL_SIZE; c++) {
 
@@ -398,10 +406,10 @@ void hinting_petlength_showhide(void) {
 }
 
 
-void hinting_petlength_remove(INT8 board_x, INT8 board_y) {
+void hinting_petlength_remove(int8_t board_x, int8_t board_y) {
 
-    UINT8 c;
-    UINT8 sprite_idx = SPR_LONG_PET_HINT_NUM_START;
+    uint8_t c;
+    uint8_t sprite_idx = SPR_LONG_PET_HINT_NUM_START;
 
 // Only search within max number of added hints
     for (c = 0; c < SPR_LONG_PET_HINT_POOL_SIZE; c++) {
@@ -420,7 +428,8 @@ void hinting_petlength_remove(INT8 board_x, INT8 board_y) {
             set_sprite_tile(sprite_idx + 1, GP_EMPTY);
 
             // Hide size hint cross sprite
-            move_sprite(sprite_idx + 2, 0,0);
+            // move_sprite(sprite_idx + 2, 0,0);
+            hide_sprite(sprite_idx + 2);
 
             // Flag this slot as last removed for use on next add()
             // to avoid needlessly overwriting other entries.
@@ -444,8 +453,8 @@ void hinting_petlength_remove(INT8 board_x, INT8 board_y) {
 // eventually be called afterward to refresh sprite locations
 void hinting_petlength_scrollup(void) {
 
-    UINT8 c;
-    UINT8 sprite_idx = SPR_LONG_PET_HINT_NUM_START;
+    uint8_t c;
+    uint8_t sprite_idx = SPR_LONG_PET_HINT_NUM_START;
 
     // Only search within max number of added hints
     for (c = 0; c < SPR_LONG_PET_HINT_POOL_SIZE; c++) {
@@ -469,8 +478,8 @@ void hinting_petlength_scrollup(void) {
 // Refresh the pet length overlay sprite locations
 void hinting_petlength_refreshxy(void) {
 
-    UINT8 c;
-    UINT8 sprite_idx = SPR_LONG_PET_HINT_NUM_START;
+    uint8_t c;
+    uint8_t sprite_idx = SPR_LONG_PET_HINT_NUM_START;
 
     // Only search within max number of added hints
     for (c = 0; c < SPR_LONG_PET_HINT_POOL_SIZE; c++) {

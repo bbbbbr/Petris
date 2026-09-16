@@ -1,4 +1,4 @@
-// Copyright 2020 (c) bbbbbr
+// Copyright 2026 (c) bbbbbr
 //
 // This software is licensed under:
 //
@@ -9,8 +9,8 @@
 // Attribution-NonCommercial-ShareAlike 4.0 International License
 // See: http://creativecommons.org/licenses/by-nc-sa/4.0/
 
-#include <gb/gb.h>
-#include <gb/cgb.h> // Include cgb functions
+#include <gbdk/platform.h>
+
 
 #include "common.h"
 
@@ -20,9 +20,9 @@
 
 #include "gameover_message.h"
 
-#define CHR2SPR(chr) ((UINT8)(chr -'A') + TILES_FONT_CHARS_START)
+#define CHR2SPR(chr) (chr) // TODO FONT SPRITES : ((uint8_t)(chr -'A') + TILES_FONT_CHARS_START)
 
-const UINT8 SPR_GAMEOVER_CHARS[SPR_GAMEOVER_COUNT] = {
+const uint8_t SPR_GAMEOVER_CHARS[SPR_GAMEOVER_COUNT] = {
             CHR2SPR('G'),
             CHR2SPR('A'),
             CHR2SPR('M'),
@@ -32,7 +32,7 @@ const UINT8 SPR_GAMEOVER_CHARS[SPR_GAMEOVER_COUNT] = {
             CHR2SPR('E'),
             CHR2SPR('R')};
 
-const UINT8 SPR_YOU_LOST_CHARS[SPR_GAMEOVER_COUNT] = {
+const uint8_t SPR_YOU_LOST_CHARS[SPR_GAMEOVER_COUNT] = {
             CHR2SPR('Y'),
             CHR2SPR('O'),
             CHR2SPR('U'),
@@ -42,7 +42,7 @@ const UINT8 SPR_YOU_LOST_CHARS[SPR_GAMEOVER_COUNT] = {
             CHR2SPR('S'),
             CHR2SPR('T')};
 
-const UINT8 SPR_YOU_WON_CHARS[SPR_GAMEOVER_COUNT] = {
+const uint8_t SPR_YOU_WON_CHARS[SPR_GAMEOVER_COUNT] = {
             CHR2SPR('Y'),
             CHR2SPR('O'),
             CHR2SPR('U'),
@@ -50,14 +50,14 @@ const UINT8 SPR_YOU_WON_CHARS[SPR_GAMEOVER_COUNT] = {
             CHR2SPR('W'),
             CHR2SPR('O'),
             CHR2SPR('N'),
-            TILES_FONT_START + 37U /* '!' char */ };
+            '!'}; // TILES_FONT_START + 37U /* '!' char */ };  // TODO FONT SPRITES
 
 #define SPR_PAL_PRINT BG_PAL_5
 
 #define SPR_GAMEOVER_MAX_Y ((BRD_ST_Y + 8U) * 8U)
 #define SPR_GAMEOVER_START_X (((BRD_ST_X + 1U) * 8U) + 2U) // 2 Pixels right of left board edge
 
-const UINT8 SPR_GAMEOVER_LUT_X[] = {SPR_GAMEOVER_START_X,
+const uint8_t SPR_GAMEOVER_LUT_X[] = {SPR_GAMEOVER_START_X,
                                     SPR_GAMEOVER_START_X + (8U * 1U) + 1U, // 1 pixel between each letter
                                     SPR_GAMEOVER_START_X + (8U * 2U) + 2U,
                                     SPR_GAMEOVER_START_X + (8U * 3U) + 3U,
@@ -70,7 +70,7 @@ const UINT8 SPR_GAMEOVER_LUT_X[] = {SPR_GAMEOVER_START_X,
 
 // Pre-calculated gravity drop bounce LUT
 // For calculation ref commented out version of gameover_message_animate() below
-const INT8 SPR_GAMEOVER_LUT_Y[] = {
+const int8_t SPR_GAMEOVER_LUT_Y[] = {
     0x01, 0x03, 0x06, 0x0A, 0x0F, 0x15, 0x1C, 0x24,
     0x2D, 0x37, 0x38, 0x31, 0x2B, 0x26, 0x22, 0x1F,
     0x1D, 0x1C, 0x1C, 0x1D, 0x1F, 0x22, 0x26, 0x2B,
@@ -84,17 +84,17 @@ const INT8 SPR_GAMEOVER_LUT_Y[] = {
 #define SPR_GAMEOVER_GRAVITY 1
 #define SPR_GAMEOVER_LANDED  127
 
-UINT8 spr_gameover_y_idx[SPR_GAMEOVER_COUNT];
-const UINT8 * p_gameover_chars = NULL;
+uint8_t spr_gameover_y_idx[SPR_GAMEOVER_COUNT];
+const uint8_t * p_gameover_chars = NULL;
 
 
 // Drop "G A M E   O V E R" letters with a bounce, starting from left to right
 // Expects font data to already be loaded (see PRINT/etc)
 void gameover_message_animate(void) {
 
-    UINT8 c;
-    UINT8 min_spr = 0; // Used to slowly exit the loop as pieces land
-    UINT8 max_spr = 0; // Used for delay launch left to right
+    uint8_t c;
+    uint8_t min_spr = 0; // Used to slowly exit the loop as pieces land
+    uint8_t max_spr = 0; // Used for delay launch left to right
 
 
     // Load text message into tiles
@@ -106,7 +106,7 @@ void gameover_message_animate(void) {
     while (min_spr != SPR_GAMEOVER_COUNT) {
 
         // Add some delay and go easy on the processor
-        wait_vbl_done();
+        vsync();
 
         // Periodic Update
         if ((sys_time & GAMEOVER_UPDATE_MASK) == GAMEOVER_UPDATE_MASK) {
@@ -141,7 +141,7 @@ void gameover_message_animate(void) {
 // Expects font data to already be loaded (see PRINT/etc)
 void gameover_message_reset(void) {
 
-    UINT8 c;
+    uint8_t c;
 
     for (c = 0; c< SPR_GAMEOVER_COUNT; c++) {
         spr_gameover_y_idx[c] = 0; // Reset Y LUT position

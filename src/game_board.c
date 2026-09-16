@@ -1,4 +1,4 @@
-// Copyright 2020 (c) bbbbbr
+// Copyright 2026 (c) bbbbbr
 //
 // This software is licensed under:
 //
@@ -11,14 +11,13 @@
 
 // game_board.c
 
-#include <gb/gb.h>
-#include <gb/cgb.h> // Include cgb functions
-#include <stdlib.h>
-#include <rand.h>
+#include <gbdk/platform.h>
+#include <gbdk/rand.h>
+#include <stdint.h>
+#include <stdbool.h>
 
 #include "audio_common.h"
 #include "common.h"
-#include "serial_link.h"
 
 #include "game_board.h"
 #include "game_board_special_pieces.h"
@@ -34,48 +33,23 @@
 #include "player_piece.h"
 #include "player_hinting.h"
 
-UINT8 board_pieces[BRD_SIZE];
-UINT8 board_attrib[BRD_SIZE];
-UINT8 board_connect[BRD_SIZE];
+#include "pet_and_special_tiles_out.h"
+#include "font_8x8_nums_pet_colored_out.h"
 
-UINT8 board_tile_clear_cache_x[BRD_SIZE];
-UINT8 board_tile_clear_cache_y[BRD_SIZE];
-UINT8 board_tile_clear_count = 0;
 
-#define TILE_ID_BOARD_BLANK_ROW_BG TILE_ID_BOARD_BLANK_BG
 
-// 10 tiles wide for clearing the game board one row at a time
-// This MUST match game board width
-const UINT8 board_blank_row[BRD_WIDTH] = {
-                 TILE_ID_BOARD_BLANK_ROW_BG,
-                 TILE_ID_BOARD_BLANK_ROW_BG,
-                 TILE_ID_BOARD_BLANK_ROW_BG,
-                 TILE_ID_BOARD_BLANK_ROW_BG,
-                 TILE_ID_BOARD_BLANK_ROW_BG,
-                 TILE_ID_BOARD_BLANK_ROW_BG,
-                 TILE_ID_BOARD_BLANK_ROW_BG,
-                 TILE_ID_BOARD_BLANK_ROW_BG,
-                 TILE_ID_BOARD_BLANK_ROW_BG,
-                 TILE_ID_BOARD_BLANK_ROW_BG};
+uint8_t board_pieces[BRD_SIZE];
+uint8_t board_attrib[BRD_SIZE];
+uint8_t board_connect[BRD_SIZE];
+uint16_t board_bgtile_output[BRD_SIZE];  // Raw output, no need to add TILES_PET_START_VRAM_ABSOLUTE since that's added with PIECE_TO_ABSOLUTE_BGTILE 
 
-const UINT8 board_uparrow_row[BRD_WIDTH] = {
-                TILE_ID_BOARD_UP,
-                TILE_ID_BOARD_UP,
-                TILE_ID_BOARD_UP,
-                TILE_ID_BOARD_UP,
-                TILE_ID_BOARD_UP,
-                TILE_ID_BOARD_UP,
-                TILE_ID_BOARD_UP,
-                TILE_ID_BOARD_UP,
-                TILE_ID_BOARD_UP,
-                TILE_ID_BOARD_UP};
+uint8_t board_tile_clear_cache_x[BRD_SIZE];
+uint8_t board_tile_clear_cache_y[BRD_SIZE];
+uint8_t board_tile_clear_count = 0;
 
-const UINT8 board_blank_row_pal[BRD_WIDTH] = {
-                0x04,0x04,0x04,0x04,0x04,0x04,0x04,0x04,0x04,0x04};
-
-const UINT8 gp_dissolve_anim[] = {GP_DISSOLVE_1 + TILES_PET_START,
-                                  GP_DISSOLVE_2 + TILES_PET_START,
-                                  GP_DISSOLVE_3 + TILES_PET_START};
+const uint16_t gp_dissolve_anim[] = {GP_DISSOLVE_1,
+                                     GP_DISSOLVE_2,
+                                     GP_DISSOLVE_3};
 
 
 
@@ -84,41 +58,29 @@ void board_init(void) {
     board_tile_clear_count = 0;
 }
 
-// Clears the game board
+// Clears the game board bg tilemap area
 //
 // * Called during PAUSE
-void board_hide_all(UINT16 delay_amount) {
+void board_hide_all(uint16_t delay_amount) {
 
-    INT8 y;
+    int8_t y;
 
     // for (y = BRD_ST_Y; y < (BRD_ST_Y + BRD_HEIGHT); y++) {
     // Clear board from bottom up
     for (y = BRD_END_Y; y >= BRD_ST_Y; y--) {
 
-        // Update BG Attribs from Game Board
-        VBK_REG = 1;
-        set_bkg_tiles(BRD_ST_X, y,
-                      sizeof(board_blank_row_pal), 1,
-                      &board_blank_row_pal[0]);
-
         // Update BG Tilemap from Game Board
-        VBK_REG = 0;
 
         // If hide is called with a delay, then for each row
         // briefly draw and show a row of up-arrows before
         // the blank row gets drawn in the same place
         if (delay_amount) {
-            set_bkg_tiles(BRD_ST_X, y,
-                          sizeof(board_uparrow_row), 1,
-                          &board_uparrow_row[0]);
-
+            fill_bkg_rect(BRD_ST_X, y, BRD_WIDTH, 1, TILE_ID_BOARD_UP + TILES_PET_START_VRAM_ABSOLUTE);
             delay(delay_amount);
         }
 
         // Draw the blank row
-        set_bkg_tiles(BRD_ST_X, y,
-                      sizeof(board_blank_row), 1,
-                      &board_blank_row[0]);
+        fill_bkg_rect(BRD_ST_X, y, BRD_WIDTH, 1, TILE_ID_BOARD_BLANK + TILES_PET_START_VRAM_ABSOLUTE);
     }
 }
 
@@ -131,18 +93,7 @@ void board_redraw_all(void) {
     // tile color doesn't turn yellow due to board default
 
     // Update BG Tilemap from Game Board
-    VBK_REG = 0; // Select regular BG tile map
-    set_bkg_tiles(BRD_ST_X, BRD_ST_Y,
-                  BRD_WIDTH, BRD_HEIGHT,
-                  &board_pieces[0]);
-
-    // Update BG Attrib Map from Game Board
-    VBK_REG = 1; // Select BG tile attribute map
-    set_bkg_tiles(BRD_ST_X, BRD_ST_Y,
-                  BRD_WIDTH, BRD_HEIGHT,
-                  &board_attrib[0]);
-
-    VBK_REG = 0; // Re-Select regular BG tile map
+    set_bkg_tiles(BRD_ST_X, BRD_ST_Y, BRD_WIDTH, BRD_HEIGHT, &board_bgtile_output[0]);
 }
 
 
@@ -151,14 +102,14 @@ void board_redraw_all(void) {
 // go past the top of the game board
 void board_crunch_up(void) {
 
-    INT8  x, y;
-    UINT8 row_cur;
-    UINT8 row_below;
+    int8_t  x, y;
+    uint8_t row_cur;
+    uint8_t row_below;
 
     // Check for end of game condition, any pieces
     // in the copy-up top row trigger game-over
     for (x=0; x < BRD_WIDTH; x++) {
-        if (board_pieces[x] != (GP_EMPTY + TILES_PET_START)) {
+        if (board_pieces[x] != (GP_EMPTY)) {
             game_state = GAME_ENDED;
         }
     }
@@ -181,6 +132,7 @@ void board_crunch_up(void) {
                 board_pieces[row_cur]  = board_pieces[row_below];
                 board_attrib[row_cur]  = board_attrib[row_below];
                 board_connect[row_cur] = board_connect[row_below];
+                board_bgtile_output[row_cur] = board_bgtile_output[row_below];
                 row_cur++;
                 row_below++;
             }
@@ -192,9 +144,10 @@ void board_crunch_up(void) {
             // Reset piece info
             // Set palette based on pet type
             // Reset board connection bits
-            board_pieces[row_cur]  = GP_EMPTY + TILES_PET_START;
-            board_attrib[row_cur]  = GP_PAL_EMPTY;
+            board_pieces[row_cur]  = GP_EMPTY;
+            board_attrib[row_cur]  = GP_ATTRIB_EMPTY;
             board_connect[row_cur] = GP_CONNECT_NONE_BITS;
+            board_bgtile_output[row_cur] = PIECE_TO_ABSOLUTE_BGTILE(GP_EMPTY, GP_ATTRIB_EMPTY);
             row_cur++;
         }
 
@@ -216,42 +169,35 @@ void board_crunch_up(void) {
 
 // Redraws single tile on board
 //
-void board_draw_tile_xy(INT8 x, INT8 y, UINT8 tile_index) {
+void board_draw_tile_xy(int8_t x, int8_t y, uint8_t tile_index) {
 
     // Update BG Tilemap from Game Board
-    VBK_REG = 1; // Select BG tile attribute map
-    set_bkg_tiles(BRD_ST_X + x, BRD_ST_Y + y,
-                  1, 1,
-                  &board_attrib[tile_index]);
-
-    // Update BG Attrib Map from Game Board
-    VBK_REG = 0; // Re-Select regular BG tile map
-    set_bkg_tiles(BRD_ST_X + x, BRD_ST_Y + y,
-                  1, 1,
-                  &board_pieces[tile_index]);
+    set_bkg_tile_xy(BRD_ST_X + (int16_t)x, BRD_ST_Y + (int16_t)y,
+                    board_bgtile_output[tile_index]);
 }
 
 
 void board_reset(void) {
 
-    UINT8 c;
+    uint8_t c;
 
     for (c=0; c < (BRD_WIDTH * BRD_HEIGHT); c++) {
         // Set pet piece
         // Set palette based on pet type
         // Reset board connection bits
-        board_pieces[c] = GP_EMPTY + TILES_PET_START;
-        board_attrib[c] = GP_PAL_EMPTY;
+        board_pieces[c] = GP_EMPTY;
+        board_attrib[c]  = GP_ATTRIB_EMPTY;
         board_connect[c] = GP_CONNECT_NONE_BITS;
+        board_bgtile_output[c] = PIECE_TO_ABSOLUTE_BGTILE(GP_EMPTY, GP_ATTRIB_EMPTY);
     }
 
     board_redraw_all();
 }
 
 
-void board_flash_message(UINT8 start_x, UINT8 start_y, char * text, char * ctext, UINT8 repeat) {
+void board_flash_message(uint8_t start_x, uint8_t start_y, char * text, char * ctext, uint8_t repeat) {
 
-    UINT8 c;
+    uint8_t c;
 
     // Hide the game board and player piece
     // NOTE: This now gets called by the calling functions instead
@@ -261,11 +207,11 @@ void board_flash_message(UINT8 start_x, UINT8 start_y, char * text, char * ctext
 
     for (c = 0; c < repeat; c++) {
         // blank print text using the provided ctext
-        PRINT(start_x, start_y, ctext,0);
+        PRINTXY(start_x, start_y, ctext,0);
         delay(500);
 
         // print provided text
-        PRINT(start_x, start_y, text,0);
+        PRINTXY(start_x, start_y, text,0);
         delay(500);
     }
 }
@@ -275,10 +221,10 @@ void board_flash_message(UINT8 start_x, UINT8 start_y, char * text, char * ctext
 // coordinate below the piece?
 //
 // Used for drop-piece hinting
-INT8 board_find_lowest_open_in_column(INT8 x, INT8 y_st) {
+int8_t board_find_lowest_open_in_column(int8_t x, int8_t y_st) {
 
-    UINT8 offset; // 8 bits is ok sicne the board array is smaller than 255
-    INT8 y;
+    uint8_t offset; // 8 bits is ok since the board array is smaller than 255
+    int8_t y;
 
     // Start at the Y location of the player piece in board array
     y = y_st;
@@ -287,7 +233,7 @@ INT8 board_find_lowest_open_in_column(INT8 x, INT8 y_st) {
     // Keep checking until either the bottom of the board is reached,
     // or an occupied (non-open) tile is found
     while ((y <= BRD_MAX_Y) &&
-           (board_pieces[offset] == (GP_EMPTY + TILES_PET_START))) {
+           (board_pieces[offset] == (GP_EMPTY))) {
 
         // Move to next row down and then test again
         y++;
@@ -302,18 +248,18 @@ INT8 board_find_lowest_open_in_column(INT8 x, INT8 y_st) {
 
 // Given X, Y board coordinate, is it open for a piece to move there?
 // Note: Bounds checking happens in calling function
-UINT8 board_check_open_xy(INT8 x, INT8 y) {
+uint8_t board_check_open_xy(int8_t x, int8_t y) {
 
-    return (board_pieces[x + (y * BRD_WIDTH)] == (GP_EMPTY + TILES_PET_START));
+    return (board_pieces[x + (y * BRD_WIDTH)] == (GP_EMPTY));
 }
 
 
 
-void board_clear_tile_xy(INT8 x, INT8 y) {
+void board_clear_tile_xy(int8_t x, int8_t y) {
 
-    UINT8 tile_index;
-    UINT8 c;
-    UINT8 is_tail = FALSE;
+    uint8_t tile_index;
+    uint8_t c;
+    bool is_tail = false;
 
     if ((x >= BRD_MIN_X) &&
         (x <= BRD_MAX_X) &&
@@ -323,8 +269,8 @@ void board_clear_tile_xy(INT8 x, INT8 y) {
         tile_index = x + (y * BRD_WIDTH);
 
         // Set the tail flag if the tile isn't empty and it's a tail (in any direction)
-        if (board_pieces[tile_index] != GP_EMPTY + TILES_PET_START) {
-            is_tail = ((board_pieces[tile_index] - TILES_PET_START) & GP_SEG_MASK) == GP_SEG_TAIL_BITS;
+        if (board_pieces[tile_index] != GP_EMPTY) {
+            is_tail = ((board_pieces[tile_index]) & GP_SEG_MASK) == GP_SEG_TAIL_BITS;
         }
 
         // Animate removal of board tile, even if blank - i,e called by a bomb/etc
@@ -336,11 +282,11 @@ void board_clear_tile_xy(INT8 x, INT8 y) {
             delay(40);
         }
 
-        board_pieces[tile_index] = GP_EMPTY + TILES_PET_START;
-        // Set palette based on pet type (CGB Pal bits are 0x07)
-        board_attrib[tile_index] = GP_PAL_EMPTY;
+        board_pieces[tile_index] = GP_EMPTY;
+        board_attrib[tile_index] = GP_ATTRIB_EMPTY;
         // Update connection setting
         board_connect[tile_index] = GP_CONNECT_NONE_BITS;
+	    board_bgtile_output[tile_index] = PIECE_TO_ABSOLUTE_BGTILE(GP_EMPTY, GP_ATTRIB_EMPTY);
 
 
         board_draw_tile_xy(x, y, tile_index);
@@ -360,9 +306,9 @@ void board_clear_tile_xy(INT8 x, INT8 y) {
 
 // Should NOT be called if (piece & GP_SPECIAL_MASK)
 // Note: No bounds checking here
-void board_set_tile_xy(INT8 x, INT8 y, UINT8 piece, UINT8 attrib, UINT8 connect) {
+void board_set_tile_xy(int8_t x, int8_t y, uint8_t piece, uint8_t attrib, uint8_t connect) {
 
-    UINT8 tile_index;
+    uint8_t tile_index;
 
     if (!(piece & GP_SPECIAL_MASK)) {
 
@@ -372,15 +318,13 @@ void board_set_tile_xy(INT8 x, INT8 y, UINT8 piece, UINT8 attrib, UINT8 connect)
 
         tile_index = x + (y * BRD_WIDTH);
 
-        // Add in offset to start of BG tile piece data
-        piece += TILES_PET_START;
-
         // Update piece
         // Set palette based on pet type (CGB Pal bits are 0x07)
         // Update connection setting
         board_pieces[tile_index] = piece;
         board_attrib[tile_index] = attrib;
         board_connect[tile_index] = connect;
+        board_bgtile_output[tile_index] = PIECE_TO_ABSOLUTE_BGTILE(piece, attrib);
 
         board_draw_tile_xy(x, y, tile_index);
     }
@@ -388,7 +332,7 @@ void board_set_tile_xy(INT8 x, INT8 y, UINT8 piece, UINT8 attrib, UINT8 connect)
 
 
 
-void board_handle_new_piece(INT8 x, INT8 y, UINT8 piece, UINT8 connect) {
+void board_handle_new_piece(int8_t x, int8_t y, uint8_t piece, uint8_t connect) {
 
     if (piece & GP_SPECIAL_MASK) {
 
@@ -419,13 +363,13 @@ void board_handle_new_piece(INT8 x, INT8 y, UINT8 piece, UINT8 connect) {
 }
 
 
-void game_board_fill_random_tails(UINT8 piece_count, INT8 board_min_y, UINT8 add_mode) {
+void game_board_fill_random_tails(uint8_t piece_count, int8_t board_min_y, uint8_t add_mode) {
 
-    UINT8 x, y;
-    UINT8 piece;
-    UINT8 attrib;
-    UINT8 index;
-    UINT8 pet_type_bits, body_seg;
+    uint8_t x, y;
+    uint8_t piece;
+    uint8_t attrib;
+    uint8_t index;
+    uint8_t pet_type_bits, body_seg;
 
     while (piece_count) {
 
@@ -433,17 +377,17 @@ void game_board_fill_random_tails(UINT8 piece_count, INT8 board_min_y, UINT8 add
         // and within board bounds
         //
         // (Old style used DIV_REG instead of rand())
-        // x = (UINT8)DIV_REG % (BRD_WIDTH + 1);
-        // y = ((UINT8)DIV_REG % (BRD_HEIGHT - BRD_MIN_Y_RANDOM_FILL + 1)) + BRD_MIN_Y_RANDOM_FILL ;
-        x = (UINT8)rand() % BRD_WIDTH;
-        y = ((UINT8)rand() % (BRD_HEIGHT - board_min_y)) + board_min_y;
+        // x = (uint8_t)DIV_REG % (BRD_WIDTH + 1);
+        // y = ((uint8_t)DIV_REG % (BRD_HEIGHT - BRD_MIN_Y_RANDOM_FILL + 1)) + BRD_MIN_Y_RANDOM_FILL ;
+        x = (uint8_t)rand() % BRD_WIDTH;
+        y = ((uint8_t)rand() % (BRD_HEIGHT - board_min_y)) + board_min_y;
         index = x + (y * BRD_WIDTH);
 
         // Loop until the randomly selected spot is free
-        if (board_pieces[index] == (GP_EMPTY + TILES_PET_START)) {
+        if (board_pieces[index] == (GP_EMPTY)) {
 
             // Default is to add tail segment of random pet type
-            pet_type_bits = (UINT8)rand() & GP_PET_MASK_NOSHIFT;
+            pet_type_bits = (uint8_t)rand() & GP_PET_MASK_NOSHIFT;
             body_seg = GP_SEG_TAIL;
 
             // If this is a crunch-up addition then avoid creating
@@ -464,17 +408,15 @@ void game_board_fill_random_tails(UINT8 piece_count, INT8 board_min_y, UINT8 add
             // once one is successfully placed on the board
             piece_count--;
 
-            // piece = ((UINT8)DIV_REG & GP_PET_MASK_NOSHIFT) |
+            // piece = ((uint8_t)DIV_REG & GP_PET_MASK_NOSHIFT) |
             piece = (pet_type_bits) |
                     (body_seg << GP_SEG_UPSHIFT) |
                     (GP_ROT_VERT << GP_ROT_UPSHIFT);
 
-            // Set palette based on pet type (CGB Pal bits are 0x07)
-            // And mirror bits based on rotation setting from LUT
-            attrib = ((piece & GP_PET_MASK) >> GP_PET_UPSHIFT) // Palette
-                      | GP_ROT_LUT_ATTR[GP_ROTATE_270];               // Rotation sprite mirror bits
+            // Mirror bits based on rotation setting from LUT
+            attrib = GP_ROT_LUT_ATTR[GP_ROTATE_270];               // Rotation sprite mirror bits
 
-            board_set_tile_xy((INT8)x, (INT8)y,
+            board_set_tile_xy((int8_t)x, (int8_t)y,
                               piece, attrib,
                               player_piece_connect_get(piece, GP_ROTATE_270));
 
@@ -489,9 +431,9 @@ void game_board_fill_random_tails(UINT8 piece_count, INT8 board_min_y, UINT8 add
 }
 
 
-UINT8 board_piece_get_xy(INT8 x, INT8 y, UINT8 * p_piece, UINT8 * p_connect) {
+bool board_piece_get_xy(int8_t x, int8_t y, uint8_t * p_piece, uint8_t * p_connect) {
 
-    UINT8 tile_index;
+    uint8_t tile_index;
 
     if ((x >= BRD_MIN_X) &&
         (x <= BRD_MAX_X) &&
@@ -502,16 +444,16 @@ UINT8 board_piece_get_xy(INT8 x, INT8 y, UINT8 * p_piece, UINT8 * p_connect) {
         *p_piece = board_pieces[tile_index];
         *p_connect = board_connect[tile_index];
 
-        return (TRUE);
+        return (true);
     }
     else
-        return (FALSE);
+        return (false);
 }
 
 
-UINT8 board_check_connected_xy(INT8 x, INT8 y, UINT8 piece, UINT8 * p_this_connect, UINT8 flags) {
+bool board_check_connected_xy(int8_t x, int8_t y, uint8_t piece, uint8_t * p_this_connect, uint8_t flags) {
 
-    UINT8 adj_piece, adj_connect;
+    uint8_t adj_piece, adj_connect;
 
     // Get requested board piece
     // (Fails if edge board piece and returns false to break out of calling loop)
@@ -528,19 +470,19 @@ UINT8 board_check_connected_xy(INT8 x, INT8 y, UINT8 piece, UINT8 * p_this_conne
                 // Find and return next connect direction on this adjacent piece
                 // by excluding current connection
                 *p_this_connect = adj_connect ^ GP_CONNECT_MATCHING_LUT[(*p_this_connect)];
-                return (TRUE);
+                return (true);
             }
         }
     }
 
-    return (FALSE);
+    return (false);
 }
 
 
-void board_handle_pet_completed(UINT8 flags) {
+void board_handle_pet_completed(uint8_t flags) {
 
-    UINT8 c = 0;
-    UINT8 crunchups_to_send;
+    uint8_t c = 0;
+    uint8_t crunchups_to_send;
 
     stats_maxpet_copy_iflongest();
 
@@ -570,11 +512,11 @@ void board_handle_pet_completed(UINT8 flags) {
         score_and_level_update(BRD_PIECE_CLEAR_COUNT_NONE);
     } else {
 
-        // If in 2 player versus mode and the bonus length
+        // TODO: 2-player
+/*        // If in 2 player versus mode and the bonus length
         // threshold is met or passed, send N crunch ups
         // based on pet-length
-        if ((link_status == LINK_STATUS_CONNECTED) &&
-            (board_tile_clear_count >= VS_CRUNCH_THR)) {
+        if (board_tile_clear_count >= VS_CRUNCH_THR) {
 
                 // Number of crunch-ups sent is a function of length
                 // Cap max number to fit within serial data payload
@@ -584,14 +526,14 @@ void board_handle_pet_completed(UINT8 flags) {
                     crunchups_to_send = LINK_DATA_MASK;
                 LINK_SEND(LINK_CMD_CRUNCHUP | (crunchups_to_send & LINK_DATA_MASK));
         }
-
+*/
 
         // Check completed pet size against level-up size requirement if it's Long pet game type
         if (option_game_type == OPTION_GAME_TYPE_LONG_PET) {
             game_type_long_pet_check_size(board_tile_clear_count);
         }
 
-        score_and_level_update((UINT16)board_tile_clear_count);
+        score_and_level_update((uint16_t)board_tile_clear_count);
     }
 
     // Reset global pet size var
@@ -608,13 +550,13 @@ void board_handle_pet_completed(UINT8 flags) {
 //     * Special-MERGE piece is passed in, but *NOT* copied onto the board array beforehand.
 //       Any connection that tests it's board location will find an EMPTY entry (no connects)
 //
-void board_check_completed_pet_xy(INT8 start_x, INT8 start_y, UINT8 piece, UINT8 connect, UINT8 flags) {
+void board_check_completed_pet_xy(int8_t start_x, int8_t start_y, uint8_t piece, uint8_t connect, uint8_t flags) {
 
-    UINT8 piece_count, headtail_count;
-     INT8 check_x = 0, check_y = 0;  // Inits here and this_connect are just to quiet the compiler re long pet hinting add() location non-initialization
-    UINT8 this_connect = 0;
-    UINT8 last_connect;
-    UINT8 source_cur_dir;
+    uint8_t piece_count, headtail_count;
+     int8_t check_x = 0, check_y = 0;  // Inits here and this_connect are just to quiet the compiler re long pet hinting add() location non-initialization
+    uint8_t this_connect = 0;
+    uint8_t last_connect;
+    uint8_t source_cur_dir;
 
 
         // Reset tile clear cache (add one entry, current piece)
@@ -749,7 +691,7 @@ void board_check_completed_pet_xy(INT8 start_x, INT8 start_y, UINT8 piece, UINT8
 
                 // Process the pet if it was completed or is being cleared via a merge
                 board_handle_pet_completed(flags);
-                // return (TRUE); // Ended up not using return codes
+                // return (true); // Ended up not using return codes
             }
         }
         // Otherwise, if this is Long Pet mode, update pet length overlays
@@ -786,6 +728,6 @@ void board_check_completed_pet_xy(INT8 start_x, INT8 start_y, UINT8 piece, UINT8
     // Reset global pet size var now that processing is completed
     board_tile_clear_count = 0;
 
-    // return (FALSE);  // Ended up not using return codes
+    // return (false);  // Ended up not using return codes
 }
 

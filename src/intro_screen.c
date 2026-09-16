@@ -65,35 +65,42 @@ static void intro_text_cleanup(void);
 
 
 static void intro_background_and_logo_init(void) {
-    
+
+    uint16_t base_tile_id = SHARED_4BPP_TRANSP_TILE_ID_START;   // TODO: Maybe a global shared next_free_bg_tile var with add_tiles and remove_tiles
+    // Load the globally shared (for convenience) transparent tile
+    set_bkg_tiles_target_screen_a_or_b(LAYER_SCREEN_A);
+    set_bkg_4bpp_data(base_tile_id, SHARED_4BPP_TRANSP_TILE_COUNT, shared_4bpp_transparent_tile);
+    base_tile_id += SHARED_4BPP_TRANSP_TILE_COUNT;
+
     // Main background on BG1 layer
     // BG1 is set to use pals 4,5,6,7 (so no need to offset palette)
     set_bkg_tiles_target_screen_a_or_b(LAYER_SCREEN_A);
 
-    set_bkg_4bpp_palette(PAL_4, intro_screen_out_PALETTE_COUNT, intro_screen_out_palettes);
-    set_bkg_4bpp_data(TILE_NUM_0, intro_screen_out_TILE_COUNT, intro_screen_out_tiles);
+    set_bkg_4bpp_palette(PAL_ASSIGN_BG1_0, intro_screen_out_PALETTE_COUNT, intro_screen_out_palettes);
+    set_bkg_4bpp_data(base_tile_id, intro_screen_out_TILE_COUNT, intro_screen_out_tiles);
     set_bkg_tilemap_base_address(BG1_MAP_START());
-    set_bkg_tiles((DEVICE_SCREEN_WIDTH - intro_screen_out_TILES_WIDTH)/2,  // Tile centered X
-                  (DEVICE_SCREEN_HEIGHT - intro_screen_out_TILES_HEIGHT)/2,  // Tile centered Y
-                  intro_screen_out_TILES_WIDTH, intro_screen_out_TILES_HEIGHT, intro_screen_out_map);
+    set_bkg_based_tiles((DEVICE_SCREEN_WIDTH - intro_screen_out_TILES_WIDTH)/2,  // Tile centered X
+                        (DEVICE_SCREEN_HEIGHT - intro_screen_out_TILES_HEIGHT)/2,  // Tile centered Y
+                        intro_screen_out_TILES_WIDTH, intro_screen_out_TILES_HEIGHT, intro_screen_out_map, base_tile_id);
+    base_tile_id += intro_screen_out_TILE_COUNT;
 
 
     // Petris Logo is now on BG0 so it can be scrolled over background in BG1
 
     // Logo background on BG0 layer so it can scroll
     // BG0 is set to use pals 0,1,2,3
-    #define TILE_LOAD_OFFSET_LOGO (intro_screen_out_TILE_COUNT)
     set_bkg_tilemap_base_address(BG0_MAP_START());
     set_bkg_tiles_target_screen_a_or_b(LAYER_SCREEN_A);
 
-    set_bkg_4bpp_palette(PAL_0, intro_logo_out_PALETTE_COUNT, intro_logo_out_palettes);
-    set_bkg_4bpp_data(TILE_LOAD_OFFSET_LOGO, intro_logo_out_TILE_COUNT, intro_logo_out_tiles);
+    set_bkg_4bpp_palette(PAL_ASSIGN_BG0_0, intro_logo_out_PALETTE_COUNT, intro_logo_out_palettes);
+    set_bkg_4bpp_data(base_tile_id, intro_logo_out_TILE_COUNT, intro_logo_out_tiles);
     // First fill entire BG1 tilemap with clear tiles to ensure
     // BG0 to shows through in transparent parts
-    fill_bkg_rect(0, 0, DEVICE_SCREEN_BUFFER_WIDTH, DEVICE_SCREEN_BUFFER_HEIGHT, TILE_LOAD_OFFSET_LOGO);
+    fill_bkg_rect(0, 0, DEVICE_SCREEN_BUFFER_WIDTH, DEVICE_SCREEN_BUFFER_HEIGHT, SHARED_4BPP_TRANSP_TILE_ID_START);
     set_bkg_based_tiles((DEVICE_SCREEN_WIDTH - intro_logo_out_TILES_WIDTH)/2,  // Tile centered X
                         LOGO_TILE_Y_START,
-                        intro_logo_out_TILES_WIDTH, intro_logo_out_TILES_HEIGHT, intro_logo_out_map, TILE_LOAD_OFFSET_LOGO);
+                        intro_logo_out_TILES_WIDTH, intro_logo_out_TILES_HEIGHT, intro_logo_out_map, base_tile_id);
+    base_tile_id += intro_logo_out_TILE_COUNT;
 
     // Scroll logo down the screen a bit to intended position
     VDP.BG_SCROLL[BG0_SCROLL_Y] = (uint16_t)-8;  // TODO: Animated scroll in of Petris logo?    
@@ -108,7 +115,7 @@ static void intro_clouds_init(void) {
     cloud_counter = 0;
 
     // Set up shared palette (from one of the images)
-    set_bkg_4bpp_palette(PAL_12, 1, intro_clouds_light_out_palette);  // 1 Palette (actually 3 colors at present, but allow it to overrun to 16)
+    set_bkg_4bpp_palette(PAL_ASSIGN_BM_0, 1, intro_clouds_light_out_palette);  // 1 Palette (actually 3 colors at present, but allow it to overrun to 16)
 
     // Load both sets of cloud bitmaps to the shared VRAM, one at top and other lower
     // Make the lighter clouds on BM2 so that they scroll over the darker ones
@@ -183,7 +190,7 @@ static void intro_background_and_logo_cleanup(void) {
     // BG0 is set to use pals 0,1,2,3
     set_bkg_tilemap_base_address(BG0_MAP_START());
     set_bkg_tiles_target_screen_a_or_b(LAYER_SCREEN_A);
-    fill_bkg_rect(0, 0, DEVICE_SCREEN_BUFFER_WIDTH, DEVICE_SCREEN_BUFFER_HEIGHT, TILE_LOAD_OFFSET_LOGO);
+    fill_bkg_rect(0, 0, DEVICE_SCREEN_BUFFER_WIDTH, DEVICE_SCREEN_BUFFER_HEIGHT, SHARED_4BPP_TRANSP_TILE_ID_START);
     VDP.BG_SCROLL[BG0_SCROLL_Y] = 0;
 }
 

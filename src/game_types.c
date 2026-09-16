@@ -21,15 +21,14 @@
 // #include "fade2pal.h"
 
 #include "game_board.h"
-#include "game_types.h"
-
 #include "gameplay.h"
 
 #include "player_info.h"
-/*#include "player_hinting.h"*/  // TODO
+#include "player_hinting.h"
 
 #include "options.h"
 
+#include "game_types.h"
 
 
 uint8_t game_type_cleanup_tail_count = 0;
@@ -73,11 +72,11 @@ void game_types_handle_level_transition(void) {
 
         HIDE_SPRITES;
 
-/*        // Remove player pet length hinting sprites  // TODO
+        // Remove player pet length hinting sprites
         hinting_petlength_reset();
 
         board_hide_all(BRD_CLR_DELAY_CLEAR_MED);
-*/
+
         PRINTXY(MSG_LEVEL_UP_X, MSG_LEVEL_UP_Y, MSG_LEVEL_UP_CTEXT,0);
 
         // Update level indicator before populating the board
@@ -96,11 +95,11 @@ void game_types_handle_level_transition(void) {
         vsync();
         SHOW_SPRITES;
 
-/*        // Flash a get ready message to the player  // TODO
+        // Flash a get ready message to the player
         board_flash_message(MSG_LEVEL_UP_X, MSG_LEVEL_UP_Y,
                             MSG_LEVEL_UP_TEXT, MSG_LEVEL_UP_CTEXT,
                             MSG_LEVEL_UP_REPEAT);
-*/
+
         gameplay_prepare_board();
 
     }

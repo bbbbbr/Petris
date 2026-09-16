@@ -1,4 +1,4 @@
-// Copyright 2020 (c) bbbbbr
+// Copyright 2026 (c) bbbbbr
 //
 // This software is licensed under:
 //
@@ -11,12 +11,12 @@
 
 // game_piece.c
 
-#include <gb/gb.h>
-#include <gb/cgb.h> // Include cgb functions
-#include <rand.h>
+#include <gbdk/platform.h>
+#include <gbdk/rand.h>
+#include <stdint.h>
+#include <stdbool.h>
 
 #include "common.h"
-#include "serial_link.h"
 
 #include "options.h"
 #include "gfx.h"
@@ -26,8 +26,8 @@
 #include "player_gfx.h"
 
 
-UINT8 game_piece_next = 0;
-UINT8 game_piece_next_stash = GAME_PIECE_STASH_NONE;
+uint8_t game_piece_next = 0;
+uint8_t game_piece_next_stash = GAME_PIECE_STASH_NONE;
 
 
 void  game_piece_next_reset(void) {
@@ -58,15 +58,19 @@ void game_piece_next_generate(void) {
     } else {
         // Otherwise generate a single random new pet tile piece
 
+        // TODO: 2-Player support
+        /*
         // If connected by link then only use rand() so that the
         // games follow the same random number sequence
         if (link_status == LINK_STATUS_CONNECTED) {
             // 2-Player mode
-            game_piece_next = ((UINT8)rand() & 0x1F);
+            game_piece_next = ((uint8_t)rand() & 0x1F);
         } else {
             // In 1-player mode mix in DIV_REG for a little more variety to the random number sequence
-            game_piece_next = ((UINT8)(rand() ^ DIV_REG) & 0x1F);
+            game_piece_next = ((uint8_t)(rand() ^ DIV_REG) & 0x1F);
         }
+        */
+        game_piece_next = ((uint8_t)rand() & GP_PET_BITS_MASK);
 
 
         // == New piece adjusments to improve player experience in various modes ==
@@ -111,13 +115,13 @@ void game_piece_next_generate(void) {
 
 
 
-UINT8 game_piece_next_get(void) {
+uint8_t game_piece_next_get(void) {
     return game_piece_next;
 }
 
 
 
-void game_piece_next_set(UINT8 override_piece) {
+void game_piece_next_set(uint8_t override_piece) {
 
     // Store current next piece
     game_piece_next_stash = game_piece_next;
@@ -125,14 +129,14 @@ void game_piece_next_set(UINT8 override_piece) {
     // Override the next piece
     game_piece_next = override_piece;
 
-    // Preview display is updated elsewhere (game_piece_next_show(TRUE)
+    // Preview display is updated elsewhere (game_piece_next_show(true)
 }
 
 
 
-void game_piece_next_show(UINT8 do_show) {
+void game_piece_next_show(uint8_t do_show) {
 
-    UINT8 attrib;
+    uint8_t attrib = GP_ATTRIB_EMPTY;
 
     if ((do_show) && (option_game_preview_next == NEXT_PREV_ON)) {
 
@@ -141,15 +145,9 @@ void game_piece_next_show(UINT8 do_show) {
                         (game_piece_next & ~GP_ROT_MASK)
                         | GP_ROT_LUT_TILE[GP_ROTATE_DEFAULT]);
 
-        // Set palette based on pet type (CGB Pal bits are 0x07)
-        // And mirror bits based on rotation setting from LUT
-        if (game_piece_next & GP_SPECIAL_MASK) {
-            // Special sprites have one palette and no rotation/etc
-            attrib = GP_PAL_SPECIAL;
-
-        } else {
-            attrib = ((game_piece_next & GP_PET_MASK) >> GP_PET_UPSHIFT) // Palette
-                      | GP_ROT_LUT_ATTR[GP_ROTATE_DEFAULT];               // Rotation sprite mirror bits
+        // Set sprite mirror bits if it's not a special piece
+        if (!(game_piece_next & GP_SPECIAL_MASK)) {
+            attrib = GP_ROT_LUT_ATTR[GP_ROTATE_DEFAULT]; // Rotation sprite mirror bits
         }
 
         set_sprite_prop(SPR_PLAYER_NEXT, attrib);

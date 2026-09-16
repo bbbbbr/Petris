@@ -84,13 +84,14 @@
 
 #define BRD_PIECE_CLEAR_COUNT_NONE 0
 
-extern uint16_t board_pieces[BRD_SIZE];
-/*extern uint16_t board_attrib[BRD_SIZE];*/ // TODO: removable? (since attribs are part of main board)
+extern uint8_t board_pieces[BRD_SIZE];
+extern uint8_t board_attrib[BRD_SIZE];
 extern uint8_t board_connect[BRD_SIZE];
+extern uint16_t board_bgtile_output[BRD_SIZE];
 
-extern uint16_t board_tile_clear_cache_x[BRD_SIZE];
-extern uint16_t board_tile_clear_cache_y[BRD_SIZE];
-extern uint16_t board_tile_clear_count;
+extern uint8_t board_tile_clear_cache_x[BRD_SIZE];
+extern uint8_t board_tile_clear_cache_y[BRD_SIZE];
+extern uint8_t board_tile_clear_count;
 
 
 
@@ -99,25 +100,25 @@ void board_init(void);
 void board_hide_all(uint16_t);
 void board_redraw_all(void);
 void board_crunch_up(void);
-void board_draw_tile_xy(int16_t, int16_t, uint16_t);
+void board_draw_tile_xy(int8_t, int8_t, uint8_t);
 
 void board_reset(void);
-void board_clear_tile_xy(int16_t, int16_t);
+void board_clear_tile_xy(int8_t, int8_t);
 
-void board_flash_message(uint16_t, uint16_t, char *, char *, uint16_t);
+void board_flash_message(uint8_t, uint8_t, char *, char *, uint8_t);
 
-int16_t board_find_lowest_open_in_column(int16_t, int16_t);
-uint16_t board_check_open_xy(int16_t, int16_t);
-void board_set_tile_xy(int16_t, int16_t, uint16_t, uint16_t, uint16_t);
-void board_handle_new_piece(int16_t, int16_t, uint16_t, uint16_t);
+int8_t board_find_lowest_open_in_column(int8_t, int8_t);
+uint8_t board_check_open_xy(int8_t, int8_t);
+void board_set_tile_xy(int8_t, int8_t, uint8_t, uint8_t, uint8_t);
+void board_handle_new_piece(int8_t, int8_t, uint8_t, uint8_t);
 
-void game_board_fill_random_tails(uint16_t, int16_t, uint16_t);
+void game_board_fill_random_tails(uint8_t, int8_t, uint8_t);
 
-uint16_t board_piece_get_xy(int16_t, int16_t, uint16_t * , uint16_t * );
-uint16_t board_check_connected_xy(int16_t, int16_t, uint16_t, uint16_t *, uint16_t);
-void  board_check_completed_pet_xy(int16_t, int16_t, uint16_t, uint16_t, uint16_t);
+bool board_piece_get_xy(int8_t, int8_t, uint8_t * , uint8_t * );
+bool board_check_connected_xy(int8_t, int8_t, uint8_t, uint8_t *, uint8_t);
+void  board_check_completed_pet_xy(int8_t, int8_t, uint8_t, uint8_t, uint8_t);
 
-void board_handle_pet_completed(uint16_t flags);
+void board_handle_pet_completed(uint8_t flags);
 void board_debug_show_connect_entire_board(void);
 
 #endif // GAME_BOARD_H

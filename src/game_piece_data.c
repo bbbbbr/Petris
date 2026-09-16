@@ -1,4 +1,4 @@
-// Copyright 2020 (c) bbbbbr
+// Copyright 2026 (c) bbbbbr
 //
 // This software is licensed under:
 //
@@ -11,22 +11,25 @@
 
 // game_piece_data.c
 
-#include <gb/gb.h>
-#include <gb/cgb.h> // Include cgb functions
+#include <gbdk/platform.h>
+#include <stdint.h>
+#include <stdbool.h>
 
 #include "game_piece_data.h"
 
 
 // This gets applied to BG Tile/Sprite INDEX:0x10
-const UINT8 GP_ROT_LUT_TILE[4] =
+const uint8_t GP_ROT_LUT_TILE[4] =
                 {GP_ROT_HORZ_BITS,     // GP_ROTATE_0
                  GP_ROT_VERT_BITS,     // GP_ROTATE_90
                  GP_ROT_HORZ_BITS,     // GP_ROTATE_180
                  GP_ROT_VERT_BITS};    // GP_ROTATE_270
 
+// The mirror bits are sprite OAM flip/mirror flags
+// If they aren't the same between OAM and BG tiles then
+// they need to be translated when placing a tile on the board/bg
 
-// This gets BG Tile/Sprite ATTRIB:0x60
-const UINT8 GP_ROT_LUT_ATTR[4] =
+const uint8_t GP_ROT_LUT_ATTR[4] =
                 {GP_MIRROR_OFF,
                  GP_MIRROR_OFF,
                  GP_MIRROR_X,
@@ -35,7 +38,7 @@ const UINT8 GP_ROT_LUT_ATTR[4] =
 
 // Game board piece connection to adjacent
 // piece matching connection lookup
-const UINT8 GP_CONNECT_LUT[] =
+const uint8_t GP_CONNECT_LUT[] =
                 {GP_CONNECT_RIGHT_BITS  | GP_CONNECT_NONE_BITS,  // GP_SEG_TAIL     0
                  GP_CONNECT_LEFT_BITS   | GP_CONNECT_RIGHT_BITS, // GP_SEG_TORSO    1
                  GP_CONNECT_RIGHT_BITS  | GP_CONNECT_DOWN_BITS,  // GP_SEG_TURN     2
@@ -43,7 +46,7 @@ const UINT8 GP_CONNECT_LUT[] =
 
 
 // Maps the matching bits for the opposite side of a connection
-const UINT8 GP_CONNECT_MATCHING_LUT[] =
+const uint8_t GP_CONNECT_MATCHING_LUT[] =
                  {GP_CONNECT_NONE_BITS,    //                          0x00U
                   GP_CONNECT_RIGHT_BITS,   // GP_CONNECT_LEFT_BITS     0x01U
                   GP_CONNECT_DOWN_BITS,    // GP_CONNECT_UP_BITS       0x02U
@@ -56,7 +59,7 @@ const UINT8 GP_CONNECT_MATCHING_LUT[] =
 
 
 // Looks up which direction a connection bit points to
-const INT8 GP_CONNECT_NEXT_X_LUT[] =
+const int8_t GP_CONNECT_NEXT_X_LUT[] =
                  { 0,    //                          0x00U
                   -1,    // GP_CONNECT_LEFT_BITS     0x01U
                    0,    // GP_CONNECT_UP_BITS       0x02U
@@ -67,7 +70,7 @@ const INT8 GP_CONNECT_NEXT_X_LUT[] =
                    0,    //                          0x07U
                    0};   // GP_CONNECT_DOWN_BITS     0x08U
 
-const INT8 GP_CONNECT_NEXT_Y_LUT[] =
+const int8_t GP_CONNECT_NEXT_Y_LUT[] =
                  { 0,    //                          0x00U
                    0,    // GP_CONNECT_LEFT_BITS     0x01U
                   -1,    // GP_CONNECT_UP_BITS       0x02U

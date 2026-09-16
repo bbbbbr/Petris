@@ -21,8 +21,10 @@
 
 // Pointer used to load pet tiles/palettes,
 // allows tile sets/palettes to be easily swapped out
-uint16_t * p_pet_tiles = NULL;
-uint16_t * p_special_tiles = NULL;
+const uint16_t * p_pet_tiles = NULL;
+const uint16_t * p_special_tiles = NULL;
+const uint16_t * p_pet_wag_tiles = NULL;
+const uint16_t * p_font_pet_colored_tiles = NULL;
 
 // uint16_t * p_pet_palette;
 
@@ -31,3 +33,4 @@ void pet_tiles_prepare(void) {
     // p_pet_tiles = pet_tiles; // TODO
     // p_pet_palette = (uint16_t *)board_pets_palette;  // TODO
 }
+
