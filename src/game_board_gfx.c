@@ -144,22 +144,22 @@ void board_gfx_init_background(void) {
     // - Put clouds BEHIND game board if possible
 
     // Set up text areas
-    PRINTXY(DISPLAY_NEXT_PIECE_TEXT_X,    DISPLAY_NEXT_PIECE_TEXT_Y - 1,    "NEXT:", 0);
+    PRINTXY(DISPLAY_NEXT_PIECE_TEXT_X,    DISPLAY_NEXT_PIECE_TEXT_Y_LABEL,    "NEXT:", 0);
 
-    PRINTXY(DISPLAY_LEVEL_X,    DISPLAY_LEVEL_Y - 1,    "LEVEL", 0);
+    PRINTXY(DISPLAY_LEVEL_X,    DISPLAY_LEVEL_Y_LABEL,    "LEVEL", 0);
      // On same line as level readout
-    PRINTXY(DISPLAY_DIFF_X,     DISPLAY_DIFF_Y,         options_difficulty_abbrev_text_get(), 0);
+    PRINTXY(DISPLAY_DIFF_X,     DISPLAY_DIFF_Y,           options_difficulty_abbrev_text_get(), 0);
 
-    PRINTXY(DISPLAY_SCORE_X,    DISPLAY_SCORE_Y - 1,    "SCORE", 0);
+    PRINTXY(DISPLAY_SCORE_X,    DISPLAY_SCORE_Y_LABEL,    "SCORE", 0);
     // Display static trailing zero for score (inflates score apparent value)
     PRINTXY(DISPLAY_SCORE_X + 4, DISPLAY_SCORE_Y,      "0", 0);
 
     if (option_game_type == OPTION_GAME_TYPE_PET_CLEANUP) {
-        PRINTXY(DISPLAY_NUMPETS_X,  DISPLAY_NUMPETS_Y - 1,  "TAILS", 0);
+        PRINTXY(DISPLAY_NUMPETS_X,  DISPLAY_NUMPETS_Y_LABEL_LINE2,  "TAILS", 0);
     } else if (option_game_type == OPTION_GAME_TYPE_LONG_PET) {
-        PRINTXY(DISPLAY_NUMPETS_X,  DISPLAY_NUMPETS_Y - 2,  "PET\nSIZE", 0);
+        PRINTXY(DISPLAY_NUMPETS_X,  DISPLAY_NUMPETS_Y_LABEL_LINE1,  "PET\nSIZE", 0);
     } else {
-        PRINTXY(DISPLAY_NUMPETS_X,  DISPLAY_NUMPETS_Y - 1,  "PETS", 0);
+        PRINTXY(DISPLAY_NUMPETS_X,  DISPLAY_NUMPETS_Y_LABEL_LINE2,  "PETS", 0);
     }
 
     // SHOW_BKG;

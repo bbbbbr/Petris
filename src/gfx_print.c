@@ -20,8 +20,6 @@
 
 #include "font_8x16_out.h"
 
-#define FONT_8x16_TILE_HEIGHT 2
-
 #define FONT_8x16_BLANK_LEN   1u
 #define FONT_8x16_CHARS_LEN   26u
 #define FONT_8x16_NUMS_LEN    11u
@@ -176,7 +174,7 @@ void print_to_tilemap(const char * txt, uint16_t delay_time) {
                 case '\n':
                     // Do a carriage return, no printing and skip to top of loop
                     print_x = start_x;
-                    print_y += SPR_PRINT_SPACING_Y;
+                    print_y += BG_PRINT_SPACING_Y;
                     txt++;
                     continue;
                 // Default is blank tile for Space or any other unknown chars
@@ -215,7 +213,7 @@ void print_num_u16(uint16_t x, uint16_t y, uint16_t num, uint16_t fixed_str_leng
     // Initialize index at END of array +1,
     // so that the first pass sets it to the first array position
     const uint16_t blank_tile = (FONT_8x16_TILE_ID_BLANK * FONT_8x16_TILE_HEIGHT) + gfx_tiles_font_base;  // * 2 is for two tiles per character
-    uint16_t index = PRINT_MAX_DIGITS;
+    uint16_t index = fixed_str_length;
 
     if (fixed_str_length > PRINT_MAX_DIGITS)
         fixed_str_length = PRINT_MAX_DIGITS;
@@ -234,7 +232,7 @@ void print_num_u16(uint16_t x, uint16_t y, uint16_t num, uint16_t fixed_str_leng
 
         // Print top then bottom of character (2 tiles)
         str_digit_tiles[index] = chr;
-        str_digit_tiles[index + PRINT_MAX_DIGITS] = ++chr;  // Wrap around to next tile row down for bottom of character
+        str_digit_tiles[index + fixed_str_length] = ++chr;  // Wrap around to next tile row down for bottom of character
         num = num / 10;
     } while (num != 0);
 
@@ -243,10 +241,10 @@ void print_num_u16(uint16_t x, uint16_t y, uint16_t num, uint16_t fixed_str_leng
         index--;
         // Print top then bottom of character (2 tiles)
         str_digit_tiles[index] = blank_tile;
-        str_digit_tiles[index + PRINT_MAX_DIGITS] = blank_tile + 1;  // Wrap around to next tile row down
+        str_digit_tiles[index + fixed_str_length] = blank_tile + 1;  // Wrap around to next tile row down
     }
 
     // Draw the digits on the background tilemap
     set_bkg_tiles(x, y, fixed_str_length, 2, // 1 tile high
-                  &str_digit_tiles[index + (PRINT_MAX_DIGITS - fixed_str_length) ]); // Start at first digit and go to end of array
+                  &str_digit_tiles[index]); // Start at first digit and go to end of digits (length depends on fixed_str_length)
 }

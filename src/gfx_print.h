@@ -7,8 +7,14 @@
 #define SPR_8x8_HEIGHT  8u
 #define SPR_8x8_WIDTH   8u
 
+
+#define FONT_8x16_TILE_HEIGHT 2u
+#define FONT_8x16_PX_HEIGHT   (FONT_8x16_TILE_HEIGHT * TILE_HEIGHT_8x8)
+
 #define SPR_PRINT_SPACING_X 7  // (SPR_8x8_WIDTH  + 1u)  // 1 pixels between character sprites
-#define SPR_PRINT_SPACING_Y (SPR_8x8_HEIGHT + 8u)  // 8 pixels between character sprites
+#define SPR_PRINT_SPACING_Y (FONT_8x16_PX_HEIGHT)  // 8 pixels between character sprites
+
+#define BG_PRINT_SPACING_Y  (FONT_8x16_TILE_HEIGHT)
 
 #define STR_DIGIT_LEN_5 5
 #define STR_DIGIT_LEN_3 3
