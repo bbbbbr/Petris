@@ -201,6 +201,7 @@ void board_reset(void) {
 
 void board_flash_message(uint8_t start_x, uint8_t start_y, char * text, char * ctext, uint8_t repeat) {
 
+/*  // TODO: FIXME
     uint8_t c;
 
     // Hide the game board and player piece
@@ -218,6 +219,7 @@ void board_flash_message(uint8_t start_x, uint8_t start_y, char * text, char * c
         PRINTXY(start_x, start_y, text,0);
         delay(500);
     }
+    */
 }
 
 
