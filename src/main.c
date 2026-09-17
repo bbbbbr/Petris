@@ -205,18 +205,12 @@ int main() {
 
             case GAME_PLAYING:
                 gameplay_update();
-
-                // TODO: DEBUG: loop back around to title screen for now
-                if (KEY_TICKED(J_START)) {
-                    game_state = GAME_INTRO_INIT;
-                }
                 break;
 
-/*
             case GAME_ENDED:
                 // TODO: 2 Player mode handling (need loopy hardware 4 player controller breakout)
 
-                GAMEOVER_MESSAGE_SET(SPR_GAMEOVER_CHARS);
+                // GAMEOVER_MESSAGE_SET(SPR_GAMEOVER_CHARS);
                 game_state = GAME_OVER_SCREEN;
                 break;
 
@@ -235,7 +229,7 @@ int main() {
                     game_state = GAME_INTRO_INIT;
                 }
                 break;
-*/
+
         }
     }
 }
