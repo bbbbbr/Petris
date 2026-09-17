@@ -78,8 +78,8 @@ void board_gfx_change_pettiles(void) {
 void board_gfx_init_pettiles(void) {
 
     p_pet_tiles              = pet_and_special_tiles_out_tiles;
-    p_special_tiles          = pet_and_special_tiles_out_tiles + TILES_SPECIAL_START;
-    p_pet_wag_tiles          = pet_and_special_tiles_out_tiles + TILE_PET_TAIL_WAG_START;
+    p_special_tiles          = pet_and_special_tiles_out_tiles + (TILES_SPECIAL_START * TILE_4BPP_SIZE_U16);
+    p_pet_wag_tiles          = pet_and_special_tiles_out_tiles + (TILE_PET_TAIL_WAG_START * TILE_4BPP_SIZE_U16);
     p_font_pet_colored_tiles = font_8x8_nums_pet_colored_out_tiles;
 
     // == Background data ==
