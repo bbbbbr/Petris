@@ -87,6 +87,7 @@ void board_hide_all(uint16_t delay_amount) {
 
 
 // Redraws the game board from the game board arrays
+// Note: board_bgtile_output[] should contain ABSOLUTE tile indexes (not OAM relative) on Loopy
 void board_redraw_all(void) {
 
     // Workaround for slight flickr on board_redraw_all()
@@ -173,7 +174,9 @@ void board_crunch_up(void) {
 }
 
 
+
 // Redraws single tile on board
+// Note: board_bgtile_output[] should contain ABSOLUTE tile indexes (not OAM relative) on Loopy
 //
 void board_draw_tile_xy(int8_t x, int8_t y, uint8_t tile_index) {
 
@@ -289,18 +292,17 @@ void board_clear_tile_xy(int8_t x, int8_t y) {
         // Animate removal of board tile, even if blank - i,e called by a bomb/etc
         // Use attribs/color from existing tile as-is
         for (c=0; c < ARRAY_LEN(gp_dissolve_anim); c++) {
-
             board_pieces[tile_index] = gp_dissolve_anim[c];
+            board_bgtile_output[tile_index] = PIECE_TO_ABSOLUTE_BGTILE(gp_dissolve_anim[c], GP_ATTRIB_EMPTY);
             board_draw_tile_xy(x, y, tile_index);
             delay(40);
         }
 
         board_pieces[tile_index] = GP_EMPTY;
         board_attrib[tile_index] = GP_ATTRIB_EMPTY;
+        board_bgtile_output[tile_index] = PIECE_TO_ABSOLUTE_BGTILE(GP_EMPTY, GP_ATTRIB_EMPTY);
         // Update connection setting
         board_connect[tile_index] = GP_CONNECT_NONE_BITS;
-	    board_bgtile_output[tile_index] = PIECE_TO_ABSOLUTE_BGTILE(GP_EMPTY, GP_ATTRIB_EMPTY);
-
 
         board_draw_tile_xy(x, y, tile_index);
 
