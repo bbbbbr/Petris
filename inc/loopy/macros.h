@@ -42,3 +42,4 @@
 
 #define OBJ_LAYER_SPLIT(num) (num)
 #define OAM_PAL(pal)         ((pal) << 12)
+#define BG_PAL(pal)         ((pal) << 12)
