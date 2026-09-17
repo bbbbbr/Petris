@@ -266,10 +266,19 @@ void set_bkg_tiles_target_subpal(uint16_t subpal) {
 }
 
 
-
-void delay(uint16_t d) {
-    // TODO: calibrate delay time (how to measure...? count in vsyncs?)
+// TODO: rewrite in ASM, count actual cycles
+//
+// 1000 msec ÷ 59.8261 hz = 16.715 FPS
+// 16.715 FPS  / 263 lines = 0.06355 msec per line
+// 1 msec / 0.06355 msec per line = 15.73 lines per msec
+void delay(uint16_t msecs_delay) {
+    for (volatile uint16_t c = 0u; c < msecs_delay; c++) {
+        for (volatile uint16_t one_msec_loop = 0u; one_msec_loop < 0x01A0u; one_msec_loop++) {
+                __asm__ volatile("nop");
+        }
+    }
 }
+
 
 
 // void set_native_tile_data(uint16_t start, uint16_t ntiles, const void *src) PRESERVES_REGS(iyh, iyl);
