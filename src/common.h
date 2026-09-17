@@ -22,7 +22,7 @@ enum GAME_STATES {
 };
 
 #define SHARED_4BPP_TRANSP_TILE_ID_START 0u  // First tile
-#define SHARED_4BPP_TRANSP_TILE_COUNT     1u
+#define SHARED_4BPP_TRANSP_TILE_COUNT    1u
 extern const uint16_t shared_4bpp_transparent_tile[32];
 
 extern uint16_t game_state;
