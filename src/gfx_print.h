@@ -25,13 +25,16 @@
 
 #define PRINT_ATTRIB_PAL_DEFAULT 0x0000u
 
+// For Game Board/Play also see: PAL_FONT_8x16_YELLOW..., PAL_FONT_8x16_GREY..., PAL_FONT_8x16_PINK...
 #define PRINT_PAL_TILE_YELLOW (0u << 12)
 #define PRINT_PAL_TILE_GREY   (1u << 12)
 // #define PRINT_PAL_TILE_PINK   (1u << 12)
 
+// For Game Board/Play also see: PAL_FONT_8x16_YELLOW..., PAL_FONT_8x16_GREY..., PAL_FONT_8x16_PINK...
 #define PRINT_PAL_OAM_YELLOW (S_PAL0)
 #define PRINT_PAL_OAM_PINK   (S_PAL1)
 #define PRINT_PAL_OAM_GREY   (S_PAL2)
+
 
 extern uint16_t print_x, print_y, print_tile_attribs;
 
