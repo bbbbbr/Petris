@@ -41,7 +41,7 @@
 uint8_t board_pieces[BRD_SIZE];
 uint8_t board_attrib[BRD_SIZE];
 uint8_t board_connect[BRD_SIZE];
-uint16_t board_bgtile_output[BRD_SIZE];  // Raw output, no need to add TILES_PET_START_VRAM_ABSOLUTE since that's added with PIECE_TO_ABSOLUTE_BGTILE 
+uint16_t board_bgtile_output[BRD_SIZE];  // Absolute tile output, already has TILES_PET_START_VRAM_ABSOLUTE and Palette bit added in
 
 uint8_t board_tile_clear_cache_x[BRD_SIZE];
 uint8_t board_tile_clear_cache_y[BRD_SIZE];
@@ -93,6 +93,8 @@ void board_redraw_all(void) {
     // tile color doesn't turn yellow due to board default
 
     // Update BG Tilemap from Game Board
+    set_bkg_tiles_target_screen_a_or_b(LAYER_SCREEN_A);
+    set_bkg_tilemap_base_address(BG0_MAP_START());
     set_bkg_tiles(BRD_ST_X, BRD_ST_Y, BRD_WIDTH, BRD_HEIGHT, &board_bgtile_output[0]);
 }
 
@@ -172,6 +174,8 @@ void board_crunch_up(void) {
 void board_draw_tile_xy(int8_t x, int8_t y, uint8_t tile_index) {
 
     // Update BG Tilemap from Game Board
+    set_bkg_tiles_target_screen_a_or_b(LAYER_SCREEN_A);
+    set_bkg_tilemap_base_address(BG0_MAP_START());
     set_bkg_tile_xy(BRD_ST_X + (int16_t)x, BRD_ST_Y + (int16_t)y,
                     board_bgtile_output[tile_index]);
 }
