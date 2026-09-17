@@ -26,6 +26,7 @@
 #include "game_piece.h"
 #include "game_piece_data.h"
 #include "game_board.h"
+#include "game_board_gfx.h"
 #include "game_types.h"
 
 #include "player_piece.h"
@@ -256,7 +257,7 @@ void hinting_petlength_reset(void) {
         // These two could probably just be called once at the
         // start of a game instead of every level
         set_sprite_tile(sprite_idx, GP_CROSS);
-        // set_sprite_prop(sprite_idx, GP_PAL_CROSS); // Single shared 16 color palette on the Loopy
+        set_sprite_prop(sprite_idx, GP_PAL_CROSS);
         sprite_idx++;
 
         // Move to next sprite
