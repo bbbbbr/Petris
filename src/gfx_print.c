@@ -57,8 +57,8 @@ const palette_color_t font_8x16_out_palette_GREY[16] = {
 void load_8x16_font_tilemap_palettes(void) {
    // Set palettes for tile printing (yellow, pink, grey) on BG0 layer
     set_bkg_4bpp_palette(PAL_ASSIGN_BG0_0, font_8x16_out_PALETTE_COUNT, font_8x16_out_palettes);
-    set_bkg_4bpp_palette(PAL_ASSIGN_BG0_1, 1, font_8x16_out_palette_PINK);
-    set_bkg_4bpp_palette(PAL_ASSIGN_BG0_2, 1, font_8x16_out_palette_GREY);
+    set_bkg_4bpp_palette(PAL_ASSIGN_BG0_1, 1, font_8x16_out_palette_GREY);
+    // set_bkg_4bpp_palette(PAL_ASSIGN_BG0_1, 1, font_8x16_out_palette_PINK);
 }
 
 

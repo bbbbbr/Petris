@@ -26,8 +26,8 @@
 #define PRINT_ATTRIB_PAL_DEFAULT 0x0000u
 
 #define PRINT_PAL_TILE_YELLOW (0u << 12)
-#define PRINT_PAL_TILE_PINK   (1u << 12)
-#define PRINT_PAL_TILE_GREY   (2u << 12)
+#define PRINT_PAL_TILE_GREY   (1u << 12)
+// #define PRINT_PAL_TILE_PINK   (1u << 12)
 
 #define PRINT_PAL_OAM_YELLOW (S_PAL0)
 #define PRINT_PAL_OAM_PINK   (S_PAL1)
