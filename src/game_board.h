@@ -3,12 +3,14 @@
 #ifndef GAME_BOARD_H
 #define GAME_BOARD_H
 
-#define BRD_ST_X   8 // Location in BG Tiles
-#define BRD_ST_Y   0
+#define BRD_ST_X   11 // Location in BG Tiles
+#define BRD_ST_Y   6
 #define BRD_WIDTH  10 // Width in BG Tiles
 #define BRD_HEIGHT 15
 #define BRD_END_X  (BRD_ST_X + BRD_WIDTH  -1)
 #define BRD_END_Y  (BRD_ST_Y + BRD_HEIGHT -1)
+#define GAME_BOARD_BORDER_START_X (BRD_ST_X - 2)
+#define GAME_BOARD_BORDER_START_Y (BRD_ST_Y - 5)
 
 #define BRD_CON_WIDTH (BRD_WIDTH - 1)
 #define BRD_CON_HEIGHT (BRD_HEIGHT - 1)
@@ -18,6 +20,7 @@
 #define BRD_MIN_Y  0
 #define BRD_MAX_Y  (BRD_HEIGHT - 1)
 #define BRD_MIN_Y_RANDOM_FILL 7
+#define BRD_MIN_Y_RANDOM_FILL 7
 
 
 #define BRD_SIZE     (BRD_WIDTH * BRD_HEIGHT)
@@ -25,8 +28,8 @@
 
 #define BRD_UNIT_SIZE  8 // 8 screen pixels per board tile
 
-#define BRD_NEWPIECE_X 5 // BRD_WIDTH/2
-#define BRD_NEWPIECE_Y BRD_ST_Y
+#define BRD_NEWPIECE_X 5
+#define BRD_NEWPIECE_Y 0
 
 // OAM Sprite coordinates are for LOWER RIGHT of sprite
 #define OAM_SPRITE_X_OFFSET (DEVICE_SPRITE_PX_OFFSET_X)
