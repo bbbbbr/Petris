@@ -48,11 +48,6 @@
 #define SCREEN_MAX_X (SCREEN_WIDTH - 1)
 #define SCREEN_MAX_Y (SCREEN_HEIGHT - 1)
 
-#define PIECE_TO_RELATIVE_BGTILE(piece, attrib) ((uint16_t)piece | (((uint16_t)attrib) << 8) | BG_PAL(PAL_3))
-#define PIECE_TO_ABSOLUTE_BGTILE(piece, attrib) (((uint16_t)piece + TILES_PET_START_VRAM_ABSOLUTE) | ((uint16_t)attrib << 8) | BG_PAL(PAL_3))
-
-
-#define CALC_PET_FONT_8x8_NUM_TILE(digit, pet_type) (FONT_8x8_NUMS_PET_COLORED_START + (pet_type * TILE_COUNT_FONT_8x8_PET_DIGIT_COUNT) + digit)
 
 #define TILE_4BPP_SIZE_BYTES           32U // (8x8 pixels, 4 bits per pixel mode)
 #define TILE_4BPP_SIZE_U16             16U // (8x8 pixels, 4 bits per pixel mode)

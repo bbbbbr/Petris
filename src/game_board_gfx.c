@@ -34,6 +34,7 @@
 
 
 #include "intro_screen_out.h"  // For determining where to start loading font tiles
+#include "game_board_border_out.h"
 #include "pet_and_special_tiles_out.h"
 #include "font_8x8_nums_pet_colored_out.h"
 
@@ -43,10 +44,32 @@
 #define TAIL_ANIM_ALTERNATE_BITS  0x04
 #define TAIL_ANIM_FRAMES_PER_SET  4
 
-const uint8_t NEXT_PIECE_BG_TILE = TILE_ID_BOARD_NEXT_PIECE_PREVIEW_BG;
+const uint8_t NEXT_PIECE_BG_TILE = TILE_ID_BOARD_NEXT_PIECE_PREVIEW_BG;  // TODO
 
 uint8_t tail_anim_count = 0;
 bool tail_anim_alternate = false;
+
+#define GAME_BOARD_UNDER_TILE_COUNT       1u
+#define GAME_BOARD_UNDER_PALETTE_COUNT    1u
+// uint16_t game_board_under_white_tile_id = 0u;  // Not yet needed
+const uint16_t game_board_under_white_tile[] = {
+    0x1111u, 0x1111u,
+    0x1111u, 0x1111u,
+    0x1111u, 0x1111u,
+    0x1111u, 0x1111u,
+    0x1111u, 0x1111u,
+    0x1111u, 0x1111u,
+    0x1111u, 0x1111u,
+    0x1111u, 0x1111u,
+};
+const palette_color_t game_board_under_pal[16] = {
+    RGB8(  0,  0,  0), RGB8(255,255,255), RGB8(  0,  0,  0), RGB8(  0,  0,  0),
+    RGB8(  0,  0,  0), RGB8(  0,  0,  0), RGB8(  0,  0,  0), RGB8(  0,  0,  0),
+    RGB8(  0,  0,  0), RGB8(  0,  0,  0), RGB8(  0,  0,  0), RGB8(  0,  0,  0),
+    RGB8(  0,  0,  0), RGB8(  0,  0,  0), RGB8(  0,  0,  0), RGB8(  0,  0,  0),
+    };
+
+
 
 
 void board_gfx_init(void) {
@@ -77,6 +100,11 @@ void board_gfx_change_pettiles(void) {
 
 void board_gfx_init_pettiles(void) {
 
+    // Graphics layer use
+    // BG0:  Text, Game Board+Pieces, Game Board Border
+    // BG1:  Main BG, Game Board White Background
+    // OAM0: Game piece and board overlay sprites
+
     p_pet_tiles              = pet_and_special_tiles_out_tiles;
     p_special_tiles          = pet_and_special_tiles_out_tiles + (TILES_SPECIAL_START * TILE_4BPP_SIZE_U16);
     p_pet_wag_tiles          = pet_and_special_tiles_out_tiles + (TILE_PET_TAIL_WAG_START * TILE_4BPP_SIZE_U16);
@@ -84,27 +112,60 @@ void board_gfx_init_pettiles(void) {
 
     // == Background data ==
     // Background Tiles
-    #define TILE_LOAD_OFFSET_FONT (intro_screen_out_TILE_COUNT + SHARED_4BPP_TRANSP_TILE_ID_START)
-    uint16_t next_free_tile = load_8x16_font_tiles(TILE_LOAD_OFFSET_FONT);
+
+    // Everything here is drawn on Screen A
+    set_bkg_tiles_target_screen_a_or_b(LAYER_SCREEN_A);
+
+    // 8x16 font 
+        // Currently uses palettes:
+        // BG0: PAL_FONT_8x16_YELLOW_BG0_0, PAL_FONT_8x16_GREY_BG0_1
+        // OAM: PAL_FONT_8x16_YELLOW_OBJ_0, PAL_FONT_8x16_PINK_OBJ_1, PAL_FONT_8x16_GREY_OBJ_2
+        #define TILE_LOAD_OFFSET_FONT (intro_screen_out_TILE_COUNT + SHARED_4BPP_TRANSP_TILE_ID_START)
+        uint16_t base_tile_id = load_8x16_font_tiles(TILE_LOAD_OFFSET_FONT);
+
+    // Background under game board (currently solid white)
+        set_bkg_tilemap_base_address(BG1_MAP_START());
+        set_bkg_tiles_target_subpal(REL_PAL_BOARD_UNDER_BG1_1);
+
+        set_bkg_4bpp_palette(ABS_PAL_BOARD_UNDER_BG1_1, GAME_BOARD_UNDER_PALETTE_COUNT, game_board_under_pal);
+        set_bkg_4bpp_data(base_tile_id, GAME_BOARD_UNDER_TILE_COUNT, game_board_under_white_tile);
+
+        fill_bkg_rect(BRD_ST_X, BRD_ST_Y, BRD_WIDTH, BRD_HEIGHT, base_tile_id);
+
+        base_tile_id += GAME_BOARD_UNDER_TILE_COUNT;
+        set_bkg_tiles_target_subpal(PAL_0);  // Revert to default palette for subsequent writes
+
+
+    // Game Board Border goes on BG0 with game board tiles and text
+        set_bkg_tilemap_base_address(BG0_MAP_START());
+        set_bkg_tiles_target_subpal(REL_PAL_BORDER_BG0_2);
+
+        set_bkg_4bpp_palette(ABS_PAL_BORDER_BG0_2, game_board_border_out_PALETTE_COUNT, game_board_border_out_palettes);
+        set_bkg_4bpp_data(base_tile_id, game_board_border_out_TILE_COUNT, game_board_border_out_tiles);
+
+        set_bkg_based_tiles(GAME_BOARD_BORDER_START_X, GAME_BOARD_BORDER_START_Y,
+                            game_board_border_out_TILES_WIDTH, game_board_border_out_TILES_HEIGHT, game_board_border_out_map, base_tile_id);
+
+        base_tile_id += game_board_border_out_TILE_COUNT;
+        set_bkg_tiles_target_subpal(PAL_0);  // Revert to default palette for subsequent writes
+
 
     // Sprite and BG0 palettes for: pet tiles, shared with special pieces and pet font 8x8
-    // Set palettes for pet tiles on BG0
-    set_bkg_4bpp_palette(PAL_ASSIGN_BG0_3, pet_and_special_tiles_out_PALETTE_COUNT, pet_and_special_tiles_out_palettes);
-    // Set palettes for Sprites
-    set_bkg_4bpp_palette(PAL_ASSIGN_OBJ_0, pet_and_special_tiles_out_PALETTE_COUNT, pet_and_special_tiles_out_palettes);
+        // Set palettes for pet tiles on BG0 and sprites
+        set_bkg_4bpp_palette(ABS_PAL_PETS_SPECIAL_8x8FONT_BG0_3, pet_and_special_tiles_out_PALETTE_COUNT, pet_and_special_tiles_out_palettes);
+        set_bkg_4bpp_palette(ABS_PAL_PETS_SPECIAL_8x8FONT_OBJ_3, pet_and_special_tiles_out_PALETTE_COUNT, pet_and_special_tiles_out_palettes);
 
-    // Shared Sprite and background data:
-    // Set at OBJ_TILEGROUP_BASE_512
-    // BG:  TILES_PET_START_VRAM_ABSOLUTE
-    // OAM: TILES_PET_START_OAM_RELATIVE
-    //
-    uint16_t tile_id = TILES_PET_START_VRAM_ABSOLUTE;
+        // Shared Sprite and background data:
+        // Set at OBJ_TILEGROUP_BASE_512
+        // BG:  TILES_PET_START_VRAM_ABSOLUTE
+        // OAM: TILES_PET_START_OAM_RELATIVE
+        uint16_t tile_id = TILES_PET_START_VRAM_ABSOLUTE;
 
-    set_bkg_4bpp_data(tile_id, pet_and_special_tiles_out_TILE_COUNT, pet_and_special_tiles_out_tiles);
-    tile_id  += pet_and_special_tiles_out_TILE_COUNT;
+        set_bkg_4bpp_data(tile_id, pet_and_special_tiles_out_TILE_COUNT, pet_and_special_tiles_out_tiles);
+        tile_id  += pet_and_special_tiles_out_TILE_COUNT;
 
-    set_bkg_4bpp_data(tile_id, font_8x8_nums_pet_colored_out_TILE_COUNT, font_8x8_nums_pet_colored_out_tiles);
-    tile_id  = font_8x8_nums_pet_colored_out_TILE_COUNT;
+        set_bkg_4bpp_data(tile_id, font_8x8_nums_pet_colored_out_TILE_COUNT, font_8x8_nums_pet_colored_out_tiles);
+        tile_id  = font_8x8_nums_pet_colored_out_TILE_COUNT;
 
         // // Uses High Contrast tile set if option is enabled  // TODO: OPTIONAL: High Contrast init
         // if (game_state == GAME_READY_TO_START)
@@ -138,30 +199,37 @@ void board_gfx_init_sprites(void) {
 
 void board_gfx_init_background(void) {
 
-
     // TODO improve the background for the game play screen
     // - Fill rect some things
     // - Put clouds BEHIND game board if possible
+
+    // Grey Palette for text labels
+    PRINT_PAL(PRINT_PAL_TILE_GREY);
 
     // Set up text areas
     PRINTXY(DISPLAY_NEXT_PIECE_TEXT_X,    DISPLAY_NEXT_PIECE_TEXT_Y_LABEL,    "NEXT:", 0);
 
     PRINTXY(DISPLAY_LEVEL_X,    DISPLAY_LEVEL_Y_LABEL,    "LEVEL", 0);
      // On same line as level readout
+    PRINT_PAL(PRINT_PAL_TILE_YELLOW);
     PRINTXY(DISPLAY_DIFF_X,     DISPLAY_DIFF_Y,           options_difficulty_abbrev_text_get(), 0);
+    PRINT_PAL(PRINT_PAL_TILE_GREY);
 
     PRINTXY(DISPLAY_SCORE_X,    DISPLAY_SCORE_Y_LABEL,    "SCORE", 0);
     // Display static trailing zero for score (inflates score apparent value)
+    PRINT_PAL(PRINT_PAL_TILE_YELLOW);
     PRINTXY(DISPLAY_SCORE_X + 4, DISPLAY_SCORE_Y,      "0", 0);
+    PRINT_PAL(PRINT_PAL_TILE_GREY);
 
     if (option_game_type == OPTION_GAME_TYPE_PET_CLEANUP) {
-        PRINTXY(DISPLAY_NUMPETS_X,  DISPLAY_NUMPETS_Y_LABEL_LINE2,  "TAILS", 0);
+        PRINTXY(DISPLAY_NUMPETS_X_LABEL, DISPLAY_NUMPETS_Y_LABEL,  "TAILS", 0);
     } else if (option_game_type == OPTION_GAME_TYPE_LONG_PET) {
-        PRINTXY(DISPLAY_NUMPETS_X,  DISPLAY_NUMPETS_Y_LABEL_LINE1,  "PET\nSIZE", 0);
+        PRINTXY(DISPLAY_NUMPETS_X_LABEL, DISPLAY_NUMPETS_Y_LABEL,  "PETSIZE", 0);
     } else {
-        PRINTXY(DISPLAY_NUMPETS_X,  DISPLAY_NUMPETS_Y_LABEL_LINE2,  "PETS", 0);
+        PRINTXY(DISPLAY_NUMPETS_X_LABEL, DISPLAY_NUMPETS_Y_LABEL,  "PETS", 0);
     }
 
+    PRINT_PAL(PRINT_PAL_TILE_YELLOW);
     // SHOW_BKG;
 }
 

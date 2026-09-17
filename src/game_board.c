@@ -20,6 +20,7 @@
 #include "common.h"
 
 #include "game_board.h"
+#include "game_board_gfx.h"
 #include "game_board_special_pieces.h"
 #include "game_piece_data.h"
 #include "game_types.h"
@@ -95,7 +96,10 @@ void board_redraw_all(void) {
     // Update BG Tilemap from Game Board
     set_bkg_tiles_target_screen_a_or_b(LAYER_SCREEN_A);
     set_bkg_tilemap_base_address(BG0_MAP_START());
+    set_bkg_tiles_target_subpal(ABS_PAL_PETS_SPECIAL_8x8FONT_BG0_3);
     set_bkg_tiles(BRD_ST_X, BRD_ST_Y, BRD_WIDTH, BRD_HEIGHT, &board_bgtile_output[0]);
+
+    set_bkg_tiles_target_subpal(PAL_0);  // Revert to default palette for subsequent writes
 }
 
 
@@ -176,8 +180,11 @@ void board_draw_tile_xy(int8_t x, int8_t y, uint8_t tile_index) {
     // Update BG Tilemap from Game Board
     set_bkg_tiles_target_screen_a_or_b(LAYER_SCREEN_A);
     set_bkg_tilemap_base_address(BG0_MAP_START());
+    set_bkg_tiles_target_subpal(ABS_PAL_PETS_SPECIAL_8x8FONT_BG0_3);
     set_bkg_tile_xy(BRD_ST_X + (int16_t)x, BRD_ST_Y + (int16_t)y,
                     board_bgtile_output[tile_index]);
+
+    set_bkg_tiles_target_subpal(PAL_0);  // Revert to default palette for subsequent writes
 }
 
 
