@@ -360,12 +360,17 @@ void set_bkg_tilemap_base_address(uint16_t * p_tilemap_base_address);
 void set_4bpp_tile_patterns_base_address(uint8_t * p_tile_patterns_base_address);
 
 
-/** Set property flag to determine whether next loaded tiles render on Screen A or B
+/** Set property flag to determine whether next loaded tiles render on Screen A or B that is ORed in when writing tilemap data
  
   @param screen_a_or_b   Select target output Screen `LAYER_SCREEN_A` or `LAYER_SCREEN_B`
  */
 void set_bkg_tiles_target_screen_a_or_b(unsigned int screen_a_or_b);
 
+/** Set BGx layer attributes subpal that is ORed in when writing tilemap data 
+ 
+  @param subpal   Range 0-3 (PAL_0, PAL_1, PAL_2, PAL_3)
+ */
+void set_bkg_tiles_target_subpal(uint16_t subpal);
 
 /** Delays the given number of milliseconds.
     Uses no timers or interrupts, and can be called with

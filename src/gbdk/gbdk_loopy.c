@@ -8,6 +8,8 @@
 static uint16_t * _bg_tilemap_base_address =  BG0_MAP_START();
 static uint8_t  * _4bpp_tile_patterns_base_address = 0;
 static uint16_t   _tilemap_screen_ab_prop = 0;
+static uint16_t   _tilemap_subpal_prop = 0;
+static uint16_t   _tilemap_cached_props = 0;
 
 uint16_t sys_time = 0;
 OAM_item_t shadow_OAM[SHADOW_OAM_MAX_SPRITES];
@@ -135,7 +137,7 @@ void set_bkg_tiles(unsigned int x, unsigned int y, unsigned int width, unsigned 
         uint16_t row_len = width;
         uint16_t row_wrap = DEVICE_SCREEN_BUFFER_WIDTH - x;
         while (row_len--) {
-            *p_dest++ = *tiles++ | _tilemap_screen_ab_prop;
+            *p_dest++ = *tiles++ | _tilemap_cached_props;
             // Check for wraparound from right edge -> left.
             // In that case, preserve current row instead of letting it step down to next
             row_wrap--;
@@ -160,7 +162,7 @@ void set_bkg_based_tiles(unsigned int x, unsigned int y, unsigned int width, uns
         uint16_t row_wrap = DEVICE_SCREEN_BUFFER_WIDTH - x;
         while (row_len--) {
             // Mask out tile ID then OR in isolated tile ID + offset, OR in properties
-            *p_dest++ = (*tiles & ~BG_TILEMAP_CHRNUM_MASK) | ((*tiles & BG_TILEMAP_CHRNUM_MASK) + base_tile) |  _tilemap_screen_ab_prop;
+            *p_dest++ = (*tiles & ~BG_TILEMAP_CHRNUM_MASK) | ((*tiles & BG_TILEMAP_CHRNUM_MASK) + base_tile) |  _tilemap_cached_props;
             tiles++;
             // Check for wraparound from right edge -> left.
             // In that case, preserve current row instead of letting it step down to next
@@ -178,7 +180,7 @@ void set_bkg_based_tiles(unsigned int x, unsigned int y, unsigned int width, uns
 uint16_t * set_bkg_tile_xy(uint16_t x, uint16_t y, uint16_t tile) {
 
     uint16_t * p_dest = _bg_tilemap_base_address + (y * DEVICE_SCREEN_BUFFER_WIDTH) + x;
-    *p_dest = tile | _tilemap_screen_ab_prop;
+    *p_dest = tile | _tilemap_cached_props;
 
     return p_dest;
 }
@@ -194,7 +196,7 @@ void fill_bkg_rect(unsigned int x, unsigned int y, unsigned int width, unsigned 
         uint16_t row_len = width;
         uint16_t row_wrap = DEVICE_SCREEN_BUFFER_WIDTH - x;
         while (row_len--) {
-            *p_dest++ = tile | _tilemap_screen_ab_prop;
+            *p_dest++ = tile | _tilemap_cached_props;
             // Check for wraparound from right edge -> left.
             // In that case, preserve current row instead of letting it step down to next
             row_wrap--;
@@ -252,6 +254,15 @@ void set_bkg_tiles_target_screen_a_or_b(unsigned int screen_a_or_b) {
         _tilemap_screen_ab_prop = BG_TILEMAP_SCREEN_B;
     else
         _tilemap_screen_ab_prop = 0;
+    // Update merged, cached props
+    _tilemap_cached_props = _tilemap_subpal_prop | _tilemap_screen_ab_prop;
+}
+
+void set_bkg_tiles_target_subpal(uint16_t subpal) {
+    _tilemap_subpal_prop = BG_PAL(subpal & 0x03u);
+    // Update merged, cached props
+    _tilemap_cached_props = _tilemap_subpal_prop | _tilemap_screen_ab_prop;
+
 }
 
 
