@@ -516,11 +516,12 @@ void gameplay_update(void) {
 
 
     // Handle timeout of Pet Length Overlay if applicable
-    if (hinting_petlength_enabled) {
-        hinting_petlength_enabled--;
+    if (hinting_petlength_counter) {
+        hinting_petlength_counter--;
 
-        if (hinting_petlength_enabled == 0)
+        if (hinting_petlength_counter == HINT_PET_LENGTH_RESET) {
             hinting_petlength_showhide();
+        }
     }
 
 

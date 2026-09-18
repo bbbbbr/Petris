@@ -59,7 +59,7 @@ uint8_t hinting_petlength_num_1[SPR_LONG_PET_HINT_POOL_SIZE];
 uint8_t hinting_petlength_num_2[SPR_LONG_PET_HINT_POOL_SIZE];
 uint8_t hinting_petlength_size[SPR_LONG_PET_HINT_POOL_SIZE];
 
-bool hinting_petlength_enabled = false;
+uint8_t hinting_petlength_counter = HINT_PET_LENGTH_RESET;
 uint8_t hinting_petlength_slot = 0;
 uint8_t hinting_petlength_last_removed = HINT_PET_LENGTH_SLOT_NONE;
 
@@ -227,7 +227,7 @@ void hinting_petlength_reset(void) {
     // and the location cache is cleared
 
     hinting_petlength_last_removed = HINT_PET_LENGTH_SLOT_NONE;
-    hinting_petlength_enabled = false;
+    hinting_petlength_counter = HINT_PET_LENGTH_RESET;
     hinting_petlength_slot = 0;
 
     sprite_idx = SPR_LONG_PET_HINT_NUM_START;
@@ -271,7 +271,7 @@ void hinting_petlength_reset(void) {
 
 void hinting_petlength_turn_on(void) {
 
-    hinting_petlength_enabled = HINT_PET_LENGTH_TIMEOUT;
+    hinting_petlength_counter = HINT_PET_LENGTH_TIMEOUT;
 
     // Update display
     hinting_petlength_showhide();
@@ -334,7 +334,7 @@ void hinting_petlength_add(int8_t board_x, int8_t board_y, uint8_t length, uint8
                 (board_y * BRD_UNIT_SIZE) + SPR_LONG_PET_HINT_OFFSET_Y);
 
     // Render sprite visible if enabled (via setting tile)
-    if (hinting_petlength_enabled) {
+    if (hinting_petlength_counter) {
         // hinting_petlength_showhide();
         set_sprite_tile(sprite_idx    , hinting_petlength_num_1[slot]);
         set_sprite_tile(sprite_idx + 1, hinting_petlength_num_2[slot]);
@@ -374,7 +374,7 @@ void hinting_petlength_showhide(void) {
         // Show the entry if it's populated
         // If it's not populated ** OR ** overlay is disabled,
         // then the sprite for the entry will get hidden (below via else {})
-        if ((hinting_petlength_enabled)
+        if ((hinting_petlength_counter)
             && (hinting_petlength_x[c] != HINT_PET_LENGTH_SLOT_EMPTY))
         {
 

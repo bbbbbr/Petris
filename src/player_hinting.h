@@ -15,9 +15,10 @@
 #define HINT_PET_LENGTH_SLOT_EMPTY -1
 #define HINT_PET_LENGTH_SLOT_NONE 255
 
+#define HINT_PET_LENGTH_RESET     0 // In Frames
 #define HINT_PET_LENGTH_TIMEOUT 150 // In Frames
 
-extern bool hinting_petlength_enabled;
+extern uint8_t hinting_petlength_counter;
 
 void player_hinting_flicker_update(void);
 
