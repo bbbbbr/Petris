@@ -145,7 +145,7 @@ void gameover_message_reset(void) {
 
     for (c = 0; c< SPR_GAMEOVER_COUNT; c++) {
         spr_gameover_y_idx[c] = 0; // Reset Y LUT position
-        move_sprite(SPR_GAMEOVER_START + c, 0,0);
+        hide_sprite(SPR_GAMEOVER_START + c);
 
         // Sprite tiles will get set just before display
         // in order to set the desired message

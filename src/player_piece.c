@@ -55,7 +55,7 @@ void player_piece_update_xy(uint8_t do_show) {
                     (player_y * BRD_UNIT_SIZE) + BRD_PIECE_Y_OFFSET);
     } else {
         // Hide sprite
-        move_sprite(SPR_PLAYER, 0,0);
+        hide_sprite(SPR_PLAYER);
     }
 }
 

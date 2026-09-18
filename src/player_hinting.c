@@ -214,7 +214,7 @@ void player_hinting_drop_update(void) {
 // Sprite IDs
 // sprite_idx + 0  = Left Length Digit
 // sprite_idx + 1  = Right Length Digit
-// sprite_idx + 2  = Cross / Penultiamte length marer
+// sprite_idx + 2  = Cross / Penultimate length marker
 //
 
 
@@ -242,18 +242,20 @@ void hinting_petlength_reset(void) {
         // and set sprites to non-visible (transparent tile)
 
         // First Digit
-        move_sprite(sprite_idx,     0,0);
+        hide_sprite(sprite_idx);
         set_sprite_tile(sprite_idx, GP_EMPTY);
+        set_sprite_prop(sprite_idx, GP_PAL_LENGTHHINT);
         sprite_idx++;
 
         // Second Digit
-        move_sprite(sprite_idx, 0,0);
+        hide_sprite(sprite_idx);
         set_sprite_tile(sprite_idx, GP_EMPTY);
+        set_sprite_prop(sprite_idx, GP_PAL_LENGTHHINT);
         sprite_idx++;
 
 
         // Hide and set tile for size hint sprite
-        move_sprite(sprite_idx, 0,0);
+        hide_sprite(sprite_idx);
         // These two could probably just be called once at the
         // start of a game instead of every level
         set_sprite_tile(sprite_idx, GP_CROSS);

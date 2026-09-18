@@ -158,6 +158,6 @@ void game_piece_next_show(uint8_t do_show) {
                     GAME_PIECE_NEXT_PREVIEW_Y);
     } else {
         // Hide sprite
-        move_sprite(SPR_PLAYER_NEXT, 0,0);
+        hide_sprite(SPR_PLAYER_NEXT);
     }
 }
