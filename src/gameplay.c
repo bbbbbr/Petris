@@ -392,10 +392,10 @@ void gameplay_handle_input(void) {
 
 
     // Rotate piece
-    if (KEY_TICKED(J_A)) {
+    if (KEY_TICKED(J_A | J_RTRIG)) {
         player_piece_rotate_apply(PLAYER_ROT_RIGHT);
     }
-    else if (KEY_TICKED(J_B)) {
+    else if (KEY_TICKED(J_B  | J_LTRIG)) {
         player_piece_rotate_apply(PLAYER_ROT_LEFT);
     }
     else if (KEY_TICKED(J_UP)) {
