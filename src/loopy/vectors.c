@@ -1,5 +1,6 @@
 #include "serial.h"
 #include "loopy/bios.h"
+#include "gbdk/gbdk_loopy.h"
 
 /*
 All vector functions MUST be declared with __attribute__((interrupt_handler)) to
@@ -42,7 +43,7 @@ void (* const vector_table[])(void) = {
 	// DMA address error
 	halt,
 	// NMI
-	doNothing,
+	isr_irq0_vblank, // doNothing,
 	// User Break
 	doNothing,
 	// (Reserved for system use)

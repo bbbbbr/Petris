@@ -12,6 +12,7 @@ static uint16_t   _tilemap_subpal_prop = 0;
 static uint16_t   _tilemap_cached_props = 0;
 
 uint16_t sys_time = 0;
+bool     vbl_done = false;
 OAM_item_t shadow_OAM[SHADOW_OAM_MAX_SPRITES];
 
 
@@ -24,16 +25,24 @@ OAM_item_t shadow_OAM[SHADOW_OAM_MAX_SPRITES];
     #define OPTIONAL_IF_ENABLED_BIOS_VSYNC_BEFORE_VDP_WRITES()  bios_vsync();  // TODO: FIXME With safe (?) VDP write timing, to at least reduce tearing  
 #endif
 
-// Note: Loopy bios vsync also polls controller(s)
-// #define vsync  bios_vsync  
-// TODO: IMPORTANT: manual OAM copy is inefficient, convert to interrupt driven vsync that increments a sys_time counter (possibly in the on-(?)-cpu ram)
-void vsync(void) {
 
-    sys_time++;
+void enable_interrupt_irq0_vblank() {
+    // VDP.IRQ0_HCMP = 0u;
+    // VDP.IRQ0_VCMP = 224u;
+    // VDP.IRQ0_NMI_CTRL |= (IRQ0_ENABLE | IRQ0_VCMP_ENABLE | NMI_ENABLE);
+    VDP.IRQ0_NMI_CTRL |= NMI_ENABLE;
+}
+
+
+void disable_interrupt_irq0_vblank() {
+    // VDP.IRQ0_NMI_CTRL &= ~IRQ0_ENABLE;
+    VDP.IRQ0_NMI_CTRL &= ~VDP.IRQ0_NMI_CTRL;
+}
+
+
+void shadow_oam_copy(void) {
     volatile uint32_t * p_OAM = VDP.OAM;
     volatile uint32_t * p_src = (uint32_t *)shadow_OAM;
-
-    bios_vsync();
     for (uint16_t c = 0; c < (SHADOW_OAM_MAX_SPRITES / VSYNC_OAM_COPY_SZ); c++) {
         // Number of unrolled writes here should match VSYNC_OAM_COPY_SZ
         *p_OAM++ = *p_src++;
@@ -54,6 +63,56 @@ void vsync(void) {
         *p_OAM++ = *p_src++;
         *p_OAM++ = *p_src++;
     }
+}
+
+// Hardware/Emulator status:
+//
+// - Hardware: Gets called, works
+// - LoopyMSE: Crash
+// - CLoopy:   Does not appear to get called
+//
+void INTERRUPT SMALLFUNC isr_irq0_vblank(void) {
+    // Increment global sys time counter
+    sys_time++;
+
+    // VBlank done flag // TODO: vbl done flag handling, vsync() clears, then checks it
+    vbl_done = true;
+
+    // Shadow OAM copy  // TODO
+    shadow_oam_copy();
+}
+
+
+// Note: Loopy bios vsync also polls controller(s)
+// #define vsync  bios_vsync  
+// TODO: IMPORTANT: manual OAM copy is inefficient, convert to interrupt driven vsync that increments a sys_time counter (possibly in the on-(?)-cpu ram)
+void vsync(void) {
+
+    // sys_time++;
+
+    bios_vsync();
+    // volatile uint32_t * p_OAM = VDP.OAM;
+    // volatile uint32_t * p_src = (uint32_t *)shadow_OAM;
+    // for (uint16_t c = 0; c < (SHADOW_OAM_MAX_SPRITES / VSYNC_OAM_COPY_SZ); c++) {
+    //     // Number of unrolled writes here should match VSYNC_OAM_COPY_SZ
+    //     *p_OAM++ = *p_src++;
+    //     *p_OAM++ = *p_src++;
+    //     *p_OAM++ = *p_src++;
+    //     *p_OAM++ = *p_src++;
+    //     *p_OAM++ = *p_src++;
+    //     *p_OAM++ = *p_src++;
+    //     *p_OAM++ = *p_src++;
+    //     *p_OAM++ = *p_src++;
+
+    //     *p_OAM++ = *p_src++;
+    //     *p_OAM++ = *p_src++;
+    //     *p_OAM++ = *p_src++;
+    //     *p_OAM++ = *p_src++;
+    //     *p_OAM++ = *p_src++;
+    //     *p_OAM++ = *p_src++;
+    //     *p_OAM++ = *p_src++;
+    //     *p_OAM++ = *p_src++;
+    // }
 }
 
 /** Set background palette(s)

@@ -139,7 +139,7 @@ void player_piece_set_on_board(void) {
     // under the sprite based piece
     if (!(player_piece & GP_SPECIAL_MASK)) {
         player_piece_update_xy(PLAYER_PIECE_HIDE);
-        vsync();  // TODO: FIXME: CASIO LOOPY: TEMP HACK UNTIL THERE IS A REAL VBLANK ISR DOING THE OAM COPY (manually called oam copy in vsync gets delayed here while pieces animate and clear, causing sprite to linger over and obscure the cleared pet)
+        // vsync();  // TODO: FIXME: CASIO LOOPY: TEMP HACK UNTIL THERE IS A REAL VBLANK ISR DOING THE OAM COPY (manually called oam copy in vsync gets delayed here while pieces animate and clear, causing sprite to linger over and obscure the cleared pet)
 
         // Now set the piece onto the board
         board_set_tile_xy(player_x, player_y,

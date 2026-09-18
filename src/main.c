@@ -155,6 +155,7 @@ int main() {
         intro_splash();
     #endif
 
+    enable_interrupt_irq0_vblank();
 
     while(1) {
         // Wait for vertical blank (end of the frame)
@@ -163,6 +164,7 @@ int main() {
         if(!vbl_count) // TODO: fixme with vbl_count increment in interrupt
             vsync();
         vbl_count = 0;
+        // print_num_u16(0,0, sys_time, STR_DIGIT_LEN_5); // DEBUG
 
         // Handle keyboard input
         UPDATE_KEYS();
