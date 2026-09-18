@@ -44,9 +44,9 @@
 #define STATS_TXT_X     BRD_ST_X + 1
 #define STATS_TXT_Y     BRD_ST_Y + 1
 #define STATS_TXT_OFST  5
-#define PETS_TXT_MSG "PETS  \nCLEARED:"
-#define TILES_TXT_MSG "TILES \nCLEARED:"
-#define PIECES_TXT_MSG "PIECES \nPLAYED:"
+#define PETS_TXT_MSG "PETS:"
+#define TILES_TXT_MSG "TILES:"
+#define PIECES_TXT_MSG "PIECES:"
 
 
 uint8_t maxpet_pieces[BRD_SIZE];
