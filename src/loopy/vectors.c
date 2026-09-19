@@ -64,7 +64,7 @@ void (* const vector_table[])(void) = {
 /* IRQ and on-chip module interrupts */
 /* Set nonzero, nonmasked priority in IPRA-IPRB to enable */
 	// IRQ0..IRQ7
-	isr_irq0_vblank, doNothing, doNothing, doNothing,
+	isr_irq0_hblank, doNothing, doNothing, doNothing,
 	doNothing, doNothing, doNothing, doNothing,
 	// DMAC0..DMAC3 (DEI, Reserved)
 	doNothing, RESERVED,

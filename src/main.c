@@ -155,8 +155,8 @@ int main() {
         intro_splash();
     #endif
 
-    // enable_interrupt_nmi_vblank();
-    enable_interrupt_irq0_vblank();
+    enable_interrupt_nmi_vblank();
+    enable_interrupt_irq0_hblank();
 
     while(1) {
         // Wait for vertical blank (end of the frame)

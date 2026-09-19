@@ -62,7 +62,7 @@ void disable_interrupt_nmi_vblank() {
 }
 
 
-void enable_interrupt_irq0_vblank() {
+void enable_interrupt_irq0_hblank() {
     #define IRQ_PRIORITY_LOWEST_OFF    0x0u
     #define IRQ_PRIORITY_14            0xEu
     #define IRQ_PRIORITY_15_HIGHEST    0xFu
@@ -72,7 +72,7 @@ void enable_interrupt_irq0_vblank() {
 
     VDP.IRQ0_VCMP = VERT_SCANLINE_VBLANK_FIRST; // First VBlank Scanline (-39 -> 0 -> 224)
     VDP.IRQ0_HCMP = HORIZ_PIXEL_HBLANK_FIRST; // First HBlank Pixel    (-84 -> 0 -> 257)
-    VDP.IRQ0_NMI_CTRL |= (IRQ0_ENABLE | IRQ0_VCMP_ENABLE);
+    VDP.IRQ0_NMI_CTRL |= IRQ0_ENABLE;
     sys_setInterruptPriority(INT_PRIO_IRQ0, IRQ_PRIORITY_15_HIGHEST);
     sys_setInterruptMask(IRQ_PRIORITY_14); // Set Global interrupt priority mask level to be 1 below the level configured above
 
@@ -88,11 +88,30 @@ void enable_interrupt_irq0_vblank() {
 }
 
 
-void disable_interrupt_irq0_vblank() {
+void disable_interrupt_irq0_hblank() {
     VDP.IRQ0_NMI_CTRL &= ~IRQ0_ENABLE;
 }
 
 
+#define SCANLINE_LUT_SZ        64u
+#define HALF_SCANLINE_LUT_SZ   (SCANLINE_LUT_SZ >> 1)
+#define HALF_SCANLINE_LUT_MASK (HALF_SCANLINE_LUT_SZ - 1u)
+
+const int16_t scanline_offsets_tbl[SCANLINE_LUT_SZ] = {
+     0,     2,     3,     4,     6,     7,     7,
+     8,     8,     8,     7,     7,     6,     4,
+     3,     2,     0,    -2,    -3,    -4,    -6,
+    -7,    -7,    -8,    -8,    -8,    -7,    -7,
+    -6,    -4,    -3,    -2,
+     // Now repeats entire sequence
+     0,     2,     3,     4,     6,     7,     7,
+     8,     8,     8,     7,     7,     6,     4,
+     3,     2,     0,    -2,    -3,    -4,    -6,
+    -7,    -7,    -8,    -8,    -8,    -7,    -7,
+    -6,    -4,    -3,    -2 };
+
+const int16_t * scanline_offsets = scanline_offsets_tbl;
+uint16_t hcount_cache;
 
 // Hardware/Emulator status:
 //
@@ -102,24 +121,22 @@ void disable_interrupt_irq0_vblank() {
 //
 void INTERRUPT SMALLFUNC isr_nmi_vblank(void) {
     // Increment global sys time counter
-    // sys_time++;
-
-    // VBlank done flag // TODO: vbl done flag handling, vsync() clears, then checks it
-    vbl_done = true;
-
-    // Shadow OAM copy  // TODO
-    shadow_oam_copy();
-}
-
-void INTERRUPT SMALLFUNC isr_irq0_vblank(void) {
-    // Increment global sys time counter
     sys_time++;
 
-    // VBlank done flag // TODO: vbl done flag handling, vsync() clears, then checks it
-    vbl_done = true;
+    hcount_cache = -39; // (uint16_t)VDP.HCOUNT;  // Hardwiring -39 since there seems to be jitter in reading HCOUNT (maybe a clash with the HBlank ISR?)
+    scanline_offsets = scanline_offsets_tbl + ((sys_time >> 2) & HALF_SCANLINE_LUT_MASK);
 
-    // Shadow OAM copy  // TODO
-    shadow_oam_copy();
+    if (hcount_cache == 223) { disable_interrupt_irq0_hblank();}
+}
+
+
+void INTERRUPT SMALLFUNC isr_irq0_hblank(void) {
+    hcount_cache++;
+    VDP.BG_SCROLL[BG0_SCROLL_X] = scanline_offsets[hcount_cache & HALF_SCANLINE_LUT_MASK];
+
+    // Instead of letting it freerun, only turn IRQ0 HBlank ISR on at the start of VBlank
+    // otherwise there seems to be some jitter in the timing
+    enable_interrupt_irq0_hblank();
 }
 
 
