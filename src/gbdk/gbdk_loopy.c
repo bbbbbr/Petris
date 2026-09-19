@@ -26,20 +26,6 @@ OAM_item_t shadow_OAM[SHADOW_OAM_MAX_SPRITES];
 #endif
 
 
-void enable_interrupt_irq0_vblank() {
-    // VDP.IRQ0_HCMP = 0u;
-    // VDP.IRQ0_VCMP = 224u;
-    // VDP.IRQ0_NMI_CTRL |= (IRQ0_ENABLE | IRQ0_VCMP_ENABLE | NMI_ENABLE);
-    VDP.IRQ0_NMI_CTRL |= NMI_ENABLE;
-}
-
-
-void disable_interrupt_irq0_vblank() {
-    // VDP.IRQ0_NMI_CTRL &= ~IRQ0_ENABLE;
-    VDP.IRQ0_NMI_CTRL &= ~VDP.IRQ0_NMI_CTRL;
-}
-
-
 void shadow_oam_copy(void) {
     volatile uint32_t * p_OAM = VDP.OAM;
     volatile uint32_t * p_src = (uint32_t *)shadow_OAM;
@@ -65,6 +51,49 @@ void shadow_oam_copy(void) {
     }
 }
 
+
+void enable_interrupt_nmi_vblank() {
+    VDP.IRQ0_NMI_CTRL |= NMI_ENABLE;
+}
+
+
+void disable_interrupt_nmi_vblank() {
+    VDP.IRQ0_NMI_CTRL &= ~VDP.IRQ0_NMI_CTRL;
+}
+
+
+void enable_interrupt_irq0_vblank() {
+    #define IRQ_PRIORITY_LOWEST_OFF    0x0u
+    #define IRQ_PRIORITY_14            0xEu
+    #define IRQ_PRIORITY_15_HIGHEST    0xFu
+
+    #define VERT_SCANLINE_VBLANK_FIRST -39 // First VBlank Scanline (-39 -> 0 -> 224)
+    #define HORIZ_PIXEL_HBLANK_FIRST   -84 // First HBlank Pixel    (-84 -> 0 -> 257)
+
+    VDP.IRQ0_VCMP = VERT_SCANLINE_VBLANK_FIRST; // First VBlank Scanline (-39 -> 0 -> 224)
+    VDP.IRQ0_HCMP = HORIZ_PIXEL_HBLANK_FIRST; // First HBlank Pixel    (-84 -> 0 -> 257)
+    VDP.IRQ0_NMI_CTRL |= (IRQ0_ENABLE | IRQ0_VCMP_ENABLE);
+    sys_setInterruptPriority(INT_PRIO_IRQ0, IRQ_PRIORITY_15_HIGHEST);
+    sys_setInterruptMask(IRQ_PRIORITY_14); // Set Global interrupt priority mask level to be 1 below the level configured above
+
+    // TODO: Maybe ICR.7 should be set to 1?
+    // INT_ICR is set to: 0b10000000 00000000
+    // SH1 docs:
+    //    Bits 7–0: IRQ0S–IRQ7SDescription
+    // 0: Interrupt is requested when IRQ input is low (initial value)
+    // 1: Interrupt is requested on falling edge of IRQ input
+    //
+    // Loopy Docs:
+    // The signals are asserted low for 16 VDP cycles, and the CPU responds to the first (falling) ed
+}
+
+
+void disable_interrupt_irq0_vblank() {
+    VDP.IRQ0_NMI_CTRL &= ~IRQ0_ENABLE;
+}
+
+
+
 // Hardware/Emulator status:
 //
 // - Hardware: Gets called, works
@@ -72,6 +101,17 @@ void shadow_oam_copy(void) {
 // - CLoopy:   Does not appear to get called
 //
 void INTERRUPT SMALLFUNC isr_nmi_vblank(void) {
+    // Increment global sys time counter
+    // sys_time++;
+
+    // VBlank done flag // TODO: vbl done flag handling, vsync() clears, then checks it
+    vbl_done = true;
+
+    // Shadow OAM copy  // TODO
+    shadow_oam_copy();
+}
+
+void INTERRUPT SMALLFUNC isr_irq0_vblank(void) {
     // Increment global sys time counter
     sys_time++;
 

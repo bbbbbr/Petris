@@ -155,6 +155,7 @@ int main() {
         intro_splash();
     #endif
 
+    // enable_interrupt_nmi_vblank();
     enable_interrupt_irq0_vblank();
 
     while(1) {
@@ -165,6 +166,7 @@ int main() {
             vsync();
         vbl_count = 0;
         print_num_u16(0,0, sys_time, STR_DIGIT_LEN_5); // DEBUG
+        // print_num_u16(0,1, INTC_ICR, STR_DIGIT_LEN_5); // DEBUG
 
         // Handle keyboard input
         UPDATE_KEYS();
