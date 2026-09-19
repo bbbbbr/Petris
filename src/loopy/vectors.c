@@ -43,7 +43,7 @@ void (* const vector_table[])(void) = {
 	// DMA address error
 	halt,
 	// NMI
-	isr_irq0_vblank, // doNothing,
+	isr_nmi_vblank, // doNothing,
 	// User Break
 	doNothing,
 	// (Reserved for system use)

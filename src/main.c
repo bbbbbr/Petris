@@ -164,7 +164,7 @@ int main() {
         if(!vbl_count) // TODO: fixme with vbl_count increment in interrupt
             vsync();
         vbl_count = 0;
-        // print_num_u16(0,0, sys_time, STR_DIGIT_LEN_5); // DEBUG
+        print_num_u16(0,0, sys_time, STR_DIGIT_LEN_5); // DEBUG
 
         // Handle keyboard input
         UPDATE_KEYS();

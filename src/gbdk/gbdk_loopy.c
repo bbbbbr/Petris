@@ -71,7 +71,7 @@ void shadow_oam_copy(void) {
 // - LoopyMSE: Crash
 // - CLoopy:   Does not appear to get called
 //
-void INTERRUPT SMALLFUNC isr_irq0_vblank(void) {
+void INTERRUPT SMALLFUNC isr_nmi_vblank(void) {
     // Increment global sys time counter
     sys_time++;
 
