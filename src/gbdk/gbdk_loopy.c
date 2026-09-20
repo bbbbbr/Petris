@@ -103,7 +103,7 @@ void enable_interrupt_irq0_vblank() {
 }
 
 
-void disable_interrupt_irq0_hblank() {
+void disable_interrupt_irq0_vblank() {
     VDP.IRQ0_NMI_CTRL &= ~IRQ0_ENABLE;
 }
 
