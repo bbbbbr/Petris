@@ -35,12 +35,12 @@ void shadow_oam_copy_dma(void) {
     DMAC_DMAOR = DMA_DMAOR_AE_NO_ERROR | DMA_DMAOR_NMIF_NO_ERROR | DMA_DMAOR_DME_ENABLE;  // Enable and clear any previously set error flags
 
     // DMA using channel 0
-    DMAC_SAR0  = (uint32_t)shadow_OAM; // Src
-    DMAC_DAR0  = (uint32_t)VDP.OAM;                // Dest     // 0x0C050000
+    DMAC_SAR0  = (uint32_t)shadow_OAM;        // Src
+    DMAC_DAR0  = (uint32_t)VDP.OAM;           // Dest
     DMAC_TCR0  = SHADOW_OAM_MAX_SPRITES * 2u; // Transfer count (size in u16, which is VRAM access size, each OAM entry is 32 bits, so 2 per entry)
     DMAC_CHCR0 = (DMA_CHCR_DM_DEST_INCREMENT | DMA_CHCR_SM_SRC_INCREMENT | DMA_CHCR_RS_AUTO_CONF | DMA_CHCR_TM_BUS_BURST | DMA_CHCR_TS_XFER_WORD_U16 | DMA_CHCR_DE_XFER_ENABLE);
 
-    // DMA is fast enough when working that this doesn't even decrement once
+    // When DMA is working this doesn't even decrement once
     uint16_t timeout = 60000u;
     while(!(DMAC_CHCR0 & DMA_CHCR_TE_XFER_IS_DONE) && timeout != 0u) {
         timeout--;
@@ -49,7 +49,7 @@ void shadow_oam_copy_dma(void) {
 
 
 // Copy shadow oam via partially unrolled CPU loop
-void shadow_oam_copy(void) {
+void shadow_oam_copy_cpu(void) {
 
     volatile uint32_t * p_OAM = VDP.OAM;
     volatile uint32_t * p_src = (uint32_t *)shadow_OAM;
@@ -83,7 +83,7 @@ void enable_interrupt_nmi_vblank() {
 
 
 void disable_interrupt_nmi_vblank() {
-    VDP.IRQ0_NMI_CTRL &= ~VDP.IRQ0_NMI_CTRL;
+    VDP.IRQ0_NMI_CTRL &= ~NMI_ENABLE;
 }
 
 
@@ -107,17 +107,65 @@ void disable_interrupt_irq0_vblank() {
     VDP.IRQ0_NMI_CTRL &= ~IRQ0_ENABLE;
 }
 
+
+void enable_interrupt_irq1_vblank() {
+    VDP.SYNC_IRQ_CTRL = (IRQ1_ENABLE | IRQ1_SRC_VSYNC);  // Enable IRQ1 VBlank in VDP with VBlank mode
+
+    INTC_ICR  = (INTC_ICR & ~INTC_ICR_IRQ1S_MASK) | INTC_ICR_IRQ1S_TRIG_FALLING_EDGE; // Set trigger to Falling edge to match VDP output behavior. If this isn't set it will trigger repeatedly during vblank
+    PFC_PACR1 = (PFC_PACR1 & ~PA13_MD10_MODE_MASK) | PA13_MD10_MODE_IRQ1;
+
+    sys_setInterruptPriority(INT_PRIO_IRQ1, IRQ_PRIORITY_15_HIGHEST);
+    sys_setInterruptMask(IRQ_PRIORITY_14); // Set Global interrupt priority mask level to be 1 below the level configured above    
+}
+
+
+void disable_interrupt_irq1_vblank() {
+    VDP.SYNC_IRQ_CTRL &= ~IRQ1_ENABLE;
+}
+
+
+//
+//               OEM    LoopyMSE  CLoopy MiSTer
+//   NMI  VBlank  Y        n         n     Y
+//   IRQ0 VBlank  Y        n         n     Y
+//   IRQ1 VBlank  Y        Y*1       n     n/Y*2
+//
+//  *1: Lets IRQ1 VBlank run without proper PACR1 pin config
+//  *2: Looks like it's running IRQ1 VBlank too often, maybe it's not detecting change from active low to falling edge trigger in INTC_ICR
+//
+
+
 // Hardware/Emulator status:
 //
 // - Hardware: Gets called, works
 // - LoopyMSE: Crash
 // - CLoopy:   Does not appear to get called
+// - MiSTer:   Gets called, works
 //
 void INTERRUPT SMALLFUNC isr_nmi_vblank(void) {
 }
 
-
+// Hardware/Emulator status:
+//
+// - Hardware: Gets called, works
+// - LoopyMSE: Crash
+// - CLoopy:   Does not appear to get called
+// - MiSTer:   Gets called, works
+//
 void INTERRUPT SMALLFUNC isr_irq0_vblank(void) {
+    // shadow_oam_copy_dma();
+    // sys_time++;
+    // vbl_done = true;
+}
+
+
+// Hardware/Emulator status:
+//
+// - Hardware: Gets called, works
+// - LoopyMSE: Lets it run without being properly configured for PACR1 (I think)
+// - CLoopy:   Does not appear to get called
+// - MiSTer:   Works but everything is strangely sped up - Maybe ICR.6 (IRQ1S, falling edge trigger) not set up? Game freezes at end of game before gameover text
+void INTERRUPT SMALLFUNC isr_irq1_vblank(void) {
     shadow_oam_copy_dma();
     sys_time++;
     vbl_done = true;

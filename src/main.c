@@ -158,7 +158,8 @@ int main() {
     #endif
 
     // enable_interrupt_nmi_vblank();  // WARNING: Cannot be enabled when using DMA!
-    enable_interrupt_irq0_vblank();
+    // enable_interrupt_irq0_vblank();
+    enable_interrupt_irq1_vblank();
 
     while(1) {
         // Wait for vertical blank (end of the frame)
@@ -168,7 +169,7 @@ int main() {
             vsync();
         vbl_count = 0;
         print_num_u16(0,0, sys_time, STR_DIGIT_LEN_5); // DEBUG
-        // print_num_u16(0,1, INTC_ICR, STR_DIGIT_LEN_5); // DEBUG
+        print_num_u16(0,2, INTC_ICR, STR_DIGIT_LEN_5); // DEBUG
 
         // Handle keyboard input
         UPDATE_KEYS();
@@ -176,11 +177,11 @@ int main() {
 
         // Debug logging of DMA Controller via Right Trigger button
         if (KEY_TICKED(J_RTRIG)) {
-            print_hex_u16(0,2, (uint16_t)(DMAC_SAR0 >> 16)); print_hex_u16(4,2, DMAC_SAR0);
-            print_hex_u16(0,4, (uint16_t)(DMAC_DAR0 >> 16)); print_hex_u16(4,4, DMAC_DAR0);
-            print_hex_u16(0,6, DMAC_TCR0);
-            print_hex_u16(0,8, DMAC_CHCR0);
-            print_hex_u16(0,10, DMAC_DMAOR);
+            print_hex_u16(0,6, (uint16_t)(DMAC_SAR0 >> 16)); print_hex_u16(4,2, DMAC_SAR0);
+            print_hex_u16(0,8, (uint16_t)(DMAC_DAR0 >> 16)); print_hex_u16(4,4, DMAC_DAR0);
+            print_hex_u16(0,10, DMAC_TCR0);
+            print_hex_u16(0,12, DMAC_CHCR0);
+            print_hex_u16(0,14, DMAC_DMAOR);
         }
 
         switch (game_state) {

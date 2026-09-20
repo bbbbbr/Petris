@@ -120,11 +120,18 @@ extern OAM_item_t shadow_OAM[SHADOW_OAM_MAX_SPRITES];
 void enable_interrupt_nmi_vblank();
 void disable_interrupt_nmi_vblank();
 
-void enable_interrupt_irq0_hblank();
-void disable_interrupt_irq0_hblank();
+void enable_interrupt_irq0_vblank();
+void disable_interrupt_irq0_vblank();
+
+void enable_interrupt_irq1_vblank();
+void disable_interrupt_irq1_vblank();
 
 void INTERRUPT SMALLFUNC isr_nmi_vblank(void);
-void INTERRUPT SMALLFUNC isr_irq0_hblank(void);
+void INTERRUPT SMALLFUNC isr_irq0_vblank(void);
+void INTERRUPT SMALLFUNC isr_irq1_vblank(void);
+
+void shadow_oam_copy_dma(void);
+void shadow_oam_copy_cpu(void);
 
 void vsync(void);
 

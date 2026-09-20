@@ -190,6 +190,72 @@ extern volatile uint16_t DMAC_CHCR3;
 #define CHCR3 DMAC_CHCR3
 #endif //SH7021_DMAC_SHORT_NAMES
 
+// DMA CHCR Register Flags
+#define DMA_CHCR_DM_DEST_NO_INCREMENT      (0b00u << 14)
+#define DMA_CHCR_DM_DEST_INCREMENT         (0b01u << 14)
+#define DMA_CHCR_DM_DEST_DECREMENT         (0b10u << 14)
+#define DMA_CHCR_DM_MASK                   (0b11u << 14)
+
+#define DMA_CHCR_SM_SRC_NO_INCREMENT       (0b00u << 12)
+#define DMA_CHCR_SM_SRC_INCREMENT          (0b01u << 12)
+#define DMA_CHCR_SM_SRC_DECREMENT          (0b10u << 12)
+#define DMA_CHCR_SM_MASK                   (0b11u << 12)
+
+#define DMA_CHCR_RS_AUTO_CONF              (0b1100u << 8)  // 1 of 12 valid settings
+#define DMA_CHCR_RS_MASK                   (0b1111u << 8)
+
+#define DMA_CHCR_AM_DACK_IN_READ           (0b0u << 7)
+#define DMA_CHCR_AM_DACK_IN_WRITE          (0b1u << 7)
+#define DMA_CHCR_AM_MASK                   (0b1u << 7)
+
+#define DMA_CHCR_AL_DACK_ACT_HI            (0b0u << 6)
+#define DMA_CHCR_AL_DACK_ACT_LO            (0b1u << 6)
+#define DMA_CHCR_AL_MASK                   (0b1u << 6)
+
+#define DMA_CHCR_DS_DREQ_ON_LOW_LEV        (0b0u << 5)
+#define DMA_CHCR_DS_DREQ_ON_FALL_EDGE      (0b1u << 5)
+#define DMA_CHCR_DS_MASK                   (0b1u << 5)
+
+#define DMA_CHCR_TM_BUS_CYCLE_STEAL        (0b0u << 4)
+#define DMA_CHCR_TM_BUS_BURST              (0b1u << 4)
+#define DMA_CHCR_TM_MASK                   (0b1u << 4)
+
+#define DMA_CHCR_TS_XFER_BYTE_U8           (0b0u << 3)
+#define DMA_CHCR_TS_XFER_WORD_U16          (0b1u << 3)
+#define DMA_CHCR_TS_MASK                   (0b1u << 3)
+
+#define DMA_CHCR_IE_DONE_INT_OFF           (0b0u << 2)
+#define DMA_CHCR_IE_DONE_INT_ON            (0b1u << 2)
+#define DMA_CHCR_IE_MASK                   (0b1u << 2)
+
+#define DMA_CHCR_TE_XFER_NOT_DONE_OR_ABORT (0b0u << 1)
+#define DMA_CHCR_TE_XFER_IS_DONE           (0b1u << 1)
+#define DMA_CHCR_TE_MASK                   (0b1u << 1)
+
+#define DMA_CHCR_DE_XFER_DISABLE           (0b0u << 0)
+#define DMA_CHCR_DE_XFER_ENABLE            (0b1u << 0)
+#define DMA_CHCR_DE_MASK                   (0b1u << 0)
+
+
+#define DMA_DMAOR_PR10_FIXED_PRIORITY_0321          (0b00u << 8)
+#define DMA_DMAOR_PR10_FIXED_PRIORITY_1320          (0b01u << 8)
+#define DMA_DMAOR_PR10_ROTATE_PRIORITY_0321         (0b10u << 8)
+#define DMA_DMAOR_PR10_EXT_PIN_ROTATE_PRIORITY_3210 (0b11u << 8)
+#define DMA_DMAOR_PR10_MASK                         (0b11u << 8)
+
+#define DMA_DMAOR_AE_NO_ERROR              (0b0u << 2)
+#define DMA_DMAOR_AE_ADDR_ERROR_OCCURRED   (0b1u << 2)
+#define DMA_DMAOR_AE_MASK                  (0b1u << 2)
+
+#define DMA_DMAOR_NMIF_NO_ERROR            (0b0u << 1)
+#define DMA_DMAOR_NMIF_BLOCKED_BY_NMI      (0b1u << 1)
+#define DMA_DMAOR_NMIF_MASK                (0b1u << 1)
+
+#define DMA_DMAOR_DME_DISABLE              (0b0u << 0)
+#define DMA_DMAOR_DME_ENABLE               (0b1u << 0)
+#define DMA_DMAOR_DME_MASK                 (0b1u << 0)
+
+
 // Interrupt Controller (INTC)
 extern volatile uint16_t INTC_IPRA;
 extern volatile uint16_t INTC_IPRB;
@@ -206,6 +272,11 @@ extern volatile uint16_t INTC_ICR;
 #define IPRE INTC_IPRE
 #define ICR  INTC_ICR
 #endif //SH7021_INTC_SHORT_NAMES
+
+#define INTC_ICR_IRQ1S_TRIG_ACTIVE_LOW    (0b0u << 6)
+#define INTC_ICR_IRQ1S_TRIG_FALLING_EDGE  (0b1u << 6)
+#define INTC_ICR_IRQ1S_MASK               (0b1u << 6)
+
 
 // User Break Controller (UBC)
 extern volatile uint16_t UBC_BARH;
@@ -292,6 +363,12 @@ extern volatile uint16_t PFC_CASCR;
 #define PBCR2 PFC_PBCR2
 #define CASCR PFC_CASCR
 #endif //SH7021_PFC_SHORT_NAMES
+
+#define PA13_MD10_MODE_PA13_IO          (0b00u << 10)
+#define PA13_MD10_MODE_IRQ1             (0b01u << 10)
+#define PA13_MD10_MODE_ITU_TCLKB_INPUT  (0b10u << 10)
+#define PA13_MD10_MODE_DMA_DREQ0        (0b11u << 10)
+#define PA13_MD10_MODE_MASK             (0b11u << 10)
 
 // Programmable Timing Pattern Controller (TPC)
 // Module also uses PBDR, PBCR1, PBCR2
