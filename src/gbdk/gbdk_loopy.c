@@ -26,9 +26,34 @@ OAM_item_t shadow_OAM[SHADOW_OAM_MAX_SPRITES];
 #endif
 
 
+// Copy shadow oam via DMA
+//
+// WARNING: DMA CANNOT be used when VDP NMI VBlank is enabled.
+//          Will fail to start with DMA_DMAOR_NMIF_BLOCKED_BY_NMI set in DMAOR
+void shadow_oam_copy_dma(void) {
+
+    DMAC_DMAOR = DMA_DMAOR_AE_NO_ERROR | DMA_DMAOR_NMIF_NO_ERROR | DMA_DMAOR_DME_ENABLE;  // Enable and clear any previously set error flags
+
+    // DMA using channel 0
+    DMAC_SAR0  = (uint32_t)shadow_OAM; // Src
+    DMAC_DAR0  = (uint32_t)VDP.OAM;                // Dest     // 0x0C050000
+    DMAC_TCR0  = SHADOW_OAM_MAX_SPRITES * 2u; // Transfer count (size in u16, which is VRAM access size, each OAM entry is 32 bits, so 2 per entry)
+    DMAC_CHCR0 = (DMA_CHCR_DM_DEST_INCREMENT | DMA_CHCR_SM_SRC_INCREMENT | DMA_CHCR_RS_AUTO_CONF | DMA_CHCR_TM_BUS_BURST | DMA_CHCR_TS_XFER_WORD_U16 | DMA_CHCR_DE_XFER_ENABLE);
+
+    // DMA is fast enough when working that this doesn't even decrement once
+    uint16_t timeout = 60000u;
+    while(!(DMAC_CHCR0 & DMA_CHCR_TE_XFER_IS_DONE) && timeout != 0u) {
+        timeout--;
+    }
+}
+
+
+// Copy shadow oam via partially unrolled CPU loop
 void shadow_oam_copy(void) {
+
     volatile uint32_t * p_OAM = VDP.OAM;
     volatile uint32_t * p_src = (uint32_t *)shadow_OAM;
+
     for (uint16_t c = 0; c < (SHADOW_OAM_MAX_SPRITES / VSYNC_OAM_COPY_SZ); c++) {
         // Number of unrolled writes here should match VSYNC_OAM_COPY_SZ
         *p_OAM++ = *p_src++;
@@ -62,7 +87,7 @@ void disable_interrupt_nmi_vblank() {
 }
 
 
-void enable_interrupt_irq0_hblank() {
+void enable_interrupt_irq0_vblank() {
     #define IRQ_PRIORITY_LOWEST_OFF    0x0u
     #define IRQ_PRIORITY_14            0xEu
     #define IRQ_PRIORITY_15_HIGHEST    0xFu
@@ -72,46 +97,15 @@ void enable_interrupt_irq0_hblank() {
 
     VDP.IRQ0_VCMP = VERT_SCANLINE_VBLANK_FIRST; // First VBlank Scanline (-39 -> 0 -> 224)
     VDP.IRQ0_HCMP = HORIZ_PIXEL_HBLANK_FIRST; // First HBlank Pixel    (-84 -> 0 -> 257)
-    VDP.IRQ0_NMI_CTRL |= IRQ0_ENABLE;
+    VDP.IRQ0_NMI_CTRL |= (IRQ0_ENABLE | IRQ0_VCMP_ENABLE);
     sys_setInterruptPriority(INT_PRIO_IRQ0, IRQ_PRIORITY_15_HIGHEST);
     sys_setInterruptMask(IRQ_PRIORITY_14); // Set Global interrupt priority mask level to be 1 below the level configured above
-
-    // TODO: Maybe ICR.7 should be set to 1?
-    // INT_ICR is set to: 0b10000000 00000000
-    // SH1 docs:
-    //    Bits 7–0: IRQ0S–IRQ7SDescription
-    // 0: Interrupt is requested when IRQ input is low (initial value)
-    // 1: Interrupt is requested on falling edge of IRQ input
-    //
-    // Loopy Docs:
-    // The signals are asserted low for 16 VDP cycles, and the CPU responds to the first (falling) ed
 }
 
 
 void disable_interrupt_irq0_hblank() {
     VDP.IRQ0_NMI_CTRL &= ~IRQ0_ENABLE;
 }
-
-
-#define SCANLINE_LUT_SZ        64u
-#define HALF_SCANLINE_LUT_SZ   (SCANLINE_LUT_SZ >> 1)
-#define HALF_SCANLINE_LUT_MASK (HALF_SCANLINE_LUT_SZ - 1u)
-
-const int16_t scanline_offsets_tbl[SCANLINE_LUT_SZ] = {
-     0,     2,     3,     4,     6,     7,     7,
-     8,     8,     8,     7,     7,     6,     4,
-     3,     2,     0,    -2,    -3,    -4,    -6,
-    -7,    -7,    -8,    -8,    -8,    -7,    -7,
-    -6,    -4,    -3,    -2,
-     // Now repeats entire sequence
-     0,     2,     3,     4,     6,     7,     7,
-     8,     8,     8,     7,     7,     6,     4,
-     3,     2,     0,    -2,    -3,    -4,    -6,
-    -7,    -7,    -8,    -8,    -8,    -7,    -7,
-    -6,    -4,    -3,    -2 };
-
-const int16_t * scanline_offsets = scanline_offsets_tbl;
-uint16_t hcount_cache;
 
 // Hardware/Emulator status:
 //
@@ -120,56 +114,20 @@ uint16_t hcount_cache;
 // - CLoopy:   Does not appear to get called
 //
 void INTERRUPT SMALLFUNC isr_nmi_vblank(void) {
-    // Increment global sys time counter
-    sys_time++;
-
-    hcount_cache = -39; // (uint16_t)VDP.HCOUNT;  // Hardwiring -39 since there seems to be jitter in reading HCOUNT (maybe a clash with the HBlank ISR?)
-    scanline_offsets = scanline_offsets_tbl + ((sys_time >> 2) & HALF_SCANLINE_LUT_MASK);
-
-    if (hcount_cache == 223) { disable_interrupt_irq0_hblank();}
 }
 
 
-void INTERRUPT SMALLFUNC isr_irq0_hblank(void) {
-    hcount_cache++;
-    VDP.BG_SCROLL[BG0_SCROLL_X] = scanline_offsets[hcount_cache & HALF_SCANLINE_LUT_MASK];
-
-    // Instead of letting it freerun, only turn IRQ0 HBlank ISR on at the start of VBlank
-    // otherwise there seems to be some jitter in the timing
-    enable_interrupt_irq0_hblank();
+void INTERRUPT SMALLFUNC isr_irq0_vblank(void) {
+    shadow_oam_copy_dma();
+    sys_time++;
+    vbl_done = true;
 }
 
 
 // Note: Loopy bios vsync also polls controller(s)
 // #define vsync  bios_vsync  
-// TODO: IMPORTANT: manual OAM copy is inefficient, convert to interrupt driven vsync that increments a sys_time counter (possibly in the on-(?)-cpu ram)
 void vsync(void) {
-
-    // sys_time++;
-
     bios_vsync();
-    // volatile uint32_t * p_OAM = VDP.OAM;
-    // volatile uint32_t * p_src = (uint32_t *)shadow_OAM;
-    // for (uint16_t c = 0; c < (SHADOW_OAM_MAX_SPRITES / VSYNC_OAM_COPY_SZ); c++) {
-    //     // Number of unrolled writes here should match VSYNC_OAM_COPY_SZ
-    //     *p_OAM++ = *p_src++;
-    //     *p_OAM++ = *p_src++;
-    //     *p_OAM++ = *p_src++;
-    //     *p_OAM++ = *p_src++;
-    //     *p_OAM++ = *p_src++;
-    //     *p_OAM++ = *p_src++;
-    //     *p_OAM++ = *p_src++;
-    //     *p_OAM++ = *p_src++;
-
-    //     *p_OAM++ = *p_src++;
-    //     *p_OAM++ = *p_src++;
-    //     *p_OAM++ = *p_src++;
-    //     *p_OAM++ = *p_src++;
-    //     *p_OAM++ = *p_src++;
-    //     *p_OAM++ = *p_src++;
-    //     *p_OAM++ = *p_src++;
-    //     *p_OAM++ = *p_src++;
-    // }
 }
 
 /** Set background palette(s)

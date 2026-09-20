@@ -47,6 +47,7 @@ extern uint16_t print_x, print_y, print_tile_attribs;
 
 
 void print_num_u16(uint16_t x, uint16_t y, uint16_t num, uint16_t fixed_str_length);
+void print_hex_u16(uint16_t x, uint16_t y, uint16_t num);
 
 void load_8x16_font_tilemap_palettes(void);
 void load_8x16_font_sprite_palettes(void);

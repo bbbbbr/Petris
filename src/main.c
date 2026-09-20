@@ -145,6 +145,8 @@ void init(void) {
 }
 
 
+extern volatile uint16_t timeout;
+
 int main() {
     init();
     magic_code_reset();
@@ -155,8 +157,8 @@ int main() {
         intro_splash();
     #endif
 
-    enable_interrupt_nmi_vblank();
-    enable_interrupt_irq0_hblank();
+    // enable_interrupt_nmi_vblank();  // WARNING: Cannot be enabled when using DMA!
+    enable_interrupt_irq0_vblank();
 
     while(1) {
         // Wait for vertical blank (end of the frame)
@@ -171,6 +173,15 @@ int main() {
         // Handle keyboard input
         UPDATE_KEYS();
         UPDATE_KEY_REPEAT((J_LEFT | J_RIGHT | J_DOWN));
+
+        // Debug logging of DMA Controller via Right Trigger button
+        if (KEY_TICKED(J_RTRIG)) {
+            print_hex_u16(0,2, (uint16_t)(DMAC_SAR0 >> 16)); print_hex_u16(4,2, DMAC_SAR0);
+            print_hex_u16(0,4, (uint16_t)(DMAC_DAR0 >> 16)); print_hex_u16(4,4, DMAC_DAR0);
+            print_hex_u16(0,6, DMAC_TCR0);
+            print_hex_u16(0,8, DMAC_CHCR0);
+            print_hex_u16(0,10, DMAC_DMAOR);
+        }
 
         switch (game_state) {
 
@@ -234,6 +245,6 @@ int main() {
                 }
                 break;
 
-        }
+        }        
     }
 }

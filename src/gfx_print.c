@@ -248,3 +248,41 @@ void print_num_u16(uint16_t x, uint16_t y, uint16_t num, uint16_t fixed_str_leng
     set_bkg_tiles(x, y, fixed_str_length, 2, // 1 tile high
                   &str_digit_tiles[index]); // Start at first digit and go to end of digits (length depends on fixed_str_length)
 }
+
+
+ // * 2 is for two tiles per character
+const uint16_t hex_8x16[16] = {
+    (FONT_8x16_TILE_ID_START + 0) * FONT_8x16_TILE_HEIGHT,
+    (FONT_8x16_TILE_ID_START + 1) * FONT_8x16_TILE_HEIGHT,
+    (FONT_8x16_TILE_ID_START + 2) * FONT_8x16_TILE_HEIGHT,
+    (FONT_8x16_TILE_ID_START + 3) * FONT_8x16_TILE_HEIGHT,
+    (FONT_8x16_TILE_ID_START + 4) * FONT_8x16_TILE_HEIGHT,
+    (FONT_8x16_TILE_ID_START + 5) * FONT_8x16_TILE_HEIGHT,
+    (FONT_8x16_TILE_ID_START + 6) * FONT_8x16_TILE_HEIGHT,
+    (FONT_8x16_TILE_ID_START + 7) * FONT_8x16_TILE_HEIGHT,
+    (FONT_8x16_TILE_ID_START + 8) * FONT_8x16_TILE_HEIGHT,
+    (FONT_8x16_TILE_ID_START + 9) * FONT_8x16_TILE_HEIGHT,
+    (FONT_8x16_TILE_ID_CHARS + 0) * FONT_8x16_TILE_HEIGHT,  // A
+    (FONT_8x16_TILE_ID_CHARS + 1) * FONT_8x16_TILE_HEIGHT,  // B
+    (FONT_8x16_TILE_ID_CHARS + 2) * FONT_8x16_TILE_HEIGHT,  // C
+    (FONT_8x16_TILE_ID_CHARS + 3) * FONT_8x16_TILE_HEIGHT,  // D
+    (FONT_8x16_TILE_ID_CHARS + 4) * FONT_8x16_TILE_HEIGHT,  // E
+    (FONT_8x16_TILE_ID_CHARS + 5) * FONT_8x16_TILE_HEIGHT,  // F, 15
+};
+
+void print_hex_u16(uint16_t x, uint16_t y, uint16_t num) {
+
+    #define STR_HEX_U16_LEN 4u
+    uint16_t chr;
+
+    for (int16_t c = 3; c >= 0; c--) {
+        chr = hex_8x16[num & 0x0Fu] + gfx_tiles_font_base;
+        str_digit_tiles[c] = chr;
+        str_digit_tiles[c + STR_HEX_U16_LEN] = ++chr;
+        num >>= 4;
+    }
+
+    // Draw the digits on the background tilemap
+    set_bkg_tiles(x, y, STR_HEX_U16_LEN, 2, // 1 tile high
+                  &str_digit_tiles[0]); // Start at first digit and go to end of digits (length depends on fixed_str_length)
+}
