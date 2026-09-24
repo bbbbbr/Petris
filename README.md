@@ -1,24 +1,15 @@
-Petris - A puzzle game of shapely pets for the Game Boy Color (CGB), Analogue Pocket (AP) and Game Gear (GG)
+Petris - A puzzle game of shapely pets for the Casio Loopy
 ===========
 
 Build your favorite pets in all shapes and sizes, keep ahead of dropping pieces and make it to the next level!
 
-Petris is a new home-brew 2D puzzle game for the Game Boy Color (CGB). It will run on original hardware (CGB and GBA) and in most emulators.
-
-### Physical Cartridge available:
-* ~~[Catskull Electronics](https://catskullelectronics.com/collections/games/products/petris)~~ 
-* Ferrante Crafts: https://ferrantecrafts.com/products/petris
-
-![Petris cart](/info/petris-cart_one_row.jpg)
-
-
-(Check other branches for Game Gear and Analogue Pocket sources)
+Petris is a home-brew 2D puzzle game for the Casio Loopy console. It will run on original hardware and (TODO) in emulators.
+- (For the previous Game Boy Color color version see it's [itch.io page](https://bbbbbr.itch.io/petris)
 
 ### Download ROMs and Play Online
-
-Downloads and online playable version are at: https://bbbbbr.itch.io/petris
+Downloads and online playable version are at: https://bbbbbr.itch.io/petris-casio-loopy
 _________________
-Run it either in an emulator such as [BGB](http://bgb.bircd.org/), on a real Game Boy if you have a flashable cartridge, or you can buy a cartridge at ~~[Catskull Electronics](https://catskullelectronics.com/collections/games/products/petris)~~ [Ferrante Crafts](https://ferrantecrafts.com/products/petris).
+Run it either in an emulator such as **TODO**, on actual Casio Loopy hardware if you have a flash cartridge such as the [Floopy Drive](https://ko-fi.com/s/f8fc120017).
 
 ![Petris cartridge sticker](/res/printable/cartridge_sticker_petris_x300.png)
 ![Petris game in Long Pet game type](/info/Petris_LongPet.png)
@@ -36,7 +27,7 @@ Try out a variety gameplay modes with different incentives and strategies:
 * **Marathon**: For the long distance player
 
 ##### Head-to-Head 2 Player
-Two players can compete over Game Boy Link Cable (CGB and GBA) in all game types.
+(TBD) Two players can compete over Game Boy Link Cable (CGB and GBA) in all game types.
  * Send crunch-ups to your opponent when you complete long pets or level-up. The last player standing wins the match.
 
 ##### Difficulty Settings
@@ -44,24 +35,18 @@ A range of difficulty levels make it suitable for all players, from relaxing to 
  * Easy / Normal / Hard / Expert / Beast
 
 ##### Other Options and features
- * Choose from multiple sound tracks
- * High Contrast mode for small and non-backlit screens
+ * (TBD) Choose from multiple sound tracks
+ * (TBD) High Contrast mode for small and non-backlit screens
  * Visual hinting for drop location/etc can be turned on/off
 
 _________________
 ##### Music Credits
- * Krümel (crumb) / GB Studio Community Assets - https://github.com/DeerTears/GB-Studio-Community-Assets
+ * (TBD) Krümel (crumb) / GB Studio Community Assets - https://github.com/DeerTears/GB-Studio-Community-Assets
 
 ##### Tools and Resources Used
- * GBDK 2020 - https://github.com/Zal0/gbdk-2020/
- * BGB - http://bgb.bircd.org/
- * Game Boy Tile Designer - http://www.devrs.com/gb/hmgd/gbtd.html
- * GIMP TileMap GB - https://github.com/bbbbbr/gimp-tilemap
- * Game Boy Map Builder - http://www.devrs.com/gb/hmgd/gbmb.html
- * GBT Player (modified to work with compression) - https://github.com/AntonioND/gbt-player
- * A little code from ZGB - https://github.com/Zal0/ZGB
- * Some GBDK patches by Toxa  - https://github.com/untoxa
- * UnaPACK aPack decompression by Toxa  - https://github.com/untoxa
- * apultra aPack compression - https://github.com/emmanuel-marty/apultra]
-
+* Emulators: LoopyMSE, CLoopy, MiSTer Loopy core
+* Floopy Drive
+* [png2asset fork for Loopy](https://github.com/bbbbbr/png2asset_casioloopy)
+* [png2reducedrgb](https://github.com/bbbbbr/png2reducedrgb)
+* [tilepalquant](https://github.com/bbbbbr/tilepalquant)
 
