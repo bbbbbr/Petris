@@ -11,9 +11,7 @@ Downloads and online playable version are at: https://bbbbbr.itch.io/petris-casi
 _________________
 Run it either in an emulator such as **TODO**, on actual Casio Loopy hardware if you have a flash cartridge such as the [Floopy Drive](https://ko-fi.com/s/f8fc120017).
 
-![Petris cartridge sticker](/res/printable/cartridge_sticker_petris_x300.png)
-![Petris game in Long Pet game type](/info/Petris_LongPet.png)
-![Petris game in Tail Cleanup game type](/info/petris_tail_cleanup.gif)
+https://github.com/user-attachments/assets/6481ac8c-ac21-4017-9a3e-2dc95b883dc3
 
 You can read the [Instruction Manual](/info/Manual.md) for full details about game play.
 _________________
