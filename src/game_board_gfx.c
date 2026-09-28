@@ -130,12 +130,8 @@ void board_gfx_init_pettiles(void) {
     // Everything here is drawn on Screen A
     set_bkg_tiles_target_screen_a_or_b(LAYER_SCREEN_A);
 
-    // 8x16 font 
-        // Currently uses palettes:
-        // BG0: PAL_FONT_8x16_YELLOW_BG0_0, PAL_FONT_8x16_GREY_BG0_1
-        // OAM: PAL_FONT_8x16_YELLOW_OBJ_0, PAL_FONT_8x16_PINK_OBJ_1, PAL_FONT_8x16_GREY_OBJ_2
-        #define TILE_LOAD_OFFSET_FONT (intro_screen_out_TILE_COUNT + SHARED_4BPP_TRANSP_TILE_ID_START)
-        uint16_t base_tile_id = load_8x16_font_tiles(TILE_LOAD_OFFSET_FONT);
+    #define TILE_LOAD_START (SHARED_4BPP_TRANSP_TILE_ID_START + intro_screen_out_TILE_COUNT + SHARED_4BPP_TRANSP_TILE_COUNT)
+    uint16_t base_tile_id = TILE_LOAD_START;
 
     // Background under game board (currently solid white)
         set_bkg_tilemap_base_address(BG1_MAP_START());
@@ -181,7 +177,14 @@ void board_gfx_init_pettiles(void) {
         tile_id  += pet_and_special_tiles_out_TILE_COUNT;
 
         set_bkg_4bpp_data(tile_id, font_8x8_nums_pet_colored_out_TILE_COUNT, font_8x8_nums_pet_colored_out_tiles);
-        tile_id  = font_8x8_nums_pet_colored_out_TILE_COUNT;
+        tile_id  += font_8x8_nums_pet_colored_out_TILE_COUNT;
+
+    // 8x16 font 
+        // Currently uses palettes:
+        // BG0: PAL_FONT_8x16_YELLOW_BG0_0, PAL_FONT_8x16_GREY_BG0_1
+        // OAM: PAL_FONT_8x16_YELLOW_OBJ_0, PAL_FONT_8x16_PINK_OBJ_1, PAL_FONT_8x16_GREY_OBJ_2
+        load_8x16_font_sprite_palettes();
+        base_tile_id += load_8x16_font_tiles(tile_id, tile_id - OBJ_TILEGROUP_BASE_512);
 
         // // Uses High Contrast tile set if option is enabled  // TODO: OPTIONAL: High Contrast init
         // if (game_state == GAME_READY_TO_START)

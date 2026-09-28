@@ -24,6 +24,7 @@
 #include "game_piece_data.h"
 #include "player_info.h"
 #include "player_gfx.h"
+#include "game_board_gfx.h"
 
 
 uint8_t game_piece_next = 0;
@@ -150,7 +151,7 @@ void game_piece_next_show(uint8_t do_show) {
             attrib = GP_ROT_LUT_ATTR[GP_ROTATE_DEFAULT]; // Rotation sprite mirror bits
         }
 
-        set_sprite_prop(SPR_PLAYER_NEXT, attrib);
+        set_sprite_prop(SPR_PLAYER_NEXT, attrib | GP_PAL_PIECE);
 
         // Make sure the sprite is visible (this could probs be optimized out with better planning / logic)
         move_sprite(SPR_PLAYER_NEXT,

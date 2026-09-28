@@ -176,7 +176,7 @@ void player_hinting_drop_show(uint8_t do_show) {
 
         // Update sprite to use visible tile
         set_sprite_tile(SPR_DROP_HINT, GP_SPECIAL_DROP_HINT);
-        // set_sprite_prop(SPR_DROP_HINT, GP_PAL_DROPHINT);  // Piece sprites share a single 16 color palette Loopy 
+        set_sprite_prop(SPR_DROP_HINT, GP_PAL_DROPHINT);  // Piece sprites share a single 16 color palette Loopy 
 
     } else {
         // Hide sprite

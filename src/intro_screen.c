@@ -133,8 +133,10 @@ static void intro_text_init(void) {
     sprite_counter = 0;
 
     // Load the 8x16 font and print it to the sprites
-    #define TILE_LOAD_OFFSET_FONT (OBJ_TILEGROUP_BASE_512)
-    load_8x16_font_tiles(TILE_LOAD_OFFSET_FONT);
+    #define TILE_LOAD_OFFSET_FONT_VRAM_ABS     (OBJ_TILEGROUP_BASE_512 + 0u)
+    #define TILE_LOAD_OFFSET_FONT_VRAM_OAM_REL (0u)
+    load_8x16_font_tiles(TILE_LOAD_OFFSET_FONT_VRAM_ABS, TILE_LOAD_OFFSET_FONT_VRAM_OAM_REL);
+
     load_8x16_font_sprite_palettes();
 
     PRINT_POS(OAM_TEXT_START_X, OAM_TEXT_START_Y);

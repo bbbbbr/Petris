@@ -22,7 +22,7 @@
 
 
 #define SPR_GAMEOVER_START SPR_LONG_PET_HINT_LAST + 1
-#define SPR_GAMEOVER_COUNT 8 // 8 Sprites: G A M E O V E R
+#define SPR_GAMEOVER_COUNT 9 // 8 Sprites: G A M E O V E R
 
 
 

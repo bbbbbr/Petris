@@ -39,6 +39,8 @@
 #define DEVICE_SCREEN_PX_WIDTH (DEVICE_SCREEN_WIDTH * 8u)
 #define DEVICE_SCREEN_PX_HEIGHT (DEVICE_SCREEN_HEIGHT * 8u)
 
+#define DEVICE_SPRITE_HIDE_Y_PX              240u // // Hide sprite by setting Y value 1 past the end of the screen (240px mode) bottom, works for sprites up to 16 pixels high
+
 #define DEVICE_BITMAP_8BPP_BUFFER_PX_WIDTH   256u // Assumes BM_CTRL 8BPP 256 x 512 shared layout
 #define DEVICE_BITMAP_8BPP_BUFFER_PX_HEIGHT  512
 
@@ -172,8 +174,10 @@ ALWAYS_INLINE inline void scroll_sprite(uint16_t nb, int8_t x, int8_t y) {
 
 ALWAYS_INLINE inline void hide_sprite(uint16_t nb) {
     OAM_item_t * itm = &shadow_OAM[nb];
-    itm->y = 128;
-    itm->prop |= S_Y_HIBIT_ON;  // Hide sprite by setting Y high (signed) bit and low y to give it a negative off-screen location
+    itm->y = DEVICE_SPRITE_HIDE_Y_PX; // Hide sprite by setting Y value 1 past the end of the screen bottom
+    // This approach was causing problems with modifying and setting sprite properties
+    // itm->y = 128;
+    // itm->prop |= S_Y_HIBIT_ON;  // Hide sprite by setting Y high (signed) bit and low y to give it a negative off-screen location
 }
 
 /** Turns on the sprites layers (OBJ0,OBJ1).

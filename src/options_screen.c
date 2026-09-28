@@ -39,7 +39,7 @@
 #include "pet_and_special_tiles_out.h"
 
 
-#define TILE_LOAD_OFFSET_FONT          (intro_screen_out_TILE_COUNT + SHARED_4BPP_TRANSP_TILE_COUNT)
+#define TILE_LOAD_OFFSET_FONT_VRAM_ABS          (intro_screen_out_TILE_COUNT + SHARED_4BPP_TRANSP_TILE_COUNT)
 #define TILE_LOAD_OFFSET_CURSOR_SPRITE (OBJ_TILEGROUP_BASE_512)
 
 #define PET_DOG_HEAD       ((GP_PET_DOG << GP_PET_UPSHIFT) | (GP_SEG_HEAD << GP_SEG_UPSHIFT))
@@ -278,7 +278,7 @@ void options_screen_init(void) {  // TODO
 */
 
     // Rely on Title screen graphics loading for Background image and Font tiles / drawing setup
-    load_8x16_font_tiles(TILE_LOAD_OFFSET_FONT);
+    load_8x16_font_tiles(TILE_LOAD_OFFSET_FONT_VRAM_ABS, 0u);  // No use of sprite printing, OAM tile load start is a shim
 
     // SHOW_BKG;
 

@@ -20,8 +20,10 @@ void hide_sprites_range(uint8_t from, uint8_t to) {
     OAM_item_t * itm = &shadow_OAM[from];
 
     while (from++ <= to) {
-        itm->y = 128;
-        itm->prop |= S_Y_HIBIT_ON;  // Hide sprite by setting Y high (signed) bit and low y to give it a negative off-screen location
+        itm->y = DEVICE_SPRITE_HIDE_Y_PX; // Hide sprite by setting Y value 1 past the end of the screen bottom
+        // This approach was causing problems with modifying and setting sprite properties
+        // itm->y = 128;
+        // itm->prop |= S_Y_HIBIT_ON;  // Hide sprite by setting Y high (signed) bit and low y to give it a negative off-screen location
         itm++;
     }
 }

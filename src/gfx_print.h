@@ -51,7 +51,7 @@ void print_num_u16(uint16_t x, uint16_t y, uint16_t num, uint16_t fixed_str_leng
 
 void load_8x16_font_tilemap_palettes(void);
 void load_8x16_font_sprite_palettes(void);
-uint16_t load_8x16_font_tiles(uint16_t tile_id_start);
+uint16_t load_8x16_font_tiles(uint16_t tile_id_load_start_vram_absolute, uint8_t tile_id_oam_relative_start);
 
 
 uint16_t print_to_sprites(uint16_t oam_id, uint8_t pal, const char * txt);

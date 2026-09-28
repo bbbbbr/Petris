@@ -22,7 +22,7 @@
 
 #include "game_board.h"
 // #include "game_board_gfx.h"
-// #include "gameover_message.h"
+#include "gameover_message.h"
 // #include "game_stats.h"
 
 #include "gameplay.h"
@@ -211,8 +211,7 @@ int main() {
 
             case GAME_ENDED:
                 // TODO: 2 Player mode handling (need loopy hardware 4 player controller breakout)
-
-                // GAMEOVER_MESSAGE_SET(SPR_GAMEOVER_CHARS);
+                GAMEOVER_MESSAGE_SET(spr_gameover_chars);
                 game_state = GAME_OVER_SCREEN;
                 break;
 

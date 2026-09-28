@@ -15,68 +15,35 @@
 #include "common.h"
 
 #include "game_board.h"
+#include "game_board_gfx.h"
 #include "gfx.h"
+#include "gfx_print.h"
 #include "player_gfx.h"
 
 #include "gameover_message.h"
 
 #define CHR2SPR(chr) (chr) // TODO FONT SPRITES : ((uint8_t)(chr -'A') + TILES_FONT_CHARS_START)
 
-const uint8_t SPR_GAMEOVER_CHARS[SPR_GAMEOVER_COUNT] = {
-            CHR2SPR('G'),
-            CHR2SPR('A'),
-            CHR2SPR('M'),
-            CHR2SPR('E'),
-            CHR2SPR('O'),
-            CHR2SPR('V'),
-            CHR2SPR('E'),
-            CHR2SPR('R')};
-
-const uint8_t SPR_YOU_LOST_CHARS[SPR_GAMEOVER_COUNT] = {
-            CHR2SPR('Y'),
-            CHR2SPR('O'),
-            CHR2SPR('U'),
-            CHR2SPR(' '),
-            CHR2SPR('L'),
-            CHR2SPR('O'),
-            CHR2SPR('S'),
-            CHR2SPR('T')};
-
-const uint8_t SPR_YOU_WON_CHARS[SPR_GAMEOVER_COUNT] = {
-            CHR2SPR('Y'),
-            CHR2SPR('O'),
-            CHR2SPR('U'),
-            CHR2SPR(' '),
-            CHR2SPR('W'),
-            CHR2SPR('O'),
-            CHR2SPR('N'),
-            '!'}; // TILES_FONT_START + 37U /* '!' char */ };  // TODO FONT SPRITES
+const uint8_t spr_gameover_chars[] = "GAME OVER";
+const uint8_t spr_you_lost_chars[] = "YOU LOST ";
+const uint8_t spr_you_won_chars[]  = " YOU WON ";
 
 #define SPR_PAL_PRINT BG_PAL_5
 
 #define SPR_GAMEOVER_MAX_Y ((BRD_ST_Y + 8U) * 8U)
-#define SPR_GAMEOVER_START_X (((BRD_ST_X + 1U) * 8U) + 2U) // 2 Pixels right of left board edge
+#define SPR_GAMEOVER_START_X (((BRD_ST_X) * 8u) + 4u) // 2 Pixels right of left board edge
 
-const uint8_t SPR_GAMEOVER_LUT_X[] = {SPR_GAMEOVER_START_X,
-                                    SPR_GAMEOVER_START_X + (8U * 1U) + 1U, // 1 pixel between each letter
-                                    SPR_GAMEOVER_START_X + (8U * 2U) + 2U,
-                                    SPR_GAMEOVER_START_X + (8U * 3U) + 3U,
-                                    // Gap between GANE -- and -- OVER
-                                    SPR_GAMEOVER_START_X + (8U * 4U) + 9U,
-                                    SPR_GAMEOVER_START_X + (8U * 5U) + 10U,
-                                    SPR_GAMEOVER_START_X + (8U * 6U) + 11U,
-                                    SPR_GAMEOVER_START_X + (8U * 7U) + 12U};
-
+#define Y_PLAT_ADJ(Y) (((Y) * 1.5))
 
 // Pre-calculated gravity drop bounce LUT
 // For calculation ref commented out version of gameover_message_animate() below
-const int8_t SPR_GAMEOVER_LUT_Y[] = {
-    0x01, 0x03, 0x06, 0x0A, 0x0F, 0x15, 0x1C, 0x24,
-    0x2D, 0x37, 0x38, 0x31, 0x2B, 0x26, 0x22, 0x1F,
-    0x1D, 0x1C, 0x1C, 0x1D, 0x1F, 0x22, 0x26, 0x2B,
-    0x31, 0x38, 0x40, 0x3B, 0x37, 0x34, 0x32, 0x31,
-    0x31, 0x32, 0x34, 0x37, 0x3B, 0x40, 0x3E, 0x3D,
-    0x3D, 0x3E, 0x40, 0x3F, 0x3F, 0x40, 0x40};
+const uint8_t SPR_GAMEOVER_LUT_Y[] = {
+    224u, Y_PLAT_ADJ(0x03u), Y_PLAT_ADJ(0x06u), Y_PLAT_ADJ(0x0Au), Y_PLAT_ADJ(0x0Fu), Y_PLAT_ADJ(0x15u), Y_PLAT_ADJ(0x1Cu), Y_PLAT_ADJ(0x24u),
+    Y_PLAT_ADJ(0x2Du), Y_PLAT_ADJ(0x37u), Y_PLAT_ADJ(0x38u), Y_PLAT_ADJ(0x31u), Y_PLAT_ADJ(0x2Bu), Y_PLAT_ADJ(0x26u), Y_PLAT_ADJ(0x22u), Y_PLAT_ADJ(0x1Fu),
+    Y_PLAT_ADJ(0x1Du), Y_PLAT_ADJ(0x1Cu), Y_PLAT_ADJ(0x1Cu), Y_PLAT_ADJ(0x1Du), Y_PLAT_ADJ(0x1Fu), Y_PLAT_ADJ(0x22u), Y_PLAT_ADJ(0x26u), Y_PLAT_ADJ(0x2Bu),
+    Y_PLAT_ADJ(0x31u), Y_PLAT_ADJ(0x38u), Y_PLAT_ADJ(0x40u), Y_PLAT_ADJ(0x3Bu), Y_PLAT_ADJ(0x37u), Y_PLAT_ADJ(0x34u), Y_PLAT_ADJ(0x32u), Y_PLAT_ADJ(0x31u),
+    Y_PLAT_ADJ(0x31u), Y_PLAT_ADJ(0x32u), Y_PLAT_ADJ(0x34u), Y_PLAT_ADJ(0x37u), Y_PLAT_ADJ(0x3Bu), Y_PLAT_ADJ(0x40u), Y_PLAT_ADJ(0x3Eu), Y_PLAT_ADJ(0x3Du),
+    Y_PLAT_ADJ(0x3Du), Y_PLAT_ADJ(0x3Eu), Y_PLAT_ADJ(0x40u), Y_PLAT_ADJ(0x3Fu), Y_PLAT_ADJ(0x3Fu), Y_PLAT_ADJ(0x40u), Y_PLAT_ADJ(0x40u)};
 
 #define SPR_GAMEOVER_LUT_Y_MAX (ARRAY_LEN(SPR_GAMEOVER_LUT_Y) - 1)
 
@@ -96,16 +63,15 @@ void gameover_message_animate(void) {
     uint8_t min_spr = 0; // Used to slowly exit the loop as pieces land
     uint8_t max_spr = 0; // Used for delay launch left to right
 
+    // Relies on existing loaded font tiles and palettes from board_gfx_init...()
 
-    // Load text message into tiles
-    for (c = 0; c< SPR_GAMEOVER_COUNT; c++) {
-        set_sprite_tile(SPR_GAMEOVER_START + c, p_gameover_chars[c]);
-    }
+    PRINT_POS(SPR_GAMEOVER_START_X, SPR_GAMEOVER_LUT_Y[ spr_gameover_y_idx[c] ]);
+    print_to_sprites(min_spr, REL_PAL_FONT_8x16_YELLOW_OAM_0, p_gameover_chars);
 
     // Loop exits when all sprites have landed
     while (min_spr != SPR_GAMEOVER_COUNT) {
 
-        // Add some delay and go easy on the processor
+        // Add some delay
         vsync();
 
         // Periodic Update
@@ -116,42 +82,39 @@ void gameover_message_animate(void) {
             if (max_spr < SPR_GAMEOVER_COUNT)
                 max_spr++;
 
-            for (c = min_spr; c < max_spr; c++) {
+            for (uint8_t spr_id = min_spr; spr_id < max_spr; spr_id++) {
 
                 // Move sprite to next Y LUT position
-                spr_gameover_y_idx[c]++;
+                spr_gameover_y_idx[spr_id]++;
 
                 // If it's at the end of the LUT then it's landing
                 // is complete. Increment the starting sprite past it
                 // so that on the next iteration it's excluded
-                if (spr_gameover_y_idx[c] >= SPR_GAMEOVER_LUT_Y_MAX) {
+                if (spr_gameover_y_idx[spr_id] >= SPR_GAMEOVER_LUT_Y_MAX) {
                     min_spr++;
                 }
 
-                move_sprite(SPR_GAMEOVER_START + c,
-                            SPR_GAMEOVER_LUT_X[c],
-                            SPR_GAMEOVER_LUT_Y[ spr_gameover_y_idx[c] ]);
-
-            } // for (c = min_spr; c < max_spr; c++) {
-        } // if ((sys_time & 0x03) == 0x03)
+                // Write directly to shadow oam
+                shadow_OAM[(spr_id * FONT_8x16_TILE_HEIGHT)     ].y = SPR_GAMEOVER_LUT_Y[ spr_gameover_y_idx[spr_id] ];
+                shadow_OAM[(spr_id * FONT_8x16_TILE_HEIGHT) + 1u].y = SPR_GAMEOVER_LUT_Y[ spr_gameover_y_idx[spr_id] ] + 8u;
+            }
+        }
     } // while (min_spr != SPR_GAMEOVER_COUNT)
 }
 
-// Hides gameover message sprites and initializes their CGB attributes
+// Hides gameover message sprites
 // Expects font data to already be loaded (see PRINT/etc)
 void gameover_message_reset(void) {
 
     uint8_t c;
 
-    for (c = 0; c< SPR_GAMEOVER_COUNT; c++) {
+    for (c = 0; c < SPR_GAMEOVER_COUNT; c++) {
         spr_gameover_y_idx[c] = 0; // Reset Y LUT position
-        hide_sprite(SPR_GAMEOVER_START + c);
+        hide_sprite((c * FONT_8x16_TILE_HEIGHT));
+        hide_sprite((c * FONT_8x16_TILE_HEIGHT) + 1u);
 
         // Sprite tiles will get set just before display
         // in order to set the desired message
-
-        // Use solid color palette for all letters
-        set_sprite_prop(SPR_GAMEOVER_START + c, SPR_PAL_PRINT);
     }
 }
 

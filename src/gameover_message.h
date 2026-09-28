@@ -4,9 +4,9 @@
 #define GAMEOVER_MESSAGE_H
 
 
-extern const uint8_t SPR_GAMEOVER_CHARS[];
-extern const uint8_t SPR_YOU_LOST_CHARS[];
-extern const uint8_t SPR_YOU_WON_CHARS[];
+extern const uint8_t spr_gameover_chars[];
+extern const uint8_t spr_you_lost_chars[];
+extern const uint8_t spr_you_won_chars[];
 
 extern const uint8_t * p_gameover_chars;
 

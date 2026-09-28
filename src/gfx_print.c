@@ -29,7 +29,8 @@
 #define FONT_8x16_TILE_ID_START  (FONT_8x16_TILE_ID_CHARS + FONT_8x16_CHARS_LEN)
 
 
-uint16_t gfx_tiles_font_base = 0;
+uint16_t gfx_tiles_font_base_bg = 0;   // Uses VRAM absolute indexing
+uint8_t gfx_tiles_font_base_spr = 0;  // Uses VRAM OAM relative indexing
 
 uint16_t str_digit_tiles[PRINT_MAX_DIGITS * FONT_8x16_TILE_HEIGHT];
 
@@ -57,29 +58,32 @@ const palette_color_t font_8x16_out_palette_GREY[16] = {
 void load_8x16_font_tilemap_palettes(void) {
    // Set palettes for tile printing (yellow, pink, grey) on BG0 layer
     set_bkg_4bpp_palette(PAL_ASSIGN_BG0_0, font_8x16_out_PALETTE_COUNT, font_8x16_out_palettes);
-    set_bkg_4bpp_palette(PAL_ASSIGN_BG0_1, 1, font_8x16_out_palette_GREY);
-    // set_bkg_4bpp_palette(PAL_ASSIGN_BG0_1, 1, font_8x16_out_palette_PINK);
+    set_bkg_4bpp_palette(PAL_ASSIGN_BG0_1, 1u, font_8x16_out_palette_GREY);
+    // set_bkg_4bpp_palette(PAL_ASSIGN_BG0_1, 1u, font_8x16_out_palette_PINK);
 }
 
 
 void load_8x16_font_sprite_palettes(void) {
     // Set palettes for Sprite printing (yellow, pink, grey) on OBJ layer(s)
     set_bkg_4bpp_palette(PAL_ASSIGN_OBJ_0, font_8x16_out_PALETTE_COUNT, font_8x16_out_palettes);
-    set_bkg_4bpp_palette(PAL_ASSIGN_OBJ_1,  1, font_8x16_out_palette_PINK);
-    set_bkg_4bpp_palette(PAL_ASSIGN_OBJ_2, 1, font_8x16_out_palette_GREY);
+    set_bkg_4bpp_palette(PAL_ASSIGN_OBJ_1, 1u, font_8x16_out_palette_PINK);
+    set_bkg_4bpp_palette(PAL_ASSIGN_OBJ_2, 1u, font_8x16_out_palette_GREY);
 }
 
 // Loads 8x16 font tiles into vram and sets gfx_tiles_font_base
-// Returns next tile index after last used
-uint16_t load_8x16_font_tiles(uint16_t tile_id_start) {
+// * Returns next tile index after last used
+// * Tiles are loaded using tile_id_load_start_vram_absolute in VRAM Absolute addressing
+//   (not OAM relative, so to print with sprites make sure it's in their configured range)
+uint16_t load_8x16_font_tiles(uint16_t tile_id_load_start_vram_absolute, uint8_t tile_id_oam_relative_start) {
 
-    gfx_tiles_font_base = tile_id_start;
+    gfx_tiles_font_base_bg  = tile_id_load_start_vram_absolute;
+    gfx_tiles_font_base_spr = tile_id_oam_relative_start;
 
     // Load font and it's default yellow palette
     set_bkg_tiles_target_screen_a_or_b(LAYER_SCREEN_A);
-    set_bkg_4bpp_data(gfx_tiles_font_base, font_8x16_out_TILE_COUNT, font_8x16_out_tiles);
+    set_bkg_4bpp_data(gfx_tiles_font_base_bg, font_8x16_out_TILE_COUNT, font_8x16_out_tiles);
 
-     return (gfx_tiles_font_base + font_8x16_out_TILE_COUNT);
+     return (gfx_tiles_font_base_bg + font_8x16_out_TILE_COUNT);
 }
 
 // Returns: Next OAM entry after last used
@@ -117,7 +121,7 @@ uint16_t print_to_sprites(uint16_t oam_id, uint8_t pal, const char * txt) {
             }
         }
 
-        c *= FONT_8x16_TILE_HEIGHT + gfx_tiles_font_base; // 2 tiles per character
+        c = (c * FONT_8x16_TILE_HEIGHT) + gfx_tiles_font_base_spr; // 2 tiles per character + font offset into oam tile range
         set_sprite_tile(oam_id, c++);  // Set sprite and advance to next 8x8 tile
         set_sprite_prop(oam_id, S_8x8 | pal);
         move_sprite(oam_id++, print_x, print_y);
@@ -182,7 +186,7 @@ void print_to_tilemap(const char * txt, uint16_t delay_time) {
             }
         }
 
-        c = (c * FONT_8x16_TILE_HEIGHT) + gfx_tiles_font_base; // 2 tiles per character
+        c = (c * FONT_8x16_TILE_HEIGHT) + gfx_tiles_font_base_bg; // 2 tiles per character
         c |= print_tile_attribs;           // Sets palette, screen, etc
         // Print top then bottom of character (2 tiles)
         set_bkg_tile_xy(print_x, print_y, c);
@@ -212,7 +216,7 @@ void print_num_u16(uint16_t x, uint16_t y, uint16_t num, uint16_t fixed_str_leng
 
     // Initialize index at END of array +1,
     // so that the first pass sets it to the first array position
-    const uint16_t blank_tile = (FONT_8x16_TILE_ID_BLANK * FONT_8x16_TILE_HEIGHT) + gfx_tiles_font_base;  // * 2 is for two tiles per character
+    const uint16_t blank_tile = (FONT_8x16_TILE_ID_BLANK * FONT_8x16_TILE_HEIGHT) + gfx_tiles_font_base_bg;  // * 2 is for two tiles per character
     uint16_t index = fixed_str_length;
 
     if (fixed_str_length > PRINT_MAX_DIGITS)
@@ -227,7 +231,7 @@ void print_num_u16(uint16_t x, uint16_t y, uint16_t num, uint16_t fixed_str_leng
     do {
         // decrement the counter first, so it finishes as pointing to the current digit in the array
         index--;
-        uint16_t chr  = (((num % 10) + FONT_8x16_TILE_ID_START) * FONT_8x16_TILE_HEIGHT) + gfx_tiles_font_base; // * 2 is for two tiles per character
+        uint16_t chr  = (((num % 10) + FONT_8x16_TILE_ID_START) * FONT_8x16_TILE_HEIGHT) + gfx_tiles_font_base_bg; // * 2 is for two tiles per character
         chr |= print_tile_attribs;           // Sets palette, screen, etc
 
         // Print top then bottom of character (2 tiles)

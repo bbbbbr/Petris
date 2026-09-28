@@ -28,6 +28,7 @@
 #include "game_piece.h"
 #include "game_piece_data.h"
 #include "game_board.h"
+#include "game_board_gfx.h"
 
 #include "player_piece.h"
 #include "player_hinting.h"
@@ -245,7 +246,7 @@ void player_piece_update_gfx(void) {
 
     // set_sprite_tile(SPR_PLAYER, (player_piece & GP_PET_BITS_MASK));
     set_sprite_tile(SPR_PLAYER, player_piece);
-    set_sprite_prop(SPR_PLAYER, player_attrib);
+    set_sprite_prop(SPR_PLAYER, player_attrib | GP_PAL_PIECE);
 }
 
 
