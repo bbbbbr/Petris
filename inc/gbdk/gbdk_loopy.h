@@ -31,8 +31,8 @@
 #define DEVICE_SCREEN_BUFFER_WIDTH   64u // Assumes one of the BG_CTRL 64 x 64 layouts (split preferred)
 #define DEVICE_SCREEN_BUFFER_HEIGHT  64u
 #define DEVICE_SCREEN_MAP_ENTRY_SIZE 1u  // In this case 1 x uint16_t (vs gbdk uint8_t perspective)
-#define DEVICE_SPRITE_PX_OFFSET_X    0u  // TODO, but I think 0 iirc
-#define DEVICE_SPRITE_PX_OFFSET_Y    0u  // TODO, but I think 0 iirc
+#define DEVICE_SPRITE_PX_OFFSET_X    0u
+#define DEVICE_SPRITE_PX_OFFSET_Y    0u
 #define DEVICE_WINDOW_PX_OFFSET_X    0u
 #define DEVICE_WINDOW_PX_OFFSET_Y    0u
 
