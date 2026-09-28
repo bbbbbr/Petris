@@ -162,9 +162,9 @@ int main() {
         // Wait for vertical blank (end of the frame)
         // before starting to process the next frame
         // (skip if already happened)
-        if(!vbl_count) // TODO: fixme with vbl_count increment in interrupt
-            vsync();
-        vbl_count = 0;
+        // * This is unlikely to happen on the Loopy with it's more powerful cpu
+        if (vbl_done == false) vsync();
+        vbl_done = false;
 
         // Handle keyboard input
         UPDATE_KEYS();
