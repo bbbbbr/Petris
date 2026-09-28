@@ -149,6 +149,8 @@ int main() {
     init();
     magic_code_reset();
 
+    enable_interrupt_irq1_vblank();
+
     #ifdef DEBUG_SKIP_INTRO
         game_state = GAME_INTRO_INIT;
     #else

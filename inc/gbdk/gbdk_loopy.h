@@ -8,6 +8,9 @@
 #undef ALWAYS_INLINE
 #define ALWAYS_INLINE __attribute__((always_inline))
 
+#define INTERRUPT __attribute__((interrupt_handler))
+#define SMALLFUNC __attribute__((section(".smallfunc")))
+
 // Casio Loopy Specific
 
 
@@ -98,7 +101,8 @@
 #define BANKREF(x)
 #define BANKREF_EXTERN(x)
 
-extern uint16_t sys_time;
+extern volatile uint16_t sys_time;
+extern volatile bool     vbl_done;
 
 typedef struct OAM_item_t {
     uint8_t tile;  //< Sprite tile number VDP.OAM[N].[31..24] 
@@ -111,6 +115,23 @@ typedef struct OAM_item_t {
 // // extern volatile struct OAM_item_t shadow_OAM[];
 // #define shadow_OAM ((OAM_item_t *)VDP.OAM)
 extern OAM_item_t shadow_OAM[SHADOW_OAM_MAX_SPRITES];
+
+
+void enable_interrupt_nmi_vblank();
+void disable_interrupt_nmi_vblank();
+
+void enable_interrupt_irq0_vblank();
+void disable_interrupt_irq0_vblank();
+
+void enable_interrupt_irq1_vblank();
+void disable_interrupt_irq1_vblank();
+
+void INTERRUPT SMALLFUNC isr_nmi_vblank(void);
+void INTERRUPT SMALLFUNC isr_irq0_vblank(void);
+void INTERRUPT SMALLFUNC isr_irq1_vblank(void);
+
+void shadow_oam_copy_dma(void);
+void shadow_oam_copy_cpu(void);
 
 void vsync(void);
 
