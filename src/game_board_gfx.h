@@ -32,6 +32,11 @@
 
 #define CALC_PET_FONT_8x8_NUM_TILE(digit, pet_type) (FONT_8x8_NUMS_PET_COLORED_START + (pet_type * TILE_COUNT_FONT_8x8_PET_DIGIT_COUNT) + digit)
 
+
+extern uint16_t game_board_under_white_tile_id;
+extern uint16_t game_board_under_blue_tile_id;
+
+
 void board_gfx_init(void);
 void board_gfx_change_pettiles(void);
 void board_gfx_init_pettiles(void);

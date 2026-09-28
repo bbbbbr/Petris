@@ -80,8 +80,18 @@ void board_hide_all(uint16_t delay_amount) {
             delay(delay_amount);
         }
 
-        // Draw the blank row
+        // Draw the blank row **on** the board on BG0
         fill_bkg_rect(BRD_ST_X, y, BRD_WIDTH, 1, TILE_ID_BOARD_BLANK + TILES_PET_START_VRAM_ABSOLUTE);
+
+        // Fill with BLUE *underneath** the board on BG1
+        // for better text visibility than the gameplay white
+        // Note: Gets redrawn to WHITE in board_redraw_all()
+        set_bkg_tilemap_base_address(BG1_MAP_START());
+        set_bkg_tiles_target_subpal(REL_PAL_BOARD_UNDER_BG1_1);
+        fill_bkg_rect(BRD_ST_X, y, BRD_WIDTH, 1, game_board_under_blue_tile_id);
+        // Revert to default palette and bg map for subsequent writes
+        set_bkg_tiles_target_subpal(PAL_0);
+        set_bkg_tilemap_base_address(BG0_MAP_START());
     }
 }
 
@@ -90,11 +100,19 @@ void board_hide_all(uint16_t delay_amount) {
 // Note: board_bgtile_output[] should contain ABSOLUTE tile indexes (not OAM relative) on Loopy
 void board_redraw_all(void) {
 
-    // Workaround for slight flickr on board_redraw_all()
-    // draw tiles first, then attribs so that previous
-    // tile color doesn't turn yellow due to board default
+    // Fill with WHITE *underneath** the board on BG1
+    // for normal gameplay background.
+    // This is in case it was previously filled with BLUE
+    // for better visibility when displaying a message
+    set_bkg_tilemap_base_address(BG1_MAP_START());
+    set_bkg_tiles_target_subpal(REL_PAL_BOARD_UNDER_BG1_1);
+    fill_bkg_rect(BRD_ST_X, BRD_ST_Y, BRD_WIDTH, BRD_HEIGHT, game_board_under_white_tile_id);
+    // Revert to default palette and bg map for subsequent writes
+    set_bkg_tiles_target_subpal(PAL_0);
+    set_bkg_tilemap_base_address(BG0_MAP_START());
 
-    // Update BG Tilemap from Game Board
+
+    // Update BG0 Tilemap from Game Board
     set_bkg_tiles_target_screen_a_or_b(LAYER_SCREEN_A);
     set_bkg_tilemap_base_address(BG0_MAP_START());
     set_bkg_tiles_target_subpal(ABS_PAL_PETS_SPECIAL_8x8FONT_BG0_3);
@@ -211,7 +229,6 @@ void board_reset(void) {
 
 void board_flash_message(uint8_t start_x, uint8_t start_y, char * text, char * ctext, uint8_t repeat) {
 
-/*  // TODO: FIXME
     uint8_t c;
 
     // Hide the game board and player piece
@@ -229,7 +246,6 @@ void board_flash_message(uint8_t start_x, uint8_t start_y, char * text, char * c
         PRINTXY(start_x, start_y, text,0);
         delay(500);
     }
-    */
 }
 
 

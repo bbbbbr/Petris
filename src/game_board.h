@@ -53,30 +53,32 @@
 #define BRD_TILE_COUNT_BONUS_SOUND_THRESHOLD 4
 
 #define MSG_GET_READY_X  BRD_ST_X + 0
-#define MSG_GET_READY_Y  BRD_ST_Y + 5
-#define MSG_GET_READY_TEXT   "   GET\n\n  READY!"
-#define MSG_GET_READY_CTEXT  "      \n\n        "
+#define MSG_GET_READY_Y  BRD_ST_Y + 4
+#define MSG_GET_READY_TEXT   "   GET\n  READY!"
+#define MSG_GET_READY_CTEXT  "      \n        "
 #define MSG_GET_READY_REPEAT 2
 
 #define MSG_LEVEL_UP_X  BRD_ST_X + 1
-#define MSG_LEVEL_UP_Y  BRD_ST_Y + 5
-#define MSG_LEVEL_UP_TEXT   "LEVEL UP \n\n\n  GET\n\n READY!"
-#define MSG_LEVEL_UP_CTEXT  "LEVEL UP \n\n\n     \n\n       "
+#define MSG_LEVEL_UP_Y  BRD_ST_Y + 4
+#define MSG_LEVEL_UP_TEXT   "LEVEL UP \n\n  GET\n READY!"
+#define MSG_LEVEL_UP_CTEXT  "LEVEL UP \n\n     \n       "
 
-#define MSG_CLEANUP_START_TEXT    "          \n\n\n   ALL\n\n  TAILS!"
-#define MSG_CLEANUP_START_CTEXT   " CLEAN UP \n\n\n   ALL\n\n  TAILS!"
+#define MSG_CLEANUP_X  BRD_ST_X + 0
+#define MSG_CLEANUP_Y  BRD_ST_Y + 2
+#define MSG_CLEANUP_START_TEXT    "          \n\n   ALL\n\n  TAILS!"
+#define MSG_CLEANUP_START_CTEXT   " CLEAN UP \n\n   ALL\n\n  TAILS!"
 #define MSG_CLEANUP_START_REPEAT 3
 
 #define MSG_LONG_PET_X  BRD_ST_X + 0
-#define MSG_LONG_PET_Y  BRD_ST_Y + 3
-#define MSG_LONG_PET_START_TEXT    "        \n\n   LONG\n   PET!\n\n (PRESS\n  SELECT\n\n  FOR PET\n  SIZES)\n "
-#define MSG_LONG_PET_START_CTEXT   "  MAKE A\n\n   LONG\n   PET!\n\n (PRESS\n  SELECT\n\n  FOR PET\n  SIZES)\n "
+#define MSG_LONG_PET_Y  BRD_ST_Y + 1
+#define MSG_LONG_PET_START_TEXT    "  MAKE A\n          \n\n (PRESS\n  SELECT\n  FOR PET\n  SIZES)\n "
+#define MSG_LONG_PET_START_CTEXT   "  MAKE A\n LONG PET!\n\n (PRESS\n  SELECT\n  FOR PET\n  SIZES)\n "
 #define MSG_LONG_PET_START_REPEAT 3
 
 #define MSG_COMPLETE_PET_X  BRD_ST_X + 0
 #define MSG_COMPLETE_PET_Y  BRD_ST_Y + 3
-#define MSG_COMPLETE_PET_START_TEXT    "          \n\n          \n\n\n    TO    \n\n LEVEL UP!\n\n"
-#define MSG_COMPLETE_PET_START_CTEXT   " COMPLETE \n\n   PETS   \n\n\n    TO    \n\n LEVEL UP!\n\n"
+#define MSG_COMPLETE_PET_START_TEXT    "          \n          \n\n    TO    \n LEVEL UP!\n\n"
+#define MSG_COMPLETE_PET_START_CTEXT   " COMPLETE \n   PETS   \n\n    TO    \n LEVEL UP!\n\n"
 #define MSG_COMPLETE_PET_START_REPEAT 3
 
 

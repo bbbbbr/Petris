@@ -49,10 +49,14 @@ const uint8_t NEXT_PIECE_BG_TILE = TILE_ID_BOARD_NEXT_PIECE_PREVIEW_BG;  // TODO
 uint8_t tail_anim_count = 0;
 bool tail_anim_alternate = false;
 
-#define GAME_BOARD_UNDER_TILE_COUNT       1u
-#define GAME_BOARD_UNDER_PALETTE_COUNT    1u
-// uint16_t game_board_under_white_tile_id = 0u;  // Not yet needed
-const uint16_t game_board_under_white_tile[] = {
+#define GAME_BOARD_UNDER_TILE_COUNT       2u
+#define GAME_BOARD_UNDER_PALETTE_COUNT    2u
+
+uint16_t game_board_under_white_tile_id = 0u;
+uint16_t game_board_under_blue_tile_id  = 0u;
+
+const uint16_t game_board_under_tiles[] = {
+    // Solid White tile
     0x1111u, 0x1111u,
     0x1111u, 0x1111u,
     0x1111u, 0x1111u,
@@ -61,9 +65,19 @@ const uint16_t game_board_under_white_tile[] = {
     0x1111u, 0x1111u,
     0x1111u, 0x1111u,
     0x1111u, 0x1111u,
+
+    // Solid Blue tile
+    0x2222u, 0x2222u,
+    0x2222u, 0x2222u,
+    0x2222u, 0x2222u,
+    0x2222u, 0x2222u,
+    0x2222u, 0x2222u,
+    0x2222u, 0x2222u,
+    0x2222u, 0x2222u,
+    0x2222u, 0x2222u,
 };
 const palette_color_t game_board_under_pal[16] = {
-    RGB8(  0,  0,  0), RGB8(255,255,255), RGB8(  0,  0,  0), RGB8(  0,  0,  0),
+    RGB8(  0,  0,  0), RGB8(255,255,255), RGB8(128,208,224), RGB8(  0,  0,  0),
     RGB8(  0,  0,  0), RGB8(  0,  0,  0), RGB8(  0,  0,  0), RGB8(  0,  0,  0),
     RGB8(  0,  0,  0), RGB8(  0,  0,  0), RGB8(  0,  0,  0), RGB8(  0,  0,  0),
     RGB8(  0,  0,  0), RGB8(  0,  0,  0), RGB8(  0,  0,  0), RGB8(  0,  0,  0),
@@ -86,7 +100,7 @@ void board_gfx_init(void) {
 }
 
 
-void board_gfx_change_pettiles(void) {
+void board_gfx_change_pettiles(void) {  // TODO
 
     // Change to next option setting and handle wraparound
     option_game_high_contrast++;
@@ -128,9 +142,11 @@ void board_gfx_init_pettiles(void) {
         set_bkg_tiles_target_subpal(REL_PAL_BOARD_UNDER_BG1_1);
 
         set_bkg_4bpp_palette(ABS_PAL_BOARD_UNDER_BG1_1, GAME_BOARD_UNDER_PALETTE_COUNT, game_board_under_pal);
-        set_bkg_4bpp_data(base_tile_id, GAME_BOARD_UNDER_TILE_COUNT, game_board_under_white_tile);
+        set_bkg_4bpp_data(base_tile_id, GAME_BOARD_UNDER_TILE_COUNT, game_board_under_tiles);
 
-        fill_bkg_rect(BRD_ST_X, BRD_ST_Y, BRD_WIDTH, BRD_HEIGHT, base_tile_id);
+        game_board_under_white_tile_id = base_tile_id;
+        game_board_under_blue_tile_id  = base_tile_id + 1u;
+        fill_bkg_rect(BRD_ST_X, BRD_ST_Y, BRD_WIDTH, BRD_HEIGHT, game_board_under_white_tile_id);
 
         base_tile_id += GAME_BOARD_UNDER_TILE_COUNT;
         set_bkg_tiles_target_subpal(PAL_0);  // Revert to default palette for subsequent writes
