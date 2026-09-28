@@ -111,9 +111,6 @@ typedef struct OAM_item_t {
     uint8_t x;     //< X Coordinates (lowest 8 bits of 9) of the sprite on screen
 } OAM_item_t;
 
-// TODO: WARNING!: Need to use DMA to copy over shadow oam to actual oam
-// // extern volatile struct OAM_item_t shadow_OAM[];
-// #define shadow_OAM ((OAM_item_t *)VDP.OAM)
 extern OAM_item_t shadow_OAM[SHADOW_OAM_MAX_SPRITES];
 
 
