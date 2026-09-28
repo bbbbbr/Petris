@@ -29,20 +29,27 @@
 #define DISPLAY_SCORE_Y_LABEL   (DISPLAY_LEVEL_Y + TEXT_GROUP_Y_SPACING)
 #define DISPLAY_SCORE_Y         (DISPLAY_SCORE_Y_LABEL + TEXT_HEIGHT_ROWS_8x16)
 
-#define DISPLAY_NEXT_PIECE_TEXT_X       1u
+#define DISPLAY_NEXT_PIECE_TEXT_X       2u
 #define DISPLAY_NEXT_PIECE_TEXT_Y_LABEL (DISPLAY_SCORE_Y + TEXT_GROUP_Y_SPACING)
 #define DISPLAY_NEXT_PIECE_TEXT_Y       (DISPLAY_NEXT_PIECE_TEXT_Y_LABEL)
 
-    #define GAME_PIECE_NEXT_PREVIEW_BG_X (DISPLAY_NEXT_PIECE_TEXT_X + 6u) // Offset N tiles from start of label to skip past text
+    #define GAME_PIECE_NEXT_PREVIEW_BG_X (DISPLAY_NEXT_PIECE_TEXT_X + 5u) // Offset N tiles from start of label to skip past text
     #define GAME_PIECE_NEXT_PREVIEW_BG_Y (DISPLAY_NEXT_PIECE_TEXT_Y)
 
     #define GAME_PIECE_NEXT_PREVIEW_X    ((GAME_PIECE_NEXT_PREVIEW_BG_X) * 8u)
     #define GAME_PIECE_NEXT_PREVIEW_Y    (((GAME_PIECE_NEXT_PREVIEW_BG_Y) * 8u) + 2u) // Trailing + amount is to fudge sprite and text visual alignment 
 
 #define DISPLAY_NUMPETS_X_LABEL          1u
+#define DISPLAY_NUMPETS_CLEANUP_X_LABEL  0u  // Bump left to make extra room for longer word and space between label and 2 digit readout
 #define DISPLAY_NUMPETS_Y_LABEL          (DISPLAY_NEXT_PIECE_TEXT_Y + TEXT_GROUP_Y_SPACING - 1u) // Less line spacing on this row
 #define DISPLAY_NUMPETS_X                4u
-#define DISPLAY_NUMPETS_Y                (DISPLAY_NUMPETS_Y_LABEL + TEXT_HEIGHT_ROWS_8x16)
+#define DISPLAY_NUMPETS_LONGPET_X        (6u)
+#define DISPLAY_NUMPETS_CLEANUP_X        (6u)
+#define DISPLAY_NUMPETS_LEVUP_CRUNCH_X   (6u)
+#define DISPLAY_NUMPETS_MARATHON_X       (4u)
+#define DISPLAY_NUMPETS_Y                (DISPLAY_NUMPETS_Y_LABEL)  // Same line as 
+#define DISPLAY_NUMPETS_LONGPET_Y        (DISPLAY_NUMPETS_Y_LABEL + TEXT_HEIGHT_ROWS_8x16)  // One full line  below
+#define DISPLAY_NUMPETS_MARATHON_Y       (DISPLAY_NUMPETS_Y_LABEL + TEXT_HEIGHT_ROWS_8x16)  // One full line  below
 
 #define DISPLAY_NUMTILES_X 1
 #define DISPLAY_NUMTILES_Y 16
@@ -56,7 +63,7 @@
 #define PLAYER_LEVEL_MAX      999
 #define PLAYER_NUMTILES_RESET 0
 #define PLAYER_NUMPETS_RESET  0
-#define PLAYER_NUMPETS_MAX    0xFFFF
+#define PLAYER_NUMPETS_MAX    9999u
 #define PLAYER_NUMPIECES_RESET 0
 #define PLAYER_NUMPIECES_MAX   0xFFFF
 

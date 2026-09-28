@@ -223,7 +223,7 @@ void board_gfx_init_background(void) {
     PRINT_PAL(PRINT_PAL_TILE_GREY);
 
     // Set up text areas
-    PRINTXY(DISPLAY_NEXT_PIECE_TEXT_X,    DISPLAY_NEXT_PIECE_TEXT_Y_LABEL,    "NEXT:", 0);
+    PRINTXY(DISPLAY_NEXT_PIECE_TEXT_X,    DISPLAY_NEXT_PIECE_TEXT_Y_LABEL,    "NEXT", 0);
 
     PRINTXY(DISPLAY_LEVEL_X,    DISPLAY_LEVEL_Y_LABEL,    "LEVEL", 0);
      // On same line as level readout
@@ -238,9 +238,11 @@ void board_gfx_init_background(void) {
     PRINT_PAL(PRINT_PAL_TILE_GREY);
 
     if (option_game_type == OPTION_GAME_TYPE_PET_CLEANUP) {
-        PRINTXY(DISPLAY_NUMPETS_X_LABEL, DISPLAY_NUMPETS_Y_LABEL,  "TAILS", 0);
+        PRINTXY(DISPLAY_NUMPETS_CLEANUP_X_LABEL, DISPLAY_NUMPETS_Y_LABEL,  "TAILS", 0);  // TODO: Shrink the left bush down so the readout can go BELOW instead of TO RIGHT
     } else if (option_game_type == OPTION_GAME_TYPE_LONG_PET) {
         PRINTXY(DISPLAY_NUMPETS_X_LABEL, DISPLAY_NUMPETS_Y_LABEL,  "PETSIZE", 0);
+    } else if (option_game_type == OPTION_GAME_TYPE_MARATHON) {
+        PRINTXY(DISPLAY_NUMPETS_X_LABEL, DISPLAY_NUMPETS_Y_LABEL,  "NUMPETS", 0);
     } else {
         PRINTXY(DISPLAY_NUMPETS_X_LABEL, DISPLAY_NUMPETS_Y_LABEL,  "PETS", 0);
     }

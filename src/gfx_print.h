@@ -17,6 +17,7 @@
 #define BG_PRINT_SPACING_Y  (FONT_8x16_TILE_HEIGHT)
 
 #define STR_DIGIT_LEN_5 5
+#define STR_DIGIT_LEN_4 4
 #define STR_DIGIT_LEN_3 3
 #define STR_DIGIT_LEN_2 2
 

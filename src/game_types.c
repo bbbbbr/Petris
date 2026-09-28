@@ -121,6 +121,16 @@ uint8_t game_type_pet_cleanup_get_tail_count(void) {
     return num_pets;
 }
 
+uint16_t game_types_marathon_levup_crunch_get_level_numpets_required(void) {
+
+    uint16_t level_numpets_required = (PLAYER_PETS_PER_LEVEL * player_level);
+
+    if (level_numpets_required > GAME_TYPE_MARTHON_LEVUP_CRUNCH_LEVEL_NUMPETS_REQUIRED_MAX) {
+        level_numpets_required = GAME_TYPE_MARTHON_LEVUP_CRUNCH_LEVEL_NUMPETS_REQUIRED_MAX;
+    }
+
+    return level_numpets_required;
+}
 
 
 // Keeps track of how many tail pieces have been added to the board.
@@ -132,7 +142,8 @@ void game_type_pet_cleanup_increment_tail_count(void) {
             game_type_cleanup_tail_count++;
         }
 
-        print_num_u16(DISPLAY_NUMPETS_X, DISPLAY_NUMPETS_Y, (uint16_t)game_type_cleanup_tail_count, STR_DIGIT_LEN_5);
+        // See player_info_display()
+        print_num_u16(DISPLAY_NUMPETS_CLEANUP_X, DISPLAY_NUMPETS_Y, (uint16_t)game_type_cleanup_tail_count, STR_DIGIT_LEN_2);
     }
 }
 
@@ -169,7 +180,8 @@ void game_type_long_pet_set_pet_size(uint8_t player_level) {
     }
 
     // Display required Pet Size
-    print_num_u16(DISPLAY_NUMPETS_X, DISPLAY_NUMPETS_Y, (uint16_t)game_type_long_pet_required_size, STR_DIGIT_LEN_3);
+    // See player_info_display()
+    print_num_u16(DISPLAY_NUMPETS_LONGPET_X, DISPLAY_NUMPETS_LONGPET_Y, (uint16_t)game_type_long_pet_required_size, STR_DIGIT_LEN_2);
 }
 
 

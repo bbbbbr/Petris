@@ -62,23 +62,34 @@ void player_info_display(void) {
         print_num_u16(DISPLAY_SCORE_X - 1, DISPLAY_SCORE_Y, player_score, STR_DIGIT_LEN_5);
     }
 
-    // Display number of pets completed
+    // Display level stats or requirement
+    // * 8 (zero indexed) is the last tile before the left edge of the game board border
+
+    // Display Tail remaining count
+    // * Max size is 20, see GAME_TYPE_PET_CLEANUP_TAIL_COUNT_MAX
+    // * Also see: game_type_pet_cleanup_increment_tail_count()
     if (option_game_type == OPTION_GAME_TYPE_PET_CLEANUP) {
-        // Display Tail remaining count
-        print_num_u16(DISPLAY_NUMPETS_X, DISPLAY_NUMPETS_Y, (uint16_t)game_type_cleanup_tail_count, STR_DIGIT_LEN_5);
-
-    } else if (option_game_type == OPTION_GAME_TYPE_LONG_PET) {
-        // Display required Pet Size
-        print_num_u16(DISPLAY_NUMPETS_X, DISPLAY_NUMPETS_Y, (uint16_t)game_type_long_pet_required_size, STR_DIGIT_LEN_3);
-
-    } else if ((option_game_type == OPTION_GAME_TYPE_LEVEL_UP)||
-               (option_game_type == OPTION_GAME_TYPE_CRUNCH_UP)) {
-        // Display pets remaining to complete level
-        print_num_u16(DISPLAY_NUMPETS_X + 2, DISPLAY_NUMPETS_Y,
-            (PLAYER_PETS_PER_LEVEL * player_level) - player_numpets, STR_DIGIT_LEN_3);
-    } else {
-        // Display total Pet completed count
-        print_num_u16(DISPLAY_NUMPETS_X, DISPLAY_NUMPETS_Y, player_numpets, STR_DIGIT_LEN_5);
+        // Try to keep the number readout away from the game border until necessary
+        print_num_u16(DISPLAY_NUMPETS_CLEANUP_X, DISPLAY_NUMPETS_Y, (uint16_t)game_type_cleanup_tail_count, STR_DIGIT_LEN_2);
+    }
+    // Display required Pet Size
+    // * Max size is 40, see GAME_TYPE_PET_LONG_PET_SIZE_MAX
+    // Also see: game_type_long_pet_set_pet_size()
+    else if (option_game_type == OPTION_GAME_TYPE_LONG_PET) {
+        print_num_u16(DISPLAY_NUMPETS_LONGPET_X, DISPLAY_NUMPETS_LONGPET_Y, (uint16_t)game_type_long_pet_required_size, STR_DIGIT_LEN_2);
+    }
+    // Display pets remaining to complete level
+    // * Max size is 99, see GAME_TYPE_MARTHON_LEVUP_CRUNCH_LEVEL_NUMPETS_REQUIRED_MAX
+    else if ((option_game_type == OPTION_GAME_TYPE_LEVEL_UP) ||
+             (option_game_type == OPTION_GAME_TYPE_CRUNCH_UP)) {
+        uint16_t level_numpets_required = game_types_marathon_levup_crunch_get_level_numpets_required();
+        print_num_u16(DISPLAY_NUMPETS_LEVUP_CRUNCH_X, DISPLAY_NUMPETS_Y, (level_numpets_required - player_numpets), STR_DIGIT_LEN_2);
+    }
+    // Marathon
+    // Display total Pet completed count
+    // * Max size is 9999, see PLAYER_NUMPETS_MAX
+    else {
+        print_num_u16(DISPLAY_NUMPETS_MARATHON_X, DISPLAY_NUMPETS_MARATHON_Y, player_numpets, STR_DIGIT_LEN_4);
     }
 
     // DISABLED:
@@ -141,7 +152,8 @@ void score_and_level_update(uint16_t num_tiles) {
         (option_game_type == OPTION_GAME_TYPE_LEVEL_UP) ||
         (option_game_type == OPTION_GAME_TYPE_CRUNCH_UP)) {
 
-        if (player_numpets >= (PLAYER_PETS_PER_LEVEL * player_level)) {
+        uint16_t level_numpets_required = game_types_marathon_levup_crunch_get_level_numpets_required();
+        if (player_numpets >= level_numpets_required) {
             level_increment_enqueue = true;
         }
     }
