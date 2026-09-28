@@ -5,7 +5,27 @@
 
 // #define DEBUG_SHOW
 
-/*
+// Casio Loopy Hardware x Layer palette assignment
+#define PAL_ASSIGN_BG0_0  (PAL_0)
+#define PAL_ASSIGN_BG0_1  (PAL_1)
+#define PAL_ASSIGN_BG0_2  (PAL_2)
+#define PAL_ASSIGN_BG0_3  (PAL_3)
+
+#define PAL_ASSIGN_BG1_0  (PAL_4)
+#define PAL_ASSIGN_BG1_1  (PAL_5)
+#define PAL_ASSIGN_BG1_2  (PAL_6)
+#define PAL_ASSIGN_BG1_3  (PAL_7)
+
+#define PAL_ASSIGN_OBJ_0  (PAL_8)
+#define PAL_ASSIGN_OBJ_1  (PAL_9)
+#define PAL_ASSIGN_OBJ_2  (PAL_10)
+#define PAL_ASSIGN_OBJ_3  (PAL_11)
+
+#define PAL_ASSIGN_BM_0  (PAL_12)
+#define PAL_ASSIGN_BM_1  (PAL_12)
+#define PAL_ASSIGN_BM_2  (PAL_12)
+#define PAL_ASSIGN_BM_3  (PAL_12)
+
 
 #define BG_PAL_0    0x00U
 #define BG_PAL_1    0x01U
@@ -17,104 +37,78 @@
 #define BG_PAL_7    0x07U
 #define BG_PAL_BOARD_NEXT_PIECE_PREVIEW BG_PAL_0
 
-#define BG_PRIORITY 0x80U
-#define BG_FLIP_Y   0x40U
-#define BG_FLIP_X   0x20U
+#define TILE_HEIGHT_8x8  8u
+#define TILE_WIDTH_8x8   8u
 
-#define SCREEN_WIDTH  20
-#define SCREEN_HEIGHT 18
-
+// In tiles
+#define SCREEN_WIDTH  (DEVICE_SCREEN_WIDTH)
+#define SCREEN_HEIGHT (DEVICE_SCREEN_HEIGHT)
 #define SCREEN_MIN_X 0
 #define SCREEN_MIN_Y 0
-#define SCREEN_MAX_X 19
-#define SCREEN_MAX_Y 17
+#define SCREEN_MAX_X (SCREEN_WIDTH - 1)
+#define SCREEN_MAX_Y (SCREEN_HEIGHT - 1)
 
 
-//#define TILES_BG_START          0
-//#define TILE_COUNT_BG          16
-#define TILE_SIZE_BYTES          16U // (8x8 pixels, 2 bits per pixel)
+#define TILE_4BPP_SIZE_BYTES           32U // (8x8 pixels, 4 bits per pixel mode)
+#define TILE_4BPP_SIZE_U16             16U // (8x8 pixels, 4 bits per pixel mode)
 
-#define TILES_INTRO_START      0U
-#define TILE_COUNT_INTRO       75U
-#define TILE_ID_BOARD_BLANK_BG    (TILES_INTRO_START + 3U)
-#define TILE_ID_BOARD_BLANK_BG_BW (TILES_INTRO_START + 0U)
-#define TILE_ID_BOARD_NEXT_PIECE_PREVIEW_BG  (TILES_INTRO_START + 0U)
-#define TILE_ID_BOARD_UP        (TILES_INTRO_START + 63U)
-
-// Clouds are stored at end of intro tiles
-#define TILE_COUNT_CLOUDS      9U
-#define TILE_ID_CLOUDS_START   (TILE_ID_BOARD_UP + 1U)
-#define TILE_OFFSET_CLOUDS     (TILE_ID_CLOUDS_START * TILE_SIZE_BYTES)
-
-#define TILE_ID_2P_LINK_OFF     TILES_INTRO_START
-#define TILE_COUNT_2P_LINK      2U
-#define TILE_ID_2P_LINK_START   (TILE_ID_CLOUDS_START + TILE_COUNT_CLOUDS)
-#define TILE_OFFSET_2P_LINK     (TILE_ID_2PLINK_START * TILE_SIZE_BYTES)
+#define TILE_ID_BOARD_BLANK       (TILE_OFFSET_PETBLANK)
+#define TILE_ID_BOARD_NEXT_PIECE_PREVIEW_BG  (0U)
+#define TILE_ID_BOARD_UP          (TILE_OFFSET_DISSOLVE_2)
 
 
-#define TILE_OFFSET_PET_TAIL_REG 0U
-#define TILE_OFFSET_PET_TAIL_WAG 33U // Offset to tail wag alternate tiles
 
+#define TILES_PET_START_VRAM_ABSOLUTE (OBJ_TILEGROUP_BASE_512) // This requires ^2 alignment
+    #define TILE_PET_TAIL_REG_START    0U  // This requires ^2 alignment
+    #define TILE_COUNT_PETS           32U
+    #define TILE_COUNT_PETBLANK        1U
+    #define TILE_COUNT_PET_TOTAL      (TILE_COUNT_PETS + TILE_COUNT_PETBLANK)
+        #define TILE_OFFSET_PETBLANK  (TILE_PET_TAIL_REG_START + TILE_COUNT_PETS)
 
-#define TILES_PET_START        96U // This requires ^2 alignment
-#define TILE_COUNT_PETS        32U
-#define TILE_COUNT_PETBLANK     1U
-#define TILE_COUNT_PET_ANIM__NOTLOADED_ONSTART__  8U // These don't get loaded at startup, just used to replace existing tiles
+#define TILES_SPECIAL_START           (TILE_PET_TAIL_REG_START + TILE_COUNT_PET_TOTAL) // Load right after pet tiles
+    #define TILE_COUNT_PETSPECIAL     4U  // Special pieces and their hinting tiles
+    #define TILE_COUNT_DROP_HINT      1U  // Crosshair Sights
+    #define TILE_COUNT_DISSOLVE       3U  // 3 Dissolve tiles
+    #define TILE_COUNT_LONG_PET_HINT  1U  // Cross shape
+    #define TILE_COUNT_SPECIAL_TOTAL   (TILE_COUNT_PETSPECIAL + TILE_COUNT_DROP_HINT + TILE_COUNT_DISSOLVE + TILE_COUNT_LONG_PET_HINT)
+        #define TILE_OFFSET_DISSOLVE_2 (TILES_SPECIAL_START + TILE_COUNT_PETSPECIAL + TILE_COUNT_DROP_HINT + 1u)
 
-#define TILE_COUNT_PETTOTAL      (TILE_COUNT_PETS + TILE_COUNT_PETBLANK)
+// #define TILES_PET_AND_SPECIAL_LOAD_COUNT (TILE_COUNT_PET_TOTAL + TILE_COUNT_SPECIAL_TOTAL)  // Ignore this, enough tile vram to load some that aren't used
 
+#define TILE_PET_TAIL_WAG_START       (TILES_SPECIAL_START + TILE_COUNT_SPECIAL_TOTAL) // Offset to tail wag alternate tiles
+    #define TILE_COUNT_PET_TAIL_WAGS  8U       // These don't get loaded at startup, just used to replace existing tiles
+    #define TILE_COUNT_PET_TAIL_WAGS_TOTAL  8U
 
-#define TILES_SPECIAL_START     (TILES_PET_START + TILE_COUNT_PETTOTAL) // Load right after pet tiles
-#define TILE_COUNT_PETSPECIAL     4U  // Special pieces and their hinting tiles
-#define TILE_COUNT_DROP_HINT      1U  // Crosshair Sights
-#define TILE_COUNT_DISSOLVE       3U  // 3 Dissolve tiles
-#define TILE_COUNT_LONG_PET_HINT  1U  // Cross shape
+#define FONT_8x8_NUMS_PET_COLORED_START          (TILE_PET_TAIL_WAG_START + TILE_COUNT_PET_TAIL_WAGS_TOTAL) // Offset to pet colored 8x8 font
+    #define TILE_COUNT_FONT_8x8_PET_DIGIT_COUNT  10U  // Ten digits
+    #define TILE_COUNT_FONT_8x8_PET_DIGIT_DOG    0U
+    #define TILE_COUNT_FONT_8x8_PET_DIGIT_CAT    (TILE_COUNT_FONT_8x8_PET_DIGIT_DOG   + TILE_COUNT_FONT_8x8_PET_DIGIT_COUNT)
+    #define TILE_COUNT_FONT_8x8_PET_DIGIT_SNAKE  (TILE_COUNT_FONT_8x8_PET_DIGIT_CAT   + TILE_COUNT_FONT_8x8_PET_DIGIT_COUNT)
+    #define TILE_COUNT_FONT_8x8_PET_DIGIT_FISH   (TILE_COUNT_FONT_8x8_PET_DIGIT_SNAKE + TILE_COUNT_FONT_8x8_PET_DIGIT_COUNT)
+    #define TILE_COUNT_FONT_8x8_PET_DIGIT_SETS   4U
+    #define TILE_COUNT_PET_TAIL_WAGSTOTAL  8U
 
-#define TILE_COUNT_SPECIALTOTAL (TILE_COUNT_PETSPECIAL + TILE_COUNT_DROP_HINT + TILE_COUNT_DISSOLVE + TILE_COUNT_LONG_PET_HINT)
+    // Font gets loaded at the end of tile RAM
+    // #define TILE_COUNT_FONT     45U //Tiles in order: <blank>ABC...XYZ0123456789!'()-.:?
+    // #define TILES_FONT_START    (255U - TILE_COUNT_FONT) // (TILES_BG_START + TILE_COUNT_BG)
 
-// Font gets loaded at the end of tile RAM
-#define TILE_COUNT_FONT     45U //Tiles in order: <blank>ABC...XYZ0123456789!'()-.:?
-#define TILES_FONT_START    (255U - TILE_COUNT_FONT) // (TILES_BG_START + TILE_COUNT_BG)
-*/
-//    #define TILE_ID_FONT_BLANK  TILES_FONT_START // blank tile
-//    #define TILES_FONT_BLANK_LEN    1U
-//    #define TILES_FONT_CHARS_START  (TILES_FONT_START  + TILES_FONT_BLANK_LEN)
-//    // Numeric tiles are a subset of main font
-//    // So these are just for convenience
-//    #define TILES_FONT_CHARS_LEN   27U
-//    #define TILES_FONT_NUMS_START  (TILES_FONT_START  + TILES_FONT_CHARS_LEN)
-//    #define TILE_COUNT_FONT_NUMS   11U //Tiles in order: 0123456789<blank>
-//
-    #define TILE_ID_FONT_BLANK      0u // blank tile
-    #define TILES_FONT_BLANK_LEN    1u
-    #define TILES_FONT_CHARS_START  (TILES_FONT_BLANK_LEN)
+    // #define TILE_ID_FONT_BLANK      0u // blank tile        // TODO
+    // #define TILES_FONT_BLANK_LEN    1u
+    // #define TILES_FONT_CHARS_START  (TILES_FONT_BLANK_LEN)
     // Numeric tiles are a subset of main font
     // So these are just for convenience
-    #define TILES_FONT_CHARS_LEN   27u
-    #define TILES_FONT_NUMS_START  (TILES_FONT_CHARS_LEN)
-    #define TILE_COUNT_FONT_NUMS   11U //Tiles in order: 0123456789<blank>
-/*
-extern uint8_t * p_pet_tiles;
-extern uint16_t * p_pet_palette;
-extern uint8_t pet_tiles_hicontrast_ram[];
+    // #define TILES_FONT_CHARS_LEN   27u
+    // #define TILES_FONT_NUMS_START  (TILES_FONT_CHARS_LEN)
+    // #define TILE_COUNT_FONT_NUMS   11U //Tiles in order: 0123456789<blank>
+
+extern const uint16_t * p_pet_tiles;
+extern const uint16_t * p_special_tiles;
+extern const uint16_t * p_pet_wag_tiles;
+extern const uint16_t * p_font_pet_colored_tiles;
+// extern uint16_t * p_pet_palette;
 
 
-extern const uint16_t board_pets_palette[];
-extern const uint16_t board_pets_pal_high_contrast[];
-extern const uint16_t board_pets_pal_high_contrast_2[];
-extern const uint16_t board_pets_pal_med_contrast[];
-
-extern const uint16_t clouds_sprite_palette[];
-extern const uint16_t option_title_palette[];
-extern const uint16_t intro_screen_logo_palette[];
-extern const uint16_t intro_screen_palette[];
-
-extern const const uint16_t intro_cat_palette[];
-
-// void print_font_palette_set(uint8_t);
 void pet_tiles_prepare(void);
-
-*/
 
 #endif // GFX_H
 

@@ -1,7 +1,7 @@
 
 #include <gbdk/platform.h>
+#include <gbdk/rand.h>
 #include <stdint.h>
-#include <rand.h>
 
 uint16_t rand_alt = 0u;
 uint16_t rand_temp;

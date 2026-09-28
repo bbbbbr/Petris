@@ -8,21 +8,55 @@
 static uint16_t * _bg_tilemap_base_address =  BG0_MAP_START();
 static uint8_t  * _4bpp_tile_patterns_base_address = 0;
 static uint16_t   _tilemap_screen_ab_prop = 0;
+static uint16_t   _tilemap_subpal_prop = 0;
+static uint16_t   _tilemap_cached_props = 0;
 
-uint16_t sys_time = 0;
+volatile uint16_t sys_time = 0;
+volatile bool     vbl_done = false;
 OAM_item_t shadow_OAM[SHADOW_OAM_MAX_SPRITES];
 
 
-// Note: Loopy bios vsync also polls controller(s)
-// #define vsync  bios_vsync  
-// TODO: IMPORTANT: manual OAM copy is inefficient, convert to interrupt driven vsync that increments a sys_time counter (possibly in the on-(?)-cpu ram)
-void vsync(void) {
+#define  U16_COUNT_PER_OAM_ENTRY  (2u)
+#define NO_BIOS_VSYNC_BEFORE_WRITES
 
-    sys_time++;
+// Turn bios vsync timing on/off for writes
+#ifdef NO_BIOS_VSYNC_BEFORE_WRITES
+    #define OPTIONAL_IF_ENABLED_BIOS_VSYNC_BEFORE_VDP_WRITES()
+#else
+    #define OPTIONAL_IF_ENABLED_BIOS_VSYNC_BEFORE_VDP_WRITES()  bios_vsync();  // TODO: FIXME With safe (?) VDP write timing, to at least reduce tearing
+#endif
+
+
+// Copy shadow oam via DMA
+//
+// WARNING: DMA CANNOT be used when VDP NMI VBlank is enabled.
+//          Will fail to start with DMA_DMAOR_NMIF_BLOCKED_BY_NMI set in DMAOR
+void shadow_oam_copy_dma(void) {
+
+    // Enable and clear any previously set error flags
+    DMAC_DMAOR = DMA_DMAOR_AE_NO_ERROR | DMA_DMAOR_NMIF_NO_ERROR | DMA_DMAOR_DME_ENABLE;
+
+    // DMA using channel 0
+    // Transfer count (size in u16, which is VRAM access size, each OAM entry is 32 bits, so 2 per entry)
+    DMAC_SAR0  = (uint32_t)shadow_OAM;        // Src
+    DMAC_DAR0  = (uint32_t)VDP.OAM;           // Dest
+    DMAC_TCR0  = SHADOW_OAM_MAX_SPRITES * U16_COUNT_PER_OAM_ENTRY;
+    DMAC_CHCR0 = (DMA_CHCR_DM_DEST_INCREMENT | DMA_CHCR_SM_SRC_INCREMENT | DMA_CHCR_RS_AUTO_CONF | DMA_CHCR_TM_BUS_BURST | DMA_CHCR_TS_XFER_WORD_U16 | DMA_CHCR_DE_XFER_ENABLE);
+
+    // When DMA is working this doesn't even decrement once
+    uint16_t timeout = 60000u;
+    while(!(DMAC_CHCR0 & DMA_CHCR_TE_XFER_IS_DONE) && timeout != 0u) {
+        timeout--;
+    }
+}
+
+
+// Copy shadow oam via partially unrolled CPU loop
+void shadow_oam_copy_cpu(void) {
+
     volatile uint32_t * p_OAM = VDP.OAM;
     volatile uint32_t * p_src = (uint32_t *)shadow_OAM;
 
-    bios_vsync();
     for (uint16_t c = 0; c < (SHADOW_OAM_MAX_SPRITES / VSYNC_OAM_COPY_SZ); c++) {
         // Number of unrolled writes here should match VSYNC_OAM_COPY_SZ
         *p_OAM++ = *p_src++;
@@ -43,6 +77,93 @@ void vsync(void) {
         *p_OAM++ = *p_src++;
         *p_OAM++ = *p_src++;
     }
+}
+
+
+// WARNING: DMA CANNOT be used when VDP NMI VBlank is enabled.
+//          Will fail to start with DMA_DMAOR_NMIF_BLOCKED_BY_NMI set in DMAOR
+void enable_interrupt_nmi_vblank() {
+    VDP.IRQ0_NMI_CTRL |= NMI_ENABLE;
+}
+
+
+void disable_interrupt_nmi_vblank() {
+    VDP.IRQ0_NMI_CTRL &= ~NMI_ENABLE;
+}
+
+
+void enable_interrupt_irq0_vblank() {
+    #define IRQ_PRIORITY_LOWEST_OFF    0x0u
+    #define IRQ_PRIORITY_14            0xEu
+    #define IRQ_PRIORITY_15_HIGHEST    0xFu
+
+    #define VERT_SCANLINE_VBLANK_FIRST -39       // First VBlank Scanline (-39 -> 0 -> 224)
+    #define HORIZ_PIXEL_HBLANK_FIRST   -84       // First HBlank Pixel    (-84 -> 0 -> 257)
+
+    VDP.IRQ0_VCMP = VERT_SCANLINE_VBLANK_FIRST;  // First VBlank Scanline (-39 -> 0 -> 224)
+    VDP.IRQ0_HCMP = HORIZ_PIXEL_HBLANK_FIRST;    // First HBlank Pixel    (-84 -> 0 -> 257)
+    VDP.IRQ0_NMI_CTRL |= (IRQ0_ENABLE | IRQ0_VCMP_ENABLE);
+    sys_setInterruptPriority(INT_PRIO_IRQ0, IRQ_PRIORITY_15_HIGHEST);
+    // Set Global interrupt priority mask level to be 1 below the level configured above
+    sys_setInterruptMask(IRQ_PRIORITY_14);
+}
+
+
+void disable_interrupt_irq0_vblank() {
+    VDP.IRQ0_NMI_CTRL &= ~IRQ0_ENABLE;
+}
+
+
+void enable_interrupt_irq1_vblank() {
+    // Enable IRQ1 VBlank in VDP with VBlank mode
+    VDP.SYNC_IRQ_CTRL = (IRQ1_ENABLE | IRQ1_SRC_VSYNC);
+
+    // Set trigger to Falling edge to match VDP output behavior. If this isn't set it will trigger repeatedly during vblank
+    INTC_ICR  = (INTC_ICR & ~INTC_ICR_IRQ1S_MASK) | INTC_ICR_IRQ1S_TRIG_FALLING_EDGE;
+    PFC_PACR1 = (PFC_PACR1 & ~PA13_MD10_MODE_MASK) | PA13_MD10_MODE_IRQ1;
+
+    sys_setInterruptPriority(INT_PRIO_IRQ1, IRQ_PRIORITY_15_HIGHEST);
+    // Set Global interrupt priority mask level to be 1 below the level configured above
+    sys_setInterruptMask(IRQ_PRIORITY_14);
+}
+
+
+void disable_interrupt_irq1_vblank() {
+    VDP.SYNC_IRQ_CTRL &= ~IRQ1_ENABLE;
+}
+
+
+// Vblank and HBlank Interrupt Source Comparison
+//
+// "++" Means trigger line/column is configurable
+//
+//        VBlank    HBlank   Notes
+// NMI    Y         N        * DMA CANNOT be used when VDP NMI VBlank is enabled
+//
+// IRQ0   Y++       Y++
+//
+// IRQ1   Y         Y        * Can be used to trigger DMA instead of an interrupt
+//
+
+
+void INTERRUPT SMALLFUNC isr_nmi_vblank(void) {
+}
+
+
+void INTERRUPT SMALLFUNC isr_irq0_vblank(void) {
+}
+
+
+void INTERRUPT SMALLFUNC isr_irq1_vblank(void) {
+    shadow_oam_copy_dma();
+    sys_time++;
+    vbl_done = true;
+}
+
+
+// Note: Loopy bios vsync also polls controller(s)
+void vsync(void) {
+    bios_vsync();
 }
 
 /** Set background palette(s)
@@ -84,14 +205,14 @@ void set_bkg_4bpp_data(unsigned int start, unsigned int ntiles, const uint16_t *
     // Important! Writes to Tile VRAM *MUST* be 16 bit, 8 bit writes
     // on real hardware will result in every other byte of tile pattern
     // data being corrupted, yielding vertical lines on the screen (palette dependent).
-    
-    // Offset into start of 4bpp tile pattern data based on 
+
+    // Offset into start of 4bpp tile pattern data based on
     uint16_t * p_dest = (start * U16_WORDS_PER_4BPP_TILE) + (uint16_t *)_4bpp_tile_patterns_base_address;
 
     // TODO: Use DMA (make a vmemcpy shim?)
     // Tile VRAM is not dual-ported, so requires safe access timing, unlike bitmap vram
     // TODO: This is the shoddiest safe access timing...
-    bios_vsync();  //TODO: FIXME
+    OPTIONAL_IF_ENABLED_BIOS_VSYNC_BEFORE_VDP_WRITES();
     size_t copybytes = ntiles;
     while (copybytes--) {
         // Write one 8x8 32 byte tile entry as a block
@@ -117,16 +238,16 @@ void set_bkg_4bpp_data(unsigned int start, unsigned int ntiles, const uint16_t *
 
 
 void set_bkg_tiles(unsigned int x, unsigned int y, unsigned int width, unsigned int height, const uint16_t *tiles) {
-    
+
           uint16_t * p_dest     = _bg_tilemap_base_address + (y * DEVICE_SCREEN_BUFFER_WIDTH) + x;
     const uint32_t   row_stride = DEVICE_SCREEN_BUFFER_WIDTH - width;
 
-    bios_vsync();  // TODO: FIXME
+    OPTIONAL_IF_ENABLED_BIOS_VSYNC_BEFORE_VDP_WRITES();
     while (height--) {
         uint16_t row_len = width;
         uint16_t row_wrap = DEVICE_SCREEN_BUFFER_WIDTH - x;
         while (row_len--) {
-            *p_dest++ = *tiles++ | _tilemap_screen_ab_prop;
+            *p_dest++ = *tiles++ | _tilemap_cached_props;
             // Check for wraparound from right edge -> left.
             // In that case, preserve current row instead of letting it step down to next
             row_wrap--;
@@ -145,13 +266,13 @@ void set_bkg_based_tiles(unsigned int x, unsigned int y, unsigned int width, uns
           uint16_t * p_dest     = _bg_tilemap_base_address + (y * DEVICE_SCREEN_BUFFER_WIDTH) + x;
     const uint32_t   row_stride = DEVICE_SCREEN_BUFFER_WIDTH - width;
 
-    bios_vsync();  // TODO: FIXME
+    OPTIONAL_IF_ENABLED_BIOS_VSYNC_BEFORE_VDP_WRITES();
     while (height--) {
         uint16_t row_len = width;
         uint16_t row_wrap = DEVICE_SCREEN_BUFFER_WIDTH - x;
         while (row_len--) {
             // Mask out tile ID then OR in isolated tile ID + offset, OR in properties
-            *p_dest++ = (*tiles & ~BG_TILEMAP_CHRNUM_MASK) | ((*tiles & BG_TILEMAP_CHRNUM_MASK) + base_tile) |  _tilemap_screen_ab_prop;
+            *p_dest++ = (*tiles & ~BG_TILEMAP_CHRNUM_MASK) | ((*tiles & BG_TILEMAP_CHRNUM_MASK) + base_tile) |  _tilemap_cached_props;
             tiles++;
             // Check for wraparound from right edge -> left.
             // In that case, preserve current row instead of letting it step down to next
@@ -169,7 +290,7 @@ void set_bkg_based_tiles(unsigned int x, unsigned int y, unsigned int width, uns
 uint16_t * set_bkg_tile_xy(uint16_t x, uint16_t y, uint16_t tile) {
 
     uint16_t * p_dest = _bg_tilemap_base_address + (y * DEVICE_SCREEN_BUFFER_WIDTH) + x;
-    *p_dest = tile | _tilemap_screen_ab_prop;
+    *p_dest = tile | _tilemap_cached_props;
 
     return p_dest;
 }
@@ -180,12 +301,12 @@ void fill_bkg_rect(unsigned int x, unsigned int y, unsigned int width, unsigned 
           uint16_t * p_dest     = _bg_tilemap_base_address + (y * DEVICE_SCREEN_BUFFER_WIDTH) + x;
     const uint32_t   row_stride = DEVICE_SCREEN_BUFFER_WIDTH - width;
 
-    bios_vsync();  // TODO: FIXME
+    OPTIONAL_IF_ENABLED_BIOS_VSYNC_BEFORE_VDP_WRITES();
     while (height--) {
         uint16_t row_len = width;
         uint16_t row_wrap = DEVICE_SCREEN_BUFFER_WIDTH - x;
         while (row_len--) {
-            *p_dest++ = tile | _tilemap_screen_ab_prop;
+            *p_dest++ = tile | _tilemap_cached_props;
             // Check for wraparound from right edge -> left.
             // In that case, preserve current row instead of letting it step down to next
             row_wrap--;
@@ -211,7 +332,7 @@ void load_bitmap_4bpp(unsigned int x, unsigned int y, unsigned int width, unsign
            uint8_t * p_dest     = VDP.BITMAP_VRAM_8BIT + ((y * DEVICE_BITMAP_4BPP_BUFFER_BYTE_WIDTH) + x);
     const uint32_t   row_stride = DEVICE_BITMAP_4BPP_BUFFER_BYTE_WIDTH - width;
 
-    // bios_vsync();  // TODO: FIXME (bitmap vram is dual ported, so always ok to write, but may want to time it to reduce tearing)
+    OPTIONAL_IF_ENABLED_BIOS_VSYNC_BEFORE_VDP_WRITES();
     while (height--) {
         uint16_t row_len = width;
         uint16_t row_wrap = DEVICE_BITMAP_4BPP_BUFFER_BYTE_WIDTH - x;
@@ -243,13 +364,31 @@ void set_bkg_tiles_target_screen_a_or_b(unsigned int screen_a_or_b) {
         _tilemap_screen_ab_prop = BG_TILEMAP_SCREEN_B;
     else
         _tilemap_screen_ab_prop = 0;
+    // Update merged, cached props
+    _tilemap_cached_props = _tilemap_subpal_prop | _tilemap_screen_ab_prop;
+}
+
+void set_bkg_tiles_target_subpal(uint16_t subpal) {
+    _tilemap_subpal_prop = BG_PAL(subpal & 0x03u);
+    // Update merged, cached props
+    _tilemap_cached_props = _tilemap_subpal_prop | _tilemap_screen_ab_prop;
+
 }
 
 
-
-void delay(uint16_t d) {
-    // TODO: calibrate delay time (how to measure...? count in vsyncs?)
+// TODO: rewrite in ASM, count actual cycles
+//
+// 1000 msec ÷ 59.8261 hz = 16.715 FPS
+// 16.715 FPS  / 263 lines = 0.06355 msec per line
+// 1 msec / 0.06355 msec per line = 15.73 lines per msec
+void delay(uint16_t msecs_delay) {
+    for (volatile uint16_t c = 0u; c < msecs_delay; c++) {
+        for (volatile uint16_t one_msec_loop = 0u; one_msec_loop < 0x01A0u; one_msec_loop++) {
+                __asm__ volatile("nop");
+        }
+    }
 }
+
 
 
 // void set_native_tile_data(uint16_t start, uint16_t ntiles, const void *src) PRESERVES_REGS(iyh, iyl);

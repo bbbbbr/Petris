@@ -30,19 +30,19 @@
 #include "common.h"
 // #include "fade.h"
 
-// #include "game_piece_data.h"
+#include "game_piece_data.h"
 
 #include "options.h"
 #include "options_screen.h"
 
 #include "intro_screen_out.h"  // For determining where to start loading font tiles
-#include "pet_tiles_out.h"
+#include "pet_and_special_tiles_out.h"
 
 
-#define TILE_LOAD_OFFSET_FONT          (intro_screen_out_TILE_COUNT)
+#define TILE_LOAD_OFFSET_FONT          (intro_screen_out_TILE_COUNT + SHARED_4BPP_TRANSP_TILE_COUNT)
 #define TILE_LOAD_OFFSET_CURSOR_SPRITE (OBJ_TILEGROUP_BASE_512)
 
-#define PET_DOG_HEAD       3u // ((GP_PET_DOG << GP_PET_UPSHIFT) | (GP_SEG_HEAD << GP_SEG_UPSHIFT))  // TODO: FIXME: once game_piece_data is ported
+#define PET_DOG_HEAD       ((GP_PET_DOG << GP_PET_UPSHIFT) | (GP_SEG_HEAD << GP_SEG_UPSHIFT))
 #define SPR_TILE_CURSOR    (PET_DOG_HEAD)  // Tile ID is offset from the Base automatically in hardware
 
 #define SPR_OPTIONS_CURSOR 0 // Cursor is sprite "0"
@@ -236,24 +236,12 @@ void options_screen_draw(void) {  // TODO
 
 
 
-void options_screen_sprites_init(void) {  // TODO
-/*
-    SPRITES_8x8;
+void options_screen_sprites_init(void) {
 
-//    set_sprite_palette(BG_PAL_0, 4, board_pets_palette); // UBYTE first_palette, UBYTE nb_palettes, uint16_t *rgb_data, pal_type
-    // No need for high-contrast here (user has not yet selected high-contrast)
-    fade_set_pal(BG_PAL_0, 4, board_pets_palette, FADE_PAL_SPRITES);
-    set_sprite_data(0, TILE_COUNT_PETTOTAL, pet_tiles);
-
-    set_sprite_tile(SPR_OPTIONS_CURSOR, PET_DOG_HEAD);
-    set_sprite_prop(SPR_OPTIONS_CURSOR, BG_FLIP_X | BG_PAL_0);
-
-    SHOW_SPRITES;
-*/
-        // Use a pet tile as a cursor, so load the pet tiles into the chosen tile obj area
+    // Use a pet tile as a cursor, so load the pet tiles into the chosen tile obj area
     set_bkg_tiles_target_screen_a_or_b(LAYER_SCREEN_A);
-    set_bkg_4bpp_data(TILE_LOAD_OFFSET_CURSOR_SPRITE, pet_tiles_out_TILE_COUNT, pet_tiles_out_tiles);
-    set_bkg_4bpp_palette(PAL_8, pet_tiles_out_PALETTE_COUNT, pet_tiles_out_palettes);  // TODO: Constant for assigned start pals, i.e. : SPR_PALS_START instead of absolutes like PAL_8
+    set_bkg_4bpp_data(TILE_LOAD_OFFSET_CURSOR_SPRITE, pet_and_special_tiles_out_TILE_COUNT, pet_and_special_tiles_out_tiles);
+    set_bkg_4bpp_palette(PAL_ASSIGN_OBJ_0, pet_and_special_tiles_out_PALETTE_COUNT, pet_and_special_tiles_out_palettes);
 
     set_sprite_tile(SPR_OPTIONS_CURSOR, SPR_TILE_CURSOR);
     set_sprite_prop(SPR_OPTIONS_CURSOR, S_8x8 | S_FLIPX | S_PAL0);
@@ -270,6 +258,10 @@ void options_screen_exit_cleanup(void) {
 */
     // TODO: Fill BG0 tilemap with empty tiles
     hide_sprites_range(0, MAX_HARDWARE_SPRITES);
+
+    // Clear BG0 (where the text is printed)
+    fill_bkg_rect(0, 0, DEVICE_SCREEN_BUFFER_WIDTH, DEVICE_SCREEN_BUFFER_HEIGHT, SHARED_4BPP_TRANSP_TILE_ID_START);
+    VDP.BG_SCROLL[BG0_SCROLL_Y] = 0;
 }
 
 
@@ -286,8 +278,6 @@ void options_screen_init(void) {  // TODO
 */
 
     // Rely on Title screen graphics loading for Background image and Font tiles / drawing setup
-    // set_bkg_data(TILES_INTRO_START,     TILE_COUNT_INTRO,     intro_screen_tiles);
-    // set_bkg_data(TILES_FONT_START,      TILE_COUNT_FONT,      font_tiles);
     load_8x16_font_tiles(TILE_LOAD_OFFSET_FONT);
 
     // SHOW_BKG;

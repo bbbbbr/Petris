@@ -7,9 +7,9 @@
 
 void  game_piece_next_reset(void);
 void  game_piece_next_generate(void);
-UINT8 game_piece_next_get(void);
-void  game_piece_next_set(UINT8);
-void  game_piece_next_show(UINT8);
+uint8_t game_piece_next_get(void);
+void  game_piece_next_set(uint8_t);
+void  game_piece_next_show(uint8_t);
 
 
 

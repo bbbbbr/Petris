@@ -20,14 +20,18 @@
 
 #include "font_8x16_out.h"
 
+#define FONT_8x16_BLANK_LEN   1u
+#define FONT_8x16_CHARS_LEN   26u
+#define FONT_8x16_NUMS_LEN    11u
+
+#define FONT_8x16_TILE_ID_BLANK 0 // First font tile is blank
+#define FONT_8x16_TILE_ID_CHARS (FONT_8x16_BLANK_LEN)
+#define FONT_8x16_TILE_ID_START  (FONT_8x16_TILE_ID_CHARS + FONT_8x16_CHARS_LEN)
+
+
 uint16_t gfx_tiles_font_base = 0;
 
-uint8_t digits[PRINT_MAX_DIGITS];
-// uint8_t digits_attribs[PRINT_MAX_DIGITS] = {PRINT_ATTRIB_PAL_DEFAULT,
-//                                           PRINT_ATTRIB_PAL_DEFAULT,
-//                                           PRINT_ATTRIB_PAL_DEFAULT,
-//                                           PRINT_ATTRIB_PAL_DEFAULT,
-//                                           PRINT_ATTRIB_PAL_DEFAULT};
+uint16_t str_digit_tiles[PRINT_MAX_DIGITS * FONT_8x16_TILE_HEIGHT];
 
 uint16_t print_x  = 0;
 uint16_t print_y  = 0;
@@ -52,18 +56,17 @@ const palette_color_t font_8x16_out_palette_GREY[16] = {
 
 void load_8x16_font_tilemap_palettes(void) {
    // Set palettes for tile printing (yellow, pink, grey) on BG0 layer
-    set_bkg_4bpp_palette(PAL_0, font_8x16_out_PALETTE_COUNT, font_8x16_out_palettes);
-    set_bkg_4bpp_palette(PAL_1, 1, font_8x16_out_palette_PINK);
-    set_bkg_4bpp_palette(PAL_2, 1, font_8x16_out_palette_GREY);
+    set_bkg_4bpp_palette(PAL_ASSIGN_BG0_0, font_8x16_out_PALETTE_COUNT, font_8x16_out_palettes);
+    set_bkg_4bpp_palette(PAL_ASSIGN_BG0_1, 1, font_8x16_out_palette_GREY);
+    // set_bkg_4bpp_palette(PAL_ASSIGN_BG0_1, 1, font_8x16_out_palette_PINK);
 }
 
 
 void load_8x16_font_sprite_palettes(void) {
-        // Set palettes for Sprite printing (yellow, pink, grey) on OBJ layer(s)
-    set_bkg_4bpp_palette(PAL_8, font_8x16_out_PALETTE_COUNT, font_8x16_out_palettes);
-    set_bkg_4bpp_palette(PAL_9,  1, font_8x16_out_palette_PINK);
-    set_bkg_4bpp_palette(PAL_10, 1, font_8x16_out_palette_GREY);
-
+    // Set palettes for Sprite printing (yellow, pink, grey) on OBJ layer(s)
+    set_bkg_4bpp_palette(PAL_ASSIGN_OBJ_0, font_8x16_out_PALETTE_COUNT, font_8x16_out_palettes);
+    set_bkg_4bpp_palette(PAL_ASSIGN_OBJ_1,  1, font_8x16_out_palette_PINK);
+    set_bkg_4bpp_palette(PAL_ASSIGN_OBJ_2, 1, font_8x16_out_palette_GREY);
 }
 
 // Loads 8x16 font tiles into vram and sets gfx_tiles_font_base
@@ -88,11 +91,11 @@ uint16_t print_to_sprites(uint16_t oam_id, uint8_t pal, const char * txt) {
     while (*txt) {
 
         if (*txt >= 'A' && *txt <= 'Z'){
-            c = TILES_FONT_CHARS_START + (unsigned char)(*txt - 'A');
+            c = FONT_8x16_TILE_ID_CHARS + (unsigned char)(*txt - 'A');
         } else if(*txt >= 'a' && *txt <= 'z') {
-            c = TILES_FONT_CHARS_START + (unsigned char)(*txt - 'a');
+            c = FONT_8x16_TILE_ID_CHARS + (unsigned char)(*txt - 'a');
         } else if(*txt >= '0' && *txt <= '9') {
-            c = TILES_FONT_NUMS_START + (unsigned char)(*txt - '0');
+            c = FONT_8x16_TILE_ID_START + (unsigned char)(*txt - '0');
         } else {
             switch(*txt) {
                 case  '!': c = 37U; break;
@@ -110,11 +113,11 @@ uint16_t print_to_sprites(uint16_t oam_id, uint8_t pal, const char * txt) {
                     txt++;
                     continue;
                 // Default is blank tile for Space or any other unknown chars
-                default: c = TILE_ID_FONT_BLANK; break;
+                default: c = FONT_8x16_TILE_ID_BLANK; break;
             }
         }
 
-        c *= 2 + gfx_tiles_font_base; // 2 tiles per character
+        c *= FONT_8x16_TILE_HEIGHT + gfx_tiles_font_base; // 2 tiles per character
         set_sprite_tile(oam_id, c++);  // Set sprite and advance to next 8x8 tile
         set_sprite_prop(oam_id, S_8x8 | pal);
         move_sprite(oam_id++, print_x, print_y);
@@ -153,11 +156,11 @@ void print_to_tilemap(const char * txt, uint16_t delay_time) {
     while (*txt) {
 
         if (*txt >= 'A' && *txt <= 'Z'){
-            c = TILES_FONT_CHARS_START + (unsigned char)(*txt - 'A');
+            c = FONT_8x16_TILE_ID_CHARS + (unsigned char)(*txt - 'A');
         } else if(*txt >= 'a' && *txt <= 'z') {
-            c = TILES_FONT_CHARS_START + (unsigned char)(*txt - 'a');
+            c = FONT_8x16_TILE_ID_CHARS + (unsigned char)(*txt - 'a');
         } else if(*txt >= '0' && *txt <= '9') {
-            c = TILES_FONT_NUMS_START + (unsigned char)(*txt - '0');
+            c = FONT_8x16_TILE_ID_START + (unsigned char)(*txt - '0');
         } else {
             switch(*txt) {
                 case  '!': c = 37U; break;
@@ -171,15 +174,15 @@ void print_to_tilemap(const char * txt, uint16_t delay_time) {
                 case '\n':
                     // Do a carriage return, no printing and skip to top of loop
                     print_x = start_x;
-                    print_y += SPR_PRINT_SPACING_Y;
+                    print_y += BG_PRINT_SPACING_Y;
                     txt++;
                     continue;
                 // Default is blank tile for Space or any other unknown chars
-                default: c = TILE_ID_FONT_BLANK; break;
+                default: c = FONT_8x16_TILE_ID_BLANK; break;
             }
         }
 
-        c = (c * 2) + gfx_tiles_font_base; // 2 tiles per character
+        c = (c * FONT_8x16_TILE_HEIGHT) + gfx_tiles_font_base; // 2 tiles per character
         c |= print_tile_attribs;           // Sets palette, screen, etc
         // Print top then bottom of character (2 tiles)
         set_bkg_tile_xy(print_x, print_y, c);
@@ -201,56 +204,47 @@ void print_to_tilemap(const char * txt, uint16_t delay_time) {
     }
 }
 
-/*
 
 
+// TODO: Does this need a smaller 8x8 font? Looks easily do-able with a 1px drop shadow instead of 2px
 // Render a font digit
-void print_num_u16(uint8_t x, uint8_t y, uint16_t num, uint8_t print_digits) {
+void print_num_u16(uint16_t x, uint16_t y, uint16_t num, uint16_t fixed_str_length) {
 
     // Initialize index at END of array +1,
     // so that the first pass sets it to the first array position
-    uint8_t index = PRINT_MAX_DIGITS;
+    const uint16_t blank_tile = (FONT_8x16_TILE_ID_BLANK * FONT_8x16_TILE_HEIGHT) + gfx_tiles_font_base;  // * 2 is for two tiles per character
+    uint16_t index = fixed_str_length;
 
-    if (print_digits > PRINT_MAX_DIGITS)
-        print_digits = PRINT_MAX_DIGITS;
+    if (fixed_str_length > PRINT_MAX_DIGITS)
+        fixed_str_length = PRINT_MAX_DIGITS;
 
-    // Optional: Bounds checking
-//    if (num <= PRINT_MAX_NUM) {
-        // Store individual digits of n in reverse order
-        // Starting at the END of the array and working forward
-        // (using do-while to handle when initial value == 0)
-        do {
-            // decrement the counter first, so it finishes as pointing to the current digit in the array
-            index--;
-            digits[index] = (num % 10) + TILES_FONT_NUMS_START;
-            num = num / 10;
-        } while (num != 0);
+    // Max output is 99999 (but won't reach that due to 16 bit unsigned)
+    // Store individual digits of n in reverse order
+    // Starting at the END of the array and working forward
+    // (using do-while to handle when initial value == 0)
+    //
+    // Note: Small optimization could be to two digits at a time with %100 and have a LUT for 0-99 pairs
+    do {
+        // decrement the counter first, so it finishes as pointing to the current digit in the array
+        index--;
+        uint16_t chr  = (((num % 10) + FONT_8x16_TILE_ID_START) * FONT_8x16_TILE_HEIGHT) + gfx_tiles_font_base; // * 2 is for two tiles per character
+        chr |= print_tile_attribs;           // Sets palette, screen, etc
 
-        // Fill remaining spaces with empty tiles
-        while (index > 0) {
-            index--;
-            digits[index] = TILE_ID_FONT_BLANK;
-        }
+        // Print top then bottom of character (2 tiles)
+        str_digit_tiles[index] = chr;
+        str_digit_tiles[index + fixed_str_length] = ++chr;  // Wrap around to next tile row down for bottom of character
+        num = num / 10;
+    } while (num != 0);
 
-        // Draw the digits on the background
+    // Fill remaining spaces with empty tiles
+    while (index > 0) {
+        index--;
+        // Print top then bottom of character (2 tiles)
+        str_digit_tiles[index] = blank_tile;
+        str_digit_tiles[index + fixed_str_length] = blank_tile + 1;  // Wrap around to next tile row down
+    }
 
-        // Update BG Tilemap from Game Board
-        VBK_REG = 1; // Select BG tile attribute map
-        set_bkg_tiles(x,
-                      y,
-                      print_digits, 1, // 1 tile high
-                      &digits_attribs[index + (PRINT_MAX_DIGITS - print_digits) ]); // Start at first digit and go to end of array
-
-        // Update BG Tilemap from Game Board
-        VBK_REG = 0; // Re-Select regular BG tile map
-        set_bkg_tiles(x,
-                      y,
-                      print_digits, 1, // 1 tile high
-                      &digits[index + (PRINT_MAX_DIGITS - print_digits) ]); // Start at first digit and go to end of array
-//    }
+    // Draw the digits on the background tilemap
+    set_bkg_tiles(x, y, fixed_str_length, 2, // 1 tile high
+                  &str_digit_tiles[index]); // Start at first digit and go to end of digits (length depends on fixed_str_length)
 }
-
-
-
-}
-*/

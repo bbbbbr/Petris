@@ -20,31 +20,29 @@
 
 // #include "fade.h"
 
-// // #include "game_board.h"
+#include "game_board.h"
 // #include "game_board_gfx.h"
 // #include "gameover_message.h"
 // #include "game_stats.h"
 
-// #include "gameplay.h"
+#include "gameplay.h"
 
 #include "intro_splash.h"
 #include "intro_screen.h"
 #include "options_screen.h"
 
-// #include "options.h"
+#include "options.h"
 // #include "player_hinting.h"
 
 #include "input.h"
-// #include "gfx.h"
-// #include "gfx_print.h"
+#include "gfx.h"
+#include "gfx_print.h"
 
 
 #include "magic_code.h"
 
-// #include "../res/font_tiles.h"
 
-
-// #define DEBUG_SKIP_INTRO
+#define DEBUG_SKIP_INTRO
 
 
 void init (void);
@@ -117,10 +115,10 @@ void init_gfx_hardware(void) {
     VDP.BM_CTRL                   = BM_MODE_4BPP_SHARED; /* 512 x 512 shared */
     VDP.BG_CTRL                   = BG_TILESIZE(BG_TILESIZE_8X8, BG_TILESIZE_8X8) | BG0_FORMAT_4BPP | BG_LAYOUT_64X64_SPLIT;  // 2x 64x64 tilemaps
 
-    VDP.OBJ_SUBPAL[OBJ0_SUBPALS]  = BG_PAL_SETUP(PAL_8, PAL_9, PAL_10, PAL_11);
-    VDP.BM_SUBPAL                 = BM_SUBPAL(PAL_12, PAL_12, PAL_12, PAL_12);
-    VDP.BG_SUBPAL[BG0_SUBPALS]    = BG_PAL_SETUP(PAL_0, PAL_1, PAL_2,  PAL_3);
-    VDP.BG_SUBPAL[BG1_SUBPALS]    = BG_PAL_SETUP(PAL_4, PAL_5, PAL_6,  PAL_7);
+    VDP.OBJ_SUBPAL[OBJ0_SUBPALS]  = BG_PAL_SETUP(PAL_ASSIGN_OBJ_0, PAL_ASSIGN_OBJ_1, PAL_ASSIGN_OBJ_2, PAL_ASSIGN_OBJ_3);
+    VDP.BM_SUBPAL                 = BM_SUBPAL(PAL_ASSIGN_BM_0, PAL_ASSIGN_BM_1, PAL_ASSIGN_BM_2, PAL_ASSIGN_BM_3);
+    VDP.BG_SUBPAL[BG0_SUBPALS]    = BG_PAL_SETUP(PAL_ASSIGN_BG0_0, PAL_ASSIGN_BG0_1, PAL_ASSIGN_BG0_2, PAL_ASSIGN_BG0_3);
+    VDP.BG_SUBPAL[BG1_SUBPALS]    = BG_PAL_SETUP(PAL_ASSIGN_BG1_0, PAL_ASSIGN_BG1_1, PAL_ASSIGN_BG1_2, PAL_ASSIGN_BG1_3);
 
     VDP.SCREENPRIO      = BLEND_MATH_ADD | SCREEN_A_ENABLE | SCREEN_B_ENABLE | PRIORITY_BM_B | PRIORITY_BG0_A | PRIORITY_OBJ0_A;
     VDP.LAYER_CTRL      = LAYER_SCREEN(LAYER_SCREEN_A, LAYER_SCREEN_B, LAYER_SCREEN_A, LAYER_SCREEN_A) | LAYER_ENABLE_BG0 | LAYER_ENABLE_BG1 | LAYER_ENABLE_OBJ0 | LAYER_ENABLE_BM2 | LAYER_ENABLE_BM3;
@@ -150,6 +148,8 @@ void init(void) {
 int main() {
     init();
     magic_code_reset();
+
+    enable_interrupt_irq1_vblank();
 
     #ifdef DEBUG_SKIP_INTRO
         game_state = GAME_INTRO_INIT;
@@ -196,15 +196,13 @@ int main() {
 
             case GAME_OPTIONS:
                 options_screen_handle();
-                // TODO: DEBUG: loop back around to title screen for now
-                if (game_state == GAME_READY_TO_START) game_state = GAME_INTRO_INIT;
                 break;
-/*
 
             case GAME_READY_TO_START:
                 gameplay_init();
-                MusicUpdateStatus();
+                // MusicUpdateStatus();  // TODO
                 game_state = GAME_PLAYING;
+
                 break;
 
             case GAME_PLAYING:
@@ -214,7 +212,7 @@ int main() {
             case GAME_ENDED:
                 // TODO: 2 Player mode handling (need loopy hardware 4 player controller breakout)
 
-                GAMEOVER_MESSAGE_SET(SPR_GAMEOVER_CHARS);
+                // GAMEOVER_MESSAGE_SET(SPR_GAMEOVER_CHARS);
                 game_state = GAME_OVER_SCREEN;
                 break;
 
@@ -229,11 +227,11 @@ int main() {
                 if (KEY_TICKED(J_START | J_A | J_B)) {
                     // Turn sprites off and then fade out
                     HIDE_SPRITES;
-                    fade_start(FADE_OUT);
+                    // fade_start(FADE_OUT);
                     game_state = GAME_INTRO_INIT;
                 }
                 break;
-*/
+
         }
     }
 }

@@ -4,11 +4,11 @@
 #define GAMEOVER_MESSAGE_H
 
 
-extern const UINT8 SPR_GAMEOVER_CHARS[];
-extern const UINT8 SPR_YOU_LOST_CHARS[];
-extern const UINT8 SPR_YOU_WON_CHARS[];
+extern const uint8_t SPR_GAMEOVER_CHARS[];
+extern const uint8_t SPR_YOU_LOST_CHARS[];
+extern const uint8_t SPR_YOU_WON_CHARS[];
 
-extern const UINT8 * p_gameover_chars;
+extern const uint8_t * p_gameover_chars;
 
 #define GAMEOVER_MESSAGE_SET(p_msg) (p_gameover_chars = &p_msg[0])
 #define GAMEOVER_MESSAGE_CHK(p_msg) (p_gameover_chars == &p_msg[0])

@@ -30,11 +30,11 @@ struct vdp {
 	};
 	PADBYTES _pad_52200[0x5E00];
 	// General registers
-	uint16_t MODE;
-	int16_t  HCOUNT;
-	int16_t  VCOUNT;
-	uint16_t TRIGGER;
-	uint16_t SYNC_IRQ_CTRL;
+	uint16_t MODE;                             // 0x58000 
+	int16_t  HCOUNT;                           // 0x58002 
+	int16_t  VCOUNT;                           // 0x58004 
+	uint16_t TRIGGER;                          // 0x58006 
+	uint16_t SYNC_IRQ_CTRL;                    // 0x58008     // New name: RASTER_DMA_CTRL
 	PADBYTES _pad_5800A[0xFF6];
 	// Bitmap registers
 	uint16_t BM_SCROLLX[4];
@@ -68,7 +68,7 @@ struct vdp {
 	uint16_t CAPTURE_CTRL;
 	PADBYTES _pad_5B00C[0xFF4];
 	// IRQ0 registers
-	uint16_t IRQ0_NMI_CTRL;
+	uint16_t IRQ0_NMI_CTRL;                    // 0x5C000     // New name: VDP.INTERRUPT_CTRL
 	uint16_t IRQ0_HCMP;
 	uint16_t IRQ0_VCMP;
 	PADBYTES _pad_5C006[0xFFA];

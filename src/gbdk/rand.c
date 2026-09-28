@@ -40,21 +40,20 @@
 //  with a = 17, m = 65536 and c = $5c93 (arbitrarily)
 //  The seed value is also chosen arbitrarily as $a27e
 //  Ref : D. E. Knuth, "The Art of Computer Programming" , Volume 2
-/*
-uint16_t rand_seed;
+
+uint16_t __rand_seed;
 
 
-uint16_t rand(void) {
+uint16_t rand(void) {  // TODO: test output
 
-    rand_seed = (rand_seed * 17) + 0x5C93u;
+    __rand_seed = (__rand_seed * 17) + 0x5C93u;
 
     // Note D is the low byte,E the high byte. This is intentional because
     // the high byte can be slightly 'more random' than the low byte, and I presume
     // most will cast the return value to a uint8_t.
-    return ((rand_seed >> 8) | (rand_seed << 8));
+    return ((__rand_seed >> 8) | (__rand_seed << 8));
 }
 
 uint16_t initrand(uint16_t seed) {
-    rand_seed = seed;
+    __rand_seed = seed;
 }
-*/

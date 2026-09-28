@@ -1,4 +1,4 @@
-// Copyright 2020 (c) bbbbbr
+// Copyright 2026 (c) bbbbbr
 //
 // This software is licensed under:
 //
@@ -11,15 +11,14 @@
 
 // game_types.c
 
-#include <gb/gb.h>
-#include <gb/cgb.h> // Include cgb functions
-#include <stdlib.h>
+#include <gbdk/platform.h>
+#include <stdint.h>
+#include <stdbool.h>
 
 #include "audio_common.h"
 #include "gfx.h"
 #include "gfx_print.h"
-#include "fade2pal.h"
-
+// #include "fade2pal.h"
 
 #include "game_board.h"
 #include "gameplay.h"
@@ -32,8 +31,8 @@
 #include "game_types.h"
 
 
-UINT8 game_type_cleanup_tail_count = 0;
-UINT8 game_type_long_pet_required_size = 0;
+uint8_t game_type_cleanup_tail_count = 0;
+uint8_t game_type_long_pet_required_size = 0;
 
 
 void game_types_init(void) {
@@ -58,7 +57,7 @@ void game_types_handle_level_transition(void) {
         // Do a color palette fade every N levels
         if ((player_level % LEVEL_CHANGE_PAL_NUM) == 0) {
 
-            fade2pal_start_next();
+            /*fade2pal_start_next();*/  // TODO
         }
 
     } else {
@@ -78,7 +77,7 @@ void game_types_handle_level_transition(void) {
 
         board_hide_all(BRD_CLR_DELAY_CLEAR_MED);
 
-        PRINT(MSG_LEVEL_UP_X, MSG_LEVEL_UP_Y, MSG_LEVEL_UP_CTEXT,0);
+        PRINTXY(MSG_LEVEL_UP_X, MSG_LEVEL_UP_Y, MSG_LEVEL_UP_CTEXT,0);
 
         // Update level indicator before populating the board
         level_show();
@@ -86,14 +85,14 @@ void game_types_handle_level_transition(void) {
         // Do a color palette fade every N levels
         if ((player_level % LEVEL_CHANGE_PAL_NUM) == 0) {
 
-            fade2pal_start_next();
+            /*fade2pal_start_next();*/ // TODO
         }
 
         // Show preview of upcoming piece so player has time to check it out
         // Wait one frame (vbl) after the update so there is time for the player
         // piece sprite location to be updated before re-showing the sprites.
         gameplay_prepare_piece();
-        wait_vbl_done();
+        vsync();
         SHOW_SPRITES;
 
         // Flash a get ready message to the player
@@ -109,9 +108,9 @@ void game_types_handle_level_transition(void) {
 
 
 // Calculate how many tails to add to the board based on current level
-UINT8 game_type_pet_cleanup_get_tail_count(void) {
+uint8_t game_type_pet_cleanup_get_tail_count(void) {
 
-    UINT8 num_pets;
+    uint8_t num_pets;
 
     num_pets = (player_level / 2) + GAME_TYPE_PET_CLEANUP_TAIL_COUNT_MIN;
 
@@ -133,7 +132,7 @@ void game_type_pet_cleanup_increment_tail_count(void) {
             game_type_cleanup_tail_count++;
         }
 
-        print_num_u16(DISPLAY_NUMPETS_X, DISPLAY_NUMPETS_Y, (UINT16)game_type_cleanup_tail_count, DIGITS_5);
+        print_num_u16(DISPLAY_NUMPETS_X, DISPLAY_NUMPETS_Y, (uint16_t)game_type_cleanup_tail_count, STR_DIGIT_LEN_5);
     }
 }
 
@@ -153,7 +152,7 @@ void game_type_pet_cleanup_decrement_tail_count(void) {
         if (game_type_cleanup_tail_count == 0) {
             // Don't increment the level now since it's
             // in the middle of clearing pieces off the baord
-            level_increment_enqueue = TRUE;
+            level_increment_enqueue = true;
         }
     }
 }
@@ -161,7 +160,7 @@ void game_type_pet_cleanup_decrement_tail_count(void) {
 
 
 // Calculate length of pet required to complete level, based on current player level
-void game_type_long_pet_set_pet_size(UINT8 player_level) {
+void game_type_long_pet_set_pet_size(uint8_t player_level) {
 
     game_type_long_pet_required_size = player_level + GAME_TYPE_PET_LONG_PET_SIZE_MIN;
 
@@ -170,18 +169,18 @@ void game_type_long_pet_set_pet_size(UINT8 player_level) {
     }
 
     // Display required Pet Size
-    print_num_u16(DISPLAY_NUMPETS_X, DISPLAY_NUMPETS_Y, (UINT16)game_type_long_pet_required_size, DIGITS_3);
+    print_num_u16(DISPLAY_NUMPETS_X, DISPLAY_NUMPETS_Y, (uint16_t)game_type_long_pet_required_size, STR_DIGIT_LEN_3);
 }
 
 
 
 // Check to see whether the size requirement has been met in
 // long pet mode. If so, flag the level as complete
-void game_type_long_pet_check_size(UINT8 tile_count) {
+void game_type_long_pet_check_size(uint8_t tile_count) {
 
     if (tile_count >= game_type_long_pet_required_size) {
         // Don't increment the level now since it's
         // in the middle of clearing pieces off the baord
-        level_increment_enqueue = TRUE;
+        level_increment_enqueue = true;
     }
 }

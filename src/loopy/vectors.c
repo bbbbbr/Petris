@@ -1,5 +1,6 @@
 #include "serial.h"
 #include "loopy/bios.h"
+#include "gbdk/gbdk_loopy.h"
 
 /*
 All vector functions MUST be declared with __attribute__((interrupt_handler)) to
@@ -42,7 +43,7 @@ void (* const vector_table[])(void) = {
 	// DMA address error
 	halt,
 	// NMI
-	doNothing,
+	isr_nmi_vblank, // doNothing,
 	// User Break
 	doNothing,
 	// (Reserved for system use)
@@ -63,7 +64,7 @@ void (* const vector_table[])(void) = {
 /* IRQ and on-chip module interrupts */
 /* Set nonzero, nonmasked priority in IPRA-IPRB to enable */
 	// IRQ0..IRQ7
-	doNothing, doNothing, doNothing, doNothing,
+	isr_irq0_vblank, isr_irq1_vblank, doNothing, doNothing,
 	doNothing, doNothing, doNothing, doNothing,
 	// DMAC0..DMAC3 (DEI, Reserved)
 	doNothing, RESERVED,

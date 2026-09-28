@@ -1,4 +1,4 @@
-// Copyright 2020 (c) bbbbbr
+// Copyright 2026 (c) bbbbbr
 //
 // This software is licensed under:
 //
@@ -11,9 +11,9 @@
 
 // game_board_special_pieces.c
 
-#include <gb/gb.h>
-#include <gb/cgb.h> // Include cgb functions
-#include <stdlib.h>
+#include <gbdk/platform.h>
+#include <stdint.h>
+#include <stdbool.h>
 
 #include "audio_common.h"
 #include "common.h"
@@ -26,14 +26,14 @@
 #include "player_info.h"
 #include "player_hinting.h"
 
-const INT8 BRD_BOMB_HINT_OFFSET_LUT_X[] = {-1,  0, 1, 0};
-const INT8 BRD_BOMB_HINT_OFFSET_LUT_Y[] = { 0, -1, 0, 1};
+const int8_t BRD_BOMB_HINT_OFFSET_LUT_X[] = {-1,  0, 1, 0};
+const int8_t BRD_BOMB_HINT_OFFSET_LUT_Y[] = { 0, -1, 0, 1};
 
-void board_handle_special_bomb(INT8 x,INT8 y) {
+void board_handle_special_bomb(int8_t x,int8_t y) {
 
-    UINT8 piece, connect;
-    UINT8 c;
-    UINT8 tx, ty;
+    uint8_t piece, connect;
+    uint8_t c;
+    uint8_t tx, ty;
 
     // Clear adjacent 4 tiles (no piece clearing player credit from this)
     c = 0;
