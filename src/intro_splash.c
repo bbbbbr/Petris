@@ -29,20 +29,22 @@
 #define TILES_SPLASH_START  0
 #define TILE_COUNT_SPLASH  23
 
-uint8_t scroll_x_amount = 0;
-uint8_t  effect_y_line = 0;
+volatile uint16_t scroll_x_amount = 0;
+volatile int16_t  effect_y_line = 0;
 
-#define EFFECT_Y_LINE_MAX      143U
+#define EFFECT_Y_LINE_MAX      224U
 #define EFFECT_START_Y          16U
 #define SCX_INVERT_WAVE_BITS  0xFAU
 
 static void init_gfx(void);
 
-/*
-void hblank_effect_isr(void) {
+
+void intro_splash_hblank_effect_isr(void) {
+
+
 
     // Don't start until line [effect_y_line]
-    if (LY_REG > effect_y_line) {
+    if (simulated_vdp_hcount > effect_y_line) {
 
         // Horizontal waves effect
 
@@ -52,23 +54,17 @@ void hblank_effect_isr(void) {
         // every other line.
         scroll_x_amount += 6U; // Other values that look good: 4U, 6U
 
-        if (LY_REG & 0x01U)
+        if (simulated_vdp_hcount & 0x01U) {
             // equiv to: SCX_REG = (LY_REG - effect_y_line) << 2;
-            SCX_REG = scroll_x_amount;
-        else
+            VDP.BG_SCROLL[BG0_SCROLL_X] = scroll_x_amount;
+        } else {
             // equiv to: SCX_REG = 255U - ((LY_REG - effect_y_line) << 2);
-            SCX_REG = 255U - scroll_x_amount;
+            VDP.BG_SCROLL[BG0_SCROLL_X] = -scroll_x_amount;
+        }
     }
 }
-*/
 
-static void init_hblank_isr(void) {
 
-    // Not sure this is supported in the Emulator, so skip this for now
-
-    // VDP.INTERRUPT_CTRL
-    // VDP.IRQ0_HCMP
-}
 
 static void init_gfx(void) {
 
@@ -94,22 +90,20 @@ void intro_splash(void) {
 
     init_gfx();
 
-/*
+
     // Scroll so graphics are off-screen to start
     VDP.BG_SCROLL[BG0_SCROLL_Y] = DEVICE_SCREEN_PX_HEIGHT;
-
-    fade_start(FADE_IN);
-
+/*
+    fade_start(FADE_IN);  // TODO
+*/
     // ========== START EFFECT ==========
 
     effect_y_line = 0U + EFFECT_START_Y;
 
     // Add the hblank ISR and enable it
-    disable_interrupts();
-    STAT_REG |=  STATF_MODE00; // (H-Blank)
-    add_LCD(hblank_effect_isr);
-    set_interrupts(VBL_IFLAG | LCD_IFLAG);
-    enable_interrupts();
+    // * Expects irq1 VBlank to be enabled, which it is on main startup for OAM DMA copy
+    add_irq0(&intro_splash_hblank_effect_isr);
+    enable_interrupt_irq0_hblank();
 
     // Repeat until effect_y_line reaches the bottom of the screen
     while (effect_y_line <= EFFECT_Y_LINE_MAX) {
@@ -118,25 +112,26 @@ void intro_splash(void) {
         // Reset scroll registers to zero
         // at the start of every frame
         scroll_x_amount = 0U;
-        SCY_REG = 0U;
-        SCX_REG = 0U;
+        VDP.BG_SCROLL[BG0_SCROLL_Y] = 0u;
+        VDP.BG_SCROLL[BG0_SCROLL_X] = 0u;
 
         // Increment effect position downward by one
         // scanline every other frame
-        if (sys_time & 0x01)
+        // if (sys_time & 0x01)
             effect_y_line++; // Move effect down screen
     }
 
     // Disable HBlank interrupt
-    disable_interrupts();
-    set_interrupts(VBL_IFLAG);
-    enable_interrupts();
+    disable_interrupt_irq0_hblank();
+    remove_irq0();
 
     // ========== START EFFECT ==========
 
-    delay(500);
-    fade_start(FADE_OUT);
+    delay(1000);
+/*
+    fade_start(FADE_OUT); // TODO
 */
 
-    waitpadticked_lowcpu(J_ANY);
+
+    // waitpadticked_lowcpu(J_ANY);
 }

@@ -13,8 +13,11 @@ static uint16_t   _tilemap_cached_props = 0;
 
 volatile uint16_t sys_time = 0;
 volatile bool     vbl_done = false;
+volatile int16_t simulated_vdp_hcount;
+
 OAM_item_t shadow_OAM[SHADOW_OAM_MAX_SPRITES];
 
+void (* registered_irq0_handler)(void);
 
 #define  U16_COUNT_PER_OAM_ENTRY  (2u)
 #define NO_BIOS_VSYNC_BEFORE_WRITES
@@ -82,23 +85,23 @@ void shadow_oam_copy_cpu(void) {
 
 // WARNING: DMA CANNOT be used when VDP NMI VBlank is enabled.
 //          Will fail to start with DMA_DMAOR_NMIF_BLOCKED_BY_NMI set in DMAOR
-void enable_interrupt_nmi_vblank() {
+void enable_interrupt_nmi_vblank(void) {
     VDP.IRQ0_NMI_CTRL |= NMI_ENABLE;
 }
 
 
-void disable_interrupt_nmi_vblank() {
+void disable_interrupt_nmi_vblank(void) {
     VDP.IRQ0_NMI_CTRL &= ~NMI_ENABLE;
 }
 
 
-void enable_interrupt_irq0_vblank() {
-    #define IRQ_PRIORITY_LOWEST_OFF    0x0u
-    #define IRQ_PRIORITY_14            0xEu
-    #define IRQ_PRIORITY_15_HIGHEST    0xFu
+#define IRQ_PRIORITY_LOWEST_OFF    0x0u
+#define IRQ_PRIORITY_14            0xEu
+#define IRQ_PRIORITY_15_HIGHEST    0xFu
 
-    #define VERT_SCANLINE_VBLANK_FIRST -39       // First VBlank Scanline (-39 -> 0 -> 224)
-    #define HORIZ_PIXEL_HBLANK_FIRST   -84       // First HBlank Pixel    (-84 -> 0 -> 257)
+#define VERT_SCANLINE_VBLANK_FIRST -39       // First VBlank Scanline (-39 -> 0 -> 224)
+#define HORIZ_PIXEL_HBLANK_FIRST   -84       // First HBlank Pixel    (-84 -> 0 -> 257)
+void enable_interrupt_irq0_vblank(void) {
 
     VDP.IRQ0_VCMP = VERT_SCANLINE_VBLANK_FIRST;  // First VBlank Scanline (-39 -> 0 -> 224)
     VDP.IRQ0_HCMP = HORIZ_PIXEL_HBLANK_FIRST;    // First HBlank Pixel    (-84 -> 0 -> 257)
@@ -108,13 +111,24 @@ void enable_interrupt_irq0_vblank() {
     sys_setInterruptMask(IRQ_PRIORITY_14);
 }
 
+void enable_interrupt_irq0_hblank(void) {
 
-void disable_interrupt_irq0_vblank() {
+    VDP.IRQ0_VCMP = VERT_SCANLINE_VBLANK_FIRST;  // First VBlank Scanline (-39 -> 0 -> 224)
+    VDP.IRQ0_HCMP = HORIZ_PIXEL_HBLANK_FIRST;    // First HBlank Pixel    (-84 -> 0 -> 257)
+    VDP.IRQ0_NMI_CTRL &= ~IRQ0_VCMP_ENABLE;      // Select HBlank mode by turning off VBlank mode bit
+    VDP.IRQ0_NMI_CTRL |= IRQ0_ENABLE;
+    sys_setInterruptPriority(INT_PRIO_IRQ0, IRQ_PRIORITY_15_HIGHEST);
+    // Set Global interrupt priority mask level to be 1 below the level configured above
+    sys_setInterruptMask(IRQ_PRIORITY_14);
+}
+
+
+void disable_interrupt_irq0_vblank(void) {
     VDP.IRQ0_NMI_CTRL &= ~IRQ0_ENABLE;
 }
 
 
-void enable_interrupt_irq1_vblank() {
+void enable_interrupt_irq1_vblank(void) {
     // Enable IRQ1 VBlank in VDP with VBlank mode
     VDP.SYNC_IRQ_CTRL = (IRQ1_ENABLE | IRQ1_SRC_VSYNC);
 
@@ -128,8 +142,18 @@ void enable_interrupt_irq1_vblank() {
 }
 
 
-void disable_interrupt_irq1_vblank() {
+void disable_interrupt_irq1_vblank(void) {
     VDP.SYNC_IRQ_CTRL &= ~IRQ1_ENABLE;
+}
+
+
+void add_irq0(void (* handler)(void)) {
+    registered_irq0_handler = handler;
+}
+
+
+void remove_irq0(void) {
+    registered_irq0_handler = NULL;
 }
 
 
@@ -149,8 +173,32 @@ void disable_interrupt_irq1_vblank() {
 void INTERRUPT SMALLFUNC isr_nmi_vblank(void) {
 }
 
+// #define SCANLINE_LUT_SZ        64u
+// #define HALF_SCANLINE_LUT_SZ   (SCANLINE_LUT_SZ >> 1)
+// #define HALF_SCANLINE_LUT_MASK (HALF_SCANLINE_LUT_SZ - 1u)
 
-void INTERRUPT SMALLFUNC isr_irq0_vblank(void) {
+// const int16_t scanline_offsets_tbl[SCANLINE_LUT_SZ] = {
+//      0,     2,     3,     4,     6,     7,     7,
+//      8,     8,     8,     7,     7,     6,     4,
+//      3,     2,     0,    -2,    -3,    -4,    -6,
+//     -7,    -7,    -8,    -8,    -8,    -7,    -7,
+//     -6,    -4,    -3,    -2,
+//      // Now repeats entire sequence
+//      0,     2,     3,     4,     6,     7,     7,
+//      8,     8,     8,     7,     7,     6,     4,
+//      3,     2,     0,    -2,    -3,    -4,    -6,
+//     -7,    -7,    -8,    -8,    -8,    -7,    -7,
+//     -6,    -4,    -3,    -2 };
+
+// const int16_t * scanline_offsets = scanline_offsets_tbl;
+
+// extern volatile int16_t effect_y_line;
+// extern volatile uint16_t scroll_x_amount;
+
+void INTERRUPT SMALLFUNC isr_irq0_vblank_hblank(void) {
+    simulated_vdp_hcount++;
+
+    if (registered_irq0_handler) registered_irq0_handler();
 }
 
 
@@ -158,6 +206,9 @@ void INTERRUPT SMALLFUNC isr_irq1_vblank(void) {
     shadow_oam_copy_dma();
     sys_time++;
     vbl_done = true;
+
+    // Hardwiring tp -39 since there seems to be jitter in reading HCOUNT (maybe a clash with the HBlank ISR?)
+    simulated_vdp_hcount = -39; // (uint16_t)VDP.HCOUNT;
 }
 
 

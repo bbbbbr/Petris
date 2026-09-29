@@ -105,6 +105,7 @@
 
 extern volatile uint16_t sys_time;
 extern volatile bool     vbl_done;
+extern volatile int16_t simulated_vdp_hcount;
 
 typedef struct OAM_item_t {
     uint8_t tile;  //< Sprite tile number VDP.OAM[N].[31..24] 
@@ -116,17 +117,23 @@ typedef struct OAM_item_t {
 extern OAM_item_t shadow_OAM[SHADOW_OAM_MAX_SPRITES];
 
 
-void enable_interrupt_nmi_vblank();
-void disable_interrupt_nmi_vblank();
+void enable_interrupt_nmi_vblank(void);
+void disable_interrupt_nmi_vblank(void);
 
-void enable_interrupt_irq0_vblank();
-void disable_interrupt_irq0_vblank();
+void enable_interrupt_irq0_vblank(void);
+void enable_interrupt_irq0_hblank(void);
+void disable_interrupt_irq0_vblank(void);
+#define disable_interrupt_irq0_hblank disable_interrupt_irq0_vblank
 
-void enable_interrupt_irq1_vblank();
-void disable_interrupt_irq1_vblank();
+void enable_interrupt_irq1_vblank(void);
+void disable_interrupt_irq1_vblank(void);
+
+void add_irq0(void (* handler)(void));
+void remove_irq0();
+
 
 void INTERRUPT SMALLFUNC isr_nmi_vblank(void);
-void INTERRUPT SMALLFUNC isr_irq0_vblank(void);
+void INTERRUPT SMALLFUNC isr_irq0_vblank_hblank(void);
 void INTERRUPT SMALLFUNC isr_irq1_vblank(void);
 
 void shadow_oam_copy_dma(void);
