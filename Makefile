@@ -152,3 +152,4 @@ assets:
 	$(TOOLSDIR)/png2asset      $(RES_ASSET_DIR)/pet_and_special_tiles.png -o $(RESDIR)/pet_and_special_tiles_out.c -use_metafile
 	$(TOOLSDIR)/png2asset      $(RES_ASSET_DIR)/font_8x8_nums_pet_colored.png -o $(RESDIR)/font_8x8_nums_pet_colored_out.c -use_metafile
 	$(TOOLSDIR)/png2asset      $(RES_ASSET_DIR)/game_board_border.png    -o $(RESDIR)/game_board_border_out.c -use_metafile
+	$(TOOLSDIR)/png2asset      $(RES_ASSET_DIR)/intro_cat_mono.png       -o $(RESDIR)/intro_cat_mono_out.c -use_metafile

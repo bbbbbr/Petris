@@ -42,7 +42,7 @@
 #include "magic_code.h"
 
 
-#define DEBUG_SKIP_INTRO
+// #define DEBUG_SKIP_INTRO
 
 
 void init (void);
