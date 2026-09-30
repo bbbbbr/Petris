@@ -379,15 +379,12 @@ void options_screen_handle(void) {
         options_screen_try_gamestart();
     }
 
-    // NOTE: For now, A/B are also used to increase/decrease option settings
-    //       so don't use B to return to main intro screen
-    //
-    // // Go back to Intro Screen
-    // else if (KEY_TICKED(J_B)) {
-    //
-    //     options_screen_exit_cleanup();
-    //     game_state = GAME_INTRO_INIT;
-    // }
+    // Go back to Intro Screen
+    else if (KEY_TICKED(J_Y)) {
+
+        options_screen_exit_cleanup();
+        game_state = GAME_INTRO_INIT;
+    }
 
     // Update cursor every N frames
     if ((sys_time & CURSOR_UPDATE_MASK) == CURSOR_UPDATE_MASK) {
