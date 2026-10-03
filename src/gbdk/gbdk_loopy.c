@@ -5,6 +5,54 @@
 
 #include "gbdk/platform.h"
 
+
+#define IRQ_PRIORITY_LOWEST_OFF    0x0u
+#define IRQ_PRIORITY_14            0xEu
+#define IRQ_PRIORITY_15_HIGHEST    0xFu
+
+#define VERT_SCANLINE_VBLANK_FIRST -39       // First VBlank Scanline (-39 -> 0 -> 224)
+#define HORIZ_PIXEL_HBLANK_FIRST   -84       // First HBlank Pixel    (-84 -> 0 -> 257)
+
+#define  U16_COUNT_PER_OAM_ENTRY  (2u)
+#define NO_BIOS_VSYNC_BEFORE_WRITES
+
+// Turn bios vsync timing on/off for writes
+#ifdef NO_BIOS_VSYNC_BEFORE_WRITES
+#else
+#endif
+
+#define CACHED_VCOUNT_INVALIDATED  0u
+#define VCOUNT_SIGN_BIT  (1u << 8)
+
+// Leave at least N scanline of safe buffer
+#define WAIT_SAFE_VSYNC_LAST_SAFE_THRESHOLD 256u // -1 signed 9 bit as uint16, since it goes from 224 -> -39 (256 + 39)
+#define WAIT_SAFE_VSYNC   while (cached_vdp_vcount < WAIT_SAFE_VSYNC_LAST_SAFE_THRESHOLD)
+
+// Channel 1 DMA copy
+#define DMA1_U16_MEMCOPY(dest, src, u16_count) \
+    DMAC_DMAOR = DMA_DMAOR_AE_NO_ERROR | DMA_DMAOR_NMIF_NO_ERROR | DMA_DMAOR_DME_ENABLE; \
+    DMAC_SAR1  = (uint32_t)(src);   \
+    DMAC_DAR1  = (uint32_t)(dest);  \
+    DMAC_TCR1  = (u16_count);       \
+    DMAC_CHCR1 = (DMA_CHCR_DM_DEST_INCREMENT | DMA_CHCR_SM_SRC_INCREMENT | DMA_CHCR_RS_AUTO_CONF | DMA_CHCR_TM_BUS_BURST | DMA_CHCR_TS_XFER_WORD_U16 | DMA_CHCR_DE_XFER_ENABLE);
+
+// When DMA is working this doesn't even decrement once
+#define DMA1_WAIT_DONE() \
+    volatile uint16_t timeout = 60000u; \
+    while(!(DMAC_CHCR1 & DMA_CHCR_TE_XFER_IS_DONE) && timeout != 0u) { \
+        timeout--; \
+    } \
+    cached_vdp_vcount = CACHED_VCOUNT_INVALIDATED; // Invalidate the vcount cache in case the dma blocked an update interrupt
+
+#define DMA1_WAIT_DONE_NO_VCOUNT_INVALIDATE() \
+    volatile uint16_t timeout = 60000u; \
+    while(!(DMAC_CHCR1 & DMA_CHCR_TE_XFER_IS_DONE) && timeout != 0u) { \
+        timeout--; \
+    }
+
+
+    // cached_vdp_vcount = VDP.VCOUNT; // Ooof, maybe can't do this because the dma to vram may have blocked the vdp from updating VCount?
+
 static uint16_t * _bg_tilemap_base_address =  BG0_MAP_START();
 static uint8_t  * _4bpp_tile_patterns_base_address = 0;
 static uint16_t   _tilemap_screen_ab_prop = 0;
@@ -13,22 +61,39 @@ static uint16_t   _tilemap_cached_props = 0;
 
 volatile uint16_t sys_time = 0;
 volatile bool     vbl_done = false;
-volatile int16_t simulated_vdp_hcount;
+volatile int16_t  simulated_vdp_vcount = VERT_SCANLINE_VBLANK_FIRST;
+volatile uint16_t cached_vdp_vcount;  // Unsigned, stores raw 9 bit VDP.VCount without translating it to uint16_t
+volatile uint16_t vdp_vcount_s16;     // VDP.VCount translated from 9 bit signed to 16 bit signed
+
 
 OAM_item_t shadow_OAM[SHADOW_OAM_MAX_SPRITES];
-
 void (* registered_irq0_handler)(void);
 
-#define  U16_COUNT_PER_OAM_ENTRY  (2u)
-#define NO_BIOS_VSYNC_BEFORE_WRITES
+#define VRAM_XFER_BUF_SZ    512u
+uint16_t vram_xfer_buf[VRAM_XFER_BUF_SZ];
 
-// Turn bios vsync timing on/off for writes
-#ifdef NO_BIOS_VSYNC_BEFORE_WRITES
-    #define OPTIONAL_IF_ENABLED_BIOS_VSYNC_BEFORE_VDP_WRITES()
-#else
-    #define OPTIONAL_IF_ENABLED_BIOS_VSYNC_BEFORE_VDP_WRITES()  bios_vsync();  // TODO: FIXME With safe (?) VDP write timing, to at least reduce tearing
-#endif
 
+/*
+void dma1_u16_memcopy_vram_safe(uint16_t * dest, uint16_t * src, uint16_t u16_count) {
+
+    // Prepare the transfer
+    DMAC_DMAOR = DMA_DMAOR_AE_NO_ERROR | DMA_DMAOR_NMIF_NO_ERROR | DMA_DMAOR_DME_ENABLE; \
+    DMAC_SAR1  = (uint32_t)(src);
+    DMAC_DAR1  = (uint32_t)(dest);
+    DMAC_TCR1  = (u16_count);
+
+    // Wait for safe vram access
+    while (simulated_vdp_vcount >= (WAIT_SAFE_VSYNC_LAST_SAFE_THRESHOLD));
+    // Start the transfer
+    DMAC_CHCR1 = (DMA_CHCR_DM_DEST_INCREMENT | DMA_CHCR_SM_SRC_INCREMENT | DMA_CHCR_RS_AUTO_CONF | DMA_CHCR_TM_BUS_BURST | DMA_CHCR_TS_XFER_WORD_U16 | DMA_CHCR_DE_XFER_ENABLE);
+
+    // Wait for done
+    volatile uint16_t timeout = 60000u;
+    while(!(DMAC_CHCR1 & DMA_CHCR_TE_XFER_IS_DONE) && timeout != 0u) {
+        timeout--;
+    }
+}
+*/
 
 // Copy shadow oam via DMA
 //
@@ -95,12 +160,6 @@ void disable_interrupt_nmi_vblank(void) {
 }
 
 
-#define IRQ_PRIORITY_LOWEST_OFF    0x0u
-#define IRQ_PRIORITY_14            0xEu
-#define IRQ_PRIORITY_15_HIGHEST    0xFu
-
-#define VERT_SCANLINE_VBLANK_FIRST -39       // First VBlank Scanline (-39 -> 0 -> 224)
-#define HORIZ_PIXEL_HBLANK_FIRST   -84       // First HBlank Pixel    (-84 -> 0 -> 257)
 void enable_interrupt_irq0_vblank(void) {
 
     VDP.IRQ0_VCMP = VERT_SCANLINE_VBLANK_FIRST;  // First VBlank Scanline (-39 -> 0 -> 224)
@@ -173,30 +232,10 @@ void remove_irq0(void) {
 void INTERRUPT SMALLFUNC isr_nmi_vblank(void) {
 }
 
-// #define SCANLINE_LUT_SZ        64u
-// #define HALF_SCANLINE_LUT_SZ   (SCANLINE_LUT_SZ >> 1)
-// #define HALF_SCANLINE_LUT_MASK (HALF_SCANLINE_LUT_SZ - 1u)
-
-// const int16_t scanline_offsets_tbl[SCANLINE_LUT_SZ] = {
-//      0,     2,     3,     4,     6,     7,     7,
-//      8,     8,     8,     7,     7,     6,     4,
-//      3,     2,     0,    -2,    -3,    -4,    -6,
-//     -7,    -7,    -8,    -8,    -8,    -7,    -7,
-//     -6,    -4,    -3,    -2,
-//      // Now repeats entire sequence
-//      0,     2,     3,     4,     6,     7,     7,
-//      8,     8,     8,     7,     7,     6,     4,
-//      3,     2,     0,    -2,    -3,    -4,    -6,
-//     -7,    -7,    -8,    -8,    -8,    -7,    -7,
-//     -6,    -4,    -3,    -2 };
-
-// const int16_t * scanline_offsets = scanline_offsets_tbl;
-
-// extern volatile int16_t effect_y_line;
-// extern volatile uint16_t scroll_x_amount;
 
 void INTERRUPT SMALLFUNC isr_irq0_vblank_hblank(void) {
-    simulated_vdp_hcount++;
+    simulated_vdp_vcount++;  // Part of the problem might be this breaking down when DMA transfers happen? (i.e. skipped hcounts never get restored?)
+    cached_vdp_vcount = VDP.VCOUNT;
 
     if (registered_irq0_handler) registered_irq0_handler();
 }
@@ -207,8 +246,9 @@ void INTERRUPT SMALLFUNC isr_irq1_vblank(void) {
     sys_time++;
     vbl_done = true;
 
-    // Hardwiring tp -39 since there seems to be jitter in reading HCOUNT (maybe a clash with the HBlank ISR?)
-    simulated_vdp_hcount = -39; // (uint16_t)VDP.HCOUNT;
+    // Hardwiring to -39 since there seems to be jitter in reading HCOUNT (maybe a clash with the HBlank ISR?)
+    simulated_vdp_vcount = -39; // (uint16_t)VDP.HCOUNT;
+    cached_vdp_vcount = VDP.VCOUNT;
 }
 
 
@@ -235,11 +275,18 @@ void set_bkg_4bpp_palette(unsigned int first_palette, unsigned int nb_palettes, 
 
     uint16_t * p_pal = &VDP.PALETTE[first_palette * COLS_PER_PAL_4BPP];
 
+    WAIT_SAFE_VSYNC;
+    DMA1_U16_MEMCOPY(p_pal, rgb_data, (nb_palettes * COLS_PER_PAL_4BPP));
+    DMA1_WAIT_DONE();
+
+    /* 
+    // NON-DMA style    
     for (unsigned int pal = 0; pal < nb_palettes; pal++) {
         for (unsigned int col = 0; col < COLS_PER_PAL_4BPP; col++) {
             *p_pal++ = *rgb_data++;
         }
     }
+    */
 }
 
 
@@ -263,9 +310,18 @@ void set_bkg_4bpp_data(unsigned int start, unsigned int ntiles, const uint16_t *
     // TODO: Use DMA (make a vmemcpy shim?)
     // Tile VRAM is not dual-ported, so requires safe access timing, unlike bitmap vram
     // TODO: This is the shoddiest safe access timing...
-    OPTIONAL_IF_ENABLED_BIOS_VSYNC_BEFORE_VDP_WRITES();
-    size_t copybytes = ntiles;
-    while (copybytes--) {
+
+    size_t copytiles = ntiles;
+    while (copytiles--) {
+
+        WAIT_SAFE_VSYNC;
+        DMA1_U16_MEMCOPY(p_dest, src, U16_WORDS_PER_4BPP_TILE);
+        DMA1_WAIT_DONE();
+        src += U16_WORDS_PER_4BPP_TILE;
+        p_dest += U16_WORDS_PER_4BPP_TILE;
+
+        /*         
+        // NON-DMA style    
         // Write one 8x8 32 byte tile entry as a block
         *p_dest++ = *src++;
         *p_dest++ = *src++;
@@ -284,6 +340,7 @@ void set_bkg_4bpp_data(unsigned int start, unsigned int ntiles, const uint16_t *
         *p_dest++ = *src++;
         *p_dest++ = *src++;
         *p_dest++ = *src++;
+        */
     }
 }
 
@@ -293,9 +350,20 @@ void set_bkg_tiles(unsigned int x, unsigned int y, unsigned int width, unsigned 
           uint16_t * p_dest     = _bg_tilemap_base_address + (y * DEVICE_SCREEN_BUFFER_WIDTH) + x;
     const uint32_t   row_stride = DEVICE_SCREEN_BUFFER_WIDTH - width;
 
-    OPTIONAL_IF_ENABLED_BIOS_VSYNC_BEFORE_VDP_WRITES();
     while (height--) {
         uint16_t row_len = width;
+
+        uint16_t * p_xfer = vram_xfer_buf;
+        while (row_len--) {
+            *p_xfer++ = *tiles++ | _tilemap_cached_props;
+        }
+        WAIT_SAFE_VSYNC;
+        DMA1_U16_MEMCOPY(p_dest, vram_xfer_buf, width);
+        DMA1_WAIT_DONE();
+        p_dest += width + row_stride;        
+
+        /* 
+        // NON-DMA style    
         uint16_t row_wrap = DEVICE_SCREEN_BUFFER_WIDTH - x;
         while (row_len--) {
             *p_dest++ = *tiles++ | _tilemap_cached_props;
@@ -308,6 +376,8 @@ void set_bkg_tiles(unsigned int x, unsigned int y, unsigned int width, unsigned 
             }
         }
         p_dest += row_stride;
+        */        
+
     }
 }
 
@@ -317,9 +387,22 @@ void set_bkg_based_tiles(unsigned int x, unsigned int y, unsigned int width, uns
           uint16_t * p_dest     = _bg_tilemap_base_address + (y * DEVICE_SCREEN_BUFFER_WIDTH) + x;
     const uint32_t   row_stride = DEVICE_SCREEN_BUFFER_WIDTH - width;
 
-    OPTIONAL_IF_ENABLED_BIOS_VSYNC_BEFORE_VDP_WRITES();
     while (height--) {
         uint16_t row_len = width;
+
+        uint16_t * p_xfer = vram_xfer_buf;
+        while (row_len--) {
+            *p_xfer++ = (*tiles & ~BG_TILEMAP_CHRNUM_MASK) | ((*tiles & BG_TILEMAP_CHRNUM_MASK) + base_tile) |  _tilemap_cached_props;
+            tiles++;            
+        }
+        // dma1_u16_memcopy_vram_safe(p_dest, vram_xfer_buf, width);
+        WAIT_SAFE_VSYNC;
+        DMA1_U16_MEMCOPY(p_dest, vram_xfer_buf, width);
+        DMA1_WAIT_DONE();
+        p_dest += width + row_stride;
+
+        /* 
+        // NON-DMA style    
         uint16_t row_wrap = DEVICE_SCREEN_BUFFER_WIDTH - x;
         while (row_len--) {
             // Mask out tile ID then OR in isolated tile ID + offset, OR in properties
@@ -334,6 +417,7 @@ void set_bkg_based_tiles(unsigned int x, unsigned int y, unsigned int width, uns
             }
         }
         p_dest += row_stride;
+        */
     }
 }
 
@@ -341,6 +425,7 @@ void set_bkg_based_tiles(unsigned int x, unsigned int y, unsigned int width, uns
 uint16_t * set_bkg_tile_xy(uint16_t x, uint16_t y, uint16_t tile) {
 
     uint16_t * p_dest = _bg_tilemap_base_address + (y * DEVICE_SCREEN_BUFFER_WIDTH) + x;
+    WAIT_SAFE_VSYNC;
     *p_dest = tile | _tilemap_cached_props;
 
     return p_dest;
@@ -352,9 +437,22 @@ void fill_bkg_rect(unsigned int x, unsigned int y, unsigned int width, unsigned 
           uint16_t * p_dest     = _bg_tilemap_base_address + (y * DEVICE_SCREEN_BUFFER_WIDTH) + x;
     const uint32_t   row_stride = DEVICE_SCREEN_BUFFER_WIDTH - width;
 
-    OPTIONAL_IF_ENABLED_BIOS_VSYNC_BEFORE_VDP_WRITES();
+    // Prepare a row to repeatedly copy
+    uint16_t * p_xfer = vram_xfer_buf;
+    uint16_t row_len = width;
+    while (row_len--) {
+        *p_xfer++ = tile | _tilemap_cached_props;
+    }        
+
     while (height--) {
-        uint16_t row_len = width;
+
+        WAIT_SAFE_VSYNC;
+        DMA1_U16_MEMCOPY(p_dest, vram_xfer_buf, width);
+        DMA1_WAIT_DONE();
+        p_dest += width + row_stride;
+
+        /* 
+        // NON-DMA style
         uint16_t row_wrap = DEVICE_SCREEN_BUFFER_WIDTH - x;
         while (row_len--) {
             *p_dest++ = tile | _tilemap_cached_props;
@@ -367,6 +465,7 @@ void fill_bkg_rect(unsigned int x, unsigned int y, unsigned int width, unsigned 
             }
         }
         p_dest += row_stride;
+        */
     }
 }
 
@@ -377,14 +476,25 @@ void load_bitmap_4bpp(unsigned int x, unsigned int y, unsigned int width, unsign
 
         if (width & 0x0001) return; // TODO: handle odd numbered widths and start x (requires splitting and shifting all bytes)
 
-          x /= 2;      // 4BPP packs 2 pixels into 1 byte
-          width /= 2;  // 4BPP packs 2 pixels into 1 byte
+        if ((width & 0x0003) != 0u) return; // Note: Handle u16 DMA limitation, only operates on 4 pixel widths at a time (one u16).
+
+        x /= 2;      // 4BPP packs 2 pixels into 1 byte
+        width /= 2;  // 4BPP packs 2 pixels into 1 byte
 
            uint8_t * p_dest     = VDP.BITMAP_VRAM_8BIT + ((y * DEVICE_BITMAP_4BPP_BUFFER_BYTE_WIDTH) + x);
     const uint32_t   row_stride = DEVICE_BITMAP_4BPP_BUFFER_BYTE_WIDTH - width;
 
-    OPTIONAL_IF_ENABLED_BIOS_VSYNC_BEFORE_VDP_WRITES();
     while (height--) {
+
+        // Bitmap vram is dual ported, safe access timing is only needed if you want to avoid tearing
+        // WAIT_SAFE_VSYNC;
+        DMA1_U16_MEMCOPY((uint16_t *)p_dest, (uint16_t *)bitmap, width / 2u);  // Transfer size is (/ 2) for 2 bytes per u16
+        DMA1_WAIT_DONE_NO_VCOUNT_INVALIDATE();
+        p_dest += width + row_stride;
+        bitmap += width;
+
+        /*
+        // NON-DMA style
         uint16_t row_len = width;
         uint16_t row_wrap = DEVICE_BITMAP_4BPP_BUFFER_BYTE_WIDTH - x;
         while (row_len--) {
@@ -398,6 +508,8 @@ void load_bitmap_4bpp(unsigned int x, unsigned int y, unsigned int width, unsign
             }
         }
         p_dest += row_stride;
+        */
+        
     }
 }
 

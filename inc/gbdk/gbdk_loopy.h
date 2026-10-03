@@ -105,7 +105,7 @@
 
 extern volatile uint16_t sys_time;
 extern volatile bool     vbl_done;
-extern volatile int16_t simulated_vdp_hcount;
+extern volatile int16_t simulated_vdp_vcount;
 
 typedef struct OAM_item_t {
     uint8_t tile;  //< Sprite tile number VDP.OAM[N].[31..24] 

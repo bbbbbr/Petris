@@ -44,7 +44,7 @@ void intro_splash_hblank_effect_isr(void) {
 
 
     // Don't start until line [effect_y_line]
-    if (simulated_vdp_hcount > effect_y_line) {
+    if (simulated_vdp_vcount > effect_y_line) {
 
         // Horizontal waves effect
 
@@ -54,7 +54,7 @@ void intro_splash_hblank_effect_isr(void) {
         // every other line.
         scroll_x_amount += 6U; // Other values that look good: 4U, 6U
 
-        if (simulated_vdp_hcount & 0x01U) {
+        if (simulated_vdp_vcount & 0x01U) {
             // equiv to: SCX_REG = (LY_REG - effect_y_line) << 2;
             VDP.BG_SCROLL[BG0_SCROLL_X] = scroll_x_amount;
         } else {
@@ -87,14 +87,13 @@ static void init_gfx(void) {
 
 void intro_splash(void) {
 
+    // Scroll so graphics are off-screen to start
+    VDP.BG_SCROLL[BG0_SCROLL_Y] = DEVICE_SCREEN_PX_HEIGHT;
 
     init_gfx();
 
-
-    // Scroll so graphics are off-screen to start
-    VDP.BG_SCROLL[BG0_SCROLL_Y] = DEVICE_SCREEN_PX_HEIGHT;
 /*
-    fade_start(FADE_IN);  // TODO
+    fade_start(FADE_IN);  // TODO: Maybe need VBL palette fade in support
 */
     // ========== START EFFECT ==========
 
