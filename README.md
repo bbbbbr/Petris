@@ -6,6 +6,12 @@ Build your favorite pets in all shapes and sizes, keep ahead of dropping pieces 
 Petris is a home-brew 2D puzzle game for the Casio Loopy console. It will run on original hardware and (TODO) in emulators.
 - (For the previous Game Boy Color color version see it's [itch.io page](https://bbbbbr.itch.io/petris)
 
+##### Credits
+* Code and assets hand-made by me (bbbbbr). No AI graphics, code, etc
+* Minimal Loopy project template by [Kasamikona](https://github.com/kasamikona/loopy-homebrew-template)
+* Music: (TBD)
+* Font: BoldPixels by [YukiPixels](https://yukipixels.itch.io/boldpixels)
+
 ### Download ROMs and Play Online
 Downloads and online playable version are at: https://bbbbbr.itch.io/petris-casio-loopy
 _________________
@@ -38,12 +44,21 @@ A range of difficulty levels make it suitable for all players, from relaxing to 
  * Visual hinting for drop location/etc can be turned on/off
 
 _________________
-##### Music Credits
- * (TBD) Krümel (crumb) / GB Studio Community Assets - https://github.com/DeerTears/GB-Studio-Community-Assets
 
 ##### Tools and Resources Used
-* Emulators: LoopyMSE, CLoopy, MiSTer Loopy core
-* Floopy Drive
+Documentation:
+* [Loopy Hardware Megadock](https://docs.google.com/document/d/1pdENQW1TpfwI13OxSud_IjoWcnCqHppCCFDhUVSScKc),
+* [SH7020/SH7021 Hardware Manual](https://www.renesas.com/en/document/mah/superh-risc-engine-sh7020-and-sh7021-hd6437020-hd6477021-hd6437021-hd6417021?r=1054661)
+
+Hardware:
+* [Floopy Drive](https://github.com/partlyhuman/floopydrive) (flash cart)
+
+Emulators:
+* [LoopyMSE](https://github.com/LoopyMSE/LoopyMSE/)
+* [Web CLoopy](https://gameblabla.github.io/casloopy/)
+* [MiSTer Loopy core](https://github.com/MiSTer-devel/Loopy_MiSTer)
+
+Tools:
 * [png2asset fork for Loopy](https://github.com/bbbbbr/png2asset_casioloopy)
 * [png2reducedrgb](https://github.com/bbbbbr/png2reducedrgb)
 * [tilepalquant](https://github.com/bbbbbr/tilepalquant)
