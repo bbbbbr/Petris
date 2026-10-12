@@ -42,7 +42,7 @@
 #include "magic_code.h"
 
 
-#define DEBUG_SKIP_INTRO
+// #define DEBUG_SKIP_INTRO
 
 
 void init (void);
@@ -150,6 +150,7 @@ void init_gfx_hardware(void) {
     set_4bpp_tile_patterns_base_address(CHAR_VRAM_4BPP_START());
 }
 
+extern volatile uint16_t cached_vdp_hcount;
 
 void init(void) {
 
@@ -163,6 +164,18 @@ void init(void) {
 
     // Set the appropriate controller scanning mode and video height
     bios_vdpMode(CONTROL_MODE_GAMEPAD, VIDEO_HEIGHT_224P);    
+}
+
+
+#define HCOUNT_SIGN_BIT  (1u << 8)
+int16_t hcount_to_signed(uint16_t n) {
+    if (n & HCOUNT_SIGN_BIT) return (int16_t)(((~n) + 1) & 0xFFu) * -1;
+    else                     return (int16_t)(n & 0xFFu);
+}
+
+uint16_t hcount_to_unsigned(uint16_t n) {
+    if (n & HCOUNT_SIGN_BIT) return (int16_t)(((~n) + 1) & 0xFFu);
+    else                     return (int16_t)(n & 0xFFu);
 }
 
 
@@ -183,6 +196,16 @@ int main() {
         // Handle keyboard input
         UPDATE_KEYS();
         UPDATE_KEY_REPEAT((J_LEFT | J_RIGHT | J_DOWN));
+
+        if (cached_vdp_hcount & 0x0100u) {
+            // Negative
+            PRINTXY(3,4, "-", 0);
+            print_num_u16(4,4,hcount_to_unsigned(cached_vdp_hcount), 5u);
+        } else {
+            // Positive
+            PRINTXY(3,4, "+", 0);
+            print_num_u16(4,4,hcount_to_unsigned(cached_vdp_hcount), 5u);
+        }
 
         switch (game_state) {
 

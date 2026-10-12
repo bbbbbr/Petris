@@ -70,8 +70,7 @@
     volatile uint16_t timeout = 60000u; \
     while(!(DMAC_CHCR1 & DMA_CHCR_TE_XFER_IS_DONE) && timeout != 0u) { \
         timeout--; \
-    } \
-    cached_vdp_vcount = CACHED_VCOUNT_INVALIDATED; // Invalidate the vcount cache in case the dma blocked an update interrupt
+    }
 
 #define DMA1_WAIT_DONE_NO_VCOUNT_INVALIDATE() \
     volatile uint16_t timeout = 60000u; \
@@ -332,9 +331,23 @@ void INTERRUPT SMALLFUNC isr_nmi_vblank(void) {
 }
 
 
+volatile uint16_t cached_vdp_hcount_sample;
+volatile uint16_t cached_vdp_hcount;
 void INTERRUPT SMALLFUNC isr_irq0_vblank_hblank(void) {
+
+    //          Raw     30x NOP  40x NOP
+    // Mister  -39/41   -10       0
+    // Loopy   -48      -18      -8
+    // CLoopy  -25       55      86
+    cached_vdp_hcount_sample = VDP.HCOUNT;
+
+
     simulated_vdp_vcount++;  // Part of the problem might be this breaking down when DMA transfers happen? (i.e. skipped hcounts never get restored?)
     cached_vdp_vcount = VDP.VCOUNT;
+
+    if (simulated_vdp_vcount == 112) {
+        cached_vdp_hcount = cached_vdp_hcount_sample;
+    }
 
     if (registered_irq0_handler) registered_irq0_handler();
 }
@@ -359,7 +372,7 @@ void INTERRUPT SMALLFUNC isr_irq1_vblank(void) {
     // Hardwiring starting HCOUNT since there seems to be jitter
     // in reading VCOUNT (maybe a clash with something else)
     simulated_vdp_vcount = VERT_SCANLINE_VBLANK_FIRST; // (uint16_t)VDP.VCOUNT;
-    cached_vdp_vcount = VDP.VCOUNT;
+    // cached_vdp_vcount = VDP.VCOUNT;
 }
 
 
