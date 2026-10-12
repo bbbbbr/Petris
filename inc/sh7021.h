@@ -151,6 +151,58 @@ extern volatile uint16_t ITU_BRB4;
 #define BRB4  ITU_BRB4
 #endif //SH7021_ITU_SHORT_NAMES
 
+// ITU_TSTR_...
+#define ITU_TSTR_TCNT0_COUNTING  (1u << 0)
+#define ITU_TSTR_TCNT0_HALTED    (0u << 0)
+#define ITU_TSTR_TCNT0_MASK      (1u << 0)
+
+#define ITU_TSTR_TCNT1_COUNTING  (1u << 1)
+#define ITU_TSTR_TCNT1_HALTED    (0u << 1)
+#define ITU_TSTR_TCNT1_MASK      (1u << 1)
+
+#define ITU_TSTR_TCNT2_COUNTING  (1u << 2)
+#define ITU_TSTR_TCNT2_HALTED    (0u << 2)
+#define ITU_TSTR_TCNT2_MASK      (1u << 2)
+
+#define ITU_TSTR_TCNT3_COUNTING  (1u << 3)
+#define ITU_TSTR_TCNT3_HALTED    (0u << 3)
+#define ITU_TSTR_TCNT3_MASK      (1u << 3)
+
+#define ITU_TSTR_TCNT4_COUNTING  (1u << 4)
+#define ITU_TSTR_TCNT4_HALTED    (0u << 4)
+#define ITU_TSTR_TCNT4_MASK      (1u << 4)
+
+// ITU_TCR_...
+#define ITU_TCR_TPSC_CLOCK_INT_DIV_1    (0u)
+#define ITU_TCR_TPSC_CLOCK_INT_DIV_2    (1u)
+#define ITU_TCR_TPSC_CLOCK_INT_DIV_4    (2u)
+#define ITU_TCR_TPSC_CLOCK_INT_DIV_8    (3u)
+#define ITU_TCR_TPSC_CLOCK_EXT_A        (4u)
+#define ITU_TCR_TPSC_CLOCK_EXT_B        (5u)
+#define ITU_TCR_TPSC_CLOCK_EXT_C        (6u)
+#define ITU_TCR_TPSC_CLOCK_EXT_D        (7u)
+
+#define ITU_TCR_CKEG_RISING_EDGE        (0u << 3)
+#define ITU_TCR_CKEG_FALLING_EDGE       (1u << 3)
+#define ITU_TCR_CKEG_BOTH_EDGES         (2u << 3)
+
+#define ITU_TCR_CCLR_NOT_CLEARED        (0u << 5)
+#define ITU_TCR_CCLR_CLEAR_GRA_MATCH    (1u << 5)
+#define ITU_TCR_CCLR_CLEAR_GRB_MATCH    (2u << 5)
+#define ITU_TCR_CCLR_CLEAR_WITH_SYNC    (3u << 5)
+
+// ITU_TSR...
+#define ITU_TSR_IMFA_GRA_MATCH_OR_INPUT_CAPTURE (1u)
+#define ITU_TSR_IMFB_GRB_MATCH_OR_INPUT_CAPTURE (1u << 1)
+#define ITU_TSR_OVF_TCNT_OVERFLOW               (1u << 2)
+#define ITU_TSR_RESERVED_BITS_SETTING           (0b11111u << 3)
+
+// ITU_TIER...
+#define ITU_TIER_IMIEA_INT_ON_IMFA_ENABLE     (1u)
+#define ITU_TIER_IMIEA_INT_ON_IMFB_ENABLE     (1u << 1)
+#define ITU_TIER_OVIE_INT_ON_OVF_ENABLE       (1u << 3)
+
+
 // DMA Controller (DMAC)
 extern volatile uint32_t DMAC_SAR0;
 extern volatile uint32_t DMAC_DAR0;

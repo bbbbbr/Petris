@@ -190,6 +190,9 @@
 #define CONTROL_MODE_MOUSE   1
 #define CONTROL_MODE_GAMEPAD 2
 
+#define VDP_MODE_CMODE_DIRECT  (0u << 4)
+#define VDP_MODE_CMODE_MATRIX  (1u << 4)
+
 #define VIDEO_HEIGHT_224P 0
 #define VIDEO_HEIGHT_240P 1
 
