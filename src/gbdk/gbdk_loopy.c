@@ -6,7 +6,7 @@
 #include "gbdk/platform.h"
 
 // Settings
-#define DEBUG_BACKDROP_VDP_AND_IDLE_STATUS
+// #define DEBUG_BACKDROP_VDP_AND_IDLE_STATUS
 // #define USE_BIOS_VSYNC
 
 
