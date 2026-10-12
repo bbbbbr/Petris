@@ -71,12 +71,12 @@ void (* const vector_table[])(void) = {
 	doNothing, RESERVED,
 	doNothing, RESERVED,
 	doNothing, RESERVED,
-	// ITU0..ITU4 (IMIA, IMIB, OVI, Reserved)
-	bios_isrAutoUpdateBgm, doNothing, doNothing, RESERVED,
-	doNothing, doNothing, doNothing, RESERVED,
-	doNothing, doNothing, doNothing, RESERVED,
-	doNothing, doNothing, doNothing, RESERVED,
-	doNothing, doNothing, doNothing, RESERVED,
+	// ITU0..ITU4  x  Per each ITUx: IMIA, IMIB, OVI, Reserved
+	bios_isrAutoUpdateBgm, doNothing, doNothing, RESERVED, // ITU0
+	isr_timer_itu1_imia, doNothing, doNothing, RESERVED,   // ITU1
+	doNothing, doNothing, doNothing, RESERVED,             // ITU2
+	doNothing, doNothing, doNothing, RESERVED,             // ITU3
+	doNothing, doNothing, doNothing, RESERVED,             // ITU4
 	// SCI0..SCI1 (ERI, RxI, TxI, TEI)
 	serial_isrERI0, serial_isrRxI0, doNothing, doNothing,
 	doNothing, doNothing, doNothing, doNothing,

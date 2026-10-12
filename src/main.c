@@ -72,7 +72,13 @@ void vbl_update(void) {
 }
 
 
+// TODO: Not currently being called/used, maybe (?) had trouble
+//       with the priority used by ITU1 timer that helps simulate
+//       VDP safe access timing, and bios_vsync()
+/*
 void init_sound(void) {
+
+    // Seems to rely on ITU0 timer
 
     // music_mute_frames = 0; // TODO
     // Setup sound hardware (takes a few frames)
@@ -81,18 +87,32 @@ void init_sound(void) {
     bios_soundVolume(SOUND_VOL_CH4,   SOUND_VOL_100);
     bios_initSoundTransmission();
 }
+*/
 
-
+// This needs to be called before any safe gated VRAM functions
+// are used, otherwise they will hang due to lack of interrupts
+// to update the status var that gates them
 void init_interrupts(void) {
+    /*
     // Enable interrupts and DMA for music
     sys_setInterruptPriority(INT_PRIO_ITU0, 0xF);
     sys_setInterruptMask(0xE);
     sys_setDmaEnabled(true);
+    */
+
+    enable_interrupt_irq1_vblank();
+
+    // For simulating safe VRAM access timing (along with VBlank isr)
+    enable_interrupt_itu1_timer();
+
+    // Not currently needed aside from HBlank scanline effects, turned on as needed
+    // enable_interrupt_irq0_hblank();
 }
 
 
 void init_gfx_hardware(void) {
-    bios_vsync();
+    // bios_vsync();
+    vsync();  // Simulated safe VRAM timing interrupts MUST be enabled first
 
     VDP.BACKDROP_A      = RGB888(0,0,0);
     VDP.BACKDROP_B      = RGB888(0,0,0);
@@ -136,8 +156,9 @@ void init(void) {
     vbl_count = 0;
     game_state = GAME_INTRO_INIT;
 
-    init_sound();
     init_interrupts();
+    joypad_init();
+    // init_sound();
     init_gfx_hardware();
 
     // Set the appropriate controller scanning mode and video height
@@ -146,10 +167,9 @@ void init(void) {
 
 
 int main() {
+
     init();
     magic_code_reset();
-
-    enable_interrupt_irq1_vblank();
 
     #ifdef DEBUG_SKIP_INTRO
         game_state = GAME_INTRO_INIT;
@@ -157,14 +177,8 @@ int main() {
         intro_splash();
     #endif
 
-
     while(1) {
-        // Wait for vertical blank (end of the frame)
-        // before starting to process the next frame
-        // (skip if already happened)
-        // * This is unlikely to happen on the Loopy with it's more powerful cpu
-        if (vbl_done == false) vsync();
-        vbl_done = false;
+        vsync();
 
         // Handle keyboard input
         UPDATE_KEYS();

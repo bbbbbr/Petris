@@ -72,7 +72,7 @@ static void init_gfx(void) {
     //       For example: fill_bkg_rect(0, 0, DEVICE_SCREEN_BUFFER_WIDTH, DEVICE_SCREEN_BUFFER_HEIGHT, 0);
 
     HIDE_SPRITES;
-    bios_vsync();
+    vsync();
 
     set_bkg_tilemap_base_address(BG0_MAP_START());
     set_bkg_tiles_target_screen_a_or_b(LAYER_SCREEN_A);
