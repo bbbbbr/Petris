@@ -51,6 +51,7 @@ void gameplay_prepare_piece(void);
 void gameplay_prepare_board(void);
 void gameplay_handle_get_ready(void);
 void gameplay_handle_pause(void);
+void gameplay_handle_input_diagonal_filtering(void);
 void gameplay_handle_input(void);
 void gameplay_update(void);
 

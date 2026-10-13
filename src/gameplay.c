@@ -64,6 +64,7 @@ bool volatile game_is_paused = false;
 #define KEY_REPEAT_LEFTRIGHT_THRESHOLD (KEY_REPEAT_LEFTRIGHT_RELOAD + 4) //6
 bool key_down_repeat_needs_release = false;
 bool gameplay_piece_drop_requested = false;
+bool gameplay_piece_hard_drop_requested = false;
 
 uint8_t piece_state = PLAYER_START;
 uint8_t new_piece_launch_delay = GAME_SPEED_LAUNCH_DELAY_FRAMES;
@@ -233,6 +234,7 @@ void gameplay_init(void) {
     piece_state = PLAYER_START;
     key_down_repeat_needs_release = false;
     gameplay_piece_drop_requested = false;
+    gameplay_piece_hard_drop_requested = false;
     game_speed_drop_frame_counter = GAME_SPEED_DROP_FRAME_COUNTER_RESET;
     game_crunchup_counter = GAME_CRUNCHUP_FRAME_COUNTER_RESET;
     game_crunchups_enqueued = GAME_CRUNCHUP_NONE;
@@ -346,6 +348,26 @@ void gameplay_handle_pause(void) {
 }
 
 
+// Check and apply D-Pad diagonal filtering
+void gameplay_handle_input_diagonal_filtering(void) {
+
+    static uint16_t keys_dpad_last_nondiagonal = J_NONE;
+
+    bool diagonal_detected = (KEY_PRESSED(J_UP | J_DOWN) && KEY_PRESSED(J_LEFT | J_RIGHT));
+
+    if (diagonal_detected) {
+        // Recycle previous D-Pad input when diagonals are detected
+        SET_KEYS( (KEYS() & ~J_DPAD) | keys_dpad_last_nondiagonal );
+    } else {
+        // If no diagonal is detected then cache the D-Pad state
+        // for re-use while diagonals are present.
+        // This is going on the theory that the intended direction
+        // was the one seen RIGHT BEFORE the diagonal was detected.
+        keys_dpad_last_nondiagonal = (KEYS() & J_DPAD);
+    }
+}
+
+
 void gameplay_handle_input(void) {
 
     // Move piece left/right
@@ -390,6 +412,11 @@ void gameplay_handle_input(void) {
         key_down_repeat_needs_release = false;  // Clear pending requirement for down key to be released before it can repeat again
     }
 
+    if (KEY_TICKED(J_UP)) {
+        if (option_game_hard_drop == OPTION_HARD_DROP_ON) {
+            gameplay_piece_hard_drop_requested = true;
+        }
+    }
 
     // Rotate piece
     if (KEY_TICKED(J_A | J_RTRIG)) {
@@ -398,24 +425,23 @@ void gameplay_handle_input(void) {
     else if (KEY_TICKED(J_B  | J_LTRIG)) {
         player_piece_rotate_apply(PLAYER_ROT_LEFT);
     }
-    else if (KEY_TICKED(J_UP)) {
 
-        // TODO: high-contrast mode is off for now, but could be needed on some CRTs
-        /*
-        // Pet tile contrast setting can be changed in-game
-        // by pressing holding down SELECT and pressing UP
-        if (KEY_PRESSED(J_SELECT)) {
-            board_gfx_change_pettiles();
-        }
-        else
-        */
-        if (magic_code_state == MAGIC_CODE_STATE_ACTIVATED) {
-            // Otherwise, if magic code is active then
-            // change pet type for current piece
-            player_piece_cycle_pet_types();
-        }
+    // TODO: high-contrast mode is off for now, but could be needed on some CRTs
+    /*
+    // Pet tile contrast setting can be changed in-game
+    // by pressing holding down SELECT and pressing UP
+    if (KEY_PRESSED(J_SELECT)) {
+        board_gfx_change_pettiles();
     }
-
+    else
+    */
+    /*
+    if (magic_code_state == MAGIC_CODE_STATE_ACTIVATED) {  // TODO: Change handling here to different button
+        // Otherwise, if magic code is active then
+        // change pet type for current piece
+        player_piece_cycle_pet_types();
+    }
+    */
 
     // Pause when Start is pressed
     // or if triggered over serial link
@@ -537,10 +563,22 @@ void gameplay_gravity_update(void) {
     game_speed_drop_frame_counter++;
 
     if ((game_speed_drop_frame_counter >= game_speed_frames_per_drop)
-        || (gameplay_piece_drop_requested)) {
+        || (gameplay_piece_drop_requested)
+        || (gameplay_piece_hard_drop_requested)) {
 
         // Reset the counter
         game_speed_drop_frame_counter = GAME_SPEED_DROP_FRAME_COUNTER_RESET;
+
+        // Hard drop forces pieces to land immediately
+        if (gameplay_piece_hard_drop_requested) {
+
+            // Move the piece to the last free row
+            // then let the code below handle landing the piece
+            int8_t drop_amount = (board_find_lowest_open_in_column(player_x, player_y) - player_y);
+            player_piece_move( 0, drop_amount);
+
+            gameplay_piece_hard_drop_requested = false;
+        }
 
         // Clear current request to move a piece down earlier than tick time
         // (will get re-enabled next pass if player continues to hold drop key down)

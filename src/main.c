@@ -180,8 +180,9 @@ int main() {
     while(1) {
         vsync();
 
-        // Handle keyboard input
+        // Handle input
         UPDATE_KEYS();
+        if (option_game_filter_diagonals == OPTION_FILTER_DIAGONALS_ON) gameplay_handle_input_diagonal_filtering();
         UPDATE_KEY_REPEAT((J_LEFT | J_RIGHT | J_DOWN));
 
         switch (game_state) {

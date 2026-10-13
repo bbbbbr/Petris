@@ -17,6 +17,8 @@ If you run the "Cartridge" build of Petris in an emulator then you may want to t
 - **Select**: Show length of recent pets
 - **Select + Up**: Change High Contrast mode setting
 
+* **Up**: Land the piece immediately (if the Hard Drop option is *ON*)
+
 
 #### Game types
 ##### Long Pet
@@ -72,6 +74,7 @@ There are difficulty levels for all players, from relaxing to full-tilt speed.
  * High Contrast options for small and non-backlit screens
  * Visual hinting for drop location and special pieces can be turned on/off
  * Game background colors will fade to a different palette every 5 levels
+ * Optional blocking of diagonals on the D-Pad if enabled (cross-talk is common on the Loopy gamepad)
 
 #### Special Pieces
 ##### Bomb

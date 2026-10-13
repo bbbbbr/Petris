@@ -36,13 +36,6 @@
 
 #include "gameplay.h"
 
-extern  int8_t player_x;
-extern  int8_t player_y;
-extern  int8_t player_rotate; // Uses wraparound, so allow negative nums
-extern uint8_t player_piece;
-extern uint8_t player_attrib;
-
-
 // Hint sprites are arranged clockwise around player piece
 // --> Left, Top, Right, Bottom
 const int8_t SPR_HINT_OFFSET_LUT_X[] = {-8,  0, 8, 0};

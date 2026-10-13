@@ -30,6 +30,8 @@ int8_t option_game_high_contrast = OPTION_HIGH_CONTRAST_DEFAULT;
 int8_t option_game_music         = OPTION_MUSIC_DEFAULT;
 int8_t option_game_preview_next  = NEXT_PREV_DEFAULT;
 int8_t option_game_link2p        = OPTION_LINK2P_DEFAULT;
+int8_t option_game_hard_drop     = OPTION_HARD_DROP_DEFAULT;
+int8_t option_game_filter_diagonals = OPTION_FILTER_DIAGONALS_DEFAULT;
 
 // See spreadsheet for more details
 // Speed increase per level bracket roughly doubles

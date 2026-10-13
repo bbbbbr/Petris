@@ -47,7 +47,7 @@
 
 #define SPR_OPTIONS_CURSOR 0 // Cursor is sprite "0"
 
-#define OPTION_MENU_Y_START 3u
+#define OPTION_MENU_Y_START 2u
 #define OPTION_MENU_X_START ((DEVICE_SCREEN_WIDTH - 16u) / 2)     // 16 is about max width of option name + text
 #define OPTION_CURSOR_X     ((OPTION_MENU_X_START * 8u) - 16u)    // x8 for Tile width, -16 for space between start of text and cursor sprite
 #define OPTION_CURSOR_X_ITEM_START (OPTION_CURSOR_X + (8u * 3u))  // Inset cursor further for Start menu entry since it's inset
@@ -56,6 +56,7 @@
 #define CURSOR_BITSHIFT    3
 #define CURSOR_LUT_MASK    0x07 << CURSOR_BITSHIFT // 8 offset entries in the LUT
 
+#define PRINT_PAL_TITLE      (PRINT_PAL_TILE_YELLOW)
 #define PRINT_PAL_HEADING    (PRINT_PAL_TILE_GREY)
 #define PRINT_PAL_VALUE      (PRINT_PAL_TILE_YELLOW)
 #define PRINT_PAL_HIGHLIGHT  (PRINT_PAL_TILE_PINK)
@@ -74,7 +75,9 @@ enum option_menu_entries {
 
     OPTION_MENU_STARTGAME,
 
-    OPTION_MENU_LINK2P,
+    // OPTION_MENU_LINK2P,
+    OPTION_MENU_FILTER_DIAGONALS,
+    OPTION_MENU_HARD_DROP,
     OPTION_MENU_VISUAL_HINTS,
 
     OPTION_MENU_MAX = OPTION_MENU_VISUAL_HINTS
@@ -92,7 +95,9 @@ const char * options_difficulty[]   = {"EASY  ",
                                        "HARD  ",
                                        "EXPERT ",
                                        "BEAST "}; // Must match : option_difficulty_entries
-const char * options_link2p[]        = {"OFF", "ON "}; // Must match : option_link2p_entries
+// const char * options_link2p[]        = {"OFF", "ON "}; // Must match : option_link2p_entries
+const char * options_hard_drop[]        = {"ON ", "OFF"}; // Must match : option_hard_drop_entries
+const char * options_filter_diagonals[] = {"    NORMAL ", "BLOCK DIAG",}; // Must match : option_filter_diagonals_entries
 const char * options_visual_hints[]  = {"ON ", "OFF"}; // Must match : option_visual_hints_entries
 
 const char * options_music[] = {"TWILIGHT",
@@ -123,8 +128,10 @@ const option_item options[] = {
         { MENU_Y( 7),"MUSIC: ",        (int8_t)ARRAY_LEN(options_music),         &options_music[0],         &option_game_music},
         { MENU_Y(10),"   START GAME ", (int8_t)ARRAY_LEN(options_visual_hints),  NULL, NULL},
         // TODO: High Score menu item here or at bottom of list
-        { MENU_Y(13),"2 PLAYER VS:  ", (int8_t)ARRAY_LEN(options_link2p),        &options_link2p[0],        &option_game_link2p},
-        { MENU_Y(15),"VISUAL HINTS: ", (int8_t)ARRAY_LEN(options_visual_hints),  &options_visual_hints[0],  &option_game_visual_hints},
+        // { MENU_Y(13),"2 PLAYER VS:  ", (int8_t)ARRAY_LEN(options_link2p),        &options_link2p[0],           &option_game_link2p},
+        { MENU_Y(13),"HARD DROP:    ", (int8_t)ARRAY_LEN(options_hard_drop),        &options_hard_drop[0],        &option_game_hard_drop},
+        { MENU_Y(15),"DPAD: ", (int8_t)ARRAY_LEN(options_filter_diagonals), &options_filter_diagonals[0], &option_game_filter_diagonals},
+        { MENU_Y(17),"VISUAL HINTS: ", (int8_t)ARRAY_LEN(options_visual_hints),     &options_visual_hints[0],     &option_game_visual_hints},
     };
 
 
@@ -229,7 +236,7 @@ void options_screen_setting_draw(int8_t option_id) {
 
 void options_screen_draw(void) {  // TODO
 
-    PRINT_PAL(PRINT_PAL_HEADING);
+    PRINT_PAL(PRINT_PAL_TITLE);
     PRINTXY(OPTION_MENU_X_START - 1u, MENU_Y(0), str_options_heading, 0);
     // PRINTXY((DEVICE_SCREEN_WIDTH - ARRAY_LEN(str_title)) / 2,3, str_title, 0);
 }

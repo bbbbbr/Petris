@@ -95,13 +95,30 @@ enum option_music_entries {
     OPTION_MUSIC_DEFAULT = OPTION_MUSIC_TWILIGHT
 };
 
-// Music Status
+// Link Status
 enum option_link2p_entries {
     OPTION_LINK2P_OFF,
     OPTION_LINK2P_ON,
 
 //  OPTION_LINK2P_DEFAULT = OPTION_LINK2P_ON
     OPTION_LINK2P_DEFAULT = OPTION_LINK2P_OFF
+};
+
+
+// Gamepad Filter Status
+enum option_filter_diagonals_entries {
+    OPTION_FILTER_DIAGONALS_OFF,
+    OPTION_FILTER_DIAGONALS_ON,
+
+    OPTION_FILTER_DIAGONALS_DEFAULT = OPTION_FILTER_DIAGONALS_ON
+};
+
+// Gamepad Hard Drop Status
+enum option_hard_drop_entries {
+    OPTION_HARD_DROP_ON,
+    OPTION_HARD_DROP_OFF,
+
+    OPTION_HARD_DROP_DEFAULT = OPTION_HARD_DROP_ON
 };
 
 
@@ -174,6 +191,8 @@ extern int8_t option_game_type;
 extern int8_t option_game_music;
 extern int8_t option_game_preview_next;
 extern int8_t option_game_link2p;
+extern int8_t option_game_hard_drop;
+extern int8_t option_game_filter_diagonals;
 
 const char * options_difficulty_abbrev_text_get(void);
 uint8_t options_frames_per_drop_get(uint8_t);
