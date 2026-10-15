@@ -10,9 +10,10 @@
 // #define USE_BIOS_VSYNC
 
 
-#define IRQ_PRIORITY_LOWEST_OFF    0x0u
-#define IRQ_PRIORITY_14            0xEu
-#define IRQ_PRIORITY_15_HIGHEST    0xFu
+#define IRQ_PRIORITY_LOWEST_OFF    0u
+#define IRQ_PRIORITY_13            13u
+#define IRQ_PRIORITY_14            14u
+#define IRQ_PRIORITY_15_HIGHEST    15u
 
 #define VERT_SCANLINE_VBLANK_FIRST -39       // First VBlank Scanline (-39 -> 0 -> 224)
 #define HORIZ_PIXEL_HBLANK_FIRST   -84       // First HBlank Pixel    (-84 -> 0 -> 257)
@@ -23,9 +24,6 @@
 #define VDP_STATIS_IN_HBLANK   (0x01u << 1)
 #define VDP_STATUS_UNSAFE      (0u)
 #define VDP_STATUS_RESET       (VDP_STATUS_UNSAFE)
-
-#define CACHED_VCOUNT_INVALIDATED  0u
-#define VCOUNT_SIGN_BIT  (1u << 8)
 
 #define WAIT_SAFE_VSYNC   while (simulated_vdp_status == VDP_STATUS_UNSAFE)  // TODO: This should never lock up, but if it starts to then add a timeout
 
@@ -57,28 +55,6 @@
 // #define ITU1_CPU_CYCLE_DIV_4 4u // When used with: ITU_TCR_TPSC_CLOCK_INT_DIV_4
 
 
-// Channel 1 DMA copy
-#define DMA1_U16_MEMCOPY(dest, src, u16_count) \
-    DMAC_DMAOR = DMA_DMAOR_AE_NO_ERROR | DMA_DMAOR_NMIF_NO_ERROR | DMA_DMAOR_DME_ENABLE; \
-    DMAC_SAR1  = (uint32_t)(src);   \
-    DMAC_DAR1  = (uint32_t)(dest);  \
-    DMAC_TCR1  = (u16_count);       \
-    DMAC_CHCR1 = (DMA_CHCR_DM_DEST_INCREMENT | DMA_CHCR_SM_SRC_INCREMENT | DMA_CHCR_RS_AUTO_CONF | DMA_CHCR_TM_BUS_BURST | DMA_CHCR_TS_XFER_WORD_U16 | DMA_CHCR_DE_XFER_ENABLE);
-
-// When DMA is working this doesn't even decrement once
-#define DMA1_WAIT_DONE() \
-    volatile uint16_t timeout = 60000u; \
-    while(!(DMAC_CHCR1 & DMA_CHCR_TE_XFER_IS_DONE) && timeout != 0u) { \
-        timeout--; \
-    } \
-    cached_vdp_vcount = CACHED_VCOUNT_INVALIDATED; // Invalidate the vcount cache in case the dma blocked an update interrupt
-
-#define DMA1_WAIT_DONE_NO_VCOUNT_INVALIDATE() \
-    volatile uint16_t timeout = 60000u; \
-    while(!(DMAC_CHCR1 & DMA_CHCR_TE_XFER_IS_DONE) && timeout != 0u) { \
-        timeout--; \
-    }
-
 
 static uint16_t * _bg_tilemap_base_address =  BG0_MAP_START();
 static uint8_t  * _4bpp_tile_patterns_base_address = 0;
@@ -95,7 +71,9 @@ volatile uint16_t simulated_vdp_status = VDP_STATUS_RESET;  // Used with ITU1 ti
 
 
 OAM_item_t shadow_OAM[SHADOW_OAM_MAX_SPRITES];
-void (* registered_irq0_handler)(void);
+void (* registered_irq0_handler)(void) = NULL;
+void (* registered_vbl_handler)(void) = NULL;
+void (* registered_vbl_ended_handler)(void) = NULL;
 
 #define VRAM_XFER_BUF_SZ    512u
 uint16_t vram_xfer_buf[VRAM_XFER_BUF_SZ];
@@ -231,10 +209,12 @@ void enable_interrupt_itu1_timer(void) {
     // "Read IMFA when IMFA = 1, then write 0 in IMFA (initial value)."
     ITU_TSR1 &= ~ITU_TSR_IMFA_GRA_MATCH_OR_INPUT_CAPTURE;
 
-    sys_setInterruptPriority(INT_PRIO_ITU1, IRQ_PRIORITY_15_HIGHEST);
+    // Note, priority here is set -1 below the VBlank and HBlank handlers
+    // so it doesn't delay those (HBlank in particular)
+    sys_setInterruptPriority(INT_PRIO_ITU1, IRQ_PRIORITY_14);
     // Set Global interrupt priority mask level to be 1 below the level configured above
     // (also set by VBlank and HBlank timers, so kind of redundant)
-    sys_setInterruptMask(IRQ_PRIORITY_14);
+    sys_setInterruptMask(IRQ_PRIORITY_13);  // TODO: Centralize interrupt priority mask to a single init function
 
     // Timer gets started in vblank
     // Enable interrupt on IMFA (meaning GRA match)
@@ -266,7 +246,7 @@ void enable_interrupt_irq0_vblank(void) {
     VDP.IRQ0_NMI_CTRL |= (IRQ0_ENABLE | IRQ0_VCMP_ENABLE);
     sys_setInterruptPriority(INT_PRIO_IRQ0, IRQ_PRIORITY_15_HIGHEST);
     // Set Global interrupt priority mask level to be 1 below the level configured above
-    sys_setInterruptMask(IRQ_PRIORITY_14);
+    sys_setInterruptMask(IRQ_PRIORITY_13);  // TODO: Centralize interrupt priority mask to a single init function
 }
 
 void enable_interrupt_irq0_hblank(void) {
@@ -277,7 +257,7 @@ void enable_interrupt_irq0_hblank(void) {
     VDP.IRQ0_NMI_CTRL |= IRQ0_ENABLE;
     sys_setInterruptPriority(INT_PRIO_IRQ0, IRQ_PRIORITY_15_HIGHEST);
     // Set Global interrupt priority mask level to be 1 below the level configured above
-    sys_setInterruptMask(IRQ_PRIORITY_14);
+    sys_setInterruptMask(IRQ_PRIORITY_13);  // TODO: Centralize interrupt priority mask to a single init function
 }
 
 
@@ -296,7 +276,7 @@ void enable_interrupt_irq1_vblank(void) {
 
     sys_setInterruptPriority(INT_PRIO_IRQ1, IRQ_PRIORITY_15_HIGHEST);
     // Set Global interrupt priority mask level to be 1 below the level configured above
-    sys_setInterruptMask(IRQ_PRIORITY_14);
+    sys_setInterruptMask(IRQ_PRIORITY_13);  // TODO: Centralize interrupt priority mask to a single init function
 }
 
 
@@ -312,6 +292,29 @@ void add_irq0(void (* handler)(void)) {
 
 void remove_irq0(void) {
     registered_irq0_handler = NULL;
+}
+
+
+void add_vbl(void (* handler)(void)) {
+    registered_vbl_handler = handler;
+}
+
+
+void remove_vbl(void) {
+    registered_vbl_handler = NULL;
+}
+
+
+// Note, priority for this interrupt is set -1 below the VBlank and HBlank
+// handlers so it doesn't delay those (HBlank in particular). Which means
+// that the handler registered here may get interrupted them
+void add_vbl_ended(void (* handler)(void)) {
+    registered_vbl_ended_handler = handler;
+}
+
+
+void remove_vbl_ended(void) {
+    registered_vbl_ended_handler = NULL;
 }
 
 
@@ -360,6 +363,8 @@ void INTERRUPT SMALLFUNC isr_irq1_vblank(void) {
     // in reading VCOUNT (maybe a clash with something else)
     simulated_vdp_vcount = VERT_SCANLINE_VBLANK_FIRST; // (uint16_t)VDP.VCOUNT;
     cached_vdp_vcount = VDP.VCOUNT;
+
+    if (registered_vbl_handler) registered_vbl_handler();
 }
 
 
@@ -386,6 +391,8 @@ void INTERRUPT SMALLFUNC isr_timer_itu1_imia(void) {
         if (vbl_done == false) VDP.BACKDROP_A = RGB888(255,255,0); // DEBUG
         else                   VDP.BACKDROP_A = RGB888(255,0,0); // DEBUG
     #endif
+
+    if (registered_vbl_ended_handler) registered_vbl_ended_handler();
 }
 
 
@@ -413,7 +420,7 @@ void vsync(void) {
 /** Set background palette(s)
 
     @param first_palette  Index of the first palette to write (0-7)
-    @param nb_palettes    Number of palettes to write (1-8, max depends on first_palette)
+    @param nb_palettes    Number of palettes to write (1-16, max depends on first_palette)
     @param rgb_data       Pointer to source palette data
 
     Writes __nb_palettes__ to background palette data starting
@@ -429,8 +436,7 @@ void set_bkg_4bpp_palette(unsigned int first_palette, unsigned int nb_palettes, 
     uint16_t * p_pal = &VDP.PALETTE[first_palette * COLS_PER_PAL_4BPP];
 
     WAIT_SAFE_VSYNC;
-    DMA1_U16_MEMCOPY(p_pal, rgb_data, (nb_palettes * COLS_PER_PAL_4BPP));
-    DMA1_WAIT_DONE();
+    DMA1_U16_MEMCOPY_AND_WAIT_DONE(p_pal, rgb_data, (nb_palettes * COLS_PER_PAL_4BPP));
 
     /* 
     // NON-DMA style    
@@ -468,8 +474,7 @@ void set_bkg_4bpp_data(unsigned int start, unsigned int ntiles, const uint16_t *
     while (copytiles--) {
 
         WAIT_SAFE_VSYNC;
-        DMA1_U16_MEMCOPY(p_dest, src, U16_WORDS_PER_4BPP_TILE);
-        DMA1_WAIT_DONE();
+        DMA1_U16_MEMCOPY_AND_WAIT_DONE(p_dest, src, U16_WORDS_PER_4BPP_TILE);
         src += U16_WORDS_PER_4BPP_TILE;
         p_dest += U16_WORDS_PER_4BPP_TILE;
 
@@ -511,8 +516,7 @@ void set_bkg_tiles(unsigned int x, unsigned int y, unsigned int width, unsigned 
             *p_xfer++ = *tiles++ | _tilemap_cached_props;
         }
         WAIT_SAFE_VSYNC;
-        DMA1_U16_MEMCOPY(p_dest, vram_xfer_buf, width);
-        DMA1_WAIT_DONE();
+        DMA1_U16_MEMCOPY_AND_WAIT_DONE(p_dest, vram_xfer_buf, width);
         p_dest += width + row_stride;        
 
         /* 
@@ -550,8 +554,7 @@ void set_bkg_based_tiles(unsigned int x, unsigned int y, unsigned int width, uns
         }
         // dma1_u16_memcopy_vram_safe(p_dest, vram_xfer_buf, width);
         WAIT_SAFE_VSYNC;
-        DMA1_U16_MEMCOPY(p_dest, vram_xfer_buf, width);
-        DMA1_WAIT_DONE();
+        DMA1_U16_MEMCOPY_AND_WAIT_DONE(p_dest, vram_xfer_buf, width);
         p_dest += width + row_stride;
 
         /* 
@@ -600,8 +603,7 @@ void fill_bkg_rect(unsigned int x, unsigned int y, unsigned int width, unsigned 
     while (height--) {
 
         WAIT_SAFE_VSYNC;
-        DMA1_U16_MEMCOPY(p_dest, vram_xfer_buf, width);
-        DMA1_WAIT_DONE();
+        DMA1_U16_MEMCOPY_AND_WAIT_DONE(p_dest, vram_xfer_buf, width);
         p_dest += width + row_stride;
 
         /* 
@@ -641,8 +643,7 @@ void load_bitmap_4bpp(unsigned int x, unsigned int y, unsigned int width, unsign
 
         // Bitmap vram is dual ported, safe access timing is only needed if you want to avoid tearing
         // WAIT_SAFE_VSYNC;
-        DMA1_U16_MEMCOPY((uint16_t *)p_dest, (uint16_t *)bitmap, width / 2u);  // Transfer size is (/ 2) for 2 bytes per u16
-        DMA1_WAIT_DONE_NO_VCOUNT_INVALIDATE();
+        DMA1_U16_MEMCOPY_AND_WAIT_DONE((uint16_t *)p_dest, (uint16_t *)bitmap, width / 2u);  // Transfer size is (/ 2) for 2 bytes per u16
         p_dest += width + row_stride;
         bitmap += width;
 
