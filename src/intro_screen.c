@@ -219,8 +219,7 @@ void intro_screen_init(void) {
     // SHOW_BKG;  // TODO: ?? BG1 as BKG and BG0 as WIN?
     SHOW_SPRITES;
 
-    palette_fade_to_target_start();
-    palette_fade_wait_completed();  // TODO: DEBUG
+    palette_fade_to_target_start();    
 }
 
 
@@ -234,8 +233,13 @@ void intro_screen_handle(void) {  // TODO: Some kind of animated roll in of logo
 
 
 void intro_screen_cleanup(void) {
+
     palette_fade_to_black_start();
-    palette_fade_wait_completed();
+    // Keep animations running until fade-out completes
+    while (palette_fade_is_running()) {
+        intro_screen_handle();
+        vsync();
+    }
 
     intro_background_and_logo_cleanup();
     intro_text_cleanup();
