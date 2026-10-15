@@ -725,3 +725,20 @@ uint16_t joypad(void) {
         return READ_GAMEPAD1_RAW;
     #endif
 }
+
+
+uint32_t disable_interrupts(void) {
+    uint32_t status_register_saved;
+    uint32_t status_register;
+    uint32_t priorityMask15 = 0xFu << 4;  // Set all bits of I3..I0 to 1
+    __asm__ __volatile__("STC SR,%0\n\t" : "=r" (status_register) : : "memory");  // "memory" barrier to prevent compiler reordering
+    status_register_saved = status_register;
+    status_register |= priorityMask15;
+    __asm__ __volatile__("LDC %0,SR\n\t" : : "r" (status_register) : "memory");
+
+    return status_register_saved;
+}
+
+void enable_interrupts(uint32_t status_register_restore) {
+    __asm__ __volatile__("LDC %0,SR\n\t" : : "r" (status_register_restore) : "memory");  // "memory" barrier to prevent compiler reordering
+}

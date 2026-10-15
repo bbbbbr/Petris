@@ -443,4 +443,15 @@ void delay(uint16_t d);
 void joypad_init(void);
 uint16_t joypad(void);
 
+
+/* Sets I3..I0 to 0xF blocking interrupts (except nmi) below priority 16
+
+   Returns saved copy of Status Register which should be passed
+   to enable_interrupts() in order to restore the previous 
+   interrupt priority setting;
+ */
+uint32_t disable_interrupts(void);
+
+void enable_interrupts(uint32_t status_register_restore);
+
 #endif // _GBDK_LOOPY_H
