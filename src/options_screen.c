@@ -28,7 +28,7 @@
 // #include "audio_common.h"
 
 #include "common.h"
-// #include "fade.h"
+#include "fade.h"
 
 #include "game_piece_data.h"
 
@@ -248,7 +248,7 @@ void options_screen_sprites_init(void) {
     // Use a pet tile as a cursor, so load the pet tiles into the chosen tile obj area
     set_bkg_tiles_target_screen_a_or_b(LAYER_SCREEN_A);
     set_bkg_4bpp_data(TILE_LOAD_OFFSET_CURSOR_SPRITE, pet_and_special_tiles_out_TILE_COUNT, pet_and_special_tiles_out_tiles);
-    set_bkg_4bpp_palette(PAL_ASSIGN_OBJ_0, pet_and_special_tiles_out_PALETTE_COUNT, pet_and_special_tiles_out_palettes);
+    set_fade_target_4bpp_palette(PAL_ASSIGN_OBJ_0, pet_and_special_tiles_out_PALETTE_COUNT, pet_and_special_tiles_out_palettes);
 
     set_sprite_tile(SPR_OPTIONS_CURSOR, SPR_TILE_CURSOR);
     set_sprite_prop(SPR_OPTIONS_CURSOR, S_8x8 | S_FLIPX | S_PAL0);
@@ -259,10 +259,12 @@ void options_screen_sprites_init(void) {
 
 
 void options_screen_exit_cleanup(void) {
-/*
-    fade_start(FADE_OUT);  // TODO fade out
+
+    palette_fade_to_black_start();
+    palette_fade_wait_completed();
+
     HIDE_SPRITES;  // TODO
-*/
+
     // TODO: Fill BG0 tilemap with empty tiles
     hide_sprites_range(0, MAX_HARDWARE_SPRITES);
 
@@ -274,15 +276,6 @@ void options_screen_exit_cleanup(void) {
 
 // Assumes and relies on "intro_screen" (title) having run and initialized
 void options_screen_init(void) {  // TODO
-
-    // Note: The popup status window is relying on the gfx initialization here
-    //       See: status_win_popup_init()
-
-/*    // Add a lighter font for options  // TODO: palette fading
-    fade_set_pal(OPTION_TITLE_PRINT_PAL, 1, option_title_palette, FADE_PAL_BKG);
-    // Upper 4 palettes from intro screen
-    fade_set_pal(BG_PAL_4, 4, intro_screen_palette, FADE_PAL_BKG);
-*/
 
     // Rely on Title screen graphics loading for Background image and Font tiles / drawing setup
     load_8x16_font_tiles(TILE_LOAD_OFFSET_FONT_VRAM_ABS, 0u);  // No use of sprite printing, OAM tile load start is a shim
@@ -302,7 +295,7 @@ void options_screen_init(void) {  // TODO
     // // Reveal sprite last since other screen setup/drawing is slow
     options_screen_sprites_init();
     options_screen_cursor_update(0);
-    // fade_start(FADE_IN);
+    palette_fade_to_target_start();
 
     // // Update music status to match option menu setting
     // MusicUpdateStatus();

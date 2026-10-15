@@ -1,4 +1,4 @@
-// Copyright 2020 (c) bbbbbr
+// Copyright 2026 (c) bbbbbr
 //
 // This software is licensed under:
 //
@@ -9,8 +9,11 @@
 // Attribution-NonCommercial-ShareAlike 4.0 International License
 // See: http://creativecommons.org/licenses/by-nc-sa/4.0/
 
-#include <gb/gb.h>
-#include <gb/cgb.h>
+#include "loopy.h"
+#include "loopy_helpers.h"
+#include <gbdk/platform.h>
+
+/*
 
 #include "fade2pal.h"
 #include "gfx_board_fadepals.h"
@@ -18,10 +21,10 @@
 // Scratch palette array in fade.c
 // Reads from this to extract current palette
 // Writes to it to apply palette updates
-extern UWORD ModPalBg[];
+extern uint16_t ModPalBg[];
 
 
-UINT8 fade_sky_pal_idx = 0;
+uint16_t fade_sky_pal_idx = 0;
 
 
 // Use Bresenham's algorithm to Linear Interpolate (lerp)
@@ -34,13 +37,13 @@ UINT8 fade_sky_pal_idx = 0;
 // distance x (dx) = FADE2PAL_FRAME_COUNT
 // distance y (dy) = color_from - color_to
 
-INT8 fade2pal_frame_count = 0;
+int16_t fade2pal_frame_count = 0;
 
 // Arrays
-UINT8 fade2pal_color_val[FADE2PAL_ARY_SIZE];
-INT8  fade2pal_color_val_dir[FADE2PAL_ARY_SIZE];
-INT8  fade2pal_err_accum[FADE2PAL_ARY_SIZE];
-INT8  fade2pal_err_framestep_add[FADE2PAL_ARY_SIZE];
+uint8_t fade2pal_color_val[FADE2PAL_ARY_SIZE];
+int8_t  fade2pal_color_val_dir[FADE2PAL_ARY_SIZE];
+int8_t  fade2pal_err_accum[FADE2PAL_ARY_SIZE];
+int8_t  fade2pal_err_framestep_add[FADE2PAL_ARY_SIZE];
 
 
 void fade2pal_init(void) {
@@ -58,7 +61,7 @@ void fade2pal_start_next(void) {
     // Loop through transitions until done
     while (fade2pal_frame_count) {
 
-        wait_vbl_done();
+        vsync();
 
         // Optional: fade can be stretched over more frames
         // if (sys_time & 0x01)
@@ -79,33 +82,33 @@ void fade2pal_start_next(void) {
 
 
 // Color Palette entry bit packing
-// UINT16
-// Component: x BBBBB GGGGG RRRRR
+// uint16_t
+// Component: x RRRRR GGGGG BBBBB
 // Bits used: F EDCBA 98765 43210
 
 // NOTE: Background Palettes ONLY
 // NOTE: Assumes palettes (FADE2PAL_NUM_PALS) are contiguous
-void fade2pal_prep_fade(UINT8 * p_dest_pal_gbr) {
+void fade2pal_prep_fade(const uint8_t * p_dest_pal_rgb) {
 
     // Extract RGB from current palettes
-    UINT16 * p_src_pal = &ModPalBg[FADE2PAL_PALNUM_START * COLORS_PER_PAL];
-    UINT16 t_color = *p_src_pal;
-    UINT8  pal_inc = PAL_INC_RESET;
-    UINT8  c;
+    uint16_t * p_src_pal = &ModPalBg[FADE2PAL_PALNUM_START * COLORS_PER_PAL];
+    uint16_t t_color = *p_src_pal;
+    uint16_t  pal_inc = PAL_INC_RESET;
+    uint16_t  c;
 
     for (c = 0; c < FADE2PAL_ARY_SIZE; c++) {
 
-
         // Initialze current channel of current palette color
-        // Need to decode in order of B -> G -> R
+        // Need to decode in order of R -> G -> B
         // Note: function could be inlined here
-        fade2pal_calc_entry( (UINT8)(t_color >> (5 * pal_inc)) & 0x1F, // color FROM
-                            *p_dest_pal_gbr,       // color TO
+        fade2pal_calc_entry( (uint8_t)t_color & 0x1F, // color FROM
+                            *p_dest_pal_rgb,       // color TO
                             c);                    // color lerp index
 
         // Load new palette color every 3rd step
         if (pal_inc) {
-            // Load next B/G/R channel
+            // Load next R/G/B channel
+            t_color >>= 5;
             pal_inc--;
         } else {
             // Load new palette color entry
@@ -116,7 +119,7 @@ void fade2pal_prep_fade(UINT8 * p_dest_pal_gbr) {
         }
 
         // next entry in color array
-        p_dest_pal_gbr++;
+        p_dest_pal_rgb++;
     }
 
     // Start frame counter
@@ -126,7 +129,7 @@ void fade2pal_prep_fade(UINT8 * p_dest_pal_gbr) {
 
 
 
-void fade2pal_calc_entry(UINT8 color_from, UINT8 color_to, UINT8 c) {
+void fade2pal_calc_entry(uint16_t color_from, uint16_t color_to, uint16_t c) {
 
     // Extract colors from current color palette here
 
@@ -153,9 +156,9 @@ void fade2pal_calc_entry(UINT8 color_from, UINT8 color_to, UINT8 c) {
 // This can also be called from a vlank/etc ISR
 void fade2pal_update_entry(void) {
 
-    UINT8  pal_inc = PAL_INC_RESET;
-    UINT8  c;
-    UINT16 * p_src_pal = &ModPalBg[FADE2PAL_PALNUM_START * COLORS_PER_PAL];
+    uint16_t  pal_inc = PAL_INC_RESET;
+    uint16_t  c;
+    uint16_t * p_src_pal = &ModPalBg[FADE2PAL_PALNUM_START * COLORS_PER_PAL];
     *p_src_pal = 0; // Clear the first palette entry
 
     // Update all the separated B,G,R color components
@@ -173,7 +176,7 @@ void fade2pal_update_entry(void) {
         fade2pal_err_accum[c] += fade2pal_err_framestep_add[c];
 
         // Merge color component into BGRu16 palette entry
-        *p_src_pal |= (UINT16)fade2pal_color_val[c];
+        *p_src_pal |= (uint16_t)fade2pal_color_val[c];
 
         // Upshift color component if needed
         // or move to next palette entry every third pass
@@ -196,13 +199,11 @@ void fade2pal_update_entry(void) {
     fade2pal_frame_count--;
 
     // Update Color Palettes
-    // To avoid flickering:
-    // Wait until VBlank (mode == 1) and then write palette in one big chunk
-    // Doing the opposite and gating with wait_vbl_done() yields mild top-of-screen flicker
-    while((STAT_REG & (STATF_HBL | STATF_VBL | STATF_OAM | STATF_LCD)) != STATF_VBL);
-    set_bkg_palette(FADE2PAL_PALNUM_START,
-                    FADE2PAL_NUM_PALS,
-                    &ModPalBg[FADE2PAL_PALNUM_START * COLORS_PER_PAL]);
+    // To avoid flickering wait until vblank
+    vsync();
+    set_bkg_4bpp_palette(FADE2PAL_PALNUM_START,
+                         FADE2PAL_NUM_PALS,
+                         &ModPalBg[FADE2PAL_PALNUM_START * COLORS_PER_PAL]);
 }
 
-
+*/

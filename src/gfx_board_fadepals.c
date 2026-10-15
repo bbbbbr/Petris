@@ -1,7 +1,8 @@
 
 
-#include <gb/gb.h>
-#include <gb/cgb.h>
+#include <gbdk/platform.h>
+
+/*
 
 #include "gfx_board_fadepals.h"
 
@@ -13,7 +14,7 @@
 //
 // Use Last 4 (4 colors x R/G/B) sets of source palette
 
-const UINT8 fade_sky_pals[FADE_SKY_PALS_COUNT][FADE2PAL_NUM_PALS * COLORS_PER_PAL * BYTES_PER_COLOR] = {
+const uint8_t fade_sky_pals[FADE_SKY_PALS_COUNT][FADE2PAL_NUM_PALS * COLORS_PER_PAL * BYTES_PER_COLOR] = {
     // Default blue sky
 {
     0x1f, 0x1e, 0x18,
@@ -213,3 +214,4 @@ const UINT8 fade_sky_pals[FADE_SKY_PALS_COUNT][FADE2PAL_NUM_PALS * COLORS_PER_PA
     0x03, 0x03, 0x03,
     }
 };
+*/

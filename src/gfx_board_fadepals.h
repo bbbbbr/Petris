@@ -1,4 +1,4 @@
-// Copyright 2020 (c) bbbbbr
+// Copyright 2026 (c) bbbbbr
 //
 // This software is licensed under:
 //
@@ -11,15 +11,15 @@
 
 #ifndef _GFX_BOARDPALS_H
 #define _GFX_BOARDPALS_H
-
-#include "fade2pal.h"
+/*
+// #include "fade2pal.h"
 
 #define FADE_SKY_PALS_RESET 1 // Skip past default on first pass
 #define FADE_SKY_PALS_COUNT 9
 #define FADE_SKY_PALS_MIN   0
 #define FADE_SKY_PALS_MAX   (FADE_SKY_PALS_COUNT - 1)
 
-extern const UINT8 fade_sky_pals[FADE_SKY_PALS_COUNT][FADE2PAL_NUM_PALS * COLORS_PER_PAL * BYTES_PER_COLOR];
+extern const uint8_t fade_sky_pals[FADE_SKY_PALS_COUNT][FADE2PAL_NUM_PALS * COLORS_PER_PAL * BYTES_PER_COLOR];
 
-
+*/
 #endif

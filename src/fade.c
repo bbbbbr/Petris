@@ -1,150 +1,182 @@
-#include <gb/gb.h>
-#include <gb/cgb.h> // Include cgb functions
+#include <gbdk/platform.h>
 
 #include "fade.h"
 
 
-// #define PAL_FADE_WHITE
-#define PAL_FADE_BLACK
-// #define PAL_FADE_NONE
+#define PAL_FADE_DONE  (0u)
+#define PAL_FADE_STEPS (31u) // Max value for a 5 bit color channel
 
-#define FADE_IN_START 5
-#define FADE_OUT_START 0
-
-#define FADE_EXCLUDE_LSBITS 0b0111101111011110
-                        //   x    R    G    B
-const UWORD FADE_LUT[6] = {0b0000000000000000,  // No white present to mix
-                           0b0000010000100001,
-                           0b0000110001100011,
-                           0b0001110011100111,
-                           0b0011110111101111,
-                           0b0111111111111111}; // Full white present to mix
-
-// Fade palette pointers needs to be initialized to something
-// So just point them at the Fade LUT (which will have a gradient of greys)
-const UWORD * p_FadePalBg[8]     = {FADE_LUT, FADE_LUT, FADE_LUT, FADE_LUT, FADE_LUT, FADE_LUT, FADE_LUT, FADE_LUT};
-const UWORD * p_FadePalSprite[8] = {FADE_LUT, FADE_LUT, FADE_LUT, FADE_LUT, FADE_LUT, FADE_LUT, FADE_LUT, FADE_LUT};
-
-#define NUM_COLORS_PER_PAL 4
-
-UWORD ModPalBg[32];
-UWORD ModPalSprite[32];
+// #define DEBUG_SLOW_FADE
 
 
-void fade_set_pal(UINT8 start_pal, UINT8 num_pal, UWORD * p_SrcPal, UINT8 which_pal) {
-    int c;
+bool palette_fade_active = false;
 
-    // **DO NOT** Pass palette update through to GBDK pal function
-    // Instead let fade_start() perform all palette updates
-    //
-    // if (which_pal == FADE_PAL_BKG)
-    //     set_bkg_palette(start_pal, num_pal, p_SrcPal);
-    // else
-    //     set_sprite_palette(start_pal, num_pal, p_SrcPal);
+static bool     palette_fade_is_to_black = false;
+static uint16_t palette_fade_count       = PAL_FADE_DONE;
 
-    // Copy palette pointers into fade palette array slots
-    // for later reference
-    for (c = start_pal; c < (start_pal + num_pal); c++) {
+static uint16_t full_palette_cached[COLS_PER_PAL_8BPP];
+static uint16_t full_palette_target[COLS_PER_PAL_8BPP];
 
-        if (which_pal == FADE_PAL_BKG)
-            p_FadePalBg[c] = p_SrcPal;
-        else
-            p_FadePalSprite[c] = p_SrcPal;
+static uint16_t palette_debug_slowdown;
 
-        p_SrcPal += NUM_COLORS_PER_PAL;
+static void palette_fade_calc_update(void);
+static void palette_fade_to_black_calc_update(void);
+
+
+// Palette fading:
+// - Call
+// - Runs asynchronously in VBlank (write palette) and VBlank-Ended (calc next fade palette) with control flag
+// - Can be waited on using palette_fade_wait_completed()
+// - Set fade target palettes with set_fade_4bpp_palette()
+//
+// - Fade in operates on cached full_palette_cached -> full_palette_target
+
+
+// Sets cached and target palettes to all black
+void palettes_init(void) {
+
+    palette_fade_count       = PAL_FADE_DONE;
+    palette_fade_active      = false;
+    palette_fade_is_to_black = false;
+
+    for (uint16_t color = 0; color < COLS_PER_PAL_8BPP; color++) {
+        full_palette_cached[color] = RGB888(0,0,0);
+        full_palette_target[color] = RGB888(0,0,0);
+    }
+
+    // Register the ISR handlers
+    add_vbl(palette_fade_vlb_handler);
+    add_vbl_ended(palette_fade_vlb_ended_handler);
+}
+
+
+// Waits for an active palette fade to complete
+void palette_fade_wait_completed(void) {
+
+    while(palette_fade_active) {
+        vsync();
     }
 }
 
 
-void fade_start(INT8 fade_dir) {
+// Starts a fadeout to black
+void palette_fade_to_black_start(void) {
+    
+    // Critical section since the control vars may be modified by interrupts
+    volatile uint32_t stauts_register_saved = disable_interrupts();
 
-    INT8 i;
-    UINT8 pal, c;
-    const UWORD * p_bg;
-    const UWORD * p_sp;
-    UWORD * p_mod_bg;
-    UWORD * p_mod_sp;
-    UWORD fade_mask;
+        palette_fade_count       = PAL_FADE_STEPS;
+        palette_fade_active      = true;
+        palette_fade_is_to_black = true;
+        palette_debug_slowdown = 0;
 
-    i = (fade_dir == FADE_OUT) ? FADE_OUT_START : FADE_IN_START; // Set loop start (5 for fade in, 0 for fade out)
+    enable_interrupts(stauts_register_saved);
+}
 
-    while ((i != -1) && (i != 6)) {
 
-        p_mod_bg = &ModPalBg[0];
-        p_mod_sp = &ModPalSprite[0];
+// Starts a fade toward full_palette_target[]
+void palette_fade_to_target_start(void) {
 
-        for(pal = 0; pal < 8; pal++) {
-            // Load pointer to palette from cached values
-            p_bg = p_FadePalBg[pal];
-            p_sp = p_FadePalSprite[pal];
+    // Critical section since the control vars may be modified by interrupts
+    volatile uint32_t stauts_register_saved = disable_interrupts();
 
-            // Read colors from palette and get faded version
-            for(c = 0; c < 4; ++c) {
+        palette_fade_count       = PAL_FADE_STEPS;
+        palette_fade_active      = true;
+        palette_fade_is_to_black = false;
 
-                #ifdef PAL_FADE_WHITE
-                    // Fade in/out from White
-                    fade_mask = FADE_LUT[i];
+    enable_interrupts(stauts_register_saved);
+}
 
-                    if (fade_dir == FADE_OUT) {
-                        // If fading out, just use currently cached/loaded palette
-                        // This makes it compatible with fade2pal adjustments
-                        *p_mod_bg = *p_mod_bg | fade_mask;
-                        *p_mod_sp = *p_mod_sp | fade_mask;
-                    } else {
-                        *p_mod_bg = *p_bg | fade_mask;
-                        *p_mod_sp = *p_sp | fade_mask;
-                    }
 
-                #else
-                  #ifdef PAL_FADE_BLACK
-
-                    if (fade_dir == FADE_OUT) {
-                        // If fading out, just use currently cached/loaded palette
-                        // This makes it compatible with fade2pal adjustments
-
-                        // Mask lowest bits then downshift all channels by 1
-                        *p_mod_bg = (*p_mod_bg & FADE_EXCLUDE_LSBITS) >> 1;
-                        *p_mod_sp = (*p_mod_sp & FADE_EXCLUDE_LSBITS) >> 1;
-
-                    } else {
-                        // Fade in/out from Black
-                        fade_mask = FADE_LUT[5 - i];
-
-                        *p_mod_bg = ((*p_bg) >> i) & fade_mask;
-                        *p_mod_sp = ((*p_sp) >> i) & fade_mask;
-                    }
-
-                    #else
-                    // No Fade
-                    *p_mod_bg = *p_bg;
-                    *p_mod_sp = *p_sp;
-                  #endif
-                #endif
-
-                // Move to next source palette color
-                p_bg++;
-                p_sp++;
-
-                // Move to next color in cached Modified palette
-                p_mod_bg++;
-                p_mod_sp++;
-            };
-        }
-        // Apply current step of faded palette colors
-
-        // To avoid flickering:
-        // Wait until VBlank (mode == 1) and then write palette in one big chunk
-        // Doing the opposite and gating with wait_vbl_done() yields mild top-of-screen flicker
-        while((STAT_REG & (STATF_HBL | STATF_VBL | STATF_OAM | STATF_LCD)) != STATF_VBL);
-        set_bkg_palette(0, 8, ModPalBg);
-
-        while((STAT_REG & (STATF_HBL | STATF_VBL | STATF_OAM | STATF_LCD)) != STATF_VBL);
-        set_sprite_palette(0, 8, ModPalSprite);
-
-        // Wait a little while before performing the next step
-        delay(40);
-
-        i += fade_dir;
+void palette_fade_vlb_handler(void) {
+    
+    // If palette fade is active then copy the cached palette to the hardware vdp palette
+    if (palette_fade_active) {
+        // Brute version, fade all colors instead of flagged sub-palettes // TODO: operate on sub-palettes of 16 instead
+        set_bkg_4bpp_palette(PAL_0, NUM_4BPP_PALS, full_palette_cached);
     }
+}
 
+
+// Sets a fade target 4bpp sub-palette (does not apply until a fade start is triggered)
+void set_fade_target_4bpp_palette(unsigned int first_palette, unsigned int nb_palettes, const palette_color_t *rgb_data) {
+
+    uint16_t * p_pal = &full_palette_target[first_palette * COLS_PER_PAL_4BPP];
+    DMA1_U16_MEMCOPY_AND_WAIT_DONE(p_pal, rgb_data, (nb_palettes * COLS_PER_PAL_4BPP));
+}
+
+
+// Called from simulated end of VBlank interrupt
+void palette_fade_vlb_ended_handler(void) {
+
+    // TODO: DEBUG TEST: SLOW DAWN FADES A LOT
+    #ifdef DEBUG_SLOW_FADE
+        palette_debug_slowdown++;
+        if ((palette_debug_slowdown & 0x000Fu) != 0u) return;
+    #endif
+
+    if (palette_fade_active) {
+        if (palette_fade_is_to_black) palette_fade_to_black_calc_update(); 
+        else                          palette_fade_calc_update();
+    }
+}
+
+
+// Calculate the next palette during a fade
+static void palette_fade_calc_update(void) {    
+
+    if (palette_fade_count == PAL_FADE_DONE) {
+        palette_fade_active = false;
+    }
+    else {
+        // Brute version, fade all colors instead of flagged sub-palettes // TODO: operate on sub-palettes of 16 instead?
+        uint16_t * p_color_cached = full_palette_cached;
+        uint16_t * p_color_target = full_palette_target;
+        for (uint16_t color = 0; color < COLS_PER_PAL_8BPP; color++) {
+
+            uint16_t color_cached = *p_color_cached;
+            uint16_t color_target = *p_color_target;
+
+            if      ((color_cached & PAL_RED_MASK)   > (color_target & PAL_RED_MASK))   color_cached -= PAL_RED_LSBIT;
+            else if ((color_cached & PAL_RED_MASK)   < (color_target & PAL_RED_MASK))   color_cached += PAL_RED_LSBIT;
+
+            if      ((color_cached & PAL_GREEN_MASK) > (color_target & PAL_GREEN_MASK)) color_cached -= PAL_GREEN_LSBIT;
+            else if ((color_cached & PAL_GREEN_MASK) < (color_target & PAL_GREEN_MASK)) color_cached += PAL_GREEN_LSBIT;
+
+            if      ((color_cached & PAL_BLUE_MASK)  > (color_target & PAL_BLUE_MASK))  color_cached -= PAL_BLUE_LSBIT;
+            else if ((color_cached & PAL_BLUE_MASK)  < (color_target & PAL_BLUE_MASK))  color_cached += PAL_BLUE_LSBIT;
+
+            *p_color_cached++ = color_cached;
+            p_color_target++;
+        }        
+
+        palette_fade_count--;
+    }
+}
+
+
+// Calculate the next palette during a fade to black
+// Does NOT modify target palette so that it can be
+// faded in/out while retaining it's values
+static void palette_fade_to_black_calc_update(void) {    
+
+    if (palette_fade_count == PAL_FADE_DONE) {
+        palette_fade_active = false;
+    }
+    else {
+        
+        // Brute version, fade all colors instead of flagged sub-palettes // TODO: operate on sub-palettes of 16 instead?
+        uint16_t * p_color_cached = full_palette_cached;
+        for (uint16_t color = 0; color < COLS_PER_PAL_8BPP; color++) {
+
+            uint16_t color_cached = *p_color_cached;
+
+            if (color_cached & PAL_RED_MASK)   color_cached -= PAL_RED_LSBIT;
+            if (color_cached & PAL_GREEN_MASK) color_cached -= PAL_GREEN_LSBIT;
+            if (color_cached & PAL_BLUE_MASK)  color_cached -= PAL_BLUE_LSBIT;
+            *p_color_cached++ = color_cached;
+        }
+
+        palette_fade_count--;
+    }
 }

@@ -24,7 +24,7 @@
 
 #include "common.h"
 
-// #include "fade.h"
+#include "fade.h"
 #include "gfx.h"
 #include "gfx_print.h"
 
@@ -96,7 +96,7 @@ void board_gfx_init(void) {
 
     gameover_message_reset();
 
-    // fade_start(FADE_IN);
+    palette_fade_to_target_start();
 }
 
 
@@ -137,7 +137,7 @@ void board_gfx_init_pettiles(void) {
         set_bkg_tilemap_base_address(BG1_MAP_START());
         set_bkg_tiles_target_subpal(REL_PAL_BOARD_UNDER_BG1_1);
 
-        set_bkg_4bpp_palette(ABS_PAL_BOARD_UNDER_BG1_1, GAME_BOARD_UNDER_PALETTE_COUNT, game_board_under_pal);
+        set_fade_target_4bpp_palette(ABS_PAL_BOARD_UNDER_BG1_1, GAME_BOARD_UNDER_PALETTE_COUNT, game_board_under_pal);
         set_bkg_4bpp_data(base_tile_id, GAME_BOARD_UNDER_TILE_COUNT, game_board_under_tiles);
 
         game_board_under_white_tile_id = base_tile_id;
@@ -152,7 +152,7 @@ void board_gfx_init_pettiles(void) {
         set_bkg_tilemap_base_address(BG0_MAP_START());
         set_bkg_tiles_target_subpal(REL_PAL_BORDER_BG0_2);
 
-        set_bkg_4bpp_palette(ABS_PAL_BORDER_BG0_2, game_board_border_out_PALETTE_COUNT, game_board_border_out_palettes);
+        set_fade_target_4bpp_palette(ABS_PAL_BORDER_BG0_2, game_board_border_out_PALETTE_COUNT, game_board_border_out_palettes);
         set_bkg_4bpp_data(base_tile_id, game_board_border_out_TILE_COUNT, game_board_border_out_tiles);
 
         set_bkg_based_tiles(GAME_BOARD_BORDER_START_X, GAME_BOARD_BORDER_START_Y,
@@ -164,8 +164,8 @@ void board_gfx_init_pettiles(void) {
 
     // Sprite and BG0 palettes for: pet tiles, shared with special pieces and pet font 8x8
         // Set palettes for pet tiles on BG0 and sprites
-        set_bkg_4bpp_palette(ABS_PAL_PETS_SPECIAL_8x8FONT_BG0_3, pet_and_special_tiles_out_PALETTE_COUNT, pet_and_special_tiles_out_palettes);
-        set_bkg_4bpp_palette(ABS_PAL_PETS_SPECIAL_8x8FONT_OBJ_3, pet_and_special_tiles_out_PALETTE_COUNT, pet_and_special_tiles_out_palettes);
+        set_fade_target_4bpp_palette(ABS_PAL_PETS_SPECIAL_8x8FONT_BG0_3, pet_and_special_tiles_out_PALETTE_COUNT, pet_and_special_tiles_out_palettes);
+        set_fade_target_4bpp_palette(ABS_PAL_PETS_SPECIAL_8x8FONT_OBJ_3, pet_and_special_tiles_out_PALETTE_COUNT, pet_and_special_tiles_out_palettes);
 
         // Shared Sprite and background data:
         // Set at OBJ_TILEGROUP_BASE_512

@@ -15,6 +15,7 @@
 
 #include "input.h"
 // #include "audio_common.h"  // TODO
+#include "fade.h"
 #include "gfx.h"
 #include "gfx_print.h"
 
@@ -57,17 +58,17 @@ const palette_color_t font_8x16_out_palette_GREY[16] = {
 
 void load_8x16_font_tilemap_palettes(void) {
    // Set palettes for tile printing (yellow, pink, grey) on BG0 layer
-    set_bkg_4bpp_palette(PAL_ASSIGN_BG0_0, font_8x16_out_PALETTE_COUNT, font_8x16_out_palettes);
-    set_bkg_4bpp_palette(PAL_ASSIGN_BG0_1, 1u, font_8x16_out_palette_GREY);
-    // set_bkg_4bpp_palette(PAL_ASSIGN_BG0_1, 1u, font_8x16_out_palette_PINK);
+    set_fade_target_4bpp_palette(PAL_ASSIGN_BG0_0, font_8x16_out_PALETTE_COUNT, font_8x16_out_palettes);
+    set_fade_target_4bpp_palette(PAL_ASSIGN_BG0_1, 1u, font_8x16_out_palette_GREY);
+    // set_fade_target_4bpp_palette(PAL_ASSIGN_BG0_1, 1u, font_8x16_out_palette_PINK);
 }
 
 
 void load_8x16_font_sprite_palettes(void) {
     // Set palettes for Sprite printing (yellow, pink, grey) on OBJ layer(s)
-    set_bkg_4bpp_palette(PAL_ASSIGN_OBJ_0, font_8x16_out_PALETTE_COUNT, font_8x16_out_palettes);
-    set_bkg_4bpp_palette(PAL_ASSIGN_OBJ_1, 1u, font_8x16_out_palette_PINK);
-    set_bkg_4bpp_palette(PAL_ASSIGN_OBJ_2, 1u, font_8x16_out_palette_GREY);
+    set_fade_target_4bpp_palette(PAL_ASSIGN_OBJ_0, font_8x16_out_PALETTE_COUNT, font_8x16_out_palettes);
+    set_fade_target_4bpp_palette(PAL_ASSIGN_OBJ_1, 1u, font_8x16_out_palette_PINK);
+    set_fade_target_4bpp_palette(PAL_ASSIGN_OBJ_2, 1u, font_8x16_out_palette_GREY);
 }
 
 // Loads 8x16 font tiles into vram and sets gfx_tiles_font_base

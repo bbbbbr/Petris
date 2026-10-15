@@ -18,7 +18,7 @@
 // #include "gbt_player.h"
 // #include "audio_common.h"
 
-// #include "fade.h"
+#include "fade.h"
 
 #include "game_board.h"
 // #include "game_board_gfx.h"
@@ -42,7 +42,7 @@
 #include "magic_code.h"
 
 
-#define DEBUG_SKIP_INTRO
+// #define DEBUG_SKIP_INTRO
 
 
 void init (void);
@@ -163,6 +163,8 @@ void init(void) {
 
     // Set the appropriate controller scanning mode and video height
     bios_vdpMode(CONTROL_MODE_GAMEPAD, VIDEO_HEIGHT_224P);    
+
+    palettes_init();
 }
 
 
@@ -241,7 +243,8 @@ int main() {
                 if (KEY_TICKED(J_START | J_A | J_B)) {
                     // Turn sprites off and then fade out
                     HIDE_SPRITES;
-                    // fade_start(FADE_OUT);
+                    palette_fade_to_black_start();
+                    palette_fade_wait_completed();
                     game_state = GAME_INTRO_INIT;
                 }
                 break;

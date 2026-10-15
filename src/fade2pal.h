@@ -1,4 +1,4 @@
-// Copyright 2020 (c) bbbbbr
+// Copyright 2026 (c) bbbbbr
 //
 // This software is licensed under:
 //
@@ -12,7 +12,9 @@
 #ifndef _FADE2PAL_H
 #define _FADE2PAL_H
 
-#define FADE2PAL_FRAME_COUNT     60   // This may be best left at 32 since that's max color delta
+
+/*
+#define FADE2PAL_FRAME_COUNT     60  // This may be best left at 32 since that's max color delta
                                      // If a slower time scale is needed it can be achieved
                                      // by calling fade2pal_update_entry() less often.
                                      // Although, longer time scales may produce more intermediate colors
@@ -22,23 +24,23 @@
 
 // For background palettes only
 // Fixed number of palettes to operate on, to reduce memory and increase speed
-#define FADE2PAL_PALNUM_START    4
+#define FADE2PAL_PALNUM_START    4  // TODO: LOOPY: WHERE DO PALETTES START
 #define FADE2PAL_NUM_PALS        4
-#define COLORS_PER_PAL  4
-#define BYTES_PER_COLOR 3
+#define COLORS_PER_PAL          16
+#define BYTES_PER_COLOR          3
 #define FADE2PAL_PAL_COLOR_COUNT  (FADE2PAL_NUM_PALS * COLORS_PER_PAL)
 #define FADE2PAL_ARY_SIZE (FADE2PAL_NUM_PALS * COLORS_PER_PAL * BYTES_PER_COLOR)
 #define PAL_INC_RESET 2
 
-extern UINT8 fade_sky_pal_idx;
+extern uint16_t fade_sky_pal_idx;
 
-extern INT8 fade2pal_frame_count;
+extern int16_t fade2pal_frame_count;
 
 void fade2pal_init(void);
 void fade2pal_start_next(void);
-void fade2pal_prep_fade(UINT8 * p_dest_pal_gbr);
-void fade2pal_calc_entry(UINT8 color_from, UINT8 color_to, UINT8 c);
+void fade2pal_prep_fade(const uint8_t * p_dest_pal_gbr);
+void fade2pal_calc_entry(uint16_t color_from, uint16_t color_to, uint16_t c);
 void fade2pal_update_entry(void);
-
+*/
 
 #endif
