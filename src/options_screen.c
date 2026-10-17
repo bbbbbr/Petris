@@ -260,7 +260,7 @@ void options_screen_sprites_init(void) {
 
 void options_screen_exit_cleanup(void) {
 
-    palette_fade_to_black_start();
+    palette_fade_start(FADE_TO_BLACK);
     palette_fade_wait_completed();
 
     HIDE_SPRITES;  // TODO
@@ -295,7 +295,7 @@ void options_screen_init(void) {  // TODO
     // // Reveal sprite last since other screen setup/drawing is slow
     options_screen_sprites_init();
     options_screen_cursor_update(0);
-    palette_fade_to_target_start();
+    palette_fade_start(FADE_TO_TARGET);
 
     // // Update music status to match option menu setting
     // MusicUpdateStatus();

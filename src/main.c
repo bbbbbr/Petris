@@ -240,7 +240,7 @@ int main() {
                 if (KEY_TICKED(J_START | J_A | J_B)) {
                     // Turn sprites off and then fade out
                     HIDE_SPRITES;
-                    palette_fade_to_black_start();
+                    palette_fade_start(FADE_TO_BLACK);
                     palette_fade_wait_completed();
                     game_state = GAME_INTRO_INIT;
                 }

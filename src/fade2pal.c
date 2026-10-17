@@ -55,7 +55,7 @@ void fade2pal_start_next(void) {
 
     // Main background palette
     set_fade_target_4bpp_palette(PAL_ASSIGN_BG1_0, intro_screen_out_PALETTE_COUNT, fade_sky_pals[fade_sky_pal_idx]);
-    palette_fade_to_target_start();
+    palette_fade_start(FADE_TO_TARGET);
 
     // Queue up next palette
     if (fade_sky_pal_idx < FADE_SKY_PALS_MAX) {

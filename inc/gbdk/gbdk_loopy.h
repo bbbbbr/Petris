@@ -112,6 +112,20 @@
         timeout--; \
     }
 
+// Channel 1 DMA copy with NO source increment
+// NOTE: Mark source as "volatile" to ensure the compiler doesn't optimize it (and it's address) out!
+// The DMA timeout may never happen if it doesn't execute during the DMA
+#define DMA1_U16_MEMSET_FROM_VAR_AND_WAIT_DONE(dest, src, u16_count) \
+    DMAC_DMAOR = DMA_DMAOR_AE_NO_ERROR | DMA_DMAOR_NMIF_NO_ERROR | DMA_DMAOR_DME_ENABLE; \
+    DMAC_SAR1  = (uint32_t)(src);   \
+    DMAC_DAR1  = (uint32_t)(dest);  \
+    DMAC_TCR1  = (u16_count);       \
+    DMAC_CHCR1 = (DMA_CHCR_DM_DEST_INCREMENT | DMA_CHCR_SM_SRC_NO_INCREMENT | DMA_CHCR_RS_AUTO_CONF | DMA_CHCR_TM_BUS_BURST | DMA_CHCR_TS_XFER_WORD_U16 | DMA_CHCR_DE_XFER_ENABLE); \
+    volatile uint16_t timeout = 60000u; \
+    while(!(DMAC_CHCR1 & DMA_CHCR_TE_XFER_IS_DONE) && timeout != 0u) { \
+        timeout--; \
+    }
+
 
 // No need for BANKREFS, zero them out
 #define BANKREF(x)

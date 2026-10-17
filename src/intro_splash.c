@@ -92,7 +92,7 @@ void intro_splash(void) {
 
     init_gfx();
 
-    palette_fade_to_target_start();
+    palette_fade_start(FADE_TO_TARGET);
     // Don't wait for fade to complete,
     // let it finish as the effect begins running
 
@@ -132,7 +132,7 @@ void intro_splash(void) {
 
     delay(1000);
 
-    palette_fade_to_black_start();
+    palette_fade_start(FADE_TO_BLACK);
     palette_fade_wait_completed();
 
     // waitpadticked_lowcpu(J_ANY);

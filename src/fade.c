@@ -45,6 +45,8 @@ static uint16_t palette_debug_slowdown;
 
 static void palette_fade_fixed_point_calc_increments(void);
 static void palette_fade_fixed_point_calc_update(void);
+static void palette_fade_to_target_finish(void);
+
 // static void palette_fade_calc_update(void);
 // static void palette_fade_to_black_calc_update(void);
 
@@ -80,10 +82,6 @@ void palettes_init(void) {
         full_palette_cached[color] = RGB888(0,0,0);
         full_palette_target[color] = RGB888(0,0,0);
     }
-
-    // Register the ISR handlers
-    add_vbl(palette_fade_vlb_handler);
-    add_vbl_ended(palette_fade_vlb_ended_handler);
 }
 
 
@@ -103,38 +101,41 @@ bool palette_fade_is_running(void) {
 }
 
 
-// Starts a fadeout to black
-void palette_fade_to_black_start(void) {
-    
+// Starts a fade toward black or full_palette_target[]
+// Adds interrupt handlers to VBlank and VBlank-ended
+void palette_fade_start(bool is_FADE_TO_BLACK) {
+
     // Critical section since the control vars may be modified by interrupts
     // This seems to have fixed an occasional glitch between fade out->in
-    volatile uint32_t stauts_register_saved = disable_interrupts();
+    volatile uint32_t status_register_saved = disable_interrupts();
 
         palette_fade_count       = PAL_FADE_STEPS;
         palette_fade_active      = true;
-        palette_fade_is_to_black = true;
-        palette_debug_slowdown = 0;
+        palette_debug_slowdown   = 0u;
+        palette_fade_is_to_black = is_FADE_TO_BLACK;
 
-    enable_interrupts(stauts_register_saved);
+        // Register the ISR handlers
+        add_vbl(palette_fade_vlb_handler);
+        add_vbl_ended(palette_fade_vlb_ended_handler);
+
+    enable_interrupts(status_register_saved);
 
     palette_fade_fixed_point_calc_increments();
 }
 
 
-// Starts a fade toward full_palette_target[]
-void palette_fade_to_target_start(void) {
+// Ends a fade and removes interrupt handlers
+static void palette_fade_to_target_end(void) {
 
-    // Critical section since the control vars may be modified by interrupts
-    // This seems to have fixed an occasional glitch between fade out->in
-    volatile uint32_t stauts_register_saved = disable_interrupts();
+    // Critical section
+    volatile uint32_t status_register_saved = disable_interrupts();
 
-        palette_fade_count       = PAL_FADE_STEPS;
-        palette_fade_active      = true;
-        palette_fade_is_to_black = false;
+        // Clear state flag and de-register the ISR handlers
+        palette_fade_active = false;
+        remove_vbl();
+        remove_vbl_ended();
 
-    enable_interrupts(stauts_register_saved);
-
-    palette_fade_fixed_point_calc_increments();
+    enable_interrupts(status_register_saved);
 }
 
 
@@ -184,7 +185,7 @@ void palette_fade_vlb_ended_handler(void) {
 static void palette_fade_fixed_point_calc_update(void) {
 
     if (palette_fade_count == PAL_FADE_DONE) {
-        palette_fade_active = false;
+        palette_fade_to_target_end();
     }
     else {
         palette_fade_count--;
@@ -192,9 +193,12 @@ static void palette_fade_fixed_point_calc_update(void) {
         // On final fade step just copy the target palette to cached to ensure
         // fixed point rounding errors don't prevent perfectly matching expected colors
         if (palette_fade_count == PAL_FADE_DONE) {
-            for (uint16_t c = 0; c < COLS_PER_PAL_8BPP; c++) {
-                if (palette_fade_is_to_black) full_palette_cached[c] = RGB555(0u, 0u, 0u);
-                else                          full_palette_cached[c] = full_palette_target[c];
+            if (palette_fade_is_to_black) {
+                // Source is "volatile" to ensure the compiler doesn't optimize it (and it's address) out!
+                volatile palette_color_t black = RGB555(0u, 0u, 0u);
+                DMA1_U16_MEMSET_FROM_VAR_AND_WAIT_DONE(full_palette_cached, &black, (NUM_4BPP_PALS * COLS_PER_PAL_4BPP));
+            } else {
+                DMA1_U16_MEMCOPY_AND_WAIT_DONE(full_palette_cached, full_palette_target, (NUM_4BPP_PALS * COLS_PER_PAL_4BPP));
             }
         }
         else {
