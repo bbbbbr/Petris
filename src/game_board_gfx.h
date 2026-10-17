@@ -20,11 +20,13 @@
 
 // Layer-Relative palettes
 #define REL_PAL_FONT_8x16_YELLOW_OAM_0      (S_PAL0)
+#define REL_PAL_FONT_8x16_PINK_OAM_1        (S_PAL1)
 #define REL_PAL_PETS_SPECIAL_8x8FONT_OAM_3  (S_PAL3)
 
 #define REL_PAL_BORDER_BG0_2                (PAL_2)
 #define REL_PAL_PETS_SPECIAL_8x8FONT_BG0_3  (PAL_3)
 
+#define REL_PAL_BACKGROUND_BG1_0            (PAL_0)
 #define REL_PAL_BOARD_UNDER_BG1_1           (PAL_1)
 
 
@@ -35,7 +37,7 @@
 
 
 extern uint16_t game_board_under_white_tile_id;
-extern uint16_t game_board_under_blue_tile_id;
+extern uint16_t game_board_under_solid_color_15_tile_id;
 
 
 void board_gfx_init(void);

@@ -145,10 +145,19 @@ assets:
 	$(TOOLSDIR)/png2asset      $(RES_GENERATED_DIR)/intro_screen_out.png -o $(RESDIR)/intro_screen_out.c -use_metafile
 	$(TOOLSDIR)/tilepalquant   $(RES_ASSET_DIR)/intro_logo.png           -o $(RES_GENERATED_DIR)/intro_logo_out.png -use_metafile
 	$(TOOLSDIR)/png2asset      $(RES_GENERATED_DIR)/intro_logo_out.png   -o $(RESDIR)/intro_logo_out.c -use_metafile
-	$(TOOLSDIR)/tilepalquant   $(RES_ASSET_DIR)/font_8x16.png            -o $(RES_GENERATED_DIR)/font_8x16_out.png -use_metafile
-	$(TOOLSDIR)/png2asset      $(RES_GENERATED_DIR)/font_8x16_out.png    -o $(RESDIR)/font_8x16_out.c -use_metafile
+	#$(TOOLSDIR)/tilepalquant   $(RES_ASSET_DIR)/font_8x16.png            -o $(RES_GENERATED_DIR)/font_8x16_out.png -use_metafile
+	#$(TOOLSDIR)/png2asset      $(RES_GENERATED_DIR)/font_8x16_out.png    -o $(RESDIR)/font_8x16_out.c -use_metafile
+	$(TOOLSDIR)/png2asset      $(RES_ASSET_DIR)/font_8x16_out.png    -o $(RESDIR)/font_8x16_out.c -use_metafile
 	$(TOOLSDIR)/png2reducedrgb $(RES_ASSET_DIR)/intro_clouds_dark.png    -o $(RESDIR)/intro_clouds_dark_out.c -use_metafile
 	$(TOOLSDIR)/png2reducedrgb $(RES_ASSET_DIR)/intro_clouds_light.png   -o $(RESDIR)/intro_clouds_light_out.c -use_metafile
 	$(TOOLSDIR)/png2asset      $(RES_ASSET_DIR)/pet_and_special_tiles.png -o $(RESDIR)/pet_and_special_tiles_out.c -use_metafile
 	$(TOOLSDIR)/png2asset      $(RES_ASSET_DIR)/font_8x8_nums_pet_colored.png -o $(RESDIR)/font_8x8_nums_pet_colored_out.c -use_metafile
 	$(TOOLSDIR)/png2asset      $(RES_ASSET_DIR)/game_board_border.png    -o $(RESDIR)/game_board_border_out.c -use_metafile
+	$(TOOLSDIR)/png2asset      $(RES_ASSET_DIR)/intro_screen_out_pal2.png -o $(RESDIR)/intro_screen_out_pal2.c -use_metafile
+	$(TOOLSDIR)/png2asset      $(RES_ASSET_DIR)/intro_screen_out_pal3.png -o $(RESDIR)/intro_screen_out_pal3.c -use_metafile
+	$(TOOLSDIR)/png2asset      $(RES_ASSET_DIR)/intro_screen_out_pal4.png -o $(RESDIR)/intro_screen_out_pal4.c -use_metafile
+	$(TOOLSDIR)/png2asset      $(RES_ASSET_DIR)/intro_screen_out_pal5.png -o $(RESDIR)/intro_screen_out_pal5.c -use_metafile
+	$(TOOLSDIR)/png2asset      $(RES_ASSET_DIR)/intro_screen_out_pal6.png -o $(RESDIR)/intro_screen_out_pal6.c -use_metafile
+	$(TOOLSDIR)/png2asset      $(RES_ASSET_DIR)/intro_screen_out_pal7.png -o $(RESDIR)/intro_screen_out_pal7.c -use_metafile
+	$(TOOLSDIR)/png2asset      $(RES_ASSET_DIR)/intro_screen_out_pal8.png -o $(RESDIR)/intro_screen_out_pal8.c -use_metafile
+	$(TOOLSDIR)/png2asset      $(RES_ASSET_DIR)/intro_screen_out_pal9.png -o $(RESDIR)/intro_screen_out_pal9.c -use_metafile

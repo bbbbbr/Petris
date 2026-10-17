@@ -42,9 +42,6 @@
 #include "magic_code.h"
 
 
-// #define DEBUG_SKIP_INTRO
-
-
 void init (void);
 void init_interrupts(void);
 void vbl_update(void);

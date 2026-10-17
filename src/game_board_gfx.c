@@ -53,7 +53,7 @@ bool tail_anim_alternate = false;
 #define GAME_BOARD_UNDER_PALETTE_COUNT    2u
 
 uint16_t game_board_under_white_tile_id = 0u;
-uint16_t game_board_under_blue_tile_id  = 0u;
+uint16_t game_board_under_solid_color_15_tile_id  = 0u;
 
 const uint16_t game_board_under_tiles[] = {
     // Solid White tile
@@ -66,15 +66,15 @@ const uint16_t game_board_under_tiles[] = {
     0x1111u, 0x1111u,
     0x1111u, 0x1111u,
 
-    // Solid Blue tile
-    0x2222u, 0x2222u,
-    0x2222u, 0x2222u,
-    0x2222u, 0x2222u,
-    0x2222u, 0x2222u,
-    0x2222u, 0x2222u,
-    0x2222u, 0x2222u,
-    0x2222u, 0x2222u,
-    0x2222u, 0x2222u,
+    // Solid Color 15 tile
+    0xEEEEu, 0xEEEEu,
+    0xEEEEu, 0xEEEEu,
+    0xEEEEu, 0xEEEEu,
+    0xEEEEu, 0xEEEEu,
+    0xEEEEu, 0xEEEEu,
+    0xEEEEu, 0xEEEEu,
+    0xEEEEu, 0xEEEEu,
+    0xEEEEu, 0xEEEEu,
 };
 const palette_color_t game_board_under_pal[16] = {
     RGB8(  0,  0,  0), RGB8(255,255,255), RGB8(128,208,224), RGB8(  0,  0,  0),
@@ -141,7 +141,7 @@ void board_gfx_init_pettiles(void) {
         set_bkg_4bpp_data(base_tile_id, GAME_BOARD_UNDER_TILE_COUNT, game_board_under_tiles);
 
         game_board_under_white_tile_id = base_tile_id;
-        game_board_under_blue_tile_id  = base_tile_id + 1u;
+        game_board_under_solid_color_15_tile_id  = base_tile_id + 1u;
         fill_bkg_rect(BRD_ST_X, BRD_ST_Y, BRD_WIDTH, BRD_HEIGHT, game_board_under_white_tile_id);
 
         base_tile_id += GAME_BOARD_UNDER_TILE_COUNT;
@@ -250,7 +250,7 @@ void board_gfx_init_background(void) {
         PRINTXY(DISPLAY_NUMPETS_X_LABEL, DISPLAY_NUMPETS_Y_LABEL,  "PETS", 0);
     }
 
-    PRINT_PAL(PRINT_PAL_TILE_YELLOW);
+    PRINT_PAL(PRINT_PAL_TILE_YELLOW); // Leave default as Yellow
     // SHOW_BKG;
 }
 

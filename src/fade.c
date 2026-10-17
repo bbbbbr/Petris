@@ -156,6 +156,12 @@ void set_fade_target_4bpp_palette(unsigned int first_palette, unsigned int nb_pa
 }
 
 
+// Set a single color entry in the fade target 4bpp sub-palette (does not apply until a fade start is triggered)
+void set_fade_target_4bpp_palette_entry(unsigned int palette, unsigned int entry, palette_color_t rgb_data) {
+    full_palette_target[(palette * COLS_PER_PAL_4BPP) + entry] = rgb_data;
+}
+
+
 // Called from simulated end of VBlank interrupt
 void palette_fade_vlb_ended_handler(void) {
 

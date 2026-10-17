@@ -12,6 +12,7 @@
 // game_board.c
 
 #include <gbdk/platform.h>
+#include <gbdk/metasprites.h>
 #include <gbdk/rand.h>
 #include <stdint.h>
 #include <stdbool.h>
@@ -23,16 +24,18 @@
 
 #include "game_piece_data.h"
 #include "game_board.h"
+#include "game_board_gfx.h"
 #include "game_stats.h"
 #include "gameover_message.h"
 
+#include "player_gfx.h"
 #include "player_info.h"
 #include "player_hinting.h"
 
 
-#define MAXPET_TXT_X       BRD_ST_X + 0
-#define MAXPET_TXT_Y       BRD_ST_Y + 0
-#define MAXPET_TXT_MSG    " BEST PET " // " LONGEST  "
+#define MAXPET_TXT_X       ((BRD_ST_X + 1u) * 8u)
+#define MAXPET_TXT_Y       ((BRD_ST_Y + 1u) * 8u)
+#define MAXPET_TXT_MSG    "BEST PET"
 #define MAXPET_TXT_DELAY  100
 #define MAXPET_TILE_DELAY 120
 #define MAXPET_MIN_DISPLAY_SIZE 2
@@ -100,8 +103,8 @@ void stats_maxpet_draw(void) {
     board_hide_all(BRD_CLR_DELAY_CLEAR_MED);
     board_reset();
 
-    PRINTXY(MAXPET_TXT_X, MAXPET_TXT_Y,
-          MAXPET_TXT_MSG, MAXPET_TXT_DELAY);
+    PRINT_POS(MAXPET_TXT_X, MAXPET_TXT_Y);
+    print_to_sprites(SPR_MAXPET_START, REL_PAL_FONT_8x16_PINK_OAM_1, MAXPET_TXT_MSG);
 
     // Draw each tile from the longest pet with delay between each
     max_x = 0;
@@ -148,9 +151,9 @@ void stats_display(void) {
 
     // == Numeric Stats Readout ==
 
-    // Re-hide pet length overlay
+    // Re-hide pet length overlay and Best Pet text
     hinting_petlength_reset();
-
+    hide_sprites_range(SPR_MAXPET_START, SPR_MAXPET_LAST);
 
     board_hide_all(BRD_CLR_DELAY_CLEAR_MED);
 

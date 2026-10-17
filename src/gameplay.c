@@ -12,6 +12,7 @@
 // gameplay.c
 
 #include <gbdk/platform.h>
+#include <gbdk/metasprites.h>
 #include <gbdk/rand.h>
 #include <stdint.h>
 #include <stdbool.h>
@@ -27,8 +28,8 @@
 #include "input.h"
 #include "gfx.h"
 #include "gfx_print.h"
-// #include "fade.h"  // TODO
-// #include "fade2pal.h" // TODO
+#include "fade.h"
+#include "fade2pal.h"
 
 #include "magic_code.h"
 
@@ -174,13 +175,13 @@ void random_init(void) {
 
 
 void gameplay_init(void) {
-    // fade2pal_init();  // TODO
     random_init();
 
     game_types_init(); // Call before board_gfx_init()
 
     board_init();
     board_gfx_init();
+    fade2pal_init();  // Call this after board_gfx_init so that it can override the sprite border color
     hinting_petlength_reset();
     stats_maxpet_reset();
 
@@ -322,12 +323,17 @@ void gameplay_handle_pause(void) {
     player_hinting_special_show(false);
     player_hinting_drop_show(false);
 
-    PRINTXY(BRD_ST_X + 2, BRD_ST_Y + 2,"PAUSED",0);   // TODO: Sprite based pause text instead of on the bg tilemap
+    #define SPR_PAUSE_MSG_X ((BRD_ST_X + 2u) * 8u)
+    #define SPR_PAUSE_MSG_Y ((BRD_ST_Y + 2u) * 8u)
 
+    PRINT_POS(SPR_PAUSE_MSG_X, SPR_PAUSE_MSG_Y);
+    uint16_t oam_slot_after_text = print_to_sprites(SPR_PAUSE_START, REL_PAL_FONT_8x16_PINK_OAM_1, "PAUSED");
 
     // Wait until unpaused by player
     // or unpause send over serial link
     waitpadticked_lowcpu(J_START);
+
+    hide_sprites_range(SPR_PAUSE_START, oam_slot_after_text - 1u);
 
     // If unpause was triggered by a local button
     // then pause state var will still be paused, so clear it
@@ -425,6 +431,12 @@ void gameplay_handle_input(void) {
     else if (KEY_TICKED(J_B  | J_LTRIG)) {
         player_piece_rotate_apply(PLAYER_ROT_LEFT);
     }
+
+    #ifdef DEBUG_PRESS_CASIO_B_TO_FADE_NEXT
+        if (KEY_TICKED(GAMEPAD_BTN_B)) {
+            fade2pal_start_next();
+        }
+    #endif
 
     // TODO: high-contrast mode is off for now, but could be needed on some CRTs
     /*

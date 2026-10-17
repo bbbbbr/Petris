@@ -66,7 +66,7 @@ void gameover_message_animate(void) {
     // Relies on existing loaded font tiles and palettes from board_gfx_init...()
 
     PRINT_POS(SPR_GAMEOVER_START_X, SPR_GAMEOVER_LUT_Y[ spr_gameover_y_idx[c] ]);
-    print_to_sprites(min_spr, REL_PAL_FONT_8x16_YELLOW_OAM_0, p_gameover_chars);
+    print_to_sprites(min_spr, REL_PAL_FONT_8x16_PINK_OAM_1, p_gameover_chars);
 
     // Loop exits when all sprites have landed
     while (min_spr != SPR_GAMEOVER_COUNT) {

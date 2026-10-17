@@ -40,16 +40,16 @@ uint16_t print_y  = 0;
 uint16_t print_tile_attribs = PRINT_ATTRIB_PAL_DEFAULT;
 
 
-
 const palette_color_t font_8x16_out_palette_PINK[16] = {
-    RGB8(  0,  0,  0), RGB8(175,134,178), RGB8(228,195,231), RGB8(  0,  0,  0),
+    // RGB8(  0,  0,  0), RGB8(114,187,203), RGB8(175,134,178), RGB8(228,195,231),
+    RGB8(  0,  0,  0), RGB8(114,187,203), RGB8(153,111,217), RGB8(233,179,255),
     RGB8(  0,  0,  0), RGB8(  0,  0,  0), RGB8(  0,  0,  0), RGB8(  0,  0,  0),
     RGB8(  0,  0,  0), RGB8(  0,  0,  0), RGB8(  0,  0,  0), RGB8(  0,  0,  0),
     RGB8(  0,  0,  0), RGB8(  0,  0,  0), RGB8(  0,  0,  0), RGB8(  0,  0,  0)
     };
 
 const palette_color_t font_8x16_out_palette_GREY[16] = {
-    RGB8(  0,  0,  0), RGB8(148,148,148), RGB8(227,227,227), RGB8(  0,  0,  0),
+    RGB8(  0,  0,  0), RGB8(114,187,203), RGB8(148,148,148), RGB8(227,227,227),
     RGB8(  0,  0,  0), RGB8(  0,  0,  0), RGB8(  0,  0,  0), RGB8(  0,  0,  0),
     RGB8(  0,  0,  0), RGB8(  0,  0,  0), RGB8(  0,  0,  0), RGB8(  0,  0,  0),
     RGB8(  0,  0,  0), RGB8(  0,  0,  0), RGB8(  0,  0,  0), RGB8(  0,  0,  0)
@@ -59,7 +59,7 @@ const palette_color_t font_8x16_out_palette_GREY[16] = {
 void load_8x16_font_tilemap_palettes(void) {
    // Set palettes for tile printing (yellow, pink, grey) on BG0 layer
     set_fade_target_4bpp_palette(PAL_ASSIGN_BG0_0, font_8x16_out_PALETTE_COUNT, font_8x16_out_palettes);
-    set_fade_target_4bpp_palette(PAL_ASSIGN_BG0_1, 1u, font_8x16_out_palette_GREY);
+    set_fade_target_4bpp_palette(PAL_ASSIGN_BG0_1, font_8x16_out_PALETTE_COUNT, font_8x16_out_palette_GREY);
     // set_fade_target_4bpp_palette(PAL_ASSIGN_BG0_1, 1u, font_8x16_out_palette_PINK);
 }
 
@@ -67,8 +67,8 @@ void load_8x16_font_tilemap_palettes(void) {
 void load_8x16_font_sprite_palettes(void) {
     // Set palettes for Sprite printing (yellow, pink, grey) on OBJ layer(s)
     set_fade_target_4bpp_palette(PAL_ASSIGN_OBJ_0, font_8x16_out_PALETTE_COUNT, font_8x16_out_palettes);
-    set_fade_target_4bpp_palette(PAL_ASSIGN_OBJ_1, 1u, font_8x16_out_palette_PINK);
-    set_fade_target_4bpp_palette(PAL_ASSIGN_OBJ_2, 1u, font_8x16_out_palette_GREY);
+    set_fade_target_4bpp_palette(PAL_ASSIGN_OBJ_1, font_8x16_out_PALETTE_COUNT, font_8x16_out_palette_PINK);
+    set_fade_target_4bpp_palette(PAL_ASSIGN_OBJ_2, font_8x16_out_PALETTE_COUNT, font_8x16_out_palette_GREY);
 }
 
 // Loads 8x16 font tiles into vram and sets gfx_tiles_font_base
