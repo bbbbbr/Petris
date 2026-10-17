@@ -20,7 +20,7 @@
 #include "common.h"
 #include "input.h"
 // #include "gfx_print.h"
-// #include "fade.h"
+#include "fade.h"
 
 #include "intro_splash.h"
 #include "intro_cat_out.h"
@@ -77,7 +77,7 @@ static void init_gfx(void) {
     set_bkg_tilemap_base_address(BG0_MAP_START());
     set_bkg_tiles_target_screen_a_or_b(LAYER_SCREEN_A);
 
-    set_bkg_4bpp_palette(PAL_ASSIGN_BG0_0, intro_cat_out_PALETTE_COUNT, intro_cat_out_palettes);
+    set_fade_target_4bpp_palette(PAL_ASSIGN_BG0_0, intro_cat_out_PALETTE_COUNT, intro_cat_out_palettes);
     set_bkg_4bpp_data(TILE_NUM_0, intro_cat_out_TILE_COUNT, intro_cat_out_tiles);
     set_bkg_based_tiles((DEVICE_SCREEN_WIDTH - intro_cat_out_TILES_WIDTH) / 2,  // Tile centered X
                   (DEVICE_SCREEN_HEIGHT - intro_cat_out_TILES_HEIGHT) / 2,  // Tile centered Y
@@ -92,9 +92,10 @@ void intro_splash(void) {
 
     init_gfx();
 
-/*
-    fade_start(FADE_IN);  // TODO: Maybe need VBL palette fade in support
-*/
+    palette_fade_to_target_start();
+    // Don't wait for fade to complete,
+    // let it finish as the effect begins running
+
     // ========== START EFFECT ==========
 
     effect_y_line = 0U + EFFECT_START_Y;
@@ -103,6 +104,9 @@ void intro_splash(void) {
     // * Expects irq1 VBlank to be enabled, which it is on main startup for OAM DMA copy
     add_irq0(&intro_splash_hblank_effect_isr);
     enable_interrupt_irq0_hblank();
+
+
+    // ========== EFFECT RUNNING ==========
 
     // Repeat until effect_y_line reaches the bottom of the screen
     while (effect_y_line <= EFFECT_Y_LINE_MAX) {
@@ -127,10 +131,9 @@ void intro_splash(void) {
     // ========== START EFFECT ==========
 
     delay(1000);
-/*
-    fade_start(FADE_OUT); // TODO
-*/
 
+    palette_fade_to_black_start();
+    palette_fade_wait_completed();
 
     // waitpadticked_lowcpu(J_ANY);
 }

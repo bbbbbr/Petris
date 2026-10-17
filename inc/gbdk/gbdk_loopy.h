@@ -99,6 +99,20 @@
 #define S_PAL3        (3 << 4)
 
 
+// Channel 1 DMA copy
+// The DMA timeout may never happen if it doesn't execute during the DMA
+#define DMA1_U16_MEMCOPY_AND_WAIT_DONE(dest, src, u16_count) \
+    DMAC_DMAOR = DMA_DMAOR_AE_NO_ERROR | DMA_DMAOR_NMIF_NO_ERROR | DMA_DMAOR_DME_ENABLE; \
+    DMAC_SAR1  = (uint32_t)(src);   \
+    DMAC_DAR1  = (uint32_t)(dest);  \
+    DMAC_TCR1  = (u16_count);       \
+    DMAC_CHCR1 = (DMA_CHCR_DM_DEST_INCREMENT | DMA_CHCR_SM_SRC_INCREMENT | DMA_CHCR_RS_AUTO_CONF | DMA_CHCR_TM_BUS_BURST | DMA_CHCR_TS_XFER_WORD_U16 | DMA_CHCR_DE_XFER_ENABLE); \
+    volatile uint16_t timeout = 60000u; \
+    while(!(DMAC_CHCR1 & DMA_CHCR_TE_XFER_IS_DONE) && timeout != 0u) { \
+        timeout--; \
+    }
+
+
 // No need for BANKREFS, zero them out
 #define BANKREF(x)
 #define BANKREF_EXTERN(x)
@@ -133,6 +147,10 @@ void disable_interrupt_irq1_vblank(void);
 
 void add_irq0(void (* handler)(void));
 void remove_irq0();
+void add_vbl(void (* handler)(void));
+void remove_vbl(void);
+void add_vbl_ended(void (* handler)(void));
+void remove_vbl_ended(void);
 
 
 void INTERRUPT SMALLFUNC isr_nmi_vblank(void);
@@ -248,8 +266,18 @@ ALWAYS_INLINE inline void hide_sprite(uint16_t nb) {
 
 typedef uint16_t palette_color_t;
 
-#define COLS_PER_PAL_4BPP  16u
-#define COLS_PER_PAL_8BPP 256u
+#define COLS_PER_PAL_4BPP  (16u)
+#define COLS_PER_PAL_8BPP (256u)
+#define NUM_4BPP_PALS     (256u / COLS_PER_PAL_4BPP)
+#define PAL_5BIT_MAX_VALUE (0b11111u)
+
+#define PAL_RED_MASK      (0b11111u << 10)
+#define PAL_GREEN_MASK    (0b11111u << 5)
+#define PAL_BLUE_MASK     (0b11111u << 0)
+
+#define PAL_RED_LSBIT     (1u << 10)
+#define PAL_GREEN_LSBIT   (1u << 5)
+#define PAL_BLUE_LSBIT    (1u << 0)
 
 #define RGB888(r, g, b) (((uint16_t)((((r) >> 3) & 0x1f) << 10)) | ((uint16_t)((((g) >> 3) & 0x1f) << 5)) | (((b) >> 3) & 0x1f))
 #define RGB8 RGB888
@@ -414,5 +442,16 @@ void delay(uint16_t d);
 
 void joypad_init(void);
 uint16_t joypad(void);
+
+
+/* Sets I3..I0 to 0xF blocking interrupts (except nmi) below priority 16
+
+   Returns saved copy of Status Register which should be passed
+   to enable_interrupts() in order to restore the previous 
+   interrupt priority setting;
+ */
+uint32_t disable_interrupts(void);
+
+void enable_interrupts(uint32_t status_register_restore);
 
 #endif // _GBDK_LOOPY_H

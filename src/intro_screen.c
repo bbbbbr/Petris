@@ -21,7 +21,7 @@
 #include "common.h"
 #include "sound.h"
 #include "input.h"
-// #include "fade.h"
+#include "fade.h"
 
 #include "magic_code.h"
 
@@ -76,7 +76,7 @@ static void intro_background_and_logo_init(void) {
     // BG1 is set to use pals 4,5,6,7 (so no need to offset palette)
     set_bkg_tiles_target_screen_a_or_b(LAYER_SCREEN_A);
 
-    set_bkg_4bpp_palette(PAL_ASSIGN_BG1_0, intro_screen_out_PALETTE_COUNT, intro_screen_out_palettes);
+    set_fade_target_4bpp_palette(PAL_ASSIGN_BG1_0, intro_screen_out_PALETTE_COUNT, intro_screen_out_palettes);
     set_bkg_4bpp_data(base_tile_id, intro_screen_out_TILE_COUNT, intro_screen_out_tiles);
     set_bkg_tilemap_base_address(BG1_MAP_START());
     set_bkg_based_tiles((DEVICE_SCREEN_WIDTH - intro_screen_out_TILES_WIDTH)/2,  // Tile centered X
@@ -92,7 +92,7 @@ static void intro_background_and_logo_init(void) {
     set_bkg_tilemap_base_address(BG0_MAP_START());
     set_bkg_tiles_target_screen_a_or_b(LAYER_SCREEN_A);
 
-    set_bkg_4bpp_palette(PAL_ASSIGN_BG0_0, intro_logo_out_PALETTE_COUNT, intro_logo_out_palettes);
+    set_fade_target_4bpp_palette(PAL_ASSIGN_BG0_0, intro_logo_out_PALETTE_COUNT, intro_logo_out_palettes);
     set_bkg_4bpp_data(base_tile_id, intro_logo_out_TILE_COUNT, intro_logo_out_tiles);
     // First fill entire BG1 tilemap with clear tiles to ensure
     // BG0 to shows through in transparent parts
@@ -115,7 +115,7 @@ static void intro_clouds_init(void) {
     cloud_counter = 0;
 
     // Set up shared palette (from one of the images)
-    set_bkg_4bpp_palette(PAL_ASSIGN_BM_0, 1, intro_clouds_light_out_palette);  // 1 Palette (actually 3 colors at present, but allow it to overrun to 16)
+    set_fade_target_4bpp_palette(PAL_ASSIGN_BM_0, 1, intro_clouds_light_out_palette);  // 1 Palette (actually 3 colors at present, but allow it to overrun to 16)
 
     // Load both sets of cloud bitmaps to the shared VRAM, one at top and other lower
     // Make the lighter clouds on BM2 so that they scroll over the darker ones
@@ -216,13 +216,10 @@ void intro_screen_init(void) {
     intro_clouds_init();
     intro_text_init();
 
-    // fade_set_pal(BG_PAL_0, 3, intro_screen_logo_palette, FADE_PAL_BKG);
-    // fade_set_pal(BG_PAL_4, 3, intro_screen_palette, FADE_PAL_BKG);
-
     // SHOW_BKG;  // TODO: ?? BG1 as BKG and BG0 as WIN?
     SHOW_SPRITES;
 
-    // fade_start(FADE_IN);  // TODO
+    palette_fade_to_target_start();    
 }
 
 
@@ -236,7 +233,14 @@ void intro_screen_handle(void) {  // TODO: Some kind of animated roll in of logo
 
 
 void intro_screen_cleanup(void) {
-    // fade_start(FADE_OUT);    // TODO
+
+    palette_fade_to_black_start();
+    // Keep animations running until fade-out completes
+    while (palette_fade_is_running()) {
+        intro_screen_handle();
+        vsync();
+    }
+
     intro_background_and_logo_cleanup();
     intro_text_cleanup();
     intro_clouds_cleanup();

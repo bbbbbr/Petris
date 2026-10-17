@@ -5,6 +5,12 @@
 
 #define ARRAY_LEN(A)  sizeof(A) / sizeof(A[0])
 
+// Debug/etc settings
+
+#define DEBUG_SKIP_INTRO
+
+// #define DEBUG_PRESS_CASIO_B_TO_FADE_NEXT
+
 #define TILE_NUM_0  0u
 
 enum GAME_STATES {

@@ -36,7 +36,6 @@
 #define PRINT_PAL_OAM_PINK   (S_PAL1)
 #define PRINT_PAL_OAM_GREY   (S_PAL2)
 
-
 extern uint16_t print_x, print_y, print_tile_attribs;
 
 

@@ -1,4 +1,4 @@
-// Copyright 2020 (c) bbbbbr
+// Copyright 2026 (c) bbbbbr
 //
 // This software is licensed under:
 //
@@ -19,7 +19,8 @@
 #define FADE_SKY_PALS_MIN   0
 #define FADE_SKY_PALS_MAX   (FADE_SKY_PALS_COUNT - 1)
 
-extern const UINT8 fade_sky_pals[FADE_SKY_PALS_COUNT][FADE2PAL_NUM_PALS * COLORS_PER_PAL * BYTES_PER_COLOR];
+extern const palette_color_t fade_font_8x16_outline_cols[FADE_SKY_PALS_COUNT];
+extern const palette_color_t * fade_sky_pals[FADE_SKY_PALS_COUNT];
 
 
 #endif
