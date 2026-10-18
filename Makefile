@@ -3,6 +3,9 @@
 
 # Normal use: "make clean && make"
 
+VERSION=0.8.0
+PROJECTNAME = petris
+
 # Memory sizes; should use K/M suffix or decimal integer
 # Cart battery-backed save RAM, most have at least 8K if any
 # "Floopy Drive" flash cart has 128K
@@ -51,6 +54,8 @@ LIBS =
 # Below here probably doesn't need to be touched
 
 LDSCRIPT = $(TOOLSDIR)/loopy.ld
+
+PACKAGE_DIR = "../build_archive/CasioLoopy/$(VERSION)"
 
 # C Source/object lists
 SRCS_C = $(wildcard $(SRCDIR)/*.c)
@@ -161,3 +166,8 @@ assets:
 	$(TOOLSDIR)/png2asset      $(RES_ASSET_DIR)/intro_screen_out_pal7.png -o $(RESDIR)/intro_screen_out_pal7.c -use_metafile
 	$(TOOLSDIR)/png2asset      $(RES_ASSET_DIR)/intro_screen_out_pal8.png -o $(RESDIR)/intro_screen_out_pal8.c -use_metafile
 	$(TOOLSDIR)/png2asset      $(RES_ASSET_DIR)/intro_screen_out_pal9.png -o $(RESDIR)/intro_screen_out_pal9.c -use_metafile
+
+
+package:
+	mkdir -p "$(PACKAGE_DIR)"
+	zip -j -9 "$(PACKAGE_DIR)/$(VERSION)_$(PROJECTNAME).zip" LICENSE FONT-LICENSE LOOPY-TEMPLATE-LICENSE.txt README.md $(ROM)
