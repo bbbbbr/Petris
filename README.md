@@ -6,6 +6,11 @@ Build your favorite pets in all shapes and sizes, keep ahead of dropping pieces 
 Petris is a home-brew 2D puzzle game for the Casio Loopy console. It will run on original hardware and some emulators.
 - (For the previous Game Boy Color color version see it's [itch.io page](https://bbbbbr.itch.io/petris)
 
+##### Project Status
+
+This game is a work in progress, it is not yet done!
+- The current release is an early feature preview that is playable but lacks many features and polish (music, sound effects, more game board borders, etc).
+
 ##### Credits
 * Code and assets hand-made by me (bbbbbr). No AI graphics, code, etc
 * Minimal Loopy project template by [Kasamikona](https://github.com/kasamikona/loopy-homebrew-template)
