@@ -108,9 +108,12 @@ void intro_splash(void) {
 
     // ========== EFFECT RUNNING ==========
 
+    bool user_early_exit = false;
+
     // Repeat until effect_y_line reaches the bottom of the screen
     while (effect_y_line <= EFFECT_Y_LINE_MAX) {
         vsync();
+        UPDATE_KEYS();
 
         // Reset scroll registers to zero
         // at the start of every frame
@@ -122,6 +125,13 @@ void intro_splash(void) {
         // scanline every other frame
         // if (sys_time & 0x01)
             effect_y_line++; // Move effect down screen
+
+        // Allow player to skip effect animation
+        if (KEY_TICKED(J_ANY)) {
+            effect_y_line == EFFECT_Y_LINE_MAX;
+            user_early_exit = true;
+            break;
+        }
     }
 
     // Disable HBlank interrupt
@@ -130,7 +140,9 @@ void intro_splash(void) {
 
     // ========== START EFFECT ==========
 
-    delay(1000);
+    if (user_early_exit == false) {
+        delay(1000);
+    }
 
     palette_fade_start(FADE_TO_BLACK);
     palette_fade_wait_completed();
