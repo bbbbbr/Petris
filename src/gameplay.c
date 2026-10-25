@@ -181,7 +181,8 @@ void gameplay_init(void) {
 
     board_init();
     board_gfx_init();
-    fade2pal_init();  // Call this after board_gfx_init so that it can override the sprite border color
+    fade2pal_init();  // Call this after board_gfx_init() and before fade start so it can override the sprite border color
+
     hinting_petlength_reset();
     stats_maxpet_reset();
 
@@ -189,6 +190,9 @@ void gameplay_init(void) {
 
     // Should be called before gameplay_prepare_board() ... -> game_board_fill_random_tails()
     player_info_newgame_reset();
+
+    // Start the fade-in
+    palette_fade_start(FADE_TO_TARGET);
 
     // Show preview of upcoming piece so player has time to check it out
     gameplay_prepare_piece();

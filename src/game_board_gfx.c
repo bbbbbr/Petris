@@ -95,8 +95,6 @@ void board_gfx_init(void) {
     board_gfx_init_sprites();
 
     gameover_message_reset();
-
-    palette_fade_start(FADE_TO_TARGET);
 }
 
 
