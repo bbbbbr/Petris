@@ -49,7 +49,7 @@
 //
 #define SCANLINES_TO_CPU_CYCLES(LINES) ((LINES * 341.25) * 2.98)
 
-#define VBLANK_SAFE_LINE_COUNT (39u - 1u)  // VBlank is 39 scanlines, -1 to leave some buffer for DMA duration 
+#define VBLANK_SAFE_LINE_COUNT (39u - 1u)  // VBlank is 39 scanlines, -1 to leave some buffer for DMA duration
 
 #define ITU1_CPU_CYCLE_DIV_1    1u // When used with: ITU_TCR_TPSC_CLOCK_INT_DIV_1
 // #define ITU1_CPU_CYCLE_DIV_4 4u // When used with: ITU_TCR_TPSC_CLOCK_INT_DIV_4
@@ -359,7 +359,7 @@ void INTERRUPT SMALLFUNC isr_irq1_vblank(void) {
 //
 // It gets started at the beginning of VBlank alongside
 // a flag indicating SAFE, and then the flag is switched off
-// once the timer completes (and then turns itself off until 
+// once the timer completes (and then turns itself off until
 // next VBlank).
 //
 // This is needed since VDP.VCOUNT cannot be busy looped since
@@ -387,7 +387,7 @@ void INTERRUPT SMALLFUNC isr_timer_itu1_imia(void) {
 void vsync(void) {
 
     #ifdef DEBUG_BACKDROP_VDP_AND_IDLE_STATUS
-        // DEBUG, change BG color to indicate exit of VBlank and vsync() idle if applicable    
+        // DEBUG, change BG color to indicate exit of VBlank and vsync() idle if applicable
         RGB888(255,255,0); // DEBUG
     #endif
 
@@ -424,15 +424,6 @@ void set_bkg_4bpp_palette(unsigned int first_palette, unsigned int nb_palettes, 
 
     WAIT_SAFE_VSYNC;
     DMA1_U16_MEMCOPY_AND_WAIT_DONE(p_pal, rgb_data, (nb_palettes * COLS_PER_PAL_4BPP));
-
-    /* 
-    // NON-DMA style    
-    for (unsigned int pal = 0; pal < nb_palettes; pal++) {
-        for (unsigned int col = 0; col < COLS_PER_PAL_4BPP; col++) {
-            *p_pal++ = *rgb_data++;
-        }
-    }
-    */
 }
 
 
@@ -486,26 +477,12 @@ void set_bkg_tiles(unsigned int x, unsigned int y, unsigned int width, unsigned 
         while (row_len--) {
             *p_xfer++ = *tiles++ | _tilemap_cached_props;
         }
+
+        // Note: The DMA version does not try to handle Right edge -> Left edge overflow wraparound.
+        //       Does not preserve row and lets it step down to next one (check prev version for ref).
         WAIT_SAFE_VSYNC;
         DMA1_U16_MEMCOPY_AND_WAIT_DONE(p_dest, vram_xfer_buf, width);
-        p_dest += width + row_stride;        
-
-        /* 
-        // NON-DMA style    
-        uint16_t row_wrap = DEVICE_SCREEN_BUFFER_WIDTH - x;
-        while (row_len--) {
-            *p_dest++ = *tiles++ | _tilemap_cached_props;
-            // Check for wraparound from right edge -> left.
-            // In that case, preserve current row instead of letting it step down to next
-            row_wrap--;
-            if ((row_wrap == 0) && (row_len != 0)) {
-                p_dest -= DEVICE_SCREEN_BUFFER_WIDTH;
-                row_wrap = DEVICE_SCREEN_BUFFER_WIDTH;
-            }
-        }
-        p_dest += row_stride;
-        */        
-
+        p_dest += width + row_stride;
     }
 }
 
@@ -521,30 +498,14 @@ void set_bkg_based_tiles(unsigned int x, unsigned int y, unsigned int width, uns
         uint16_t * p_xfer = vram_xfer_buf;
         while (row_len--) {
             *p_xfer++ = (*tiles & ~BG_TILEMAP_CHRNUM_MASK) | ((*tiles & BG_TILEMAP_CHRNUM_MASK) + base_tile) |  _tilemap_cached_props;
-            tiles++;            
+            tiles++;
         }
-        // dma1_u16_memcopy_vram_safe(p_dest, vram_xfer_buf, width);
+
+        // Note: The DMA version does not try to handle Right edge -> Left edge overflow wraparound.
+        //       Does not preserve row and lets it step down to next one (check prev version for ref).        
         WAIT_SAFE_VSYNC;
         DMA1_U16_MEMCOPY_AND_WAIT_DONE(p_dest, vram_xfer_buf, width);
         p_dest += width + row_stride;
-
-        /* 
-        // NON-DMA style    
-        uint16_t row_wrap = DEVICE_SCREEN_BUFFER_WIDTH - x;
-        while (row_len--) {
-            // Mask out tile ID then OR in isolated tile ID + offset, OR in properties
-            *p_dest++ = (*tiles & ~BG_TILEMAP_CHRNUM_MASK) | ((*tiles & BG_TILEMAP_CHRNUM_MASK) + base_tile) |  _tilemap_cached_props;
-            tiles++;
-            // Check for wraparound from right edge -> left.
-            // In that case, preserve current row instead of letting it step down to next
-            row_wrap--;
-            if ((row_wrap == 0) && (row_len != 0)) {
-                p_dest -= DEVICE_SCREEN_BUFFER_WIDTH;
-                row_wrap = DEVICE_SCREEN_BUFFER_WIDTH;
-            }
-        }
-        p_dest += row_stride;
-        */
     }
 }
 
@@ -569,29 +530,15 @@ void fill_bkg_rect(unsigned int x, unsigned int y, unsigned int width, unsigned 
     uint16_t row_len = width;
     while (row_len--) {
         *p_xfer++ = tile | _tilemap_cached_props;
-    }        
+    }
 
     while (height--) {
-
+        // Note: The DMA version does not try to handle Right edge -> Left edge overflow wraparound.
+        //       Does not preserve row and lets it step down to next one (check prev version for ref).
         WAIT_SAFE_VSYNC;
         DMA1_U16_MEMCOPY_AND_WAIT_DONE(p_dest, vram_xfer_buf, width);
         p_dest += width + row_stride;
 
-        /* 
-        // NON-DMA style
-        uint16_t row_wrap = DEVICE_SCREEN_BUFFER_WIDTH - x;
-        while (row_len--) {
-            *p_dest++ = tile | _tilemap_cached_props;
-            // Check for wraparound from right edge -> left.
-            // In that case, preserve current row instead of letting it step down to next
-            row_wrap--;
-            if ((row_wrap == 0) && (row_len != 0)) {
-                p_dest -= DEVICE_SCREEN_BUFFER_WIDTH;
-                row_wrap = DEVICE_SCREEN_BUFFER_WIDTH;
-            }
-        }
-        p_dest += row_stride;
-        */
     }
 }
 
@@ -610,30 +557,14 @@ void load_bitmap_4bpp(unsigned int x, unsigned int y, unsigned int width, unsign
     const uint32_t   row_stride = DEVICE_BITMAP_4BPP_BUFFER_BYTE_WIDTH - width;
 
     while (height--) {
+        // Note: The DMA version does not try to handle Right edge -> Left edge overflow wraparound.
+        //       Does not preserve row and lets it step down to next one (check prev version for ref).
 
         // Bitmap vram is dual ported, safe access timing is only needed if you want to avoid tearing
         // WAIT_SAFE_VSYNC;
         DMA1_U16_MEMCOPY_AND_WAIT_DONE((uint16_t *)p_dest, (uint16_t *)bitmap, width / 2u);  // Transfer size is (/ 2) for 2 bytes per u16
         p_dest += width + row_stride;
         bitmap += width;
-
-        /*
-        // NON-DMA style
-        uint16_t row_len = width;
-        uint16_t row_wrap = DEVICE_BITMAP_4BPP_BUFFER_BYTE_WIDTH - x;
-        while (row_len--) {
-            *p_dest++ = *bitmap++;
-            // Check for wraparound from right edge -> left.
-            // In that case, preserve current row instead of letting it step down to next
-            row_wrap--;
-            if ((row_wrap == 0) && (row_len != 0)) {
-                p_dest -= DEVICE_BITMAP_4BPP_BUFFER_BYTE_WIDTH;
-                row_wrap = DEVICE_BITMAP_4BPP_BUFFER_BYTE_WIDTH - x;
-            }
-        }
-        p_dest += row_stride;
-        */
-        
     }
 }
 
