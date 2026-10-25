@@ -517,6 +517,12 @@ void board_handle_pet_completed(uint8_t flags) {
 
     stats_maxpet_copy_iflongest();
 
+    // Wait three frames so the piece has a chance to show up
+    // landed, in case it was hard dropped in to complete a pet.
+    vsync();
+    vsync();
+    vsync();
+
     while (c < board_tile_clear_count) {
 
         // Play special sound (per tile) when more than N tiles have been cleared for a pet
