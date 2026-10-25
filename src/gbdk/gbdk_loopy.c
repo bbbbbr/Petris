@@ -452,39 +452,24 @@ void set_bkg_4bpp_data(unsigned int start, unsigned int ntiles, const uint16_t *
     // Offset into start of 4bpp tile pattern data based on
     uint16_t * p_dest = (start * U16_WORDS_PER_4BPP_TILE) + (uint16_t *)_4bpp_tile_patterns_base_address;
 
-    // TODO: Use DMA (make a vmemcpy shim?)
-    // Tile VRAM is not dual-ported, so requires safe access timing, unlike bitmap vram
-    // TODO: This is the shoddiest safe access timing...
+    // Copy tiles in 512 word chunks, so not more than would take a single scanline
+    // so it can help guarantee safe vram timing
+    #define TILE_BLOCK_COPY_COUNT     (32u)
+    #define TILE_BLOCK_COPY_SIZE_U16S (U16_WORDS_PER_4BPP_TILE * TILE_BLOCK_COPY_COUNT)
 
-    size_t copytiles = ntiles;
-    while (copytiles--) {
+    size_t copytotal = ntiles * U16_WORDS_PER_4BPP_TILE;
+    size_t copysize = (copytotal >= TILE_BLOCK_COPY_SIZE_U16S) ? TILE_BLOCK_COPY_SIZE_U16S : copytotal;
+    while (copytotal) {
 
+        // Tile VRAM is not dual-ported, so requires safe access timing, unlike bitmap vram
         WAIT_SAFE_VSYNC;
-        DMA1_U16_MEMCOPY_AND_WAIT_DONE(p_dest, src, U16_WORDS_PER_4BPP_TILE);
-        src += U16_WORDS_PER_4BPP_TILE;
-        p_dest += U16_WORDS_PER_4BPP_TILE;
+        DMA1_U16_MEMCOPY_AND_WAIT_DONE(p_dest, src, copysize);
 
-        /*         
-        // NON-DMA style    
-        // Write one 8x8 32 byte tile entry as a block
-        *p_dest++ = *src++;
-        *p_dest++ = *src++;
-        *p_dest++ = *src++;
-        *p_dest++ = *src++;
-        *p_dest++ = *src++;
-        *p_dest++ = *src++;
-        *p_dest++ = *src++;
-        *p_dest++ = *src++;
+        src += copysize;
+        p_dest += copysize;
+        copytotal -= copysize;
 
-        *p_dest++ = *src++;
-        *p_dest++ = *src++;
-        *p_dest++ = *src++;
-        *p_dest++ = *src++;
-        *p_dest++ = *src++;
-        *p_dest++ = *src++;
-        *p_dest++ = *src++;
-        *p_dest++ = *src++;
-        */
+        copysize = (copytotal >= TILE_BLOCK_COPY_SIZE_U16S) ? TILE_BLOCK_COPY_SIZE_U16S : copytotal;
     }
 }
 
