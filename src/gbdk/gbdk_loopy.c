@@ -42,7 +42,7 @@
 // For safe VRAM gating variable remove ~1 scanline (so 39 - 1) to leave some buffer for DMA duration
 //
 //
-// Formula: ((N scanlines * 341.25 pixels) * 2.98 cpu cycles per pixel) = X cpu cycles (TODO: Double check this)
+// Formula: ((N scanlines * 341.25 pixels) * 2.98 cpu cycles per pixel) = X cpu cycles
 //
 // WARNING: Max calculated value is around 267,451 for scanline 224, which exceeds 16 bit int,
 //          so if using larger scanlines make sure to divide it down and set a matching divider in the timer (ITU_TCR1)
@@ -107,21 +107,8 @@ void dma1_u16_memcopy_vram_safe(uint16_t * dest, uint16_t * src, uint16_t u16_co
 //          Will fail to start with DMA_DMAOR_NMIF_BLOCKED_BY_NMI set in DMAOR
 void shadow_oam_copy_dma(void) {
 
-    // Enable and clear any previously set error flags
-    DMAC_DMAOR = DMA_DMAOR_AE_NO_ERROR | DMA_DMAOR_NMIF_NO_ERROR | DMA_DMAOR_DME_ENABLE;
-
-    // DMA using channel 0
-    // Transfer count (size in u16, which is VRAM access size, each OAM entry is 32 bits, so 2 per entry)
-    DMAC_SAR0  = (uint32_t)shadow_OAM;        // Src
-    DMAC_DAR0  = (uint32_t)VDP.OAM;           // Dest
-    DMAC_TCR0  = SHADOW_OAM_MAX_SPRITES * U16_COUNT_PER_OAM_ENTRY;
-    DMAC_CHCR0 = (DMA_CHCR_DM_DEST_INCREMENT | DMA_CHCR_SM_SRC_INCREMENT | DMA_CHCR_RS_AUTO_CONF | DMA_CHCR_TM_BUS_BURST | DMA_CHCR_TS_XFER_WORD_U16 | DMA_CHCR_DE_XFER_ENABLE);
-
-    // When DMA is working this doesn't even decrement once
-    uint16_t timeout = 60000u;
-    while(!(DMAC_CHCR0 & DMA_CHCR_TE_XFER_IS_DONE) && timeout != 0u) {
-        timeout--;
-    }
+    // No need to wait for safe vram timing since this is called at the start of VBlank
+    DMA1_U16_MEMCOPY_AND_WAIT_DONE((uint32_t)VDP.OAM, (uint32_t)shadow_OAM, (SHADOW_OAM_MAX_SPRITES * U16_COUNT_PER_OAM_ENTRY));
 }
 
 
@@ -214,7 +201,7 @@ void enable_interrupt_itu1_timer(void) {
     sys_setInterruptPriority(INT_PRIO_ITU1, IRQ_PRIORITY_14);
     // Set Global interrupt priority mask level to be 1 below the level configured above
     // (also set by VBlank and HBlank timers, so kind of redundant)
-    sys_setInterruptMask(IRQ_PRIORITY_13);  // TODO: Centralize interrupt priority mask to a single init function
+    sys_setInterruptMask(IRQ_PRIORITY_13);  // TODO: Centralize interrupt priority mask to a single init function gbdk_init()
 
     // Timer gets started in vblank
     // Enable interrupt on IMFA (meaning GRA match)
@@ -450,7 +437,6 @@ void set_bkg_4bpp_palette(unsigned int first_palette, unsigned int nb_palettes, 
 
 
 
-// TODO: convert to u16 to reduce number of writes
 /** Sets VRAM Tile Pattern data in the 4bpp format
 
     @param first_tile  Index of the first tile to write (0 - 511)
@@ -625,16 +611,15 @@ void fill_bkg_rect(unsigned int x, unsigned int y, unsigned int width, unsigned 
 }
 
 
-// TODO: this could be a DMA
 // Only operates on width multiples of 2, X is rounded down to multiple of 2
 void load_bitmap_4bpp(unsigned int x, unsigned int y, unsigned int width, unsigned int height, const uint8_t *bitmap) {
 
-        if (width & 0x0001) return; // TODO: handle odd numbered widths and start x (requires splitting and shifting all bytes)
+    if (width & 0x0001) return; // TODO: handle odd numbered widths and start x (requires splitting and shifting all bytes)
 
-        if ((width & 0x0003) != 0u) return; // Note: Handle u16 DMA limitation, only operates on 4 pixel widths at a time (one u16).
+    if ((width & 0x0003) != 0u) return; // Note: Handle u16 DMA limitation, only operates on 4 pixel widths at a time (one u16).
 
-        x /= 2;      // 4BPP packs 2 pixels into 1 byte
-        width /= 2;  // 4BPP packs 2 pixels into 1 byte
+    x /= 2;      // 4BPP packs 2 pixels into 1 byte
+    width /= 2;  // 4BPP packs 2 pixels into 1 byte
 
            uint8_t * p_dest     = VDP.BITMAP_VRAM_8BIT + ((y * DEVICE_BITMAP_4BPP_BUFFER_BYTE_WIDTH) + x);
     const uint32_t   row_stride = DEVICE_BITMAP_4BPP_BUFFER_BYTE_WIDTH - width;
