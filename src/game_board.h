@@ -4,7 +4,7 @@
 #define GAME_BOARD_H
 
 #define BRD_ST_X   11 // Location in BG Tiles
-#define BRD_ST_Y   6
+#define BRD_ST_Y   7
 #define BRD_WIDTH  10 // Width in BG Tiles
 #define BRD_HEIGHT 15
 #define BRD_END_X  (BRD_ST_X + BRD_WIDTH  -1)
