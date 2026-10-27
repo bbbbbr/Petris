@@ -78,8 +78,8 @@ void gameplay_drop_speed_update(void) {
     // For Long Pet and Pet Cleanup modes the speed
     // increases slower (1/4th) since it could otherwise
     // make higher levels potentially impossible to play
-    if ((option_game_type == OPTION_GAME_TYPE_LONG_PET) ||
-        (option_game_type == OPTION_GAME_TYPE_PET_CLEANUP)) {
+    if ((game_options.type == OPTION_GAME_TYPE_LONG_PET) ||
+        (game_options.type == OPTION_GAME_TYPE_PET_CLEANUP)) {
 
         level >>= 2;
         // Don't go below starting player level
@@ -199,18 +199,18 @@ void gameplay_init(void) {
     SHOW_SPRITES;
 
     // Flash a get ready message to the player  // TODO  -- MAYBE ANIMATED SPRITE BASED MESSAGE INSTEAD, Sine wavey, or rotate in like canyon racer
-    if (option_game_type == OPTION_GAME_TYPE_PET_CLEANUP) {
+    if (game_options.type == OPTION_GAME_TYPE_PET_CLEANUP) {
 
         board_flash_message(MSG_CLEANUP_X, MSG_CLEANUP_Y,
                             MSG_CLEANUP_START_TEXT, MSG_CLEANUP_START_CTEXT,
                             MSG_CLEANUP_START_REPEAT);
-    } else if (option_game_type == OPTION_GAME_TYPE_LONG_PET) {
+    } else if (game_options.type == OPTION_GAME_TYPE_LONG_PET) {
 
         board_flash_message(MSG_LONG_PET_X, MSG_LONG_PET_Y,
                             MSG_LONG_PET_START_TEXT, MSG_LONG_PET_START_CTEXT,
                             MSG_LONG_PET_START_REPEAT);
-    } else if ((option_game_type == OPTION_GAME_TYPE_LEVEL_UP) ||
-               (option_game_type == OPTION_GAME_TYPE_CRUNCH_UP)) {
+    } else if ((game_options.type == OPTION_GAME_TYPE_LEVEL_UP) ||
+               (game_options.type == OPTION_GAME_TYPE_CRUNCH_UP)) {
 
         board_flash_message(MSG_COMPLETE_PET_X, MSG_COMPLETE_PET_Y,
                             MSG_COMPLETE_PET_START_TEXT, MSG_COMPLETE_PET_START_CTEXT,
@@ -280,7 +280,7 @@ void gameplay_prepare_board(void) {
     // Switch to the alternate random number sequence for tail generation
     // Keeps random tail genetatoin from altering game piece sequence
     swaprand();
-    if (option_game_type == OPTION_GAME_TYPE_PET_CLEANUP) {
+    if (game_options.type == OPTION_GAME_TYPE_PET_CLEANUP) {
         // This will (indirectly) auto-increment game_type_cleanup_tail_count
         game_board_fill_random_tails( game_type_pet_cleanup_get_tail_count(),
                                       BRD_MIN_Y_RANDOM_FILL,
@@ -290,7 +290,7 @@ void gameplay_prepare_board(void) {
         // before gameplay starts. Helpful on higher levels
         // and high difficulty settings
         delay(550);
-    } else if (option_game_type == OPTION_GAME_TYPE_CRUNCH_UP) {
+    } else if (game_options.type == OPTION_GAME_TYPE_CRUNCH_UP) {
 
             // Generate some random pieces on the bottom row
         game_board_fill_random_tails(GAME_TYPE_CRUNCH_UP_TAIL_COUNT_ADD,
@@ -300,7 +300,7 @@ void gameplay_prepare_board(void) {
     // Switch back to main random number sequence
     swaprand();
 
-    if (option_game_type == OPTION_GAME_TYPE_LONG_PET) {
+    if (game_options.type == OPTION_GAME_TYPE_LONG_PET) {
         // Update length requirement for long pet mode
         game_type_long_pet_set_pet_size( (uint8_t)player_level );
     }
@@ -309,7 +309,7 @@ void gameplay_prepare_board(void) {
 
 void gameplay_handle_pause(void) {
 
-    if (option_game_music != OPTION_MUSIC_OFF) {
+    if (game_options.music != OPTION_MUSIC_OFF) {
         // gbt_pause(1);  // TODO pause music
         // Mute output of all sound since gpt_pause just freezes the sound and holds the current note
         //NR50_REG = 0x00; // Max volume .[2..0] Right Main Vol, .[6..4] Left Main Volume
@@ -317,7 +317,7 @@ void gameplay_handle_pause(void) {
     }
 
     // Hide the game board and player piece (except in long-pet mode)
-    // if (option_game_type != OPTION_GAME_TYPE_LONG_PET) {
+    // if (game_options.type != OPTION_GAME_TYPE_LONG_PET) {
     //     board_hide_all(BRD_CLR_DELAY_NONE);
     // }
 
@@ -350,7 +350,7 @@ void gameplay_handle_pause(void) {
     player_piece_update_xy(PLAYER_PIECE_SHOW);
     game_piece_next_show(true);
 
-    if (option_game_music != OPTION_MUSIC_OFF) {
+    if (game_options.music != OPTION_MUSIC_OFF) {
         // gbt_pause(0);  // TODO: unpause music
         //NR50_REG = 0x77; // Max volume .[2..0] Right Main Vol, .[6..4] Left Main Volume
         // NR51_REG = 0xFF; // Turn ON all channels (left and right)
@@ -423,7 +423,7 @@ void gameplay_handle_input(void) {
     }
 
     if (KEY_TICKED(J_UP)) {
-        if (option_game_hard_drop == OPTION_HARD_DROP_ON) {
+        if (game_options.hard_drop == OPTION_HARD_DROP_ON) {
             gameplay_piece_hard_drop_requested = true;
         }
     }
@@ -489,7 +489,7 @@ void gameplay_handle_input(void) {
 
         // PET_LENGTH_PREVIEW_ENABLED_FOR_ALL_MODES
         //
-        // if (option_game_type == OPTION_GAME_TYPE_LONG_PET) {
+        // if (game_options.type == OPTION_GAME_TYPE_LONG_PET) {
             hinting_petlength_turn_on();
         // }
     }
@@ -614,7 +614,7 @@ void gameplay_gravity_update(void) {
 void gameplay_crunchup_update(void) {
 
     // Update crunch-up counter if needed
-    if (option_game_type == OPTION_GAME_TYPE_CRUNCH_UP) {
+    if (game_options.type == OPTION_GAME_TYPE_CRUNCH_UP) {
 
         // Crunch up happens ~once every 10 seconds
         game_crunchup_counter++;

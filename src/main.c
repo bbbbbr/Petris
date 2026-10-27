@@ -32,6 +32,7 @@
 #include "options_screen.h"
 
 #include "options.h"
+#include "cartsave.h"
 // #include "player_hinting.h"
 
 #include "input.h"
@@ -154,6 +155,7 @@ void init(void) {
 
     vbl_count = 0;
     game_state = GAME_INTRO_INIT;
+    cartsave_load_options(); //options_reset_to_defaults();
 
     init_interrupts();
     joypad_init();
@@ -183,7 +185,7 @@ int main() {
 
         // Handle input
         UPDATE_KEYS();
-        if (option_game_filter_diagonals == OPTION_FILTER_DIAGONALS_ON) gameplay_handle_input_diagonal_filtering();
+        if (game_options.filter_diagonals == OPTION_FILTER_DIAGONALS_ON) gameplay_handle_input_diagonal_filtering();
         UPDATE_KEY_REPEAT((J_LEFT | J_RIGHT | J_DOWN));
 
         switch (game_state) {

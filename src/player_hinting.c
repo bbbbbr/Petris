@@ -337,7 +337,7 @@ void hinting_petlength_add(int8_t board_x, int8_t board_y, uint8_t length, uint8
     // add a size hint, regardless of overlay status
     //
     // PET_LENGTH_PREVIEW_ENABLED_FOR_ALL_MODES
-    if (option_game_type == OPTION_GAME_TYPE_LONG_PET) {
+    if (game_options.type == OPTION_GAME_TYPE_LONG_PET) {
         if (length >= (game_type_long_pet_required_size - 1)) {
             move_sprite(sprite_idx + 2,
                         (board_x * BRD_UNIT_SIZE) + SPR_LONG_PET_SIZE_OFFSET_X,

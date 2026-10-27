@@ -566,7 +566,7 @@ void board_handle_pet_completed(uint8_t flags) {
 */
 
         // Check completed pet size against level-up size requirement if it's Long pet game type
-        if (option_game_type == OPTION_GAME_TYPE_LONG_PET) {
+        if (game_options.type == OPTION_GAME_TYPE_LONG_PET) {
             game_type_long_pet_check_size(board_tile_clear_count);
         }
 
@@ -616,7 +616,7 @@ void board_check_completed_pet_xy(int8_t start_x, int8_t start_y, uint8_t piece,
         //
         // PET_LENGTH_PREVIEW_ENABLED_FOR_ALL_MODES
         //
-        // if (option_game_type == OPTION_GAME_TYPE_LONG_PET) {
+        // if (game_options.type == OPTION_GAME_TYPE_LONG_PET) {
             hinting_petlength_remove(start_x, start_y);
         // }
 
@@ -658,7 +658,7 @@ void board_check_completed_pet_xy(int8_t start_x, int8_t start_y, uint8_t piece,
                     //
                     // PET_LENGTH_PREVIEW_ENABLED_FOR_ALL_MODES
                     //
-                    // if (option_game_type == OPTION_GAME_TYPE_LONG_PET) {
+                    // if (game_options.type == OPTION_GAME_TYPE_LONG_PET) {
                         hinting_petlength_remove(check_x, check_y);
                     // }
 
@@ -737,7 +737,7 @@ void board_check_completed_pet_xy(int8_t start_x, int8_t start_y, uint8_t piece,
         //
         // PET_LENGTH_PREVIEW_ENABLED_FOR_ALL_MODES
         //
-        // else if ((option_game_type == OPTION_GAME_TYPE_LONG_PET)
+        // else if ((game_options.type == OPTION_GAME_TYPE_LONG_PET)
         //         && (piece_count >= HINT_LONG_PET_MIN_SIZE)
         //         && (!(flags & BRD_CHECK_FLAGS_DONT_HANDLE_PET_COMPLETED)))
         else if ((piece_count >= HINT_LONG_PET_MIN_SIZE)

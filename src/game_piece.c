@@ -82,14 +82,14 @@ void game_piece_next_generate(void) {
         if (!(game_piece_next & GP_SPECIAL_MASK)) {
 
             // Tail Cleanup : suppress adding tail pieces to make it less frustrating
-            if ((option_game_type == OPTION_GAME_TYPE_PET_CLEANUP) &&
+            if ((game_options.type == OPTION_GAME_TYPE_PET_CLEANUP) &&
                 ((game_piece_next & GP_SEG_MASK) == GP_SEG_TAIL_BITS)) {
 
                 // Translate Tail pieces to Head pieces
                 game_piece_next = (game_piece_next & ~GP_SEG_MASK) | GP_SEG_HEAD_BITS;
 
             // Crunch-up mode: suppress all L-Turn pieces to make it less frustrating
-            } else if ((option_game_type == OPTION_GAME_TYPE_CRUNCH_UP) &&
+            } else if ((game_options.type == OPTION_GAME_TYPE_CRUNCH_UP) &&
                 ((game_piece_next & GP_SEG_MASK) == GP_SEG_TURN_BITS)) {
 
                 // Translate L-Turn pieces to Torso
@@ -139,7 +139,7 @@ void game_piece_next_show(uint8_t do_show) {
 
     uint8_t attrib = GP_ATTRIB_EMPTY;
 
-    if ((do_show) && (option_game_preview_next == NEXT_PREV_ON)) {
+    if ((do_show) && (game_options.preview_next == NEXT_PREV_ON)) {
 
         // Update player rotation (clear rotate bits and then set)
         set_sprite_tile(SPR_PLAYER_NEXT,

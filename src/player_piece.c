@@ -93,7 +93,7 @@ uint8_t player_piece_try_reload(void) {
     player_piece_update_xy(PLAYER_PIECE_SHOW);
 
 
-    if (option_game_visual_hints == OPTION_VISUAL_HINTS_ON) {
+    if (game_options.visual_hints == OPTION_VISUAL_HINTS_ON) {
 
         if (player_piece & GP_SPECIAL_MASK) {
             player_hinting_special_update_gfx();
@@ -149,7 +149,7 @@ void player_piece_set_on_board(void) {
     }
 
     // Make sure special piece hinting is turned off once landed
-    if (option_game_visual_hints == OPTION_VISUAL_HINTS_ON) {
+    if (game_options.visual_hints == OPTION_VISUAL_HINTS_ON) {
         player_hinting_special_show(false);
     }
 
@@ -203,7 +203,7 @@ uint8_t player_piece_move(int8_t dir_x, int8_t dir_y) {
 
         player_piece_update_xy(PLAYER_PIECE_SHOW);
 
-        if (option_game_visual_hints == OPTION_VISUAL_HINTS_ON) {
+        if (game_options.visual_hints == OPTION_VISUAL_HINTS_ON) {
 
             if (player_piece & GP_SPECIAL_MASK)
                 player_hinting_special_move();

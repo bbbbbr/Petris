@@ -26,3 +26,10 @@ const uint16_t shared_4bpp_transparent_tile[] = {
     0x0000u, 0x0000u,
     0x0000u, 0x0000u,
 };
+
+
+void * memcpy(void * dest, const void * src, size_t count) {
+    for (size_t c = 0; c < count; c++) {
+        *(uint8_t *)dest++ = *(const uint8_t *)src++;
+    }
+}

@@ -68,20 +68,20 @@ void player_info_display(void) {
     // Display Tail remaining count
     // * Max size is 20, see GAME_TYPE_PET_CLEANUP_TAIL_COUNT_MAX
     // * Also see: game_type_pet_cleanup_increment_tail_count()
-    if (option_game_type == OPTION_GAME_TYPE_PET_CLEANUP) {
+    if (game_options.type == OPTION_GAME_TYPE_PET_CLEANUP) {
         // Try to keep the number readout away from the game border until necessary
         print_num_u16(DISPLAY_NUMPETS_CLEANUP_X, DISPLAY_NUMPETS_Y, (uint16_t)game_type_cleanup_tail_count, STR_DIGIT_LEN_2);
     }
     // Display required Pet Size
     // * Max size is 40, see GAME_TYPE_PET_LONG_PET_SIZE_MAX
     // Also see: game_type_long_pet_set_pet_size()
-    else if (option_game_type == OPTION_GAME_TYPE_LONG_PET) {
+    else if (game_options.type == OPTION_GAME_TYPE_LONG_PET) {
         print_num_u16(DISPLAY_NUMPETS_LONGPET_X, DISPLAY_NUMPETS_LONGPET_Y, (uint16_t)game_type_long_pet_required_size, STR_DIGIT_LEN_2);
     }
     // Display pets remaining to complete level
     // * Max size is 99, see GAME_TYPE_MARTHON_LEVUP_CRUNCH_LEVEL_NUMPETS_REQUIRED_MAX
-    else if ((option_game_type == OPTION_GAME_TYPE_LEVEL_UP) ||
-             (option_game_type == OPTION_GAME_TYPE_CRUNCH_UP)) {
+    else if ((game_options.type == OPTION_GAME_TYPE_LEVEL_UP) ||
+             (game_options.type == OPTION_GAME_TYPE_CRUNCH_UP)) {
         uint16_t level_numpets_required = game_types_marathon_levup_crunch_get_level_numpets_required();
         print_num_u16(DISPLAY_NUMPETS_LEVUP_CRUNCH_X, DISPLAY_NUMPETS_Y, (level_numpets_required - player_numpets), STR_DIGIT_LEN_2);
     }
@@ -148,9 +148,9 @@ void score_and_level_update(uint16_t num_tiles) {
     // number of pets completed.
     // Long Pet and Pet Cleanup don't need it since they
     // get triggered by specific completed tasks
-    if ((option_game_type == OPTION_GAME_TYPE_MARATHON) ||
-        (option_game_type == OPTION_GAME_TYPE_LEVEL_UP) ||
-        (option_game_type == OPTION_GAME_TYPE_CRUNCH_UP)) {
+    if ((game_options.type == OPTION_GAME_TYPE_MARATHON) ||
+        (game_options.type == OPTION_GAME_TYPE_LEVEL_UP) ||
+        (game_options.type == OPTION_GAME_TYPE_CRUNCH_UP)) {
 
         uint16_t level_numpets_required = game_types_marathon_levup_crunch_get_level_numpets_required();
         if (player_numpets >= level_numpets_required) {
@@ -240,7 +240,7 @@ void player_info_newgame_reset(void) {
     // Set initial game piece speed
     gameplay_drop_speed_update();
 
-    if (option_game_type == OPTION_GAME_TYPE_LONG_PET) {
+    if (game_options.type == OPTION_GAME_TYPE_LONG_PET) {
         game_type_long_pet_set_pet_size( (uint8_t)player_level );
     }
 

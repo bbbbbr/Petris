@@ -34,4 +34,6 @@ extern const uint16_t shared_4bpp_transparent_tile[32];
 extern uint16_t game_state;
 extern uint16_t vbl_count;
 
+void * memcpy(void * dest, const void * src, size_t count);
+
 #endif

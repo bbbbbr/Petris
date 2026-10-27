@@ -49,7 +49,7 @@ void game_types_handle_level_transition(void) {
     PLAY_SOUND_LEVEL_UP;
 
     // Minimal transition for marathon long play mode
-    if (option_game_type == OPTION_GAME_TYPE_MARATHON) {
+    if (game_options.type == OPTION_GAME_TYPE_MARATHON) {
 
         // Update level indicator
         level_show();
@@ -63,10 +63,10 @@ void game_types_handle_level_transition(void) {
     } else {
 
         // Implied:
-        // if ((option_game_type == OPTION_GAME_TYPE_LEVEL_UP) ||
-        //     (option_game_type == OPTION_GAME_TYPE_CRUNCH_UP) ||
-        //     (option_game_type == OPTION_GAME_TYPE_PET_CLEANUP) ||
-        //     (option_game_type == OPTION_GAME_TYPE_LONG_PET)) {
+        // if ((game_options.type == OPTION_GAME_TYPE_LEVEL_UP) ||
+        //     (game_options.type == OPTION_GAME_TYPE_CRUNCH_UP) ||
+        //     (game_options.type == OPTION_GAME_TYPE_PET_CLEANUP) ||
+        //     (game_options.type == OPTION_GAME_TYPE_LONG_PET)) {
 
         // NOTE: The specific sequence in here is important for user experience
 
@@ -137,7 +137,7 @@ uint16_t game_types_marathon_levup_crunch_get_level_numpets_required(void) {
 // That value gets decremented. Once zero level is complete (in tail cleanup mode)
 void game_type_pet_cleanup_increment_tail_count(void) {
 
-    if (option_game_type == OPTION_GAME_TYPE_PET_CLEANUP) {
+    if (game_options.type == OPTION_GAME_TYPE_PET_CLEANUP) {
         if (game_type_cleanup_tail_count < 255) {
             game_type_cleanup_tail_count++;
         }
@@ -154,7 +154,7 @@ void game_type_pet_cleanup_increment_tail_count(void) {
 // Once zero level is complete (in tail cleanup mode)
 void game_type_pet_cleanup_decrement_tail_count(void) {
 
-    if (option_game_type == OPTION_GAME_TYPE_PET_CLEANUP) {
+    if (game_options.type == OPTION_GAME_TYPE_PET_CLEANUP) {
 
         if (game_type_cleanup_tail_count > 0) {
             game_type_cleanup_tail_count--;

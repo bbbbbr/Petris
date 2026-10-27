@@ -101,9 +101,9 @@ void board_gfx_init(void) {
 void board_gfx_change_pettiles(void) {  // TODO
 
     // Change to next option setting and handle wraparound
-    option_game_high_contrast++;
-    if (option_game_high_contrast == OPTION_HIGH_CONTRAST_END)
-        option_game_high_contrast = OPTION_HIGH_CONTRAST_MIN;
+    game_options.high_contrast++;
+    if (game_options.high_contrast == OPTION_HIGH_CONTRAST_END)
+        game_options.high_contrast = OPTION_HIGH_CONTRAST_MIN;
 
     // Update pet tiles to match new setting
     pet_tiles_prepare();
@@ -238,11 +238,11 @@ void board_gfx_init_background(void) {
     PRINTXY(DISPLAY_SCORE_X + 4, DISPLAY_SCORE_Y,      "0", 0);
     PRINT_PAL(PRINT_PAL_TILE_GREY);
 
-    if (option_game_type == OPTION_GAME_TYPE_PET_CLEANUP) {
+    if (game_options.type == OPTION_GAME_TYPE_PET_CLEANUP) {
         PRINTXY(DISPLAY_NUMPETS_CLEANUP_X_LABEL, DISPLAY_NUMPETS_Y_LABEL,  "TAILS", 0);  // TODO: Shrink the left bush down so the readout can go BELOW instead of TO RIGHT
-    } else if (option_game_type == OPTION_GAME_TYPE_LONG_PET) {
+    } else if (game_options.type == OPTION_GAME_TYPE_LONG_PET) {
         PRINTXY(DISPLAY_NUMPETS_X_LABEL, DISPLAY_NUMPETS_Y_LABEL,  "PETSIZE", 0);
-    } else if (option_game_type == OPTION_GAME_TYPE_MARATHON) {
+    } else if (game_options.type == OPTION_GAME_TYPE_MARATHON) {
         PRINTXY(DISPLAY_NUMPETS_X_LABEL, DISPLAY_NUMPETS_Y_LABEL,  "NUMPETS", 0);
     } else {
         PRINTXY(DISPLAY_NUMPETS_X_LABEL, DISPLAY_NUMPETS_Y_LABEL,  "PETS", 0);

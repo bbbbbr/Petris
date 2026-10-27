@@ -34,6 +34,7 @@
 
 #include "options.h"
 #include "options_screen.h"
+#include "cartsave.h"
 
 #include "intro_screen_out.h"  // For determining where to start loading font tiles
 #include "pet_and_special_tiles_out.h"
@@ -89,16 +90,16 @@ const char * options_type[]         = {"LONG PET    ",
                                        "CRUNCH UP   ",
                                        "TAIL CLEANUP",
                                        "LEVEL UP    ",
-                                       "MARATHON    "}; // Must match : option_game_type_entries
+                                       "MARATHON    "}; // Must match : game_options.type_entries
 const char * options_difficulty[]   = {"EASY  ",
                                        "NORMAL",
                                        "HARD  ",
                                        "EXPERT ",
                                        "BEAST "}; // Must match : option_difficulty_entries
 // const char * options_link2p[]        = {"OFF", "ON "}; // Must match : option_link2p_entries
-const char * options_hard_drop[]        = {"ON ", "OFF"}; // Must match : option_hard_drop_entries
-const char * options_filter_diagonals[] = {"    NORMAL ", "BLOCK DIAG",}; // Must match : option_filter_diagonals_entries
-const char * options_visual_hints[]  = {"ON ", "OFF"}; // Must match : option_visual_hints_entries
+const char * options_hard_drop[]        = {" ON", "OFF"}; // Must match : option_hard_drop_entries
+const char * options_filter_diagonals[] = {"     NORMAL ", " BLOCK DIAG",}; // Must match : option_filter_diagonals_entries
+const char * options_visual_hints[]  = {" ON", "OFF"}; // Must match : option_visual_hints_entries
 
 const char * options_music[] = {"TWILIGHT",
                                 "CHILL   ",
@@ -123,15 +124,15 @@ const char str_options_heading[] = "---- OPTIONS ----";
 
 // See above for meaning of each element
 const option_item options[] = {
-        { MENU_Y( 3),"TYPE : ",        (int8_t)ARRAY_LEN(options_type),          &options_type[0],          &option_game_type},
-        { MENU_Y( 5),"LEVEL: ",        (int8_t)ARRAY_LEN(options_difficulty),    &options_difficulty[0],    &option_game_difficulty},
-        { MENU_Y( 7),"MUSIC: ",        (int8_t)ARRAY_LEN(options_music),         &options_music[0],         &option_game_music},
+        { MENU_Y( 3),"TYPE : ",        (int8_t)ARRAY_LEN(options_type),          &options_type[0],          &game_options.type},
+        { MENU_Y( 5),"LEVEL: ",        (int8_t)ARRAY_LEN(options_difficulty),    &options_difficulty[0],    &game_options.difficulty},
+        { MENU_Y( 7),"MUSIC: ",        (int8_t)ARRAY_LEN(options_music),         &options_music[0],         &game_options.music},
         { MENU_Y(10),"   START GAME ", (int8_t)ARRAY_LEN(options_visual_hints),  NULL, NULL},
         // TODO: High Score menu item here or at bottom of list
-        // { MENU_Y(13),"2 PLAYER VS:  ", (int8_t)ARRAY_LEN(options_link2p),        &options_link2p[0],           &option_game_link2p},
-        { MENU_Y(13),"HARD DROP:    ", (int8_t)ARRAY_LEN(options_hard_drop),        &options_hard_drop[0],        &option_game_hard_drop},
-        { MENU_Y(15),"DPAD: ", (int8_t)ARRAY_LEN(options_filter_diagonals), &options_filter_diagonals[0], &option_game_filter_diagonals},
-        { MENU_Y(17),"VISUAL HINTS: ", (int8_t)ARRAY_LEN(options_visual_hints),     &options_visual_hints[0],     &option_game_visual_hints},
+        // { MENU_Y(13),"2 PLAYER VS:  ", (int8_t)ARRAY_LEN(options_link2p),        &options_link2p[0],           &game_options.link2p},
+        { MENU_Y(13),"HARD DROP:    ", (int8_t)ARRAY_LEN(options_hard_drop),        &options_hard_drop[0],        &game_options.hard_drop},
+        { MENU_Y(15),"DPAD: ", (int8_t)ARRAY_LEN(options_filter_diagonals), &options_filter_diagonals[0], &game_options.filter_diagonals},
+        { MENU_Y(17),"VISUAL HINTS: ", (int8_t)ARRAY_LEN(options_visual_hints),     &options_visual_hints[0],     &game_options.visual_hints},
     };
 
 
@@ -260,6 +261,9 @@ void options_screen_sprites_init(void) {
 
 void options_screen_exit_cleanup(void) {
 
+    // Save updated settings to SRAM
+    cartsave_save_options();
+
     palette_fade_start(FADE_TO_BLACK);
     palette_fade_wait_completed();
 
@@ -309,7 +313,7 @@ void options_screen_try_gamestart(void) {
     // If serial link 2-Player versus is being initiated
     // then try to link up with the other player
     // before starting the game.
-    if (option_game_link2p == OPTION_LINK2P_ON) {
+    if (game_options.link2p == OPTION_LINK2P_ON) {
 
         // TODO: 2-Player game start
     } else {

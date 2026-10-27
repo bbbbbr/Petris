@@ -1,4 +1,3 @@
-
 // Copyright 2026 (c) bbbbbr
 //
 // This software is licensed under:
@@ -23,15 +22,23 @@
 #include "options.h"
 #include "options_screen.h"
 
-int8_t option_game_type          = OPTION_GAME_TYPE_DEFAULT;
-int8_t option_game_difficulty    = OPTION_DIFFICULTY_DEFAULT;
-int8_t option_game_visual_hints  = OPTION_VISUAL_HINTS_DEFAULT;
-int8_t option_game_high_contrast = OPTION_HIGH_CONTRAST_DEFAULT;
-int8_t option_game_music         = OPTION_MUSIC_DEFAULT;
-int8_t option_game_preview_next  = NEXT_PREV_DEFAULT;
-int8_t option_game_link2p        = OPTION_LINK2P_DEFAULT;
-int8_t option_game_hard_drop     = OPTION_HARD_DROP_DEFAULT;
-int8_t option_game_filter_diagonals = OPTION_FILTER_DIAGONALS_DEFAULT;
+
+options_rec game_options;
+
+
+void options_reset_to_defaults(void) {
+
+    game_options.type          = OPTION_GAME_TYPE_DEFAULT;
+    game_options.difficulty    = OPTION_DIFFICULTY_DEFAULT;
+    game_options.visual_hints  = OPTION_VISUAL_HINTS_DEFAULT;
+    game_options.high_contrast = OPTION_HIGH_CONTRAST_DEFAULT;
+    game_options.music         = OPTION_MUSIC_DEFAULT;
+    game_options.preview_next  = NEXT_PREV_DEFAULT;
+    game_options.link2p        = OPTION_LINK2P_DEFAULT;
+    game_options.hard_drop     = OPTION_HARD_DROP_DEFAULT;
+    game_options.filter_diagonals = OPTION_FILTER_DIAGONALS_DEFAULT;
+}
+
 
 // See spreadsheet for more details
 // Speed increase per level bracket roughly doubles
@@ -53,7 +60,7 @@ const settings_data * p_game_settings = NULL;
 
 
 const char * options_difficulty_abbrev_text_get(void) {
-    return options_difficulty_abrv[option_game_difficulty];
+    return options_difficulty_abrv[game_options.difficulty];
 }
 
 
@@ -102,7 +109,7 @@ uint8_t options_frames_per_drop_get(uint8_t level) {
 
 void options_player_settings_apply(void) {
 
-    p_game_settings = &settings_LUT[ option_game_difficulty ];
+    p_game_settings = &settings_LUT[ game_options.difficulty ];
 
-    option_game_preview_next = p_game_settings->preview_next_enabled;
+    game_options.preview_next = p_game_settings->preview_next_enabled;
 }

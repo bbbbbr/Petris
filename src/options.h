@@ -184,16 +184,22 @@ typedef struct settings_rec {
 
 extern const settings_data * p_game_settings;
 
-extern int8_t option_game_difficulty;
-extern int8_t option_game_visual_hints;
-extern int8_t option_game_high_contrast;
-extern int8_t option_game_type;
-extern int8_t option_game_music;
-extern int8_t option_game_preview_next;
-extern int8_t option_game_link2p;
-extern int8_t option_game_hard_drop;
-extern int8_t option_game_filter_diagonals;
+typedef struct options_rec {
+    int8_t type;
+    int8_t difficulty;
+    int8_t visual_hints;
+    int8_t high_contrast;
+    int8_t music;
+    int8_t preview_next;
+    int8_t link2p;
+    int8_t hard_drop;
+    int8_t filter_diagonals;
+    uint16_t checksum;  // Only updated when reading or writing sram
+} options_rec;
 
+extern options_rec game_options;
+
+void options_reset_to_defaults(void);
 const char * options_difficulty_abbrev_text_get(void);
 uint8_t options_frames_per_drop_get(uint8_t);
 void options_player_settings_apply(void);
