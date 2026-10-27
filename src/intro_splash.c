@@ -56,10 +56,10 @@ void intro_splash_hblank_effect_isr(void) {
 
         if (simulated_vdp_vcount & 0x01U) {
             // equiv to: SCX_REG = (LY_REG - effect_y_line) << 2;
-            VDP.BG_SCROLL[BG0_SCROLL_X] = scroll_x_amount;
+            SCX_REG = scroll_x_amount;
         } else {
             // equiv to: SCX_REG = 255U - ((LY_REG - effect_y_line) << 2);
-            VDP.BG_SCROLL[BG0_SCROLL_X] = -scroll_x_amount;
+            SCX_REG = -scroll_x_amount;
         }
     }
 }
@@ -118,8 +118,8 @@ void intro_splash(void) {
         // Reset scroll registers to zero
         // at the start of every frame
         scroll_x_amount = 0U;
-        VDP.BG_SCROLL[BG0_SCROLL_Y] = 0u;
-        VDP.BG_SCROLL[BG0_SCROLL_X] = 0u;
+        SCY_REG = 0u;
+        SCX_REG = 0u;
 
         // Increment effect position downward by one
         // scanline every other frame

@@ -106,7 +106,7 @@ void gameplay_ended_cleanup(void) {
 void gameplay_handle_gameover_screen(void) {
 
     // Make sure scroll X is reset if it was doing any shaking at the moment the game ended
-    // SCX_REG = 0; // TODO SCROLL TILEMAP
+    SCX_REG = 0;
     
     // Stop music, play end game sound and hide all the sprites
     // MusicStop();  // TODO
@@ -644,10 +644,10 @@ void gameplay_crunchup_update(void) {
             // Keep shifting the board until it's the last pass,
             // then make sure map is scrolled back to zero
             if (game_shake_enqueued >= GAME_CRUNCHUP_SHAKE_COMPLETE) {
-                // SCX_REG = 0; // TODO: GAME SHAKE SCROLL X
+                SCX_REG = 0;
                 game_shake_enqueued = GAME_CRUNCHUP_SHAKE_RESET;
             } else {
-                // SCX_REG = sys_time & 0x03; // SCX_REG = 0; // TODO: GAME SHAKE SCROLL X
+                SCX_REG = sys_time & 0x03;
             }
         // }
 

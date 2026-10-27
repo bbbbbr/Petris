@@ -127,6 +127,8 @@ void init_gfx_hardware(void) {
     }
     VDP.BG_SCROLL[BG0_SCROLL_X] = 0;
     VDP.BG_SCROLL[BG0_SCROLL_Y] = 0;
+    VDP.BG_SCROLL[BG1_SCROLL_X] = 0;
+    VDP.BG_SCROLL[BG1_SCROLL_Y] = 0;
 
     VDP.OBJ_CTRL                  = OBJ_LAYER_SPLIT_ALL_OBJ0 | OBJ_FORMAT_4BPP | OBJ0_USE_TILEGROUP_512_767;
     VDP.BM_CTRL                   = BM_MODE_4BPP_SHARED; /* 512 x 512 shared */
