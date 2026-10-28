@@ -49,13 +49,10 @@ const uint8_t NEXT_PIECE_BG_TILE = TILE_ID_BOARD_NEXT_PIECE_PREVIEW_BG;  // TODO
 uint8_t tail_anim_count = 0;
 bool tail_anim_alternate = false;
 
-#define GAME_BOARD_UNDER_TILE_COUNT       2u
-#define GAME_BOARD_UNDER_PALETTE_COUNT    2u
-
 uint16_t game_board_under_white_tile_id = 0u;
 uint16_t game_board_under_solid_color_15_tile_id  = 0u;
 
-const uint16_t game_board_under_tiles[] = {
+const uint16_t game_board_under_tiles[] = {  // See GAME_BOARD_UNDER_TILE_COUNT
     // Solid White tile
     0x1111u, 0x1111u,
     0x1111u, 0x1111u,
@@ -89,12 +86,26 @@ const palette_color_t game_board_under_pal[16] = {
 void board_gfx_init(void) {
 
     pet_tiles_prepare();
-    board_gfx_init_pettiles();
+    board_gfx_init_tiles_and_palettes();
 
     board_gfx_init_background();
     board_gfx_init_sprites();
 
     gameover_message_reset();
+}
+
+
+void board_gfx_fill_bg1_under_board(uint16_t relative_palette, uint16_t tile_id) {
+
+    // Fill **underneath** board with specific palette and background color the board on BG1
+    // - White during gameplay for better text visibility
+    // - "Blue" (or whatever faded to at other times for text readability and it looks nicer
+    set_bkg_tilemap_base_address(BG1_MAP_START());
+    set_bkg_tiles_target_subpal(relative_palette);
+    fill_bkg_rect(BRD_ST_X, BRD_ST_Y, BRD_WIDTH, BRD_HEIGHT, tile_id);
+    // Revert to default palette and bg map for subsequent writes
+    set_bkg_tiles_target_subpal(PAL_0);
+    set_bkg_tilemap_base_address(BG0_MAP_START());
 }
 
 
@@ -107,10 +118,10 @@ void board_gfx_change_pettiles(void) {  // TODO
 
     // Update pet tiles to match new setting
     pet_tiles_prepare();
-    board_gfx_init_pettiles();
+    board_gfx_init_tiles_and_palettes();
 }
 
-void board_gfx_init_pettiles(void) {
+void board_gfx_init_tiles_and_palettes(void) {
 
     // Graphics layer use
     // BG0:  Text, Game Board+Pieces, Game Board Border
@@ -132,18 +143,14 @@ void board_gfx_init_pettiles(void) {
     uint16_t base_tile_id = TILE_LOAD_START;
 
     // Background under game board (currently solid white)
-        set_bkg_tilemap_base_address(BG1_MAP_START());
-        set_bkg_tiles_target_subpal(REL_PAL_BOARD_UNDER_BG1_1);
 
         set_fade_target_4bpp_palette(ABS_PAL_BOARD_UNDER_BG1_1, GAME_BOARD_UNDER_PALETTE_COUNT, game_board_under_pal);
         set_bkg_4bpp_data(base_tile_id, GAME_BOARD_UNDER_TILE_COUNT, game_board_under_tiles);
-
         game_board_under_white_tile_id = base_tile_id;
         game_board_under_solid_color_15_tile_id  = base_tile_id + 1u;
-        fill_bkg_rect(BRD_ST_X, BRD_ST_Y, BRD_WIDTH, BRD_HEIGHT, game_board_under_white_tile_id);
-
         base_tile_id += GAME_BOARD_UNDER_TILE_COUNT;
-        set_bkg_tiles_target_subpal(PAL_0);  // Revert to default palette for subsequent writes
+
+        board_gfx_fill_bg1_under_board(REL_PAL_BOARD_UNDER_BG1_1, game_board_under_white_tile_id);
 
 
     // Game Board Border goes on BG0 with game board tiles and text

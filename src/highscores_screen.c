@@ -1,0 +1,208 @@
+
+// Copyright 2026 (c) bbbbbr
+//
+// This software is licensed under:
+//
+// For the purposes of this project "Share Alike" shall also include
+// distribution of the source code and any changes to it.
+//
+// CC-BY-NC-SA: Attribution Non-Commercial Share Alike Creative Commons
+// Attribution-NonCommercial-ShareAlike 4.0 International License
+// See: http://creativecommons.org/licenses/by-nc-sa/4.0/
+
+#include <gbdk/platform.h>
+#include <gbdk/metasprites.h>
+
+#include <stdint.h>
+#include <stdbool.h>
+
+#include "gfx.h"
+#include "gfx_print.h"
+#include "input.h"
+
+#include "common.h"
+#include "fade.h"
+
+#include "options.h"
+#include "options_screen.h"
+#include "highscores.h"
+#include "cartsave.h"
+
+#include "game_board_gfx.h"
+
+#include "intro_screen_out.h"  // For determining where to start loading font tiles
+#include "pet_and_special_tiles_out.h"
+
+// The tile load start offset here is to skip past main background + transparent tile + the two tiles
+// used during gameplay for filling/resetting under the board, so that when the font loads it won't
+// overwrite the filled board (from end of gameplay) and turn that area transparent
+#define TILE_LOAD_START (SHARED_4BPP_TRANSP_TILE_ID_START + intro_screen_out_TILE_COUNT + SHARED_4BPP_TRANSP_TILE_COUNT + GAME_BOARD_UNDER_TILE_COUNT)
+
+#define TILE_LOAD_OFFSET_CURSOR_SPRITE (OBJ_TILEGROUP_BASE_512)
+
+
+//  32 x 28
+//
+// |01234567890123456789012345678912|
+// |                                |
+// |  HIGH SCORES: < TAIL CLEANUP > | 4 (Row Color: YELLOW)
+// |                                |
+// |   SCORE    DIFF.    MAX LEVEL  | 7 (Row Color: PINK)
+// |   655350   EXPERT   999        | 9
+// | > 123450   BEAST     99  NEW!  | 11 <-- New Highscore: PINK ROW "new" (As a bouncing sprite??) , otherwise YELLOW/GREY
+// |   000000   NORMAL     0        | 13
+// |   000000   NORMAL     0        | 15
+// |   000000   NORMAL     0        | 17
+// |   000000   NORMAL     0        | 19
+
+
+#define PAL_TITLE      (PRINT_PAL_TILE_YELLOW)
+#define PAL_HEADERS    (PRINT_PAL_TILE_YELLOW)
+#define PAL_SCORE      (PRINT_PAL_TILE_GREY)
+#define PAL_NON_SCORE  (PRINT_PAL_TILE_GREY)
+#define PAL_HIGHLIGHT  (PRINT_PAL_TILE_YELLOW)  // TODO: PRINT_PAL_TILE_PINK was removed, but might have enough free to add back?
+
+#define TITLE_X_START    (2u)
+#define TITLE_Y_START    (3u)
+#define TITLE_TYPE_X_START  (TITLE_X_START + 15u)
+#define TITLE_TEXT       "HIGH SCORES: ( ____________ )"  // TODO CHANGE PARENS TO < > to indicate left/right
+
+#define HEADERS_X_START  (3u)
+#define HEADERS_Y_START  (TITLE_Y_START + FONT_8x16_TILE_HEIGHT + 1u)
+#define HEADERS_TEXT     " SCORE   DIFF.    MAX LEVEL"
+
+#define SCORES_Y_START   (HEADERS_Y_START + FONT_8x16_TILE_HEIGHT)
+#define SCORES_X_START   (3u)
+#define SCORES_X_GAP     (3u)
+#define SCORES_X_DIFF_LEN   (6u)
+#define SCORES_X_FAKE_0_LEN (1u)
+#define SCORES_ZERO_BLANK_TEXT "     " // Print blank text when zero since there is a fake trailing zero, match length of max score (5)
+
+#define SCORE_Y(N) (SCORES_Y_START + (N))
+
+
+int8_t showing_game_type = OPTION_GAME_TYPE_DEFAULT;
+
+
+static void highscores_draw(void);
+static void highscores_screen_switch_game_type(int8_t dir);
+static void highscores_screen_exit_cleanup(void);
+
+
+static void highscores_draw(void) {
+
+    score_rec * p_scores = NULL;
+
+    // Pick scores for the matching game type
+    switch (showing_game_type) {
+        case OPTION_GAME_TYPE_LONG_PET:    p_scores = highscores.long_pet;     break;
+        case OPTION_GAME_TYPE_CRUNCH_UP:   p_scores = highscores.crunch_up;    break;
+        case OPTION_GAME_TYPE_PET_CLEANUP: p_scores = highscores.tail_cleanup; break;
+        case OPTION_GAME_TYPE_LEVEL_UP:    p_scores = highscores.level_up;     break;
+        case OPTION_GAME_TYPE_MARATHON:    p_scores = highscores.marathon;     break;
+    }
+
+    // Check to see if the score made it into the top scores table
+    if (p_scores != NULL) {
+
+        // TODO: check and display (or hide) new highscore sprite indicator "NEW!"
+
+        // Print Title + type
+        PRINT_PAL(PAL_TITLE);
+        PRINTXY(TITLE_X_START, TITLE_Y_START, TITLE_TEXT, 0);
+        PRINTXY(TITLE_TYPE_X_START, TITLE_Y_START, options_type[showing_game_type], 0);
+
+        // Print column headers
+        PRINT_PAL(PAL_HEADERS);
+        PRINTXY(HEADERS_X_START, HEADERS_Y_START, HEADERS_TEXT, 0);
+
+        uint16_t y = SCORES_Y_START;
+        for (int c = 0; c < SCORES_PER_GAME_TYPE; c++) {
+            uint16_t x = SCORES_X_START;
+
+            // Score + fake trailing zero
+            uint16_t pal = (highscore_new_record_is_this_entry(c, showing_game_type)) ? PAL_HIGHLIGHT : PAL_SCORE;
+            PRINT_PAL(pal);
+            if (p_scores[c].score > 0) print_num_u16(x, y, p_scores[c].score, STR_DIGIT_LEN_5);
+            else                       PRINTXY(x, y, SCORES_ZERO_BLANK_TEXT, 0);
+            x += STR_DIGIT_LEN_5;
+            PRINTXY(x, y, "0", 0);
+            x += SCORES_X_GAP + SCORES_X_FAKE_0_LEN;
+
+            // Difficulty mode
+            pal = (highscore_new_record_is_this_entry(c, showing_game_type)) ? PAL_HIGHLIGHT : PAL_NON_SCORE;
+            PRINT_PAL(pal);
+            PRINTXY(x, y, options_difficulty[p_scores[c].difficulty], 0);
+            x += SCORES_X_GAP + SCORES_X_DIFF_LEN;
+
+            // Max level reached
+            print_num_u16(x, y, p_scores[c].max_level, STR_DIGIT_LEN_3);
+
+            y += FONT_8x16_TILE_HEIGHT;
+        }
+    }
+}
+
+
+static void highscores_screen_switch_game_type(int8_t dir) {
+
+    // Increment which type of game mode scores are being shown for and handle wraparound
+    showing_game_type += dir;
+    if (showing_game_type < OPTION_GAME_TYPE_MIN)      showing_game_type = OPTION_GAME_TYPE_MAX;
+    else if (showing_game_type > OPTION_GAME_TYPE_MAX) showing_game_type = OPTION_GAME_TYPE_MIN;
+
+    highscores_draw();
+}
+
+
+static void highscores_screen_exit_cleanup(void) {
+
+    // Clear new highscore flag so it doesn't show
+    // if just returning to the screen
+    highscore_is_new_record_clear();
+
+    palette_fade_start(FADE_TO_BLACK);
+    palette_fade_wait_completed();
+
+    hide_sprites_range(0, MAX_HARDWARE_SPRITES);
+
+    // Clear BG0 (where the text is printed)
+    fill_bkg_rect(0, 0, DEVICE_SCREEN_BUFFER_WIDTH, DEVICE_SCREEN_BUFFER_HEIGHT, SHARED_4BPP_TRANSP_TILE_ID_START);
+}
+
+// Initializes high score screen
+void highscores_screen_init(void) {
+
+    // Rely on Title Screen or Game Over Screen graphics loading for Background image and Font tiles / drawing setup
+    load_8x16_font_tiles(TILE_LOAD_START, 0u);
+    load_8x16_font_tilemap_palettes();
+
+    showing_game_type = game_options.type;
+
+    highscores_draw();
+
+    // Reveal sprite last since other screen setup/drawing is slow
+    palette_fade_start(FADE_TO_TARGET);
+}
+
+
+void highscores_screen_handle(void) {
+
+    // TODO: animate new highscore indicator
+
+    if (KEY_TICKED(J_LEFT)) {
+
+        highscores_screen_switch_game_type(-1);
+    }
+    else if (KEY_TICKED(J_RIGHT)) {
+
+        highscores_screen_switch_game_type(1);
+    }
+    // Go back to Intro Screen
+    else if (KEY_TICKED(J_Y | J_START | J_A)) {
+
+        highscores_screen_exit_cleanup();
+        game_state = GAME_INTRO_INIT;
+    }
+}
+

@@ -90,16 +90,20 @@ enum option_menu_entries {
 
 
 // Trailing spaces are to clear out previous option value text
-const char * options_type[]         = {"LONG PET    ",
+const char * options_type[OPTION_GAME_TYPE_COUNT] = {
+                                       "LONG PET    ",
                                        "CRUNCH UP   ",
                                        "TAIL CLEANUP",
                                        "LEVEL UP    ",
                                        "MARATHON    "}; // Must match : game_options.type_entries
-const char * options_difficulty[]   = {"EASY  ",
+
+const char * options_difficulty[OPTION_DIFFICULTY_COUNT] = {
+                                       "EASY  ",
                                        "NORMAL",
                                        "HARD  ",
-                                       "EXPERT ",
+                                       "EXPERT ", // TODO: is this trailing space here a typo?
                                        "BEAST "}; // Must match : option_difficulty_entries
+
 // const char * options_link2p[]        = {"OFF", "ON "}; // Must match : option_link2p_entries
 const char * options_hard_drop[]        = {" ON", "OFF"}; // Must match : option_hard_drop_entries
 const char * options_filter_diagonals[] = {"     NORMAL ", " BLOCK DIAG",}; // Must match : option_filter_diagonals_entries

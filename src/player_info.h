@@ -76,6 +76,7 @@
 extern uint16_t player_numtiles;
 extern uint16_t player_numpets;
 
+extern uint16_t player_score;
 extern uint16_t player_level;
 extern uint16_t player_numpieces;
 extern bool level_increment_enqueue;

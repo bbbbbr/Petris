@@ -31,9 +31,11 @@
 #include "intro_screen.h"
 #include "options_screen.h"
 
+#include "highscores.h"
+#include "highscores_screen.h"
+
 #include "options.h"
 #include "cartsave.h"
-// #include "player_hinting.h"
 
 #include "input.h"
 #include "gfx.h"
@@ -155,7 +157,10 @@ void init(void) {
 
     vbl_count = 0;
     game_state = GAME_INTRO_INIT;
+
     cartsave_load_options(); //options_reset_to_defaults();
+    highscore_is_new_record_clear();
+    highscores_reset_all();  // TODO: cartsave_load_highscores();
 
     init_interrupts();
     joypad_init();
@@ -204,10 +209,14 @@ int main() {
                     game_state = GAME_OPTIONS_INIT;
                    intro_screen_cleanup();
                 }
+                if (KEY_TICKED(J_Y)) {
+                    game_state = GAME_HIGHSCORES_INIT;  // TODO: TEMP HACK UNTIL THERE IS TITLE SCREEN MENU
+                    intro_screen_cleanup();
+                }
                 break;
 
             case GAME_OPTIONS_INIT:
-                game_state = GAME_OPTIONS;
+                game_state = GAME_OPTIONS;  // TODO: delete
                 options_screen_init();
                 game_state = GAME_OPTIONS;
                 break;
@@ -241,15 +250,17 @@ int main() {
 
 
             case GAME_OVER_WAITEXIT:
-                if (KEY_TICKED(J_START | J_A | J_B)) {
-                    // Turn sprites off and then fade out
-                    HIDE_SPRITES;
-                    palette_fade_start(FADE_TO_BLACK);
-                    palette_fade_wait_completed();
-                    game_state = GAME_INTRO_INIT;
-                }
+                gameplay_handle_gameover_screen_idle();
                 break;
 
+            case GAME_HIGHSCORES_INIT:
+                highscores_screen_init();  // TODO: Pass in current game type and score rec if not null
+                game_state = GAME_HIGHSCORES;
+                break;
+
+            case GAME_HIGHSCORES:
+                highscores_screen_handle();
+                break;
         }
     }
 }

@@ -83,7 +83,7 @@ void board_hide_all(uint16_t delay_amount) {
         // Draw the blank row **on** the board on BG0
         fill_bkg_rect(BRD_ST_X, y, BRD_WIDTH, 1, TILE_ID_BOARD_BLANK + TILES_PET_START_VRAM_ABSOLUTE);
 
-        // Fill with MAIN SKU BACKGROUND COLOR *underneath** the board on BG1
+        // Fill a single row with MAIN BACKGROUND COLOR *underneath** the board on BG1
         // for better text visibility than the gameplay white
         // Note: Gets redrawn to WHITE in board_redraw_all()
         set_bkg_tilemap_base_address(BG1_MAP_START());
@@ -104,13 +104,7 @@ void board_redraw_all(void) {
     // for normal gameplay background.
     // This is in case it was previously filled with BLUE
     // for better visibility when displaying a message
-    set_bkg_tilemap_base_address(BG1_MAP_START());
-    set_bkg_tiles_target_subpal(REL_PAL_BOARD_UNDER_BG1_1);
-    fill_bkg_rect(BRD_ST_X, BRD_ST_Y, BRD_WIDTH, BRD_HEIGHT, game_board_under_white_tile_id);
-    // Revert to default palette and bg map for subsequent writes
-    set_bkg_tiles_target_subpal(PAL_0);
-    set_bkg_tilemap_base_address(BG0_MAP_START());
-
+    board_gfx_fill_bg1_under_board(REL_PAL_BOARD_UNDER_BG1_1, game_board_under_white_tile_id);
 
     // Update BG0 Tilemap from Game Board
     set_bkg_tiles_target_screen_a_or_b(LAYER_SCREEN_A);
