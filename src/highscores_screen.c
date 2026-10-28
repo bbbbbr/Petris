@@ -78,18 +78,32 @@
 #define SCORES_X_FAKE_0_LEN (1u)
 #define SCORES_ZERO_BLANK_TEXT "     " // Print blank text when zero since there is a fake trailing zero, match length of max score (5)
 
-#define SCORE_Y(N) (SCORES_Y_START + (N))
+#define IDLE_GAMETYPE_COUNT_RESET      (0u)
+#define IDLE_GAMETYPE_COUNT_THRESHOLD  (7u * 60u) // Rotate through score types every N seconds if no input
+#define IDLE_EXIT_COUNT_RESET          (0u)
+#define IDLE_EXIT_COUNT_THRESHOLD      (OPTION_GAME_TYPE_MAX) // Exit screen after rotating through all game types with no player input
+
+#define SCORE_PRINT_DELAY_FRAMES       (250 / 16.6)           // 1/4 of second (in frames) between printing consecutive score records
 
 
-int8_t showing_game_type = OPTION_GAME_TYPE_DEFAULT;
+static int8_t showing_game_type;
+static uint16_t idle_gametype_count;
+static uint16_t idle_exit_count;
+static uint16_t skip_delay_keys;
 
 
 static void highscores_draw(void);
 static void highscores_screen_switch_game_type(int8_t dir);
 static void highscores_screen_exit_cleanup(void);
+static void highscore_update_idle_actions(void);
 
 
 static void highscores_draw(void) {
+
+    // Clear everything on BG0 (game pieces, text printing, etc)
+    set_bkg_tilemap_base_address(BG0_MAP_START());
+    set_bkg_tiles_target_screen_a_or_b(LAYER_SCREEN_A);
+    fill_bkg_rect(0, 0, DEVICE_SCREEN_BUFFER_WIDTH, DEVICE_SCREEN_BUFFER_HEIGHT, SHARED_4BPP_TRANSP_TILE_ID_START);
 
     score_rec * p_scores = NULL;
 
@@ -105,6 +119,8 @@ static void highscores_draw(void) {
     // Check to see if the score made it into the top scores table
     if (p_scores != NULL) {
 
+        skip_delay_keys = J_NONE;
+
         // TODO: check and display (or hide) new highscore sprite indicator "NEW!"
 
         // Print Title + type
@@ -112,9 +128,13 @@ static void highscores_draw(void) {
         PRINTXY(TITLE_X_START, TITLE_Y_START, TITLE_TEXT, 0);
         PRINTXY(TITLE_TYPE_X_START, TITLE_Y_START, options_type[showing_game_type], 0);
 
+        if (!skip_delay_keys) skip_delay_keys = delay_frames_with_input_exit(SCORE_PRINT_DELAY_FRAMES, J_ANY);
+
         // Print column headers
         PRINT_PAL(PAL_HEADERS);
         PRINTXY(HEADERS_X_START, HEADERS_Y_START, HEADERS_TEXT, 0);
+
+        if (!skip_delay_keys) skip_delay_keys = delay_frames_with_input_exit(SCORE_PRINT_DELAY_FRAMES, J_ANY);
 
         uint16_t y = SCORES_Y_START;
         for (int c = 0; c < SCORES_PER_GAME_TYPE; c++) {
@@ -139,6 +159,7 @@ static void highscores_draw(void) {
             print_num_u16(x, y, p_scores[c].max_level, STR_DIGIT_LEN_3);
 
             y += FONT_8x16_TILE_HEIGHT;
+            if (!skip_delay_keys) skip_delay_keys = delay_frames_with_input_exit(SCORE_PRINT_DELAY_FRAMES, J_ANY);
         }
     }
 }
@@ -152,6 +173,27 @@ static void highscores_screen_switch_game_type(int8_t dir) {
     else if (showing_game_type > OPTION_GAME_TYPE_MAX) showing_game_type = OPTION_GAME_TYPE_MIN;
 
     highscores_draw();
+}
+
+
+// Rotates through game type high scores if no buttons are pressed
+// If it rotates through them all then it exits the screen
+static void highscore_update_idle_actions(void) {
+
+    if (++idle_gametype_count > IDLE_GAMETYPE_COUNT_THRESHOLD) {
+
+        if (++idle_exit_count > IDLE_EXIT_COUNT_THRESHOLD) {
+            highscores_screen_exit_cleanup();
+            game_state = GAME_INTRO_INIT;
+        }
+
+        highscores_screen_switch_game_type(1);
+        idle_gametype_count = IDLE_GAMETYPE_COUNT_RESET;
+    }
+    if (KEY_TICKED(J_ANY)) {
+        idle_gametype_count = IDLE_GAMETYPE_COUNT_RESET;
+        idle_exit_count     = IDLE_EXIT_COUNT_RESET;
+    }
 }
 
 
@@ -177,12 +219,17 @@ void highscores_screen_init(void) {
     load_8x16_font_tiles(TILE_LOAD_START, 0u);
     load_8x16_font_tilemap_palettes();
 
-    showing_game_type = game_options.type;
+    showing_game_type   = game_options.type;
+
+    idle_gametype_count = IDLE_GAMETYPE_COUNT_RESET;
+    idle_exit_count     = IDLE_EXIT_COUNT_RESET;
+
+    skip_delay_keys = J_NONE;
+
+
+    palette_fade_start(FADE_TO_TARGET);
 
     highscores_draw();
-
-    // Reveal sprite last since other screen setup/drawing is slow
-    palette_fade_start(FADE_TO_TARGET);
 }
 
 
@@ -190,16 +237,28 @@ void highscores_screen_handle(void) {
 
     // TODO: animate new highscore indicator
 
-    if (KEY_TICKED(J_LEFT)) {
+    uint16_t keys_ticked = KEYS_TICKED(J_ANY);
+    if (skip_delay_keys != J_NONE) {
+        keys_ticked = skip_delay_keys;
+        skip_delay_keys = J_NONE;
+    }
+
+    // If there isn't a new high-score record active then
+    // cycle through the screens when there isn't any input
+    if (!highscore_is_new_record()) {
+        highscore_update_idle_actions();
+    }
+
+    if (keys_ticked & (J_LEFT)) {
 
         highscores_screen_switch_game_type(-1);
     }
-    else if (KEY_TICKED(J_RIGHT)) {
+    else if (keys_ticked & (J_RIGHT)) {
 
         highscores_screen_switch_game_type(1);
     }
     // Go back to Intro Screen
-    else if (KEY_TICKED(J_Y | J_START | J_A)) {
+    else if (keys_ticked & (J_Y | J_START | J_A)) {
 
         highscores_screen_exit_cleanup();
         game_state = GAME_INTRO_INIT;

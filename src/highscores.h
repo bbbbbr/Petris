@@ -25,6 +25,7 @@ typedef struct highscores_rec {
 extern highscores_rec highscores;
 
 void highscore_is_new_record_clear(void);
+bool highscore_is_new_record(void);
 bool highscore_new_record_is_this_entry(const int index, const int8_t game_type);
 void highscores_reset_all(void);
 void highscore_new_record_check_and_update(const score_rec * new_score, const int8_t game_type);

@@ -35,6 +35,10 @@ void highscore_is_new_record_clear(void) {
     is_new_highscore = false;
 }
 
+bool highscore_is_new_record(void) {
+    return is_new_highscore;
+}
+
 
 // Called on startup and start of a new game
 bool highscore_new_record_is_this_entry(const int index, const int8_t game_type) {
