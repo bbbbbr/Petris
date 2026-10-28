@@ -27,3 +27,23 @@ void waitpadticked_lowcpu(uint16_t button_mask) {
     // event that may have just happened
     UPDATE_KEYS();
 }
+
+// Delay N frames and exit early if button pressed
+// Returns:
+// * Keys Ticked if any button pressed
+// * J_NONE if no button pressed and full delay elapsed
+uint16_t delay_frames_with_input_exit(uint16_t delay_in_frames, uint16_t button_mask) {
+
+    while (delay_in_frames) {
+        delay_in_frames--;
+        vsync(); // yield CPU
+        UPDATE_KEYS();
+        if (KEYS_TICKED(button_mask) != J_NONE)
+            return KEYS_TICKED(button_mask);
+    };
+
+    // Prevent passing through any key ticked
+    // event that may have just happened
+    UPDATE_KEYS();
+    return J_NONE;
+}
