@@ -158,9 +158,9 @@ void init(void) {
     vbl_count = 0;
     game_state = GAME_INTRO_INIT;
 
-    cartsave_load_options(); //options_reset_to_defaults();
+    cartsave_load_options();  // Handles options_reset_to_defaults() if needed
+    cartsave_load_highscores();  // Handles highscores_reset_all() if needed
     highscore_is_new_record_clear();
-    highscores_reset_all();  // TODO: cartsave_load_highscores();
 
     init_interrupts();
     joypad_init();

@@ -18,6 +18,7 @@
 #include <stdbool.h>
 
 #include "common.h"
+#include "cartsave.h"
 
 #include "options.h"
 #include "highscores.h"
@@ -110,7 +111,8 @@ void highscore_new_record_check_and_update(const score_rec * p_new_score, const 
                 // Insert the new score
                 p_scores[new_highscore_idx] = *p_new_score;
 
-                // TODO: Write updated score records to SRAM
+                // Write updated score records to SRAM
+                cartsave_save_highscores();
 
                 return;
             }
