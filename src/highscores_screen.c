@@ -57,6 +57,7 @@
 
 
 #define PAL_TITLE      (PRINT_PAL_TILE_YELLOW)
+#define PAL_TITLE_TYPE (PRINT_PAL_TILE_GREY)
 #define PAL_HEADERS    (PRINT_PAL_TILE_YELLOW)
 #define PAL_SCORE      (PRINT_PAL_TILE_GREY)
 #define PAL_NON_SCORE  (PRINT_PAL_TILE_GREY)
@@ -126,6 +127,7 @@ static void highscores_draw(void) {
         // Print Title + type
         PRINT_PAL(PAL_TITLE);
         PRINTXY(TITLE_X_START, TITLE_Y_START, TITLE_TEXT, 0);
+        PRINT_PAL(PAL_TITLE_TYPE);
         PRINTXY(TITLE_TYPE_X_START, TITLE_Y_START, options_type[showing_game_type], 0);
 
         if (!skip_delay_keys) skip_delay_keys = delay_frames_with_input_exit(SCORE_PRINT_DELAY_FRAMES, J_ANY);
