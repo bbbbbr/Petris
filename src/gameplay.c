@@ -235,6 +235,10 @@ void gameplay_init(void) {
     // Should be called before gameplay_prepare_board() ... -> game_board_fill_random_tails()
     player_info_newgame_reset();
 
+    // vsync to let all changes commit (including shadow oam copy) before starting fade,
+    // fixes second aspect of font outline glitch
+    vsync();
+
     // Start the fade-in
     palette_fade_start(FADE_TO_TARGET);
 
