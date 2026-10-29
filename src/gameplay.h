@@ -45,6 +45,8 @@ extern bool volatile game_is_paused;
 void gameplay_drop_speed_update(void);
 void gameplay_ended_cleanup(void);
 void gameplay_handle_gameover_screen(void);
+void gameplay_handle_gameover_screen_idle(void);
+
 void random_init(void);
 void gameplay_init(void);
 void gameplay_prepare_piece(void);

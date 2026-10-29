@@ -39,6 +39,8 @@
 #include "player_gfx.h"
 
 #include "options.h"
+#include "highscores.h"
+
 #include "game_piece.h"
 #include "game_piece_data.h"
 #include "game_board.h"
@@ -69,6 +71,9 @@ bool gameplay_piece_hard_drop_requested = false;
 
 uint8_t piece_state = PLAYER_START;
 uint8_t new_piece_launch_delay = GAME_SPEED_LAUNCH_DELAY_FRAMES;
+
+
+static void gameplay_gameover_screen_cleanup(void);
 
 
 void gameplay_drop_speed_update(void) {
@@ -102,7 +107,7 @@ void gameplay_ended_cleanup(void) {
 }
 
 
-
+// TODO: Move gameover code to a separate source file
 void gameplay_handle_gameover_screen(void) {
 
     // Make sure scroll X is reset if it was doing any shaking at the moment the game ended
@@ -144,6 +149,43 @@ void gameplay_handle_gameover_screen(void) {
 
     // Reset visible sprites, then display stats
     stats_display();
+
+    // Check for and log highscore
+    score_rec this_score;
+    this_score.score      = player_score;
+    this_score.max_level  = player_level;
+    this_score.difficulty = game_options.difficulty;
+    highscore_new_record_check_and_update(&this_score, game_options.type);
+}
+
+
+static void gameplay_gameover_screen_cleanup(void) {
+
+    // Restore under the board to a solid color
+    board_gfx_fill_bg1_under_board(REL_PAL_BACKGROUND_BG1_0, game_board_under_solid_color_15_tile_id);
+
+    // Clear everything on BG0 (game pieces, text printing, etc)
+    set_bkg_tilemap_base_address(BG0_MAP_START());
+    set_bkg_tiles_target_screen_a_or_b(LAYER_SCREEN_A);
+    fill_bkg_rect(0, 0, DEVICE_SCREEN_BUFFER_WIDTH, DEVICE_SCREEN_BUFFER_HEIGHT, SHARED_4BPP_TRANSP_TILE_ID_START);
+    SCY_REG = 0;  // Scroll back to default
+}
+
+
+// Idling with the game over stats showing until player presses a button
+void gameplay_handle_gameover_screen_idle(void) {
+
+    if (KEY_TICKED(J_START | J_A | J_B)) {
+        // Turn sprites off and then fade out
+        palette_fade_start(FADE_TO_BLACK);
+        palette_fade_wait_completed();
+
+        gameplay_gameover_screen_cleanup();
+        HIDE_SPRITES;
+
+        // game_state = GAME_INTRO_INIT;
+        game_state = GAME_HIGHSCORES_INIT;
+    }
 }
 
 
@@ -175,6 +217,8 @@ void random_init(void) {
 
 
 void gameplay_init(void) {
+
+    highscore_is_new_record_clear();
     random_init();
 
     game_types_init(); // Call before board_gfx_init()

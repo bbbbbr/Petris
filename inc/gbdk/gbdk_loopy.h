@@ -92,6 +92,9 @@
 #define S_X_HIBIT_ON  (1 << 0)
 #define S_HIBITS_MASK_OFF (0xFCu)
 #define S_HIBITS_ON       (0x03u)
+#define S_Y_HIBIT_MASK_OFF (~(S_Y_HIBIT_ON))
+#define S_X_HIBIT_MASK_OFF (~(S_X_HIBIT_ON))
+
 
 #define S_PAL0        (0 << 4)
 #define S_PAL1        (1 << 4)
@@ -224,6 +227,20 @@ ALWAYS_INLINE inline void move_sprite(uint16_t nb, uint8_t x, uint8_t y) {
     OAM_item_t * itm = &shadow_OAM[nb];
     itm->y=y, itm->x=x;
     itm->prop &= (S_HIBITS_MASK_OFF);  // TODO: Forcing X,Y High bits off for now
+}
+
+// TODO: Using 8 bit x,y positions for now, but x and y are signed 9 bit (so -256 to 255)
+ALWAYS_INLINE inline void move_sprite_y(uint16_t nb, uint8_t y) {
+    OAM_item_t * itm = &shadow_OAM[nb];
+    itm->y=y;
+    itm->prop &= (S_Y_HIBIT_MASK_OFF);  // TODO: Forcing Y High bit off for now
+}
+
+// TODO: Using 8 bit x,y positions for now, but x and y are signed 9 bit (so -256 to 255)
+ALWAYS_INLINE inline void move_sprite_x(uint16_t nb, uint8_t x) {
+    OAM_item_t * itm = &shadow_OAM[nb];
+    itm->x=x;
+    itm->prop &= (S_X_HIBIT_MASK_OFF);  // TODO: Forcing Y High bit off for now
 }
 
 // TODO: Using 8 bit x,y positions for now, but x and y are signed 9 bit (so -256 to 255)

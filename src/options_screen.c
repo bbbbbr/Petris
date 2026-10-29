@@ -90,16 +90,20 @@ enum option_menu_entries {
 
 
 // Trailing spaces are to clear out previous option value text
-const char * options_type[]         = {"LONG PET    ",
+const char * options_type[OPTION_GAME_TYPE_COUNT] = {
+                                       "LONG PET    ",
                                        "CRUNCH UP   ",
                                        "TAIL CLEANUP",
                                        "LEVEL UP    ",
                                        "MARATHON    "}; // Must match : game_options.type_entries
-const char * options_difficulty[]   = {"EASY  ",
+
+const char * options_difficulty[OPTION_DIFFICULTY_COUNT] = {
+                                       "EASY  ",
                                        "NORMAL",
                                        "HARD  ",
-                                       "EXPERT ",
+                                       "EXPERT ", // TODO: is this trailing space here a typo?
                                        "BEAST "}; // Must match : option_difficulty_entries
+
 // const char * options_link2p[]        = {"OFF", "ON "}; // Must match : option_link2p_entries
 const char * options_hard_drop[]        = {" ON", "OFF"}; // Must match : option_hard_drop_entries
 const char * options_filter_diagonals[] = {"     NORMAL ", " BLOCK DIAG",}; // Must match : option_filter_diagonals_entries
@@ -157,6 +161,7 @@ static void options_screen_setting_draw(int8_t);
 static void options_screen_draw(void);
 static void options_screen_exit_cleanup(void);
 static void options_screen_try_gamestart(void);
+static void cursor_animate(void);
 
 
 // Redraw all menu entries
@@ -349,6 +354,20 @@ static void options_screen_try_gamestart(void) {
 }
 
 
+static void cursor_animate(void) {
+    // Update cursor every N frames
+    if ((sys_time & CURSOR_UPDATE_MASK) == CURSOR_UPDATE_MASK) {
+        // Animate the cursor with a mild bounce
+        // Indent if it's one of the fixed/control menu items
+        uint8_t cursor_x = (options[options_menu_index].opt_entries > 0) ? OPTION_CURSOR_X : OPTION_CURSOR_X_ITEM_INDENT;
+        move_sprite(SPR_OPTIONS_CURSOR,
+                    cursor_x,
+                    (((options[options_menu_index].menu_y) * 8) + 4)  // + 2 is sprite vs bg offset
+                    + spr_cursor_offset[(sys_time & CURSOR_LUT_MASK) >> CURSOR_BITSHIFT] - 2);
+    }
+}
+
+
 void options_screen_handle(void) {
 
     // Cursor Updates
@@ -419,15 +438,5 @@ void options_screen_handle(void) {
         game_state = GAME_INTRO_INIT;
     }
 
-    // Update cursor every N frames
-    if ((sys_time & CURSOR_UPDATE_MASK) == CURSOR_UPDATE_MASK) {
-        // Animate the cursor with a mild bounce
-        // Indent if it's one of the fixed/control menu items
-        uint8_t cursor_x = (options[options_menu_index].opt_entries > 0) ? OPTION_CURSOR_X : OPTION_CURSOR_X_ITEM_INDENT;
-        move_sprite(SPR_OPTIONS_CURSOR,
-                    cursor_x,
-                    (((options[options_menu_index].menu_y) * 8) + 4)  // + 2 is sprite vs bg offset
-                    + spr_cursor_offset[(sys_time & CURSOR_LUT_MASK) >> CURSOR_BITSHIFT] - 2);
-    }
-
+    cursor_animate();
 }

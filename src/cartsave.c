@@ -13,13 +13,15 @@
 #include <stdint.h>
 
 #include "options.h"
+#include "highscores.h"
 
 // Note: SRAM on the loopy has an 8 bit bus width
 #define SRAM_BASE       (0x02000000u)
 #define SRAM_OPTIONS    (SRAM_BASE + 0u)
-#define SRAM_HIGHSCORES (SRAM_OPTIONS + SIZEOF(options_rec))
+#define SRAM_HIGHSCORES (SRAM_OPTIONS + sizeof(options_rec))
 
-options_rec * const p_sram_game_options = (options_rec *)SRAM_OPTIONS;
+options_rec    * const p_sram_game_options = (options_rec *)SRAM_OPTIONS;
+highscores_rec * const p_sram_highscores   = (highscores_rec *)SRAM_HIGHSCORES;
 
 
 // Basic checksum on all bytes of the SRAM record except the checksum byte itself
@@ -61,3 +63,31 @@ void cartsave_save_options(void) {
     *p_sram_game_options = game_options;
     // memcpy((void *)&sram_options, (void *)&sram_game_options, sizeof(game_options));
 }
+
+
+
+void cartsave_load_highscores(void) {
+
+    // Calc checksum on SRAM data, excluding the checksum itself
+    // Then load if it matches, or reset high-scores if it doesn't
+    uint16_t calc_checksum = cartsave_calc_checksum((uint8_t *)p_sram_highscores, sizeof(highscores) - sizeof(highscores.checksum));
+
+    if (p_sram_highscores->checksum == calc_checksum) {
+        highscores = *p_sram_highscores;
+        // memcpy((void *)&highscores_rec, (void *)&sram_highscores, sizeof(highscores));
+    } else {
+        highscores_reset_all();
+    }
+}
+
+
+void cartsave_save_highscores(void) {
+
+    // Update checksum for high-scores (excluding checksum itself), then write it to SRAM
+    highscores.checksum = cartsave_calc_checksum((uint8_t *)&highscores, sizeof(highscores) - sizeof(highscores.checksum));
+
+    *p_sram_highscores = highscores;
+    // memcpy((void *)&sram_options, (void *)&sram_highscores, sizeof(highscores));
+}
+
+
