@@ -11,11 +11,11 @@
 #define font_8x16_out_TILE_ORIGIN 0
 #define font_8x16_out_TILE_W 8
 #define font_8x16_out_TILE_H 16
-#define font_8x16_out_WIDTH 360
+#define font_8x16_out_WIDTH 376
 #define font_8x16_out_HEIGHT 16
-#define font_8x16_out_TILES_WIDTH 45
+#define font_8x16_out_TILES_WIDTH 47
 #define font_8x16_out_TILES_HEIGHT 1
-#define font_8x16_out_TILE_COUNT 90
+#define font_8x16_out_TILE_COUNT 94
 #define font_8x16_out_PALETTE_COUNT 1
 #define font_8x16_out_COLORS_PER_PALETTE 16
 #define font_8x16_out_TOTAL_COLORS 16
@@ -23,6 +23,6 @@
 BANKREF_EXTERN(font_8x16_out)
 
 extern const palette_color_t font_8x16_out_palettes[16];
-extern const uint16_t font_8x16_out_tiles[1440];
+extern const uint16_t font_8x16_out_tiles[1504];
 
 #endif
