@@ -13,6 +13,7 @@
 
 
 #include "common.h"
+#include "input.h"
 
 #include "game_board.h"
 #include "game_board_gfx.h"
@@ -68,11 +69,19 @@ void gameover_message_animate(void) {
     PRINT_POS(SPR_GAMEOVER_START_X, SPR_GAMEOVER_LUT_Y[ spr_gameover_y_idx[c] ]);
     print_to_sprites(min_spr, REL_PAL_FONT_8x16_PINK_OAM_1, p_gameover_chars);
 
+    bool speedup_delay = false;
     // Loop exits when all sprites have landed
     while (min_spr != SPR_GAMEOVER_COUNT) {
 
-        // Add some delay
-        vsync();
+        UPDATE_KEYS();
+        if (KEY_TICKED(J_ANY)) speedup_delay = true;
+
+        // Add some delay, less if the user presses buttons to skip ahead
+        if (!speedup_delay) {
+            vsync();
+        } else {
+            delay(4u);  // About 1/4 the duration of vsync = 4x speedup
+        }
 
         // Periodic Update
         if ((sys_time & GAMEOVER_UPDATE_MASK) == GAMEOVER_UPDATE_MASK) {
