@@ -111,6 +111,8 @@ uint16_t print_to_sprites(uint16_t oam_id, uint8_t pal, const char * txt) {
                 case  '.': c = 42U; break;
                 case  ':': c = 43U; break;
                 case  '?': c = 44U; break;
+                case  '<': c = 45U; break;
+                case  '>': c = 46U; break;
                 case '\n':
                     // Do a carriage return, no printing and skip to top of loop
                     print_x = start_x;
@@ -176,6 +178,8 @@ void print_to_tilemap(const char * txt, uint16_t delay_time) {
                 case  '.': c = 42U; break;
                 case  ':': c = 43U; break;
                 case  '?': c = 44U; break;
+                case  '<': c = 45U; break;
+                case  '>': c = 46U; break;
                 case '\n':
                     // Do a carriage return, no printing and skip to top of loop
                     print_x = start_x;

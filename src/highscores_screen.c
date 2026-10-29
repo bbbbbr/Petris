@@ -66,7 +66,7 @@
 #define TITLE_X_START    (2u)
 #define TITLE_Y_START    (3u)
 #define TITLE_TYPE_X_START  (TITLE_X_START + 15u)
-#define TITLE_TEXT       "HIGH SCORES: ( ____________ )"  // TODO CHANGE PARENS TO < > to indicate left/right
+#define TITLE_TEXT       "HIGH SCORES: < ____________ >"  // TODO CHANGE PARENS TO < > to indicate left/right
 
 #define HEADERS_X_START  (3u)
 #define HEADERS_Y_START  (TITLE_Y_START + FONT_8x16_TILE_HEIGHT + 1u)
