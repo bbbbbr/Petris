@@ -36,9 +36,9 @@
 // The tile load start offset here is to skip past main background + transparent tile + the two tiles
 // used during gameplay for filling/resetting under the board, so that when the font loads it won't
 // overwrite the filled board (from end of gameplay) and turn that area transparent
-#define TILE_LOAD_START (SHARED_4BPP_TRANSP_TILE_ID_START + intro_screen_out_TILE_COUNT + SHARED_4BPP_TRANSP_TILE_COUNT + GAME_BOARD_UNDER_TILE_COUNT)
+#define TILE_LOAD_OFFSET_FONT_VRAM_ABS     (OBJ_TILEGROUP_BASE_512 + 0u)
+#define TILE_LOAD_OFFSET_FONT_VRAM_OAM_REL (0u)
 
-#define TILE_LOAD_OFFSET_CURSOR_SPRITE (OBJ_TILEGROUP_BASE_512)
 
 
 //  32 x 28
@@ -77,7 +77,9 @@
 #define SCORES_X_GAP     (3u)
 #define SCORES_X_DIFF_LEN   (6u)
 #define SCORES_X_FAKE_0_LEN (1u)
+#define SCORES_X_SPRITE_GAP (1u)
 #define SCORES_ZERO_BLANK_TEXT "     " // Print blank text when zero since there is a fake trailing zero, match length of max score (5)
+#define SCORES_SPRITE_TEXT_NEW_RECORD "NEW!"
 
 #define IDLE_GAMETYPE_COUNT_RESET      (0u)
 #define IDLE_GAMETYPE_COUNT_THRESHOLD  (7u * 60u) // Rotate through score types every N seconds if no input
@@ -86,6 +88,18 @@
 
 #define SCORE_PRINT_DELAY_FRAMES       (250 / 16.6)           // 1/4 of second (in frames) between printing consecutive score records
 
+#define SPR_ID_NEW_RECORD_START   0u // New record starts at sprite ID 0
+#define SPR_ID_NEW_RECORD_RESET   (SPR_ID_NEW_RECORD_START)
+
+#define NEW_RECORD_UPDATE_MASK (0x03) // Only update cursor once every 8 frames
+#define NEW_RECORD_BITSHIFT    (3)
+#define NEW_RECORD_LUT_MASK    (0x07 << NEW_RECORD_BITSHIFT) // 8 offset entries in the LUT
+const uint8_t spr_new_record_offset[] = {0,1,2,3,3,2,1,0};
+
+static uint8_t spr_id_new_record_end;
+static uint8_t spr_new_record_y;
+static uint8_t spr_new_record_x;
+static bool show_new_record_indicator_sprite;
 
 static int8_t showing_game_type;
 static uint16_t idle_gametype_count;
@@ -101,10 +115,12 @@ static void highscore_update_idle_actions(void);
 
 static void highscores_draw(void) {
 
-    // Clear everything on BG0 (game pieces, text printing, etc)
+    // Clear everything on BG0 (game pieces, text printing, etc), and hide possible new record indicator sprites
     set_bkg_tilemap_base_address(BG0_MAP_START());
     set_bkg_tiles_target_screen_a_or_b(LAYER_SCREEN_A);
     fill_bkg_rect(0, 0, DEVICE_SCREEN_BUFFER_WIDTH, DEVICE_SCREEN_BUFFER_HEIGHT, SHARED_4BPP_TRANSP_TILE_ID_START);
+    hide_sprites_range(0, MAX_HARDWARE_SPRITES);
+    show_new_record_indicator_sprite = false;
 
     score_rec * p_scores = NULL;
 
@@ -120,7 +136,7 @@ static void highscores_draw(void) {
     // Check to see if the score made it into the top scores table
     if (p_scores != NULL) {
 
-        skip_delay_keys = J_NONE;
+        skip_delay_keys = J_NONE;        
 
         // TODO: check and display (or hide) new highscore sprite indicator "NEW!"
 
@@ -143,7 +159,9 @@ static void highscores_draw(void) {
             uint16_t x = SCORES_X_START;
 
             // Score + fake trailing zero
-            uint16_t pal = (highscore_new_record_is_this_entry(c, showing_game_type)) ? PAL_HIGHLIGHT : PAL_SCORE;
+            bool is_new_highscore_entry = highscore_new_record_is_this_entry(c, showing_game_type);
+
+            uint16_t pal = (is_new_highscore_entry) ? PAL_HIGHLIGHT : PAL_SCORE;
             PRINT_PAL(pal);
             if (p_scores[c].score > 0) print_num_u16(x, y, p_scores[c].score, STR_DIGIT_LEN_5);
             else                       PRINTXY(x, y, SCORES_ZERO_BLANK_TEXT, 0);
@@ -152,16 +170,30 @@ static void highscores_draw(void) {
             x += SCORES_X_GAP + SCORES_X_FAKE_0_LEN;
 
             // Difficulty mode
-            pal = (highscore_new_record_is_this_entry(c, showing_game_type)) ? PAL_HIGHLIGHT : PAL_NON_SCORE;
+            pal = (is_new_highscore_entry) ? PAL_HIGHLIGHT : PAL_NON_SCORE;
             PRINT_PAL(pal);
             PRINTXY(x, y, options_difficulty[p_scores[c].difficulty], 0);
             x += SCORES_X_GAP + SCORES_X_DIFF_LEN;
 
             // Max level reached
             print_num_u16(x, y, p_scores[c].max_level, STR_DIGIT_LEN_3);
+            x += STR_DIGIT_LEN_3 + SCORES_X_SPRITE_GAP;
+
+            if (is_new_highscore_entry) {
+                show_new_record_indicator_sprite = true;
+                spr_new_record_y = y * TILE_WIDTH_8x8;
+                spr_new_record_x = x * TILE_WIDTH_8x8;
+            }
 
             y += FONT_8x16_TILE_HEIGHT;
             if (!skip_delay_keys) skip_delay_keys = delay_frames_with_input_exit(SCORE_PRINT_DELAY_FRAMES, J_ANY);
+        }
+
+        // Show new record sprite *after* all records print so it doesn't
+        // look weirdly fixed in place and only animating after record printing finishes
+        if (show_new_record_indicator_sprite) {
+            PRINT_POS(spr_new_record_x, spr_new_record_y);
+            spr_id_new_record_end = print_to_sprites(SPR_ID_NEW_RECORD_START, REL_PAL_FONT_8x16_PINK_OAM_1, "NEW!");
         }
     }
 }
@@ -214,12 +246,31 @@ static void highscores_screen_exit_cleanup(void) {
     fill_bkg_rect(0, 0, DEVICE_SCREEN_BUFFER_WIDTH, DEVICE_SCREEN_BUFFER_HEIGHT, SHARED_4BPP_TRANSP_TILE_ID_START);
 }
 
+
+static void new_record_animate(void) {
+
+    // If visible, animate the new record indicator with a mild bounce every N frames
+    if (show_new_record_indicator_sprite) {
+        if ((sys_time & NEW_RECORD_UPDATE_MASK) == NEW_RECORD_UPDATE_MASK) {
+
+            for (uint16_t c = SPR_ID_NEW_RECORD_START; c < spr_id_new_record_end; c+=2) {
+                // 8x16 font is 2 tiles/sprites high
+                uint8_t sine_offset = spr_new_record_offset[(sys_time & NEW_RECORD_LUT_MASK) >> NEW_RECORD_BITSHIFT] - 2;
+                move_sprite_y(c,        spr_new_record_y + sine_offset);
+                move_sprite_y((c + 1u), spr_new_record_y + sine_offset + TILE_HEIGHT_8x8);
+            }
+        }
+    }
+}
+
+
 // Initializes high score screen
 void highscores_screen_init(void) {
 
     // Rely on Title Screen or Game Over Screen graphics loading for Background image and Font tiles / drawing setup
-    load_8x16_font_tiles(TILE_LOAD_START, 0u);
+    load_8x16_font_tiles(TILE_LOAD_OFFSET_FONT_VRAM_ABS, TILE_LOAD_OFFSET_FONT_VRAM_OAM_REL);
     load_8x16_font_tilemap_palettes();
+    load_8x16_font_sprite_palettes();
 
     showing_game_type   = game_options.type;
 
@@ -228,8 +279,13 @@ void highscores_screen_init(void) {
 
     skip_delay_keys = J_NONE;
 
+    show_new_record_indicator_sprite = false;
+    spr_id_new_record_end = SPR_ID_NEW_RECORD_RESET;
+
 
     palette_fade_start(FADE_TO_TARGET);
+
+    SHOW_SPRITES;
 
     highscores_draw();
 }
@@ -237,7 +293,7 @@ void highscores_screen_init(void) {
 
 void highscores_screen_handle(void) {
 
-    // TODO: animate new highscore indicator
+    // TODO: animate new highscore indicator    
 
     uint16_t keys_ticked = KEYS_TICKED(J_ANY);
     if (skip_delay_keys != J_NONE) {
@@ -265,5 +321,7 @@ void highscores_screen_handle(void) {
         highscores_screen_exit_cleanup();
         game_state = GAME_INTRO_INIT;
     }
+
+    new_record_animate();
 }
 

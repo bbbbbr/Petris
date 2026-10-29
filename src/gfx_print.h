@@ -40,7 +40,7 @@ extern uint16_t print_x, print_y, print_tile_attribs;
 
 
 #define PRINT_PAL(SELECTED_PAL) print_tile_attribs = ((print_tile_attribs & ~BG_TILEMAP_SUBPAL_MASK) | SELECTED_PAL)
-#define PRINT_POS(X, Y) print_x = X; print_y  = Y
+#define PRINT_POS(X, Y) print_x = (X); print_y  = (Y)
 #define PRINTXY(X, Y, TXT, DELAY) PRINT_POS(X,Y); print_to_tilemap(TXT, DELAY)
 #define PRINT(TXT, DELAY) print_to_tilemap(TXT, DELAY)
 #define SET_PRINT_TARGET(TARGET) set_bkg_tilemap_base_address(TARGET)
