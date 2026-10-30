@@ -47,13 +47,13 @@
 // |                                |
 // |  HIGH SCORES: < TAIL CLEANUP > | 4 (Row Color: YELLOW)
 // |                                |
-// |   SCORE    DIFF.    MAX LEVEL  | 7 (Row Color: PINK)
-// |   655350   EXPERT   999        | 9
-// | > 123450   BEAST     99  NEW!  | 11 <-- New Highscore: PINK ROW "new" (As a bouncing sprite??) , otherwise YELLOW/GREY
-// |   000000   NORMAL     0        | 13
-// |   000000   NORMAL     0        | 15
-// |   000000   NORMAL     0        | 17
-// |   000000   NORMAL     0        | 19
+// |   SCORE  DIFF.  NAME  MAX LEV. | 7 (Row Color: YELLOW)
+// |  655350  EXPERT  XXX  999      | 9
+// |  123450  BEAST   A--   99 NEW! | 11 <-- New Highscore: Row color: YELLOW, PINK "new" bouncing sprite, otherwise GREY
+// |    1000  NORMAL  ---    0      | 13
+// |     100  NORMAL  ---    0      | 15
+// |       0  NORMAL  ---    0      | 17
+// |       0  NORMAL  ---    0      | 19
 
 
 #define PAL_TITLE      (PRINT_PAL_TILE_YELLOW)
@@ -63,23 +63,31 @@
 #define PAL_NON_SCORE  (PRINT_PAL_TILE_GREY)
 #define PAL_HIGHLIGHT  (PRINT_PAL_TILE_YELLOW)  // TODO: PRINT_PAL_TILE_PINK was removed, but might have enough free to add back?
 
-#define TITLE_X_START    (2u)
-#define TITLE_Y_START    (3u)
-#define TITLE_TYPE_X_START  (TITLE_X_START + 15u)
-#define TITLE_TEXT       "HIGH SCORES: < ____________ >"  // TODO CHANGE PARENS TO < > to indicate left/right
+#define TITLE_X_START         (2u)
+#define TITLE_Y_START         (3u)
+#define TITLE_TYPE_X_START    (TITLE_X_START + 15u)
+#define TITLE_TEXT            "HIGH SCORES: < ____________ >"  // TODO CHANGE PARENS TO < > to indicate left/right
 
-#define HEADERS_X_START  (3u)
-#define HEADERS_Y_START  (TITLE_Y_START + FONT_8x16_TILE_HEIGHT + 1u)
-#define HEADERS_TEXT     " SCORE   DIFF.    MAX LEVEL"
+#define HEADERS_X_START       (3u)
+#define HEADERS_Y_START       (TITLE_Y_START + FONT_8x16_TILE_HEIGHT + 1u)
+#define HEADERS_TEXT          "SCORE  DIFF.  NAME  MAX LEV."
 
-#define SCORES_Y_START   (HEADERS_Y_START + FONT_8x16_TILE_HEIGHT)
-#define SCORES_X_START   (3u)
-#define SCORES_X_GAP     (3u)
-#define SCORES_X_DIFF_LEN   (6u)
-#define SCORES_X_FAKE_0_LEN (1u)
-#define SCORES_X_SPRITE_GAP (1u)
-#define SCORES_ZERO_BLANK_TEXT "     " // Print blank text when zero since there is a fake trailing zero, match length of max score (5)
-#define SCORES_SPRITE_TEXT_NEW_RECORD "NEW!"
+#define SCORES_Y_START        (HEADERS_Y_START + FONT_8x16_TILE_HEIGHT)
+#define SCORES_X_START        (2u)
+#define SCORES_X_SCORE_LEN    (5u)
+#define SCORES_X_FAKE_0_LEN   (1u)
+#define SCORES_X_GAP          (2u)
+#define SCORES_X_DIFF_LEN     (6u)
+#define SCORES_X_INITIALS_LEN (SCORES_INITIALS_LEN)
+#define SCORES_X_SPRITE_GAP   (1u)
+#define SCORES_X_INITIALS     (SCORES_X_START + SCORES_X_SCORE_LEN + SCORES_X_FAKE_0_LEN + SCORES_X_GAP + SCORES_X_DIFF_LEN + SCORES_X_GAP)
+
+#define SPR_ENTER_INITIALS_Y_OFFSET (TILE_WIDTH_8x8 + 2u)
+
+#define SCORES_ZERO_BLANK_TEXT         "     " // Print blank text when zero since there is a fake trailing zero, match length of max score (5)
+#define SCORES_SPRITE_TEXT_NEW_RECORD  "NEW!"
+#define SCORES_SPRITE_TEXT_ENTRY_INITS "-"
+
 
 #define IDLE_GAMETYPE_COUNT_RESET      (0u)
 #define IDLE_GAMETYPE_COUNT_THRESHOLD  (7u * 60u) // Rotate through score types every N seconds if no input
@@ -91,15 +99,21 @@
 #define SPR_ID_NEW_RECORD_START   0u // New record starts at sprite ID 0
 #define SPR_ID_NEW_RECORD_RESET   (SPR_ID_NEW_RECORD_START)
 
-#define NEW_RECORD_UPDATE_MASK (0x03) // Only update cursor once every 8 frames
-#define NEW_RECORD_BITSHIFT    (3)
-#define NEW_RECORD_LUT_MASK    (0x07 << NEW_RECORD_BITSHIFT) // 8 offset entries in the LUT
+
+#define SPR_ANIMATE_UPDATE_MASK (0x03) // Only update cursor once every 8 frames
+#define NEW_RECORD_BITSHIFT     (3)
+#define NEW_RECORD_LUT_MASK     (0x07 << NEW_RECORD_BITSHIFT) // 8 offset entries in the LUT
 const uint8_t spr_new_record_offset[] = {0,1,2,3,3,2,1,0};
 
 static uint8_t spr_id_new_record_end;
 static uint8_t spr_new_record_y;
 static uint8_t spr_new_record_x;
 static bool show_new_record_indicator_sprite;
+
+static bool    enter_initials_mode_is_active;
+static uint8_t enter_initials_index;
+static char *  enter_initials_str;
+static uint8_t spr_id_enter_initials_highlight;
 
 static int8_t showing_game_type;
 static uint16_t idle_gametype_count;
@@ -111,6 +125,8 @@ static void highscores_draw(void);
 static void highscores_screen_switch_game_type(int8_t dir);
 static void highscores_screen_exit_cleanup(void);
 static void highscore_update_idle_actions(void);
+static void initials_entry_mode_init(void);
+static void initials_entry_mode_handle(void);
 
 
 static void highscores_draw(void) {
@@ -146,8 +162,6 @@ static void highscores_draw(void) {
         PRINT_PAL(PAL_TITLE_TYPE);
         PRINTXY(TITLE_TYPE_X_START, TITLE_Y_START, options_type[showing_game_type], 0);
 
-        if (!skip_delay_keys) skip_delay_keys = delay_frames_with_input_exit(SCORE_PRINT_DELAY_FRAMES, J_ANY);
-
         // Print column headers
         PRINT_PAL(PAL_HEADERS);
         PRINTXY(HEADERS_X_START, HEADERS_Y_START, HEADERS_TEXT, 0);
@@ -160,9 +174,10 @@ static void highscores_draw(void) {
 
             // Score + fake trailing zero
             bool is_new_highscore_entry = highscore_new_record_is_this_entry(c, showing_game_type);
-
             uint16_t pal = (is_new_highscore_entry) ? PAL_HIGHLIGHT : PAL_SCORE;
             PRINT_PAL(pal);
+
+            // Print blank text when zero since there is a fake trailing zero (to avoid double zeros)
             if (p_scores[c].score > 0) print_num_u16(x, y, p_scores[c].score, STR_DIGIT_LEN_5);
             else                       PRINTXY(x, y, SCORES_ZERO_BLANK_TEXT, 0);
             x += STR_DIGIT_LEN_5;
@@ -170,10 +185,12 @@ static void highscores_draw(void) {
             x += SCORES_X_GAP + SCORES_X_FAKE_0_LEN;
 
             // Difficulty mode
-            pal = (is_new_highscore_entry) ? PAL_HIGHLIGHT : PAL_NON_SCORE;
-            PRINT_PAL(pal);
             PRINTXY(x, y, options_difficulty[p_scores[c].difficulty], 0);
             x += SCORES_X_GAP + SCORES_X_DIFF_LEN;
+
+            // Player Initials
+            PRINTXY(x, y, p_scores[c].initials, 0);
+            x += SCORES_X_GAP + SCORES_X_INITIALS_LEN;
 
             // Max level reached
             print_num_u16(x, y, p_scores[c].max_level, STR_DIGIT_LEN_3);
@@ -193,7 +210,7 @@ static void highscores_draw(void) {
         // look weirdly fixed in place and only animating after record printing finishes
         if (show_new_record_indicator_sprite) {
             PRINT_POS(spr_new_record_x, spr_new_record_y);
-            spr_id_new_record_end = print_to_sprites(SPR_ID_NEW_RECORD_START, REL_PAL_FONT_8x16_PINK_OAM_1, "NEW!");
+            spr_id_new_record_end = print_to_sprites(SPR_ID_NEW_RECORD_START, REL_PAL_FONT_8x16_PINK_OAM_1, SCORES_SPRITE_TEXT_NEW_RECORD);
         }
     }
 }
@@ -251,7 +268,7 @@ static void new_record_animate(void) {
 
     // If visible, animate the new record indicator with a mild bounce every N frames
     if (show_new_record_indicator_sprite) {
-        if ((sys_time & NEW_RECORD_UPDATE_MASK) == NEW_RECORD_UPDATE_MASK) {
+        if ((sys_time & SPR_ANIMATE_UPDATE_MASK) == SPR_ANIMATE_UPDATE_MASK) {
 
             for (uint16_t c = SPR_ID_NEW_RECORD_START; c < spr_id_new_record_end; c+=2) {
                 // 8x16 font is 2 tiles/sprites high
@@ -263,6 +280,80 @@ static void new_record_animate(void) {
     }
 }
 
+
+static void initials_entry_mode_init(void) {
+
+    enter_initials_index                     = SCORES_INITIALS_MIN;
+    enter_initials_str                       = highscore_new_record_get_initials_str_ptr();
+
+    // Put intials entry highlight under active initial character
+    PRINT_POS((SCORES_X_INITIALS + enter_initials_index) * TILE_WIDTH_8x8, spr_new_record_y + SPR_ENTER_INITIALS_Y_OFFSET);
+    spr_id_enter_initials_highlight = spr_id_new_record_end;
+    print_to_sprites(spr_id_enter_initials_highlight , REL_PAL_FONT_8x16_PINK_OAM_1, SCORES_SPRITE_TEXT_ENTRY_INITS);
+}
+
+
+static void initials_entry_mode_handle(void) {
+
+    bool redraw         = false;
+    bool entry_complete = false;
+
+    // Redraw for any input
+    if (KEYS_TICKED(J_ANY)) redraw = true;
+
+    switch (KEYS_TICKED(J_ANY)) {
+                      // Cursor Left
+        case J_B:
+        case J_LEFT:  if (enter_initials_index > SCORES_INITIALS_MIN) enter_initials_index--;
+                      break;
+
+                      // Cursor Right
+                      // If pressing "A" after last character is entered then commit the entry and exit edit mode
+        case J_A:     if (enter_initials_index == SCORES_INITIALS_MAX) { entry_complete = true; break; }
+                      // Otherwise fall through to changing active letter
+        case J_RIGHT: if (enter_initials_index < SCORES_INITIALS_MAX) enter_initials_index++;
+                      break;
+
+                      // Rotate character toward A
+        case J_DOWN:  if (enter_initials_str[enter_initials_index] > 'A') enter_initials_str[enter_initials_index]--;
+                      break;
+
+                      // Rotate character toward Z
+        case J_UP:    if (enter_initials_str[enter_initials_index] < 'Z') enter_initials_str[enter_initials_index]++;
+                      break;
+
+                      // Commit the entry and exit edit mode
+        case J_START: entry_complete = true;
+                     break;
+
+    }
+
+    if (entry_complete) {
+        // Exit initials entry mode
+        enter_initials_mode_is_active = false;
+        // Write updated score records to SRAM
+        cartsave_save_highscores();
+        // Hide the highlight sprite
+        hide_sprites_range(spr_id_enter_initials_highlight, spr_id_enter_initials_highlight + 1u);
+    }
+
+    if (redraw) {
+        // Move highlight sprite
+        move_sprite_x(spr_id_enter_initials_highlight,      (SCORES_X_INITIALS + enter_initials_index) * TILE_WIDTH_8x8);
+        move_sprite_x(spr_id_enter_initials_highlight + 1u, (SCORES_X_INITIALS + enter_initials_index) * TILE_WIDTH_8x8);
+
+        // And print updated initials
+        PRINT_PAL(PAL_HIGHLIGHT);
+        PRINTXY(SCORES_X_INITIALS, spr_new_record_y / TILE_HEIGHT_8x8, enter_initials_str, 0);
+    }
+
+    // Animate the enter initials cursor with a mild bounce every N frames
+    if ((sys_time & SPR_ANIMATE_UPDATE_MASK) == SPR_ANIMATE_UPDATE_MASK) {
+        uint8_t sine_offset = spr_new_record_offset[(sys_time & NEW_RECORD_LUT_MASK) >> NEW_RECORD_BITSHIFT] - 2;
+        move_sprite_y(spr_id_enter_initials_highlight,      spr_new_record_y + sine_offset + SPR_ENTER_INITIALS_Y_OFFSET);
+        move_sprite_y(spr_id_enter_initials_highlight + 1u, spr_new_record_y + sine_offset + SPR_ENTER_INITIALS_Y_OFFSET + TILE_HEIGHT_8x8);
+    }
+}
 
 // Initializes high score screen
 void highscores_screen_init(void) {
@@ -288,38 +379,49 @@ void highscores_screen_init(void) {
     SHOW_SPRITES;
 
     highscores_draw();
+
+    // Switch to initials entry mode if there is a new highscore
+    enter_initials_mode_is_active = highscore_is_new_record();
+    if (enter_initials_mode_is_active) initials_entry_mode_init();
+
 }
 
 
 void highscores_screen_handle(void) {
 
-    // TODO: animate new highscore indicator    
 
-    uint16_t keys_ticked = KEYS_TICKED(J_ANY);
-    if (skip_delay_keys != J_NONE) {
-        keys_ticked = skip_delay_keys;
-        skip_delay_keys = J_NONE;
+    if (enter_initials_mode_is_active) {
+        initials_entry_mode_handle();
     }
+    else {
+        
+        uint16_t keys_ticked = KEYS_TICKED(J_ANY);
+        // Allows pressing any key to skip score line printing delays
+        if (skip_delay_keys != J_NONE) {
+            keys_ticked = skip_delay_keys;
+            skip_delay_keys = J_NONE;
+        }
 
-    // If there isn't a new high-score record active then
-    // cycle through the screens when there isn't any input
-    if (!highscore_is_new_record()) {
-        highscore_update_idle_actions();
-    }
+        // If there isn't a new high-score record active then
+        // cycle through the screens when there isn't any input
+        if (!highscore_is_new_record()) {
+            highscore_update_idle_actions();
+        }
 
-    if (keys_ticked & (J_LEFT)) {
+        if (keys_ticked & (J_LEFT)) {
 
-        highscores_screen_switch_game_type(-1);
-    }
-    else if (keys_ticked & (J_RIGHT)) {
+            highscores_screen_switch_game_type(-1);
+        }
+        else if (keys_ticked & (J_RIGHT)) {
 
-        highscores_screen_switch_game_type(1);
-    }
-    // Go back to Intro Screen
-    else if (keys_ticked & (J_Y | J_START | J_A)) {
+            highscores_screen_switch_game_type(1);
+        }
+        // Go back to Intro Screen
+        else if (keys_ticked & (J_Y | J_START | J_A)) {
 
-        highscores_screen_exit_cleanup();
-        game_state = GAME_INTRO_INIT;
+            highscores_screen_exit_cleanup();
+            game_state = GAME_INTRO_INIT;
+        }
     }
 
     new_record_animate();

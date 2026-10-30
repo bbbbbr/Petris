@@ -29,6 +29,7 @@ highscores_rec highscores;
 bool   is_new_highscore;
 int    new_highscore_idx;
 int8_t new_highscore_type;
+char * new_highscore_initials_ptr;
 
 
 // Called on startup and start of a new game
@@ -38,6 +39,10 @@ void highscore_is_new_record_clear(void) {
 
 bool highscore_is_new_record(void) {
     return is_new_highscore;
+}
+
+char * highscore_new_record_get_initials_str_ptr(void) {
+    return new_highscore_initials_ptr;
 }
 
 
@@ -59,6 +64,13 @@ void highscores_reset_all(void) {
         highscores.tail_cleanup[c].score = 0u;
         highscores.level_up[c].score     = 0u;
         highscores.marathon[c].score     = 0u;
+
+        // Add string terminator to the end of the initials
+        highscores.long_pet[c].initials[SCORES_INITIALS_TERM]     = '\0';
+        highscores.crunch_up[c].initials[SCORES_INITIALS_TERM]    = '\0';
+        highscores.tail_cleanup[c].initials[SCORES_INITIALS_TERM] = '\0';
+        highscores.level_up[c].initials[SCORES_INITIALS_TERM]     = '\0';
+        highscores.marathon[c].initials[SCORES_INITIALS_TERM]     = '\0';
 
         highscores.long_pet[c].max_level     = 0u;
         highscores.crunch_up[c].max_level    = 0u;
@@ -108,8 +120,12 @@ void highscore_new_record_check_and_update(const score_rec * p_new_score, const 
                     p_scores[below_idx] = p_scores[below_idx - 1];
                 }
 
-                // Insert the new score
+                // Insert the new score and pre-fill the name with AAA
                 p_scores[new_highscore_idx] = *p_new_score;
+                new_highscore_initials_ptr  = p_scores[new_highscore_idx].initials;
+                new_highscore_initials_ptr[SCORES_INITIALS_MIN     ] = 'A';
+                new_highscore_initials_ptr[SCORES_INITIALS_MIN + 1u] = 'A';
+                new_highscore_initials_ptr[SCORES_INITIALS_MIN + 2u] = 'A';
 
                 // Write updated score records to SRAM
                 cartsave_save_highscores();
