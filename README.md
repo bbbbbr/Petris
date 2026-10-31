@@ -64,6 +64,7 @@ Emulators:
 * [MiSTer Loopy core](https://github.com/MiSTer-devel/Loopy_MiSTer)
 
 Tools:
+* [Wonderful Toolchain](https://wonderful.asie.pl/)
 * [png2asset fork for Loopy](https://github.com/bbbbbr/png2asset_casioloopy)
 * [png2reducedrgb](https://github.com/bbbbbr/png2reducedrgb)
 * [tilepalquant](https://github.com/bbbbbr/tilepalquant)
