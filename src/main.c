@@ -204,15 +204,8 @@ int main() {
 
             case GAME_INTRO:
                 intro_screen_handle();
-                // Done with intro screen, now start game
-                if (KEY_TICKED(J_START)) {
-                    game_state = GAME_OPTIONS_INIT;
-                   intro_screen_cleanup();
-                }
-                if (KEY_TICKED(J_Y)) {
-                    game_state = GAME_HIGHSCORES_INIT;  // TODO: TEMP HACK UNTIL THERE IS TITLE SCREEN MENU
-                    intro_screen_cleanup();
-                }
+                // Cleanup screen if changing state
+                if (game_state != GAME_INTRO) intro_screen_cleanup();
                 break;
 
             case GAME_OPTIONS_INIT:

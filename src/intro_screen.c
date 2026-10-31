@@ -27,6 +27,8 @@
 
 // #include "player_gfx.h"
 
+#include "intro_screen.h"
+
 #include "intro_screen_out.h"
 #include "intro_logo_out.h"
 
@@ -38,15 +40,27 @@
 // #include "../res/font_tiles.h"
 
 
-#define LOGO_TILE_Y_START 5u
+#define LOGO_TILE_Y_START 4u
 
-#define STR_INTRO_TEXT_START "PRESS START"
-#define OAM_TEXT_INTRO_START 0u
-#define OAM_TEXT_START_X  80u
-#define OAM_TEXT_START_Y  136u
+#define STR_INTRO_TEXT_START      "START GAME"
+#define STR_INTRO_TEXT_HIGHSCORES "HIGHSCORES"
+#define STR_INTRO_TEXT_CREDITS    " CREDITS"
 
-static uint16_t oam_text_intro_end = 0;
+#define OAM_TEXT_SPR_IDS_START 0u
+#define OAM_TEXT_START_X       88u
+#define OAM_TEXT_START_Y       116u
+#define OAM_TEXT_GAP_Y         ((FONT_8x16_TILE_HEIGHT * SPR_8x8_HEIGHT) + 4u)
+#define OAM_TEXT_HIGHSCORES_Y  (OAM_TEXT_START_Y + OAM_TEXT_GAP_Y)
+#define OAM_TEXT_CREDITS_Y     (OAM_TEXT_HIGHSCORES_Y + OAM_TEXT_GAP_Y)
 
+#define MENU_PAL_HIGHLIGHT     (PRINT_PAL_OAM_YELLOW)
+#define MENU_PAL_NORMAL        (PRINT_PAL_OAM_GREY)
+
+static uint8_t        intro_menu_id_active;
+static uint16_t       menu_text_spr_ids[INTRO_MENU_ID_COUNT + 1u];  // Trailing entryu
+static const uint8_t  menu_text_spr_y[INTRO_MENU_ID_COUNT]      = {OAM_TEXT_START_Y,     OAM_TEXT_HIGHSCORES_Y,     OAM_TEXT_CREDITS_Y};
+static const char *   menu_items_text[INTRO_MENU_ID_COUNT]      = {STR_INTRO_TEXT_START, STR_INTRO_TEXT_HIGHSCORES, STR_INTRO_TEXT_CREDITS};
+static const uint16_t menu_next_game_state[INTRO_MENU_ID_COUNT] = {GAME_OPTIONS_INIT,    GAME_HIGHSCORES_INIT,      /* Credits entry is nerfed until implemented */ GAME_INTRO };
 
 static uint16_t sprite_counter = 0;
 static uint16_t cloud_counter = 0;
@@ -56,6 +70,7 @@ static void intro_background_and_logo_init(void);
 static void intro_text_init(void);
 static void intro_clouds_init(void);
 
+static void intro_text_reset(uint8_t menu_index);
 static void intro_text_update(void);
 static void intro_clouds_update(void);
 
@@ -103,7 +118,7 @@ static void intro_background_and_logo_init(void) {
     base_tile_id += intro_logo_out_TILE_COUNT;
 
     // Scroll logo down the screen a bit to intended position
-    VDP.BG_SCROLL[BG0_SCROLL_Y] = (uint16_t)-8;  // TODO: Animated scroll in of Petris logo?    
+    VDP.BG_SCROLL[BG0_SCROLL_Y] = (uint16_t)-8;  // TODO: Animated scroll in of Petris logo?
 }
 
 
@@ -130,6 +145,7 @@ static void intro_clouds_init(void) {
 // Animated "Press Start" message using Sprites
 static void intro_text_init(void) {
 
+    intro_menu_id_active = INTRO_MENU_ID_DEFAULT;
     sprite_counter = 0;
 
     // Load the 8x16 font and print it to the sprites
@@ -139,8 +155,15 @@ static void intro_text_init(void) {
 
     load_8x16_font_sprite_palettes();
 
-    PRINT_POS(OAM_TEXT_START_X, OAM_TEXT_START_Y);
-    oam_text_intro_end = print_to_sprites(OAM_TEXT_INTRO_START, PRINT_PAL_OAM_GREY, STR_INTRO_TEXT_START);
+    // Draw the menu
+    menu_text_spr_ids[INTRO_MENU_ID_MIN] = OAM_TEXT_SPR_IDS_START;
+    for (uint8_t idx = INTRO_MENU_ID_MIN; idx <= INTRO_MENU_ID_MAX; idx++) {
+        PRINT_POS(OAM_TEXT_START_X, menu_text_spr_y[idx]);
+        // Next oam index after printed menu item is saved as start for the next one
+        // These values are later used to select the oam indexes to animate per menu item
+        menu_text_spr_ids[idx + 1u] = print_to_sprites(menu_text_spr_ids[idx], MENU_PAL_NORMAL, menu_items_text[idx]);
+    }
+
     intro_text_update();
 }
 
@@ -156,30 +179,73 @@ void intro_clouds_update(void) {
 // Generated using Dr LUT - Free Lookup Table Generator
 // https://github.com/ppelikan/drlut
 //
-// Formula: sin(2*pi*t/T) 
-// Amp=4, Offs=0, Sz=16 (size should be an even power of 2 for range masking to work)
+// Formula: sin(2*pi*t/T)
+// Amp=3, Offs=0, Sz=16 (size should be an even power of 2 for range masking to work)
 const int16_t sine[32] = {
-    //  0,     1,     2,     2,     3,     3,     4,
-    //  4,     4,     4,     4,     3,     3,     2,
-    //  2,     1,     0,    -1,    -2,    -2,    -3,
-    // -3,    -4,    -4,    -4,    -4,    -4,    -3,
-    // -3,    -2,    -2,    -1 };
      0,     1,     1,     2,     2,     2,     3,
      3,     3,     3,     3,     2,     2,     2,
      1,     1,     0,    -1,    -1,    -2,    -2,
     -2,    -3,    -3,    -3,    -3,    -3,    -2,
     -2,    -2,    -1,    -1 };
 
+
+// Resets text to static position with no sine wave
+static void intro_text_gradual_remove_sine_wiggle(uint8_t menu_index) {
+
+    // Update menu text sprites every 8 frames so they gradually
+    // settle back into position instead of snapping back immediately
+    if ((sprite_counter & 0x07u) == 0u) {
+        uint16_t oam_id     = menu_text_spr_ids[menu_index];
+        uint16_t oam_id_end = menu_text_spr_ids[menu_index + 1u];
+        // Set the sprite colors back to the normal menu color
+        uint8_t pal = MENU_PAL_NORMAL;
+
+        while (oam_id < oam_id_end) {
+            // If Y position is above or below default position for the menu entry
+            // then increment it by 1 in the relevant direction (same for top and bottom)
+            uint8_t spr_y = menu_text_spr_y[menu_index];
+
+            // Top 8x8 sprite of letter
+            int8_t mv_y = (shadow_OAM[oam_id].y > spr_y) ? -1 : ((shadow_OAM[oam_id].y < spr_y) ? 1 : 0);
+            set_sprite_prop(oam_id, S_8x8 | pal);
+            scroll_sprite(oam_id++, 0, mv_y);
+            // Bottom 8x8 sprite of letter
+            set_sprite_prop(oam_id, S_8x8 | pal);
+            scroll_sprite(oam_id++, 0, mv_y);
+        }
+    }
+}
+
+
+// Updates current menu entry text with slow sine wave
+static void intro_text_sine_wiggle(uint8_t menu_index) {
+
+    uint16_t lut_index = sprite_counter >> 1;
+    uint16_t oam_id     = menu_text_spr_ids[menu_index];
+    uint16_t oam_id_end = menu_text_spr_ids[menu_index + 1u];
+    // Set the sprite colors to the highlight menu color
+    uint8_t pal = MENU_PAL_HIGHLIGHT;
+
+    while (oam_id < oam_id_end) {
+        uint8_t spr_y = menu_text_spr_y[menu_index] + sine[lut_index & (ARRAY_LEN(sine) - 1)];
+        // Top 8x8 sprite of letter        
+        set_sprite_prop(oam_id, S_8x8 | pal);
+        move_sprite_y(oam_id++, spr_y);
+        // Bottom 8x8 sprite of letter
+        set_sprite_prop(oam_id, S_8x8 | pal);
+        move_sprite_y(oam_id++, spr_y + SPR_8x8_HEIGHT);
+        lut_index += 2;
+    }
+}
+
+
+// Updates animation for all menu entries
 static void intro_text_update(void) {
 
     sprite_counter++;
-
-    uint16_t lut_index = sprite_counter >> 1;
-    uint16_t c = OAM_TEXT_INTRO_START;
-    while (c < oam_text_intro_end) {
-        shadow_OAM[c++].y = OAM_TEXT_START_Y + sine[lut_index & (ARRAY_LEN(sine) - 1)]; // Top of char sprite
-        shadow_OAM[c++].y = (OAM_TEXT_START_Y + SPR_8x8_HEIGHT) + sine[lut_index & (ARRAY_LEN(sine) - 1)]; // Top of char sprite
-        lut_index += 2;
+    for (uint8_t c = INTRO_MENU_ID_MIN; c <= INTRO_MENU_ID_MAX; c++) {
+        if (c == intro_menu_id_active) intro_text_sine_wiggle(c);
+        else                           intro_text_gradual_remove_sine_wiggle(c);
     }
 }
 
@@ -229,6 +295,18 @@ void intro_screen_handle(void) {  // TODO: Some kind of animated roll in of logo
     intro_text_update();
     intro_clouds_update();
     magic_code_update();
+
+    // Check for switching active menu item (and reset previous if needed)
+    if (KEY_TICKED(J_UP)) {
+        if (intro_menu_id_active > INTRO_MENU_ID_MIN) intro_menu_id_active--;
+    }
+    else if (KEY_TICKED(J_DOWN)) {
+        if (intro_menu_id_active < INTRO_MENU_ID_MAX) intro_menu_id_active++;
+    }
+    else if (KEY_TICKED(J_START | J_A)) {
+        // If a menu item was selected, change to the associated game state
+        game_state = menu_next_game_state[intro_menu_id_active];
+    }
 }
 
 
